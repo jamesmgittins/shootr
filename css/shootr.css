@@ -1,0 +1,39 @@
+﻿canvas {
+	 border: 1px dashed #0b0;
+	 width:100%;
+}
+
+body {
+	padding:20px 0;
+    background-color: #000;
+    font-family: "Courier";
+    font-size:20px;
+	color: #0B0;
+}
+
+.col-no-pad {
+	padding:0;
+}
+
+#stats {
+    margin-top: 15px;
+}
+
+button,select {
+    margin: 5px 0;
+    padding: 8px;
+    color: #0B0;
+    background-color: #000;
+    border: 2px outset #0b0;
+    width:100%;
+    text-align:center;
+}
+
+button:active {
+    border: 1px inset #0b0;
+    margin: 6px;
+}
+
+button:focus {
+    outline: 0;
+}

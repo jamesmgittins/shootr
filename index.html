@@ -1,0 +1,37 @@
+﻿<html>
+<head>
+    <title>Shootr</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="css/shootr.css">
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/seedrandom.min.js"></script>
+</head>
+<body>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-xs-12 col-sm-4">
+                <button onclick="ShootrUI.pauseGame();">Pause</button>
+                <select id="gamepad-sel" onchange="ShootrUI.selectGamepad(this, 1);"><option>Select Gamepad</option></select>
+				<div id="stats"></div>
+				<button onclick="PlayerShip.newShip();">New Ship</button>
+                <button onclick="Bullets.upgradeFrequency();" id="btn-freq">Upgrade Frequency <span>₡10</span></button>
+			</div>
+			<div class="col-xs-12 col-sm-4 col-no-pad">
+				<canvas id="game_canvas"></canvas>
+			</div>
+			<div class="col-xs-12 col-sm-4"></div>
+		</div>	
+	</div>
+    <script src="js/utilfunctions.js"></script>
+    <script src="js/stars.js"></script>
+    <script src="js/ships.js"></script>
+    <script src="js/playership.js"></script>
+    <script src="js/enemyships.js"></script>
+    <script src="js/bullets.js"></script>
+    <script src="js/shootrui.js"></script>
+    <script src="js/shootr.js"></script>
+</body>
+</html>
