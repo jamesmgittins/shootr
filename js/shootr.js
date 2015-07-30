@@ -47,9 +47,11 @@ function update() {
 
 	Stars.drawShipTrails(timeDiff);
 	Stars.drawExplosions(timeDiff);
-	Bullets.drawPlayerBullets();
+	
 	
 	ctx.putImageData(canvasData, 0, 0);
+
+	Bullets.drawPlayerBullets();
 
     EnemyShips.drawShips(ctx, timeDiff);
     EnemyShips.drawShipFragments(ctx, timeDiff);
@@ -63,9 +65,9 @@ function update() {
 function resetCanvas() {
 	// reset canvas data
 	var len = canvasWidth * canvasHeight * 4;
-	for (var i =0; i < len; i+=4) {
-		if (canvasDataArr[i + 3] !== 0)
-			canvasDataArr[i + 3] = 0;
+	for (var i =3; i < len; i+=4) {
+		if (canvasDataArr[i] !== 0)
+			canvasDataArr[i] = 0;
 	}
 }
 

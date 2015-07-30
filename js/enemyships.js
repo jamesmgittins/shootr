@@ -173,12 +173,13 @@ EnemyShips.checkForPlayerCollision = function (ship) {
 };
 
 EnemyShips.checkForBulletCollisions = function (ship){
-    for (var i = 0; i < Bullets.maxPlayerBullets; i++) {
-        if (Bullets.playerBullets[i] && Bullets.playerBullets[i].inPlay === 1) {
-            if (Ships.detectCollision(ship, Bullets.playerBullets[i].x, Bullets.playerBullets[i].y)) {
-                Bullets.playerBullets[i].inPlay = 0;
-                Bullets.generateExplosion(Bullets.playerBullets[i]);
-                ship.health -= Bullets.playerBullets[i].strength;
+    for (var i = 0; i < Bullets.playerBullets.maxPlayerBullets; i++) {
+        if (Bullets.playerBullets.inPlay[i] === 1) {
+            if (Ships.detectCollision(ship, Bullets.playerBullets.xLoc[i], Bullets.playerBullets.yLoc[i])) {
+
+                Bullets.playerBullets.inPlay[i] = 0;
+                Bullets.generateExplosion(Bullets.playerBullets.xLoc[i], Bullets.playerBullets.yLoc[i]);
+                ship.health -= Bullets.playerBullets.strength;
                 if (ship.health <= 0) {
                     ship.inPlay = 0;
                     ship.wave.shipsDestroyed++;
@@ -283,6 +284,16 @@ EnemyShips.drawShipFragments = function (ctx, timeDiff) {
 			}
 		}
 	}
+
+	
+	for (var i = 0; i < Bullets.blasts.maxBlasts; i++) {
+	    if (Bullets.blasts.opacity[i] && Bullets.blasts.opacity[i] > 0) {
+	        ctx.globalAlpha = Bullets.blasts.opacity[i];
+	        ctx.drawImage(Bullets.blasts.art, Bullets.blasts.xLoc[i], Bullets.blasts.yLoc[i]);
+	        Bullets.blasts.opacity[i] -= (6 * timeDiff);
+	    }
+	}
+	
 	ctx.globalAlpha = 1;
 };
 

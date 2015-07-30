@@ -2,36 +2,42 @@
 
 Stars.NUM_STARS = 300;
 
-Stars.stars = [];
+Stars.stars = {
+	xLoc : [],
+	yLoc : [],
+	speed : [],
+	opacity : [],
+	r : [],
+	g : [],
+	b : []
+};
 
-Stars.star = function() {
-    this.reset = function () {
-        this.x = Math.random() * canvasWidth;
-        this.y = 0;
-        this.speed = 10 + Math.random() * 30;
-        this.opacity = 10 + Math.floor(this.speed / 40 * 245);
-        this.r = 128 + Math.random() * 128 | 0;
-        this.g = 128 + Math.random() * 128 | 0;
-        this.b = 128 + Math.random() * 128 | 0;
-    };
-    this.reset();
-    this.y = Math.random() * canvasHeight;
+Stars.resetStar = function(i) {
+        Stars.stars.xLoc[i] = Math.random() * canvasWidth;
+        Stars.stars.yLoc[i] = 0;
+        Stars.stars.speed[i] = 10 + Math.random() * 30;
+        Stars.stars.opacity[i] = 10 + Math.floor(Stars.stars.speed[i] / 40 * 245);
+        Stars.stars.r[i] = 128 + Math.random() * 128 | 0;
+        Stars.stars.g[i] = 128 + Math.random() * 128 | 0;
+        Stars.stars.b[i] = 128 + Math.random() * 128 | 0;
 };
 
 Stars.resetStars = function() {
     for (var i = 0; i < Stars.NUM_STARS; i++) {
-        Stars.stars[i] = new Stars.star();
+        Stars.resetStar(i);
+        Stars.stars.yLoc[i] = Math.random() * canvasHeight;
     }
 };
 
 Stars.drawStars = function (timeDiff) {
 
 	for (var i = 0; i < Stars.NUM_STARS; i++) {
-        Stars.stars[i].y = Stars.stars[i].y + Stars.stars[i].speed * timeDiff;
-        if (Stars.stars[i].y > canvasHeight) {
-            Stars.stars[i].reset();
+        Stars.stars.yLoc[i] += Stars.stars.speed[i] * timeDiff;
+        if (Stars.stars.yLoc[i] > canvasHeight) {
+            Stars.resetStar(i);
         }
-        drawPixel(Math.round(Stars.stars[i].x), Math.round(Stars.stars[i].y), Stars.stars[i].r, Stars.stars[i].g, Stars.stars[i].b, Stars.stars[i].opacity);
+        drawPixel(Math.round(Stars.stars.xLoc[i]), Math.round(Stars.stars.yLoc[i]), 
+				  Stars.stars.r[i], Stars.stars.g[i], Stars.stars.b[i], Stars.stars.opacity[i]);
     }
 };
 
