@@ -1,11 +1,5 @@
 ﻿var Bullets = {};
 
-Bullets.enemyBullets = [];
-Bullets.maxEnemyBullets = 100;
-Bullets.currentEnemyBullet = 0;
-Bullets.enemyShotSpeed = 100;
-Bullets.enemyShotStrength = 1;
-
 Bullets.blasts = {
     art: (function () {
         var blast = document.createElement('canvas');
@@ -31,23 +25,62 @@ Bullets.blasts = {
     opacity:[]
 };
 
-Bullets.enemyBulletArt = (function () {
-    var blast = document.createElement('canvas');
-    blast.width = 8;
-    blast.height = 8;
-    var blastCtx = blast.getContext('2d');
 
-    var radgrad = blastCtx.createRadialGradient(4, 4, 0, 4, 4, 4);
-    radgrad.addColorStop(0, 'rgba(255,255,128,1)');
-    radgrad.addColorStop(0.8, 'rgba(255,0,0,0.4)');
-    radgrad.addColorStop(1, 'rgba(255,180,0,0)');
 
-    // draw shape
-    blastCtx.fillStyle = radgrad;
-    blastCtx.fillRect(0, 0, 8, 8);
+Bullets.enemyBullets = {
+    art: (function () {
+        var blast = document.createElement('canvas');
+        blast.width = 8;
+        blast.height = 8;
+        var blastCtx = blast.getContext('2d');
 
-    return blast;
-})();
+        var radgrad = blastCtx.createRadialGradient(4, 4, 0, 4, 4, 4);
+        radgrad.addColorStop(0, 'rgba(255,255,128,1)');
+        radgrad.addColorStop(0.8, 'rgba(255,0,0,0.4)');
+        radgrad.addColorStop(1, 'rgba(255,180,0,0)');
+
+        // draw shape
+        blastCtx.fillStyle = radgrad;
+        blastCtx.fillRect(0, 0, 8, 8);
+
+        return blast;
+    })(),
+    offset: -4,
+    maxEnemyBullets : 10,
+    currentEnemyBullet : 0,
+    enemyShotSpeed : 100,
+    enemyShotStrength: 1,
+
+    xLoc: [],
+    yLoc: [],
+    ySpeed: [],
+    xSpeed: [],
+    inPlay: [],
+
+    r: 256,
+    g: 256,
+    b: 256,
+
+    newEnemyBullet : function (ship) {
+        if (Bullets.enemyBullets.currentEnemyBullet >= Bullets.enemyBullets.maxEnemyBullets) {
+            Bullets.enemyBullets.currentEnemyBullet = 0;
+        }
+
+        Bullets.enemyBullets.xLoc[Bullets.enemyBullets.currentEnemyBullet] = ship.xLoc;
+        Bullets.enemyBullets.yLoc[Bullets.enemyBullets.currentEnemyBullet] = ship.yLoc + 16;
+    
+        var xDiff = PlayerShip.playerShip.xLoc - ship.xLoc;
+        var yDiff = ship.yLoc - PlayerShip.playerShip.yLoc;
+        var multi = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
+
+        Bullets.enemyBullets.xSpeed[Bullets.enemyBullets.currentEnemyBullet] = xDiff / multi * Bullets.enemyBullets.enemyShotSpeed;
+        Bullets.enemyBullets.ySpeed[Bullets.enemyBullets.currentEnemyBullet] = yDiff / multi * Bullets.enemyBullets.enemyShotSpeed;
+
+        Bullets.enemyBullets.inPlay[Bullets.enemyBullets.currentEnemyBullet] = 1;
+
+        Bullets.enemyBullets.currentEnemyBullet++;
+    }
+};
 
 Bullets.playerBullets = {
     art: (function () {
@@ -57,9 +90,9 @@ Bullets.playerBullets = {
         var blastCtx = blast.getContext('2d');
 
         var radgrad = blastCtx.createRadialGradient(4, 4, 0, 4, 4, 4);
-        radgrad.addColorStop(0, 'rgba(255,255,255,1)');
-        radgrad.addColorStop(0.8, 'rgba(255,255,128,0.2)');
-        radgrad.addColorStop(1, 'rgba(255,255,0,0)');
+        radgrad.addColorStop(0, 'rgba(255,255,0,1)');
+        radgrad.addColorStop(0.8, 'rgba(255,255,255,0.5)');
+        radgrad.addColorStop(1, 'rgba(255,255,255,0)');
 
         // draw shape
         blastCtx.fillStyle = radgrad;
@@ -80,9 +113,9 @@ Bullets.playerBullets = {
     xSpeed : [],
 	inPlay : [],
     
-	r : 256,
-    g : 256,
-    b : 256,
+	r : 255,
+    g : 255,
+    b : 255,
 	
 	resetPlayerBullet : function (i) {
         Bullets.playerBullets.xLoc[i] = PlayerShip.playerShip.xLoc;
@@ -93,13 +126,33 @@ Bullets.playerBullets = {
 	}
 };
 
+Bullets.explosionBits = {
+    bitsPerExplosion: 16,
+    maxExplosionBits: 256,
+    currentExplosionBit: 0,
+    opacity: [],
+    xLoc: [],
+    yLoc: [],
+    color: { r: Bullets.playerBullets.r, g: Bullets.playerBullets.g, b: Bullets.playerBullets.b },
+    xSpeed: [],
+    ySpeed: [],
+
+    newExplosionBit: function (x, y) {
+
+        if (Bullets.explosionBits.currentExplosionBit >= Bullets.explosionBits.maxExplosionBits)
+            Bullets.explosionBits.currentExplosionBit = 0;
+
+        Bullets.explosionBits.opacity[Bullets.explosionBits.currentExplosionBit] = 255;
+        Bullets.explosionBits.xLoc[Bullets.explosionBits.currentExplosionBit] = x;
+        Bullets.explosionBits.yLoc[Bullets.explosionBits.currentExplosionBit] = y;
+        Bullets.explosionBits.xSpeed[Bullets.explosionBits.currentExplosionBit] = -100 + Math.random() * 200;
+        Bullets.explosionBits.ySpeed[Bullets.explosionBits.currentExplosionBit] = -100 + Math.random() * 200;
+        
+        Bullets.explosionBits.currentExplosionBit++;
+    }
+};
+
 Bullets.frequencyUpgrades = 0;
-
-
-Bullets.explosionBits = [];
-Bullets.bitsPerExplosion = 16;
-Bullets.maxExplosionBits = 256;
-Bullets.currentExplosionBit = 0;
 
 Bullets.upgradeFrequency = function () {
     if (credits > upgradePrice(10, 1.2, Bullets.frequencyUpgrades)) {
@@ -111,21 +164,8 @@ Bullets.upgradeFrequency = function () {
 };
 
 Bullets.generateExplosion = function (x, y) {
-    for (var i = 0; i < Bullets.bitsPerExplosion; i++) {
-
-        if (Bullets.currentExplosionBit >= Bullets.maxExplosionBits)
-            Bullets.currentExplosionBit = 0;
-
-        Bullets.explosionBits[Bullets.currentExplosionBit] = {
-            opacity: 255,
-            xLoc: x,
-            yLoc: y,
-            color: { r: Bullets.playerBullets.r, g: Bullets.playerBullets.g, b: Bullets.playerBullets.b },
-            xSpeed: -100 + Math.random() * 200,
-            ySpeed: -100 + Math.random() * 200
-        };
-
-        Bullets.currentExplosionBit++;
+    for (var i = 0; i < Bullets.explosionBits.bitsPerExplosion; i++) {
+        Bullets.explosionBits.newExplosionBit(x, y);
     }
 
     if (Bullets.blasts.currentBlast > Bullets.blasts.maxBlasts)
@@ -136,27 +176,6 @@ Bullets.generateExplosion = function (x, y) {
     Bullets.blasts.yLoc[Bullets.blasts.currentBlast] = y - 16;
 
     Bullets.blasts.currentBlast++;
-};
-
-Bullets.enemyBullet = function (ship, playerShip) {
-    this.reset = function (ship, playerShip) {
-        this.x = ship.xLoc;
-        this.y = ship.yLoc + 16;
-
-        var xDiff = playerShip.xLoc - ship.xLoc;
-        var yDiff = ship.yLoc - playerShip.yLoc;
-        var multi = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
-
-        this.xSpeed = xDiff / multi * Bullets.enemyShotSpeed;
-        this.ySpeed = yDiff / multi * Bullets.enemyShotSpeed;
-
-        this.r = 256;
-        this.g = 196;
-        this.b = 0;
-        this.inPlay = 1;
-        this.strength = Bullets.enemyShotStrength;
-    }
-    this.reset(ship, playerShip);
 };
 
 Bullets.updatePlayerBullets = function (timeDiff) {
@@ -190,19 +209,20 @@ Bullets.updatePlayerBullets = function (timeDiff) {
 };
 
 Bullets.updateEnemyBullets = function (timeDiff) {
-    for (var i = 0; i < Bullets.enemyBullets.length; i++) {
-        if (Bullets.enemyBullets[i] && Bullets.enemyBullets[i].inPlay === 1) {
+    for (var i = 0; i < Bullets.enemyBullets.maxEnemyBullets; i++) {
+        if (Bullets.enemyBullets.inPlay[i] === 1) {
 
-            Bullets.enemyBullets[i].x += Bullets.enemyBullets[i].xSpeed * timeDiff;
-            Bullets.enemyBullets[i].y -= Bullets.enemyBullets[i].ySpeed * timeDiff;
+            Bullets.enemyBullets.xLoc[i] += Bullets.enemyBullets.xSpeed[i] * timeDiff;
+            Bullets.enemyBullets.yLoc[i] -= Bullets.enemyBullets.ySpeed[i] * timeDiff;
 
-            if (Bullets.enemyBullets[i].y < 0 || Bullets.enemyBullets[i].y > canvasHeight || Bullets.enemyBullets[i].x < 0 || Bullets.enemyBullets[i].x > canvasWidth) {
-                Bullets.enemyBullets[i].inPlay = 0;
+            if (Bullets.enemyBullets.yLoc[i] < 0 || Bullets.enemyBullets.yLoc[i] > canvasHeight ||
+                Bullets.enemyBullets.xLoc[i] < 0 || Bullets.enemyBullets.xLoc[i] > canvasWidth) {
+                Bullets.enemyBullets.inPlay[i] = 0;
             } else {
-                if (Ships.detectCollision(PlayerShip.playerShip, Bullets.enemyBullets[i].x, Bullets.enemyBullets[i].y)) {
-                    Bullets.enemyBullets[i].inPlay = 0;
-                    Bullets.generateExplosion(Bullets.enemyBullets[i].x, Bullets.enemyBullets[i].y);
-                    PlayerShip.playerShip.health -= Bullets.enemyBullets[i].strength;
+                if (Ships.detectCollision(PlayerShip.playerShip, Bullets.enemyBullets.xLoc[i], Bullets.enemyBullets.yLoc[i])) {
+                    Bullets.enemyBullets.inPlay[i] = 0;
+                    Bullets.generateExplosion(Bullets.enemyBullets.xLoc[i], Bullets.enemyBullets.yLoc[i]);
+                    PlayerShip.playerShip.health -= Bullets.enemyBullets.strength;
                     
                     //TODO destroy player ship?
                 }
@@ -211,49 +231,19 @@ Bullets.updateEnemyBullets = function (timeDiff) {
     }
 };
 
-Bullets.newEnemyBullet = function (ship) {
-    if (Bullets.currentEnemyBullet >= Bullets.maxEnemyBullets) {
-        Bullets.currentEnemyBullet = 0;
-    }
 
-    Bullets.enemyBullets[Bullets.currentEnemyBullet] = new Bullets.enemyBullet(ship, PlayerShip.playerShip);
-    Bullets.currentEnemyBullet++;
-};
 
-Bullets.drawPlayerBullet = function (i) {
-    
-    drawPixel(Math.round(Bullets.playerBullets.xLoc[i]), Math.round(Bullets.playerBullets.yLoc[i] - 1), Bullets.playerBullets.r, Bullets.playerBullets.g, Bullets.playerBullets.b, 255);
-    drawPixel(Math.round(Bullets.playerBullets.xLoc[i]), Math.round(Bullets.playerBullets.yLoc[i]), Bullets.playerBullets.r, Bullets.playerBullets.g, Bullets.playerBullets.b, 255);
-    drawPixel(Math.round(Bullets.playerBullets.xLoc[i]), Math.round(Bullets.playerBullets.yLoc[i] + 1), Bullets.playerBullets.r, Bullets.playerBullets.g, Bullets.playerBullets.b, 255);
-    drawPixel(Math.round(Bullets.playerBullets.xLoc[i] - 1), Math.round(Bullets.playerBullets.yLoc[i]), Bullets.playerBullets.r, Bullets.playerBullets.g, Bullets.playerBullets.b, 255);
-    drawPixel(Math.round(Bullets.playerBullets.xLoc[i] + 1), Math.round(Bullets.playerBullets.yLoc[i]), Bullets.playerBullets.r, Bullets.playerBullets.g, Bullets.playerBullets.b, 255);
-};
-
-Bullets.drawEnemyBullet = function (playerBullet) {
-    drawPixel(Math.round(playerBullet.x), Math.round(playerBullet.y - 2), playerBullet.r, playerBullet.g, playerBullet.b, 255);
-    drawPixel(Math.round(playerBullet.x), Math.round(playerBullet.y - 1), playerBullet.r, playerBullet.g, playerBullet.b, 255);
-    drawPixel(Math.round(playerBullet.x), Math.round(playerBullet.y), playerBullet.r, playerBullet.g, playerBullet.b, 255);
-    drawPixel(Math.round(playerBullet.x), Math.round(playerBullet.y + 1), playerBullet.r, playerBullet.g, playerBullet.b, 255);
-    drawPixel(Math.round(playerBullet.x), Math.round(playerBullet.y + 2), playerBullet.r, playerBullet.g, playerBullet.b, 255);
-
-    drawPixel(Math.round(playerBullet.x - 2), Math.round(playerBullet.y), playerBullet.r, playerBullet.g, playerBullet.b, 255);
-    drawPixel(Math.round(playerBullet.x - 1), Math.round(playerBullet.y), playerBullet.r, playerBullet.g, playerBullet.b, 255);
-    drawPixel(Math.round(playerBullet.x + 1), Math.round(playerBullet.y), playerBullet.r, playerBullet.g, playerBullet.b, 255);
-    drawPixel(Math.round(playerBullet.x + 2), Math.round(playerBullet.y), playerBullet.r, playerBullet.g, playerBullet.b, 255);
-};
 
 Bullets.drawPlayerBullets = function () {
     for (var i = 0; i < Bullets.playerBullets.maxPlayerBullets; i++) {
         if (Bullets.playerBullets.inPlay[i]) {
-            //Bullets.drawPlayerBullet(i);
             ctx.drawImage(Bullets.playerBullets.art, Bullets.playerBullets.xLoc[i] + Bullets.playerBullets.offset, Bullets.playerBullets.yLoc[i] + Bullets.playerBullets.offset);
         }
             
     }
-    for (var i = 0; i < Bullets.enemyBullets.length; i++) {
-        if (Bullets.enemyBullets[i].inPlay) {
-            //Bullets.drawEnemyBullet(Bullets.enemyBullets[i]);
-            ctx.drawImage(Bullets.enemyBulletArt, Bullets.enemyBullets[i].x + Bullets.playerBullets.offset, Bullets.enemyBullets[i].y + Bullets.playerBullets.offset);
+    for (var i = 0; i < Bullets.enemyBullets.maxEnemyBullets; i++) {
+        if (Bullets.enemyBullets.inPlay[i]) {
+            ctx.drawImage(Bullets.enemyBullets.art, Bullets.enemyBullets.xLoc[i] + Bullets.enemyBullets.offset, Bullets.enemyBullets.yLoc[i] + Bullets.enemyBullets.offset);
         }   
     }
 };

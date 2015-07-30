@@ -85,49 +85,42 @@ Stars.drawShipTrails = function (timeDiff) {
 };
 
 Stars.drawExplosions = function (timeDiff) {
-    for (var i = 0; i < Bullets.explosionBits.length; i++) {
+    for (var i = 0; i < Bullets.explosionBits.maxExplosionBits; i++) {
 
-        if (Bullets.explosionBits[i] && Bullets.explosionBits[i].opacity > 0) {
+        if (Bullets.explosionBits.opacity[i] && Bullets.explosionBits.opacity[i] > 0) {
 
-            Bullets.explosionBits[i].opacity -= 20000 * timeDiff / Bullets.explosionBits[i].opacity;
+            Bullets.explosionBits.xLoc[i] += Bullets.explosionBits.xSpeed[i] * timeDiff;
+            Bullets.explosionBits.yLoc[i] += Bullets.explosionBits.ySpeed[i] * timeDiff;
 
-            if (Bullets.explosionBits[i].opacity > 0) {
+            drawPixel(Math.round(Bullets.explosionBits.xLoc[i]), Math.round(Bullets.explosionBits.yLoc[i]), Bullets.explosionBits.color.r,
+                        Bullets.explosionBits.color.g, Bullets.explosionBits.color.b, Bullets.explosionBits.opacity[i]);
 
-                Bullets.explosionBits[i].xLoc += Bullets.explosionBits[i].xSpeed * timeDiff;
-                Bullets.explosionBits[i].yLoc += Bullets.explosionBits[i].ySpeed * timeDiff;
-                Bullets.explosionBits[i].opacity -= 100 * timeDiff;
-
-                drawPixel(Math.round(Bullets.explosionBits[i].xLoc), Math.round(Bullets.explosionBits[i].yLoc), Bullets.explosionBits[i].color.r,
-                        Bullets.explosionBits[i].color.g, Bullets.explosionBits[i].color.b, Bullets.explosionBits[i].opacity);
-            }
+            Bullets.explosionBits.opacity[i] -= 30000 * timeDiff / Bullets.explosionBits.opacity[i];
         }
     }
-    for (var i = 0; i < EnemyShips.explosionBits.length; i++) {
+    for (var i = 0; i < EnemyShips.explosionBits.maxExplosionBits; i++) {
 
-        if (EnemyShips.explosionBits[i] && EnemyShips.explosionBits[i].opacity > 0) {
+        if (EnemyShips.explosionBits.opacity[i] && EnemyShips.explosionBits.opacity[i] > 0) {
 
-            EnemyShips.explosionBits[i].opacity -= 20000 * timeDiff / EnemyShips.explosionBits[i].opacity;
+            EnemyShips.explosionBits.xLoc[i] += EnemyShips.explosionBits.xSpeed[i] * timeDiff;
+            EnemyShips.explosionBits.yLoc[i] += EnemyShips.explosionBits.ySpeed[i] * timeDiff;
 
-            if (EnemyShips.explosionBits[i].opacity > 0) {
+            drawPixel(Math.round(EnemyShips.explosionBits.xLoc[i]), Math.round(EnemyShips.explosionBits.yLoc[i]), EnemyShips.explosionBits.color[i].r,
+                    EnemyShips.explosionBits.color[i].g, EnemyShips.explosionBits.color[i].b, EnemyShips.explosionBits.opacity[i]);
 
-                EnemyShips.explosionBits[i].xLoc += EnemyShips.explosionBits[i].xSpeed * timeDiff;
-                EnemyShips.explosionBits[i].yLoc += EnemyShips.explosionBits[i].ySpeed * timeDiff;
-
-                drawPixel(Math.round(EnemyShips.explosionBits[i].xLoc), Math.round(EnemyShips.explosionBits[i].yLoc), EnemyShips.explosionBits[i].color.r,
-                        EnemyShips.explosionBits[i].color.g, EnemyShips.explosionBits[i].color.b, EnemyShips.explosionBits[i].opacity);
-
-                if (EnemyShips.explosionBits[i].vertical) {
-                    drawPixel(Math.round(EnemyShips.explosionBits[i].xLoc), Math.round(EnemyShips.explosionBits[i].yLoc + 1), EnemyShips.explosionBits[i].color.r,
-                        EnemyShips.explosionBits[i].color.g, EnemyShips.explosionBits[i].color.b, EnemyShips.explosionBits[i].opacity);
-                    drawPixel(Math.round(EnemyShips.explosionBits[i].xLoc), Math.round(EnemyShips.explosionBits[i].yLoc - 1), EnemyShips.explosionBits[i].color.r,
-                        EnemyShips.explosionBits[i].color.g, EnemyShips.explosionBits[i].color.b, EnemyShips.explosionBits[i].opacity);
-                } else {
-                    drawPixel(Math.round(EnemyShips.explosionBits[i].xLoc + 1), Math.round(EnemyShips.explosionBits[i].yLoc), EnemyShips.explosionBits[i].color.r,
-                        EnemyShips.explosionBits[i].color.g, EnemyShips.explosionBits[i].color.b, EnemyShips.explosionBits[i].opacity);
-                    drawPixel(Math.round(EnemyShips.explosionBits[i].xLoc - 1), Math.round(EnemyShips.explosionBits[i].yLoc), EnemyShips.explosionBits[i].color.r,
-                        EnemyShips.explosionBits[i].color.g, EnemyShips.explosionBits[i].color.b, EnemyShips.explosionBits[i].opacity);
-                }
+            if (EnemyShips.explosionBits.vertical[i]) {
+                drawPixel(Math.round(EnemyShips.explosionBits.xLoc[i]), Math.round(EnemyShips.explosionBits.yLoc[i] + 1), EnemyShips.explosionBits.color[i].r,
+                    EnemyShips.explosionBits.color[i].g, EnemyShips.explosionBits.color[i].b, EnemyShips.explosionBits.opacity[i]);
+                drawPixel(Math.round(EnemyShips.explosionBits.xLoc[i]), Math.round(EnemyShips.explosionBits.yLoc[i] - 1), EnemyShips.explosionBits.color[i].r,
+                    EnemyShips.explosionBits.color[i].g, EnemyShips.explosionBits.color[i].b, EnemyShips.explosionBits.opacity[i]);
+            } else {
+                drawPixel(Math.round(EnemyShips.explosionBits.xLoc[i] + 1), Math.round(EnemyShips.explosionBits.yLoc[i]), EnemyShips.explosionBits.color[i].r,
+                    EnemyShips.explosionBits.color[i].g, EnemyShips.explosionBits.color[i].b, EnemyShips.explosionBits.opacity[i]);
+                drawPixel(Math.round(EnemyShips.explosionBits.xLoc[i] - 1), Math.round(EnemyShips.explosionBits.yLoc[i]), EnemyShips.explosionBits.color[i].r,
+                    EnemyShips.explosionBits.color[i].g, EnemyShips.explosionBits.color[i].b, EnemyShips.explosionBits.opacity[i]);
             }
+            EnemyShips.explosionBits.opacity[i] -= 20000 * timeDiff / EnemyShips.explosionBits.opacity[i];
+
         }
     }
 };

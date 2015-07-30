@@ -7,10 +7,34 @@ EnemyShips.maxWaves = 3;
 
 EnemyShips.waveBulletFrequency = 3000;
 
-EnemyShips.explosionBits = [];
-EnemyShips.bitsPerExplosion = 24;
-EnemyShips.maxExplosionBits = 256;
-EnemyShips.currentExplosionBit = 0;
+EnemyShips.explosionBits = {
+    bitsPerExplosion : 32,
+    maxExplosionBits : 256,
+    currentExplosionBit: 0,
+    opacity: [],
+    xLoc: [],
+    yLoc: [],
+    color: [],
+    xSpeed: [],
+    ySpeed: [],
+    vertical: [],
+
+    newExplosionBit: function (ship) {
+
+        if (EnemyShips.explosionBits.currentExplosionBit >= EnemyShips.explosionBits.maxExplosionBits)
+            EnemyShips.explosionBits.currentExplosionBit = 0;
+
+        EnemyShips.explosionBits.opacity[EnemyShips.explosionBits.currentExplosionBit] = 255;
+        EnemyShips.explosionBits.xLoc[EnemyShips.explosionBits.currentExplosionBit] = ship.xLoc;
+        EnemyShips.explosionBits.yLoc[EnemyShips.explosionBits.currentExplosionBit] = ship.yLoc;
+        EnemyShips.explosionBits.color[EnemyShips.explosionBits.currentExplosionBit] = Math.random() > 0.8 ? { r: 255, g: 190, b: 51 } : ship.wave.colorsRgb[Math.floor(Math.random() * ship.wave.colorsRgb.length)];
+        EnemyShips.explosionBits.xSpeed[EnemyShips.explosionBits.currentExplosionBit] = (ship.xSpeed / 2) - 150 + Math.random() * 300;
+        EnemyShips.explosionBits.ySpeed[EnemyShips.explosionBits.currentExplosionBit] = (ship.ySpeed / 2) - 150 + Math.random() * 300;
+        EnemyShips.explosionBits.vertical[EnemyShips.explosionBits.currentExplosionBit] = Math.random() > 0.5;
+
+        EnemyShips.explosionBits.currentExplosionBit++;
+    }
+};
 
 EnemyShips.fragments = [];
 EnemyShips.fragmentsPerExplosion = 8;
@@ -19,22 +43,8 @@ EnemyShips.currentExplosionFragment = 0;
 
 
 EnemyShips.generateExplosion = function (ship) {
-    for (var i = 0; i < EnemyShips.bitsPerExplosion; i++) {
-
-        if (EnemyShips.currentExplosionBit >= EnemyShips.maxExplosionBits)
-            EnemyShips.currentExplosionBit = 0;
-
-        EnemyShips.explosionBits[EnemyShips.currentExplosionBit] = {
-            opacity: 255,
-            xLoc: ship.xLoc,
-            yLoc: ship.yLoc,
-            color: Math.random() > 0.8 ? {r:255,g:190,b:51} : ship.wave.colorsRgb[Math.floor(Math.random() * ship.wave.colorsRgb.length)],
-            xSpeed: (ship.xSpeed / 2) - 150 + Math.random() * 300,
-            ySpeed: (ship.ySpeed / 2) - 150 + Math.random() * 300,
-            vertical: Math.random() > 0.5
-        };
-
-        EnemyShips.currentExplosionBit++;
+    for (var i = 0; i < EnemyShips.explosionBits.bitsPerExplosion; i++) {
+        EnemyShips.explosionBits.newExplosionBit(ship);
     }
 	
 	var fragmentCount = EnemyShips.fragmentsPerExplosion + Math.random() * EnemyShips.fragmentsPerExplosion;
@@ -72,7 +82,7 @@ EnemyShips.generateExplosion = function (ship) {
 	Ships.currentBlast++;
 };
     
-EnemyShips.lastWave = 0;
+EnemyShips.lastWave = 6000;
 EnemyShips.waveFrequency = 10000;
 
 EnemyShips.wavePatterns = [
@@ -239,7 +249,7 @@ EnemyShips.update = function (timeDiff) {
                         EnemyShips.checkForPlayerCollision(eShip);
 
                         if (eShip.inPlay && EnemyShips.waves[i].lastBullet >= EnemyShips.waveBulletFrequency && Math.random() > 0.9) {
-                            Bullets.newEnemyBullet(eShip);
+                            Bullets.enemyBullets.newEnemyBullet(eShip);
                             EnemyShips.waves[i].lastBullet = 0;
                         }
                     }

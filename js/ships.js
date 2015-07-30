@@ -29,25 +29,23 @@ Ships.shipTrailCount = 32;
 
 var nextXLoc, nextYLoc;
 
-Ships.blastArtFunc = function() {
-	var blast = document.createElement('canvas');
-	blast.width = 64;
-	blast.height = 64;
-	var blastCtx = blast.getContext('2d');
-	
-	var radgrad = blastCtx.createRadialGradient(32,32,0,32,32,32);
-	radgrad.addColorStop(0, 'rgba(255,255,255,1)');
-	radgrad.addColorStop(0.8, 'rgba(255,255,128,0.2)');
-	radgrad.addColorStop(1, 'rgba(255,180,0,0)');
+Ships.shipBlastArt = (function () {
+    var blast = document.createElement('canvas');
+    blast.width = 64;
+    blast.height = 64;
+    var blastCtx = blast.getContext('2d');
 
-	// draw shape
-	blastCtx.fillStyle = radgrad;
-	blastCtx.fillRect(0,0,64,64);
-	
-	return blast;
-};
+    var radgrad = blastCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    radgrad.addColorStop(0, 'rgba(255,255,255,1)');
+    radgrad.addColorStop(0.8, 'rgba(255,255,128,0.2)');
+    radgrad.addColorStop(1, 'rgba(255,180,0,0)');
 
-Ships.shipBlastArt = Ships.blastArtFunc();
+    // draw shape
+    blastCtx.fillStyle = radgrad;
+    blastCtx.fillRect(0, 0, 64, 64);
+
+    return blast;
+})();
 
 Ships.shipFragments = function (colors) {
 	var fragments = [];
