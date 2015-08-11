@@ -108,7 +108,8 @@ Ships.shipArt = function (size, seed, enemy, colors) {
 var collisionCushion = 3; // num pixels to reduce collision area by
 
 Ships.detectShipCollision = function(enemyShip, playerShip) {
-	if (enemyShip.yLoc < playerShip.yLoc + playerShip.offset * 2 &&
+    if (playerShip.inPlay === 1 &&
+        enemyShip.yLoc < playerShip.yLoc + playerShip.offset * 2 &&
 		enemyShip.yLoc + enemyShip.offset * 2 > playerShip.yLoc &&
 		enemyShip.xLoc < playerShip.xLoc + playerShip.offset * 2 &&
 		enemyShip.xLoc + enemyShip.offset * 2 > playerShip.xLoc) {
@@ -136,7 +137,7 @@ Ships.detectShipCollision = function(enemyShip, playerShip) {
 };
 
 Ships.detectCollision = function (ship, xLoc, yLoc) {
-    if (yLoc > ship.yLoc - ship.offset && yLoc < ship.yLoc + ship.offset) {
+    if (ship.inPlay === 1 && yLoc > ship.yLoc - ship.offset && yLoc < ship.yLoc + ship.offset) {
         var yPos = yLoc - (ship.yLoc - ship.offset);
         if (!ship.enemyShip) {
             var xOffset = ship.offset * (yPos / (ship.offset * 2));
@@ -163,6 +164,17 @@ Ships.updateShipSpeed = function (ship, xDiff, yDiff, timeDiff) {
         ship.yLoc += ship.ySpeed * timeDiff;
 };
 
+Ships.updateShipSpeedFromController = function (ship, xDiff, yDiff, timeDiff) {
+    
+    ship.xSpeed = xDiff * ship.maxSpeed;
+    ship.ySpeed = yDiff * ship.maxSpeed;
+
+    if (ship.enemyShip || (ship.xLoc + ship.xSpeed * timeDiff > 0 && ship.xLoc + ship.xSpeed * timeDiff < canvasWidth))
+        ship.xLoc += ship.xSpeed * timeDiff;
+    if (ship.enemyShip || (ship.yLoc + ship.ySpeed * timeDiff > 0 && ship.yLoc + ship.ySpeed * timeDiff < canvasHeight))
+        ship.yLoc += ship.ySpeed * timeDiff;
+};
+
 Ships.updateRotation = function (ship, timeDiff) {
 	var maxRot = ship.xSpeed / 500;
 
@@ -178,4 +190,11 @@ Ships.updateRotation = function (ship, timeDiff) {
 		else
 			ship.rotation = maxRot;
 	}
+
+	var tempX = -2 + Math.random() * 4;
+	var tempY = ship.enemyShip ? -20 : 20;
+	var tempRotation = ship.enemyShip ? ship.rotation * -1 : ship.rotation;
+
+	ship.trailX = Math.cos(tempRotation) * tempX - Math.sin(tempRotation) * tempY + ship.xLoc;
+	ship.trailY = Math.sin(tempRotation) * tempX + Math.cos(tempRotation) * tempY + ship.yLoc;
 };

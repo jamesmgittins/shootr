@@ -8,8 +8,8 @@ EnemyShips.maxWaves = 3;
 EnemyShips.waveBulletFrequency = 3000;
 
 EnemyShips.explosionBits = {
-    bitsPerExplosion : 32,
-    maxExplosionBits : 256,
+    bitsPerExplosion : 24,
+    maxExplosionBits : 128,
     currentExplosionBit: 0,
     opacity: [],
     xLoc: [],
@@ -19,7 +19,7 @@ EnemyShips.explosionBits = {
     ySpeed: [],
     vertical: [],
 
-    newExplosionBit: function (ship) {
+    newExplosionBit: function (ship, colors) {
 
         if (EnemyShips.explosionBits.currentExplosionBit >= EnemyShips.explosionBits.maxExplosionBits)
             EnemyShips.explosionBits.currentExplosionBit = 0;
@@ -27,7 +27,7 @@ EnemyShips.explosionBits = {
         EnemyShips.explosionBits.opacity[EnemyShips.explosionBits.currentExplosionBit] = 255;
         EnemyShips.explosionBits.xLoc[EnemyShips.explosionBits.currentExplosionBit] = ship.xLoc;
         EnemyShips.explosionBits.yLoc[EnemyShips.explosionBits.currentExplosionBit] = ship.yLoc;
-        EnemyShips.explosionBits.color[EnemyShips.explosionBits.currentExplosionBit] = Math.random() > 0.8 ? { r: 255, g: 190, b: 51 } : ship.wave.colorsRgb[Math.floor(Math.random() * ship.wave.colorsRgb.length)];
+        EnemyShips.explosionBits.color[EnemyShips.explosionBits.currentExplosionBit] = Math.random() > 0.8 ? { r: 255, g: 190, b: 51 } : colors[Math.floor(Math.random() * colors.length)];
         EnemyShips.explosionBits.xSpeed[EnemyShips.explosionBits.currentExplosionBit] = (ship.xSpeed / 2) - 150 + Math.random() * 300;
         EnemyShips.explosionBits.ySpeed[EnemyShips.explosionBits.currentExplosionBit] = (ship.ySpeed / 2) - 150 + Math.random() * 300;
         EnemyShips.explosionBits.vertical[EnemyShips.explosionBits.currentExplosionBit] = Math.random() > 0.5;
@@ -37,14 +37,14 @@ EnemyShips.explosionBits = {
 };
 
 EnemyShips.fragments = [];
-EnemyShips.fragmentsPerExplosion = 8;
-EnemyShips.maxExplosionFragments = 64;
+EnemyShips.fragmentsPerExplosion = 6;
+EnemyShips.maxExplosionFragments = 32;
 EnemyShips.currentExplosionFragment = 0;
 
 
 EnemyShips.generateExplosion = function (ship) {
     for (var i = 0; i < EnemyShips.explosionBits.bitsPerExplosion; i++) {
-        EnemyShips.explosionBits.newExplosionBit(ship);
+        EnemyShips.explosionBits.newExplosionBit(ship, ship.wave.colorsRgb);
     }
 	
 	var fragmentCount = EnemyShips.fragmentsPerExplosion + Math.random() * EnemyShips.fragmentsPerExplosion;
@@ -86,6 +86,14 @@ EnemyShips.lastWave = 6000;
 EnemyShips.waveFrequency = 10000;
 
 EnemyShips.wavePatterns = [
+	{
+		xCoords:[0.9, 0.9,0.1,0.1,0.9,0.9,0.1,0.1,0.9,0.9,0.1,0.1,0.9,0.9,0.1,0.1,0.9,0.9],
+		yCoords:[-0.2,0.1,0.1,0.2,0.2,0.3,0.3,0.4,0.5,0.6,0.6,0.7,0.7,0.8,0.8,0.9,0.9,1.1]
+	},
+    {
+        xCoords: [-0.2, 0.1, 0.3, 0.5, 0.7, 0.9, 0.7, 0.5, 0.3, 0.1, -0.2],
+        yCoords: [0.45, 0.45, 0.2, 0.1, 0.2, 0.5, 0.7, 0.9, 0.7, 0.55, 0.55]
+    },
     {
         xCoords: [-0.2, 0.8, 0.9],
         yCoords: [0.2 , 0.1, 1.3]
@@ -160,25 +168,33 @@ EnemyShips.enemyShip = function (wave) {
     this.health = wave.shipHealth;
     this.inPlay = 1;
     this.enemyShip = true;
-	this.shipTrail = [];
 	this.rotation=0;
 	this.offset = wave.offset;
+};
 
-	for (var i = 0; i < this.SHIP_TRAIL_COUNT; i++) {
-        this.shipTrail[i] = new Stars.shipTrailPart(this);
-    }
+EnemyShips.destroy = function(ship) {
+	ship.inPlay = 0;
+	ship.wave.shipsDestroyed++;
+	if (ship.wave.shipsDestroyed >= ship.wave.shipsInWave) {
+	    addCredits(ship.wave.shipHealth * ship.wave.shipsInWave * 0.5);
+	    setTimeout(function () {
+	        $("#message-overlay-small").html("Wave destroyed<br>" + formatMoney(ship.wave.shipHealth * ship.wave.shipsInWave * 0.5) + " bonus credits!")
+                .show().delay(1500).fadeOut(1000);
+	    });
+	}
+	enemiesKilled++;
+	EnemyShips.generateExplosion(ship);
+	addCredits(ship.wave.shipHealth);
+
+	if (enemiesKilled >= enemiesToKill) {
+	    EnemyShips.allDeadTimer = 0;
+	}
 };
 
 EnemyShips.checkForPlayerCollision = function (ship) {
     if (Ships.detectShipCollision(ship, PlayerShip.playerShip)) {
-        if (ship.health > PlayerShip.playerShip.health) {
-            ship.health -= PlayerShip.playerShip.health;
-            PlayerShip.playerShip.health -= ship.health;
-        } else {
-            ship.inPlay = 0;
-            ship.wave.shipsDestroyed++;
-            EnemyShips.generateExplosion(ship);
-        }
+        PlayerShip.damagePlayerShip(PlayerShip.playerShip, ship.health);
+		EnemyShips.destroy(ship);
     }
 };
 
@@ -191,11 +207,7 @@ EnemyShips.checkForBulletCollisions = function (ship){
                 Bullets.generateExplosion(Bullets.playerBullets.xLoc[i], Bullets.playerBullets.yLoc[i]);
                 ship.health -= Bullets.playerBullets.strength;
                 if (ship.health <= 0) {
-                    ship.inPlay = 0;
-                    ship.wave.shipsDestroyed++;
-                    EnemyShips.generateExplosion(ship);
-
-                    credits += ship.wave.shipHealth;
+                    EnemyShips.destroy(ship);
                 }
             }
         }
@@ -205,6 +217,13 @@ EnemyShips.checkForBulletCollisions = function (ship){
 EnemyShips.update = function (timeDiff) {
 
     EnemyShips.lastWave += timeDiff * 1000;
+
+    if (enemiesKilled >= enemiesToKill) {
+        EnemyShips.allDeadTimer += (timeDiff * 1000);
+        if (EnemyShips.allDeadTimer > PlayerShip.allDeadTime) {
+            changeState(states.levelComplete);
+        }
+    }
 
     for (var i = 0; i < EnemyShips.maxWaves; i++) {
 
@@ -220,11 +239,17 @@ EnemyShips.update = function (timeDiff) {
                 if (!EnemyShips.waves[i].ships[j]) {
                     if (EnemyShips.waves[i].lastShipSpawned >= EnemyShips.waves[i].shipFrequency) {
                         EnemyShips.waves[i].ships[j] = new EnemyShips.enemyShip(EnemyShips.waves[i]);
+                        EnemyShips.waves[i].ships[j].shipTrail = new Stars.shipTrail(EnemyShips.waves[i].ships[j]);
                         EnemyShips.waves[i].lastShipSpawned = 0;
                     }
                 } else {
                     if (EnemyShips.waves[i].ships[j].inPlay) {
                         var eShip = EnemyShips.waves[i].ships[j];
+                        if (enemiesKilled >= enemiesToKill) {
+                            eShip.inPlay = 0;
+                            if (eShip.xLoc > 0 && eShip.yLoc > 0)
+                                EnemyShips.generateExplosion(eShip);
+                        }
                         if (Math.sqrt(Math.pow(eShip.xLoc - eShip.xTar, 2) +
                                         Math.pow(eShip.yLoc - eShip.yTar, 2)) > 5) {
 
@@ -314,7 +339,7 @@ EnemyShips.drawShips = function (ctx, timeDiff) {
 	
 	if (EnemyShips.waves.length > 0) {
 		for (var i = 0; i < EnemyShips.waves.length; i++) {
-			if (EnemyShips.waves[i] && EnemyShips.waves[i].shipsInWave) {
+		    if (EnemyShips.waves[i] && !EnemyShips.waves[i].finished && EnemyShips.waves[i].shipsInWave) {
 				for (var j = 0; j < EnemyShips.waves[i].shipsInWave; j++) {
 					if (EnemyShips.waves[i].ships[j] && EnemyShips.waves[i].ships[j].inPlay) {
 						ctx.save();

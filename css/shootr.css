@@ -1,18 +1,116 @@
 ﻿canvas {
-	 border: 1px dashed #0b0;
 	 width:100%;
+}
+
+.canvas-container {
+    position:relative;
+    border: 1px dashed #050;
+    background-color:#000;
+    cursor:crosshair;
+    clear:both;
+}
+
+#p1-shield-div {
+    position:relative;
+}
+
+#p1-shield-div:after {
+	color:#f00;
+    position:absolute;
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
+    margin:auto;
+    height:100%;
+    width:100%;
+    text-align:center;
+    /*animation:flashing 1s infinite;*/
+}
+
+#p1-shield-div.warning:after {
+    content:"WARNING";
+}
+
+#p1-shield-div.destroyed:after {
+	content:"SHIP DESTROYED";
+}
+
+@keyframes flashing {
+    0% {opacity:0;}
+    50% {opacity:1;}
+    100% {opacity:0;}
+}
+
+#p1-shield {
+    height:30px;
 }
 
 body {
 	padding:20px 0;
-    background-color: #000;
-    font-family: "Courier";
+    background-color: #010;
+    font-family: 'Dosis', sans-serif;
     font-size:20px;
 	color: #0B0;
 }
 
 .col-no-pad {
 	padding:0;
+}
+
+#message-overlay {
+    margin:auto;
+    position:absolute;
+    left:0;
+    right:0;
+    top:0;
+    bottom:0;
+    height:200px;
+    font-size:32px;
+    text-align:center;
+    padding:0 15px;
+}
+#message-overlay-small {
+    position:absolute;
+    left:0;
+    right:0;
+    top:50px;
+    bottom:0;
+    height:200px;
+    font-size:20px;
+    text-align:center;
+    padding:0 15px;
+}
+
+#p1-upgrades button > span {
+    font-weight:bold;
+    float:left;
+}
+#p1-upgrades button > span.price {
+    float:right;
+    min-width:30px;
+    min-height:5px;
+}
+
+#level-select {
+    text-align:center;    
+}
+
+#level-select > div {
+    border: 1px dashed #0b0;
+    height: 50px;
+    width: 50px;
+    margin: 5px;
+    text-align: center;
+    display: inline-block;
+    padding-top:10px;
+	cursor:pointer;
+    background-color: #000700;
+}
+
+#level-select > div.current {
+    border-style: solid;
+    font-weight: bold;
 }
 
 #stats {
@@ -23,10 +121,15 @@ button,select {
     margin: 5px 0;
     padding: 8px;
     color: #0B0;
-    background-color: #000;
+    background-color: #000700;
     border: 2px outset #0b0;
     width:100%;
     text-align:center;
+}
+
+button.disabled {
+	color:#050;
+	border-color:#070;
 }
 
 button:active {

@@ -155,11 +155,12 @@ Bullets.explosionBits = {
 Bullets.frequencyUpgrades = 0;
 
 Bullets.upgradeFrequency = function () {
-    if (credits > upgradePrice(10, 1.2, Bullets.frequencyUpgrades)) {
-        credits -= upgradePrice(10, 1.2, Bullets.frequencyUpgrades);
+    if (gameModel.p1.credits > upgradePrice(10, 1.2, Bullets.frequencyUpgrades)) {
+        gameModel.p1.credits -= upgradePrice(10, 1.2, Bullets.frequencyUpgrades);
         Bullets.frequencyUpgrades++;
         Bullets.playerBullets.shotFrequency -= 10;
         $('#btn-freq span').text('₡' + upgradePrice(10, 1.2, Bullets.frequencyUpgrades).toFixed(0));
+		save();
     }
 };
 
@@ -183,17 +184,24 @@ Bullets.updatePlayerBullets = function (timeDiff) {
     Bullets.playerBullets.lastPlayerShot += timeDiff * 1000;
 
     for (var i = 0; i < Bullets.playerBullets.maxPlayerBullets; i++) {
-        if (Bullets.playerBullets.inPlay[i] !== 1) {
+        if (Bullets.playerBullets.inPlay[i] !== 1 && PlayerShip.playerShip.inPlay) {
 
             if (Bullets.playerBullets.lastPlayerShot >= Bullets.playerBullets.shotFrequency) {
 
                 Bullets.playerBullets.resetPlayerBullet(i);
 
-                if (playerOneAxes[2] > 0.25 || playerOneAxes[2] < -0.25 || playerOneAxes[3] > 0.25 || playerOneAxes[2] < -0.25) {
+                if (playerOneAxes[2] > 0.25 || playerOneAxes[2] < -0.25 || playerOneAxes[3] > 0.25 || playerOneAxes[3] < -0.25) {
                     var multi = Math.sqrt(Math.pow(playerOneAxes[2], 2) + Math.pow(playerOneAxes[3], 2));
 
                     Bullets.playerBullets.xSpeed[i] = playerOneAxes[2] / multi * Bullets.playerBullets.shotSpeed;
                     Bullets.playerBullets.ySpeed[i] = -1 * playerOneAxes[3] / multi * Bullets.playerBullets.shotSpeed;
+                } else if (aimLocX && aimLocY) {
+                    var xDiff = aimLocX - Bullets.playerBullets.xLoc[i];
+                    var yDiff = Bullets.playerBullets.yLoc[i] - aimLocY;
+                    var multi = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
+
+                    Bullets.playerBullets.xSpeed[i] = xDiff / multi * Bullets.playerBullets.shotSpeed;
+                    Bullets.playerBullets.ySpeed[i] = yDiff / multi * Bullets.playerBullets.shotSpeed;
                 }
                 Bullets.playerBullets.lastPlayerShot = 0;
             }
@@ -210,21 +218,25 @@ Bullets.updatePlayerBullets = function (timeDiff) {
 
 Bullets.updateEnemyBullets = function (timeDiff) {
     for (var i = 0; i < Bullets.enemyBullets.maxEnemyBullets; i++) {
+        
         if (Bullets.enemyBullets.inPlay[i] === 1) {
 
-            Bullets.enemyBullets.xLoc[i] += Bullets.enemyBullets.xSpeed[i] * timeDiff;
-            Bullets.enemyBullets.yLoc[i] -= Bullets.enemyBullets.ySpeed[i] * timeDiff;
-
-            if (Bullets.enemyBullets.yLoc[i] < 0 || Bullets.enemyBullets.yLoc[i] > canvasHeight ||
-                Bullets.enemyBullets.xLoc[i] < 0 || Bullets.enemyBullets.xLoc[i] > canvasWidth) {
+            if (enemiesKilled >= enemiesToKill) {
                 Bullets.enemyBullets.inPlay[i] = 0;
+                Bullets.generateExplosion(Bullets.enemyBullets.xLoc[i], Bullets.enemyBullets.yLoc[i]);
             } else {
-                if (Ships.detectCollision(PlayerShip.playerShip, Bullets.enemyBullets.xLoc[i], Bullets.enemyBullets.yLoc[i])) {
+                Bullets.enemyBullets.xLoc[i] += Bullets.enemyBullets.xSpeed[i] * timeDiff;
+                Bullets.enemyBullets.yLoc[i] -= Bullets.enemyBullets.ySpeed[i] * timeDiff;
+
+                if (Bullets.enemyBullets.yLoc[i] < 0 || Bullets.enemyBullets.yLoc[i] > canvasHeight ||
+                    Bullets.enemyBullets.xLoc[i] < 0 || Bullets.enemyBullets.xLoc[i] > canvasWidth) {
                     Bullets.enemyBullets.inPlay[i] = 0;
-                    Bullets.generateExplosion(Bullets.enemyBullets.xLoc[i], Bullets.enemyBullets.yLoc[i]);
-                    PlayerShip.playerShip.health -= Bullets.enemyBullets.strength;
-                    
-                    //TODO destroy player ship?
+                } else {
+                    if (Ships.detectCollision(PlayerShip.playerShip, Bullets.enemyBullets.xLoc[i], Bullets.enemyBullets.yLoc[i])) {
+                        Bullets.enemyBullets.inPlay[i] = 0;
+                        Bullets.generateExplosion(Bullets.enemyBullets.xLoc[i], Bullets.enemyBullets.yLoc[i]);
+                        PlayerShip.damagePlayerShip(PlayerShip.playerShip, Bullets.enemyBullets.enemyShotStrength);
+                    }
                 }
             }
         }

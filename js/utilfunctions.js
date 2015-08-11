@@ -15,10 +15,6 @@ function distanceBetweenPoints(x1, y1, x2, y2) {
     return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 }
 
-function upgradePrice(basePrice, priceMulti, qty) {
-    return basePrice * Math.pow(priceMulti, qty);
-}
-
 // convert HEX color to RGB
 function hexToRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -101,3 +97,17 @@ HTMLCanvasElement.prototype.relMouseCoords = relMouseCoords;
             clearTimeout(id);
         };
 }());
+
+function formatMoney(input) {
+	if (!input) input = 0;
+	if (input >= 1000000000000)
+		return (input / 1000000000000).toFixed(2) + 'T';
+	if (input >= 1000000000)
+		return (input / 1000000000).toFixed(2) + 'B';
+	if (input >= 1000000)
+		return (input / 1000000).toFixed(2) + 'M';
+	if (input >= 1000)
+		return (input / 1000).toFixed(2) + 'K';
+
+	return input.toFixed(0);
+}

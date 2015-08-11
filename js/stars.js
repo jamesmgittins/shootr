@@ -41,42 +41,48 @@ Stars.drawStars = function (timeDiff) {
     }
 };
 
-Stars.shipTrailPart = function (ship) {
-    this.reset = function (ship) {
-        var tempX = -2 + Math.random() * 4;
-        var tempY = ship.enemyShip ? -20 : 20;
-        var tempRotation = ship.enemyShip ? ship.rotation * -1 : ship.rotation;
+Stars.shipTrail = function (ship) {
+    this.xLoc = [];
+    this.yLoc = [];
+    this.speed = [];
+    this.xSpeed = [];
+    this.opacity = [];
+    this.r = [];
+    this.b = [];
+    this.g = [];
+    this.ship = ship;
+};
 
-        var x = Math.cos(tempRotation) * tempX - Math.sin(tempRotation) * tempY + ship.xLoc;
-        var y = Math.sin(tempRotation) * tempX + Math.cos(tempRotation) * tempY + ship.yLoc;
-        
-        this.y = y;
-        this.x = x;
+Stars.resetTrail = function (shipTrail, i) {
 
-		if (ship.enemyShip) {    
-	        this.speed = -100 + Math.random() * -100;
-	        this.opacity = 10 + Math.floor(-1 * this.speed / 200 * 245);
-		} else {
-	        this.speed = 100 + Math.random() * 100;
-	        this.opacity = 10 + Math.floor(this.speed / 200 * 245);
-		}
+    shipTrail.xLoc[i] = shipTrail.ship.trailX - 2 + Math.random() * 4;
+    shipTrail.yLoc[i] = shipTrail.ship.trailY;
 
-        this.r = 128 + Math.random() * 128 | 0;
-        this.g = 128 + Math.random() * 128 | 0;
-        this.b = 0;
-    };
-    this.reset(ship);
+    if (shipTrail.ship.enemyShip) {    
+        shipTrail.speed[i] = -100 + Math.random() * -100;
+        shipTrail.opacity[i] = 150 + Math.floor(-1 * shipTrail.speed[i] / 200 * 105);
+    } else {
+        shipTrail.speed[i] = 100 + Math.random() * 100;
+        shipTrail.opacity[i] = 150 + Math.floor(shipTrail.speed[i] / 200 * 105);
+    }
+    shipTrail.xSpeed[i] = -20 + Math.random() * 40;
+
+    shipTrail.r[i] = 128 + Math.random() * 128 | 0;
+    shipTrail.g[i] = 128 + Math.random() * 128 | 0;
+    shipTrail.b[i] = 0;
 };
 
 Stars.drawShipTrails = function (timeDiff) {
-	Stars.drawShipTrail(PlayerShip.playerShip, timeDiff);
+    if (PlayerShip.playerShip.inPlay === 1) {
+        Stars.drawShipTrail(PlayerShip.playerShip.shipTrail, timeDiff);
+    }
 	
 	if (EnemyShips.waves.length > 0) {
 		for (var i = 0; i < EnemyShips.waves.length; i++) {
 			if (EnemyShips.waves[i] && !EnemyShips.waves[i].finished) {
 				for (var j = 0; j < EnemyShips.waves[i].shipsInWave; j++) {
 					if (EnemyShips.waves[i].ships[j] && EnemyShips.waves[i].ships[j].inPlay) {
-						Stars.drawShipTrail(EnemyShips.waves[i].ships[j], timeDiff);
+						Stars.drawShipTrail(EnemyShips.waves[i].ships[j].shipTrail, timeDiff);
 					}
 				}			
 			}
@@ -120,22 +126,26 @@ Stars.drawExplosions = function (timeDiff) {
                     EnemyShips.explosionBits.color[i].g, EnemyShips.explosionBits.color[i].b, EnemyShips.explosionBits.opacity[i]);
             }
             EnemyShips.explosionBits.opacity[i] -= 20000 * timeDiff / EnemyShips.explosionBits.opacity[i];
-
         }
     }
 };
 
-Stars.drawShipTrail = function (ship, timeDiff) {
-    var shipTrailCount = ship.enemyShip && ship.health < ship.wave.shipHealth ? 10 : ship.SHIP_TRAIL_COUNT;
+Stars.drawShipTrail = function (shipTrail, timeDiff) {
+    var shipTrailCount = shipTrail.ship.enemyShip && shipTrail.ship.health < shipTrail.ship.wave.shipHealth ? 10 : shipTrail.ship.SHIP_TRAIL_COUNT;
+    //var shipTrailCount = shipTrail.ship.SHIP_TRAIL_COUNT;
 
     for (var i = 0; i < shipTrailCount; i++) {
-        ship.shipTrail[i].y += ship.shipTrail[i].speed * timeDiff;
-        //ship.shipTrail[i].x += -1 + Math.random() * 2;
-        ship.shipTrail[i].opacity -= (1500 / ship.shipTrail[i].opacity);
-        if (ship.shipTrail[i].opacity < 10) {
-            ship.shipTrail[i].reset(ship);
+
+        if (shipTrail.opacity[i] && shipTrail.opacity[i] > 10) {
+            drawPixel(Math.round(shipTrail.xLoc[i]), Math.round(shipTrail.yLoc[i]), shipTrail.r[i],
+                    shipTrail.g[i], shipTrail.b[i], shipTrail.opacity[i]);
+
+            shipTrail.yLoc[i] += shipTrail.speed[i] * timeDiff;
+            shipTrail.xLoc[i] += shipTrail.xSpeed[i] * timeDiff;
+
+            shipTrail.opacity[i] -= 1500 / shipTrail.opacity[i];
+        } else {
+            Stars.resetTrail(shipTrail, i);
         }
-        drawPixel(Math.round(ship.shipTrail[i].x), Math.round(ship.shipTrail[i].y), ship.shipTrail[i].r,
-                    ship.shipTrail[i].g, ship.shipTrail[i].b, ship.shipTrail[i].opacity);
     }
 };
