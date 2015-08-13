@@ -2,17 +2,8 @@
 	 width:100%;
 }
 
-.canvas-container {
-    position:relative;
-    border: 1px dashed #050;
-    background-color:#000;
-    cursor:crosshair;
-    clear:both;
-}
-
 #p1-shield-div {
     position:relative;
-    margin-top:15px;
 }
 
 #p1-shield-div:after {
@@ -43,14 +34,18 @@
     100% {opacity:0;}
 }
 
+#game_canvas {
+    border: 1px dashed #0b0;
+}
+
 #p1-shield {
     height:30px;
 }
 
 body {
 	padding:20px 0;
-    background-color: #010;
-    font-family: 'Dosis', sans-serif;
+    background-color: #000;
+    font-family: "Courier";
     font-size:20px;
 	color: #0B0;
 }
@@ -69,28 +64,10 @@ body {
     height:200px;
     font-size:32px;
     text-align:center;
-    padding:0 15px;
-}
-#message-overlay-small {
-    position:absolute;
-    left:0;
-    right:0;
-    top:50px;
-    bottom:0;
-    height:200px;
-    font-size:20px;
-    text-align:center;
-    padding:0 15px;
 }
 
 #p1-upgrades button > span {
     font-weight:bold;
-    float:left;
-}
-#p1-upgrades button > span.price {
-    float:right;
-    min-width:30px;
-    min-height:5px;
 }
 
 #level-select {
@@ -106,7 +83,6 @@ body {
     display: inline-block;
     padding-top:10px;
 	cursor:pointer;
-    background-color: #000700;
 }
 
 #level-select > div.current {
@@ -114,23 +90,18 @@ body {
     font-weight: bold;
 }
 
-#p1-stats {
-    margin: 15px 0;
+#stats {
+    margin-top: 15px;
 }
 
 button,select {
     margin: 5px 0;
     padding: 8px;
     color: #0B0;
-    background-color: #000700;
+    background-color: #000;
     border: 2px outset #0b0;
     width:100%;
     text-align:center;
-}
-
-button.disabled {
-	color:#050;
-	border-color:#070;
 }
 
 button:active {

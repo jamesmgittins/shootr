@@ -83,7 +83,7 @@ ShootrUI.updateUI = function () {
     // run every 200 ms
     setTimeout(ShootrUI.updateUI, 200);
 
-    stats.innerHTML = fps.toFixed() + " fps<br>Credits: " + formatMoney(gameModel.p1.credits) +
+    stats.innerHTML = fps + " fps<br>Credits: " + formatMoney(gameModel.p1.credits) +
 		"<br>Enemies killed: " + enemiesKilled + "/" + enemiesToKill;
 
 	$("#p1-upgrades button").each(function(){
@@ -99,12 +99,17 @@ ShootrUI.updateGamepadSelect = function () {
     if (typeof navigator.getGamepads !== 'undefined') {
 
         var gamePadOptions = "<option value='-1'>Select Gamepad</option>";
+        var foundAGamePad = false;
 
         for (var i = 0; i < navigator.getGamepads().length; i++) {
             if (typeof navigator.getGamepads()[i] !== 'undefined') {
                 gamePadOptions += "<option value=" + i + (i == player1Gamepad ? " selected " : "") + ">" + navigator.getGamepads()[i].id + "</option>";
+                foundAGamePad = true;
             }
         }
+
+        if (!foundAGamePad)
+            gamePadOptions = "<option value='-1'>No Gamepads Connected</option>"
 
         document.getElementById("gamepad-sel").innerHTML = gamePadOptions;
     } else {

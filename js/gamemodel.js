@@ -85,7 +85,12 @@ function buyUpgrade(id) {
 }
 
 function upgradePrice(upgrade) {
-    return upgrade.basePrice * Math.pow(upgrade.priceMult, upgrade.qty);
+    var qty = 0;
+    for (var i = 0; i < upgrades.length; i++) {
+        qty += upgrades[i].qty;
+    }
+    //return upgrade.basePrice * Math.pow(upgrade.priceMult, upgrade.qty);
+    return upgrade.basePrice * Math.pow(1.1, qty);
 }
 
 function resetSaveGame() {
@@ -102,7 +107,7 @@ function addCredits (value) {
 var upgrades = [
 	{
 		desc:"+5% Fire Rate",
-		basePrice: 600,
+		basePrice: 50,
         baseVal: 1000,
 		priceMult: 1.35,
 		effectMultiplier: 0.95,
@@ -122,7 +127,7 @@ var upgrades = [
 	},
     {
         desc: "+5% Shot Speed",
-        basePrice: 800,
+        basePrice: 50,
         baseVal: 150,
         priceMult: 1.5,
         effectMultiplier: 1.05,
@@ -132,7 +137,7 @@ var upgrades = [
     },
     {
         desc: "+25% Shield Capacity",
-        basePrice: 400,
+        basePrice: 30,
         baseVal: 10,
         priceMult: 1.25,
         effectMultiplier: 1.26,
@@ -142,7 +147,7 @@ var upgrades = [
     },
     {
         desc: "+5% Ship Speed",
-        basePrice: 200,
+        basePrice: 35,
         baseVal: 100,
         priceMult: 1.75,
         effectMultiplier: 1.05,
@@ -152,7 +157,7 @@ var upgrades = [
     },
     {
         desc: "+30% Shield Regen",
-        basePrice: 1000,
+        basePrice: 50,
         baseVal: 2,
         priceMult: 1.35,
         effectMultiplier: 1.3,
@@ -162,7 +167,7 @@ var upgrades = [
     },
     {
         desc: "-10% Shield Regen Delay",
-        basePrice: 1200,
+        basePrice: 60,
         baseVal: 5000,
         priceMult: 3.5,
         effectMultiplier: 0.9,

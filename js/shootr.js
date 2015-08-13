@@ -96,7 +96,8 @@ function changeState(state) {
 function resetGame() {
     EnemyShips.waves = [];
 	enemiesKilled = 0;
-	enemiesToKill = enemiesToKillConstant + Math.floor(gameModel.currentLevel / 5);
+	enemiesToKill = enemiesToKillConstant + Math.floor(gameModel.currentLevel / 2);
+	EnemyShips.allDeadTimer = 0;
 	if (gameModel.currentLevel != gameModel.levelsUnlocked)
 	    enemiesToKill *= 5;
     PlayerShip.playerShip.currShield = PlayerShip.playerShip.maxShield;

@@ -18,9 +18,7 @@
                 <select id="gamepad-sel" onchange="ShootrUI.selectGamepad(this, 1);"><option>Select Gamepad</option></select>
                 <div id="p1-shield-div"><canvas id="p1-shield"></canvas></div>
 				<div id="p1-stats"></div>
-                <div id="p1-upgrades">
-
-                </div>
+                <div id="p1-upgrades"></div>
 			</div>
 			<div class="col-xs-12 col-sm-4 col-no-pad">
                 <div class="col-xs-12" id="level-select"></div>
@@ -31,7 +29,7 @@
                 </div>
 			</div>
 			<div class="col-xs-12 col-sm-4">
-                <button onclick="resetSaveGame();">Reset Game</button>
+                <button onclick="if (confirm('You will lose all progress')) { resetSaveGame(); }">Reset Game</button>
                 <div id="p2-shield-div" class="warning"><canvas id="p2-shield"></canvas></div>
                 <div id="p2-stats"></div>
             </div>

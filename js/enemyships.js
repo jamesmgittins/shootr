@@ -1,5 +1,6 @@
 ﻿var EnemyShips = {};
 
+EnemyShips.allDeadTimer = 0;
 EnemyShips.maxShipsPerWave = 16;
 EnemyShips.minShipsPerWave = 4;
 EnemyShips.shipHealth = 2;
@@ -148,7 +149,9 @@ EnemyShips.wave = function () {
     this.lastBullet = 0;
     
     this.shipArt = Ships.shipArt(size, Date.now(), true, this.colors);
-	this.shipFragments = Ships.shipFragments(this.colors);
+    this.shipFragments = Ships.shipFragments(this.colors);
+
+    this.maxSpeed = 90 + Math.random() * 20;
 	
     this.offset = Math.round(size / 2);
     this.ships = [];
@@ -164,7 +167,7 @@ EnemyShips.enemyShip = function (wave) {
     this.yLoc = canvasHeight * wave.wavePattern.yCoords[0];
     this.yTar = canvasHeight * wave.wavePattern.yCoords[1];
     this.nextCoord = 1;
-    this.maxSpeed = 100;
+    this.maxSpeed = wave.maxSpeed;
     this.health = wave.shipHealth;
     this.inPlay = 1;
     this.enemyShip = true;

@@ -186,7 +186,7 @@ Bullets.updatePlayerBullets = function (timeDiff) {
     for (var i = 0; i < Bullets.playerBullets.maxPlayerBullets; i++) {
         if (Bullets.playerBullets.inPlay[i] !== 1 && PlayerShip.playerShip.inPlay) {
 
-            if (Bullets.playerBullets.lastPlayerShot >= Bullets.playerBullets.shotFrequency) {
+            if (Bullets.playerBullets.lastPlayerShot >= Bullets.playerBullets.shotFrequency && EnemyShips.allDeadTimer == 0) {
 
                 Bullets.playerBullets.resetPlayerBullet(i);
 
