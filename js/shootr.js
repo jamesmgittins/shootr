@@ -146,7 +146,8 @@ function update() {
         Bullets.updateEnemyBullets(timeDiff);
     }
     
-    resetCanvas();
+    //resetCanvas();
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
     // render current game state
 	Stars.drawStars(timeDiff);
@@ -156,7 +157,7 @@ function update() {
 	    Stars.drawExplosions(timeDiff);
 	}
 
-	ctx.putImageData(canvasData, 0, 0);
+	//ctx.putImageData(canvasData, 0, 0);
 
 	if (currentState == states.running || currentState == states.paused) {
 	
@@ -252,32 +253,31 @@ startGame();
 window.onkeydown = function (e) {
     switch (e.keyCode) {
         case 87:
-            w = true
+            w = true;
             break;
         case 65:
-            a = true
+            a = true;
             break;
         case 83:
-            s = true
+            s = true;
             break;
         case 68:
-            d = true
+            d = true;
             break;
         case 38:
-            w = true
+            w = true;
             break;
         case 37:
-            a = true
+            a = true;
             break;
         case 40:
-            s = true
+            s = true;
             break;
         case 39:
-            d = true
+            d = true;
             break;
         default:
             return true;
-            break;
     }
     return false;
 };
@@ -285,32 +285,31 @@ window.onkeydown = function (e) {
 window.onkeyup = function (e) {
     switch (e.keyCode) {
         case 87:
-            w = false
+            w = false;
             break;
         case 65:
-            a = false
+            a = false;
             break;
         case 83:
-            s = false
+            s = false;
             break;
         case 68:
-            d = false
+            d = false;
             break;
         case 38:
-            w = false
+            w = false;
             break;
         case 37:
-            a = false
+            a = false;
             break;
         case 40:
-            s = false
+            s = false;
             break;
         case 39:
-            d = false
+            d = false;
             break;
         default:
             return true;
-            break;
     }
     return false;
 };

@@ -90,7 +90,7 @@ function upgradePrice(upgrade) {
         qty += upgrades[i].qty;
     }
     //return upgrade.basePrice * Math.pow(upgrade.priceMult, upgrade.qty);
-    return upgrade.basePrice * Math.pow(1.1, qty);
+    return upgrade.basePrice * Math.pow(1.11, qty);
 }
 
 function resetSaveGame() {

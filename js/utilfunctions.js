@@ -1,5 +1,5 @@
 // That's how you define the value of a pixel //
-function drawPixel(x, y, r, g, b, a) {
+function drawPixel2(x, y, r, g, b, a) {
     if (x < 0 || x >= canvasWidth || y < 0 || y >= canvasHeight)
         return;
 
@@ -9,6 +9,14 @@ function drawPixel(x, y, r, g, b, a) {
     canvasDataArr[index + 1] = g;
     canvasDataArr[index + 2] = b;
     canvasDataArr[index + 3] = a;
+}
+
+function drawPixel(x, y, r, g, b, a, w, h) {
+    if (x < 0 || x >= canvasWidth || y < 0 || y >= canvasHeight)
+        return;
+
+    ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (a / 255) + ')';
+    ctx.fillRect(x, y, (w ? w : 1), (h ? h : 1));
 }
 
 function distanceBetweenPoints(x1, y1, x2, y2) {
@@ -54,7 +62,7 @@ function relMouseCoords(event) {
         totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
         totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
     }
-    while (currentElement = currentElement.offsetParent)
+    while (currentElement = currentElement.offsetParent);
 
     canvasX = event.pageX - totalOffsetX;
     canvasY = event.pageY - totalOffsetY;
