@@ -2,6 +2,7 @@
 <head>
     <title>Shootr</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href='http://fonts.googleapis.com/css?family=Dosis:300' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="css/shootr.css">
@@ -15,17 +16,27 @@
 			<div class="col-xs-12 col-sm-4">
                 <button onclick="ShootrUI.pauseGame();">Pause</button>
                 <select id="gamepad-sel" onchange="ShootrUI.selectGamepad(this, 1);"><option>Select Gamepad</option></select>
-				<div id="stats"></div>
-				<button onclick="PlayerShip.newShip();">New Ship</button>
-                <button onclick="Bullets.upgradeFrequency();" id="btn-freq">Upgrade Frequency <span>₡10</span></button>
+                <div id="p1-shield-div"><canvas id="p1-shield"></canvas></div>
+				<div id="p1-stats"></div>
+                <div id="p1-upgrades"></div>
 			</div>
 			<div class="col-xs-12 col-sm-4 col-no-pad">
-				<canvas id="game_canvas"></canvas>
+                <div class="col-xs-12" id="level-select"></div>
+                <div class="canvas-container">
+                    <canvas id="game_canvas"></canvas>
+                    <div id="message-overlay">Click or press start to begin</div>
+                    <div id="message-overlay-small" style="display:none;"></div>
+                </div>
 			</div>
-			<div class="col-xs-12 col-sm-4"></div>
+			<div class="col-xs-12 col-sm-4">
+                <button onclick="if (confirm('You will lose all progress')) { resetSaveGame(); }">Reset Game</button>
+                <div id="p2-shield-div" class="warning"><canvas id="p2-shield"></canvas></div>
+                <div id="p2-stats"></div>
+            </div>
 		</div>	
 	</div>
     <script src="js/utilfunctions.js"></script>
+	<script src="js/gamemodel.js"></script>
     <script src="js/stars.js"></script>
     <script src="js/ships.js"></script>
     <script src="js/playership.js"></script>

@@ -1,5 +1,5 @@
 // That's how you define the value of a pixel //
-function drawPixel(x, y, r, g, b, a) {
+function drawPixel2(x, y, r, g, b, a) {
     if (x < 0 || x >= canvasWidth || y < 0 || y >= canvasHeight)
         return;
 
@@ -11,12 +11,16 @@ function drawPixel(x, y, r, g, b, a) {
     canvasDataArr[index + 3] = a;
 }
 
-function distanceBetweenPoints(x1, y1, x2, y2) {
-    return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+function drawPixel(x, y, r, g, b, a, w, h) {
+    if (x < 0 || x >= canvasWidth || y < 0 || y >= canvasHeight)
+        return;
+
+    ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (a / 255) + ')';
+    ctx.fillRect(x, y, (w ? w : 1), (h ? h : 1));
 }
 
-function upgradePrice(basePrice, priceMulti, qty) {
-    return basePrice * Math.pow(priceMulti, qty);
+function distanceBetweenPoints(x1, y1, x2, y2) {
+    return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 }
 
 // convert HEX color to RGB
@@ -58,7 +62,7 @@ function relMouseCoords(event) {
         totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
         totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
     }
-    while (currentElement = currentElement.offsetParent)
+    while (currentElement = currentElement.offsetParent);
 
     canvasX = event.pageX - totalOffsetX;
     canvasY = event.pageY - totalOffsetY;
@@ -101,3 +105,17 @@ HTMLCanvasElement.prototype.relMouseCoords = relMouseCoords;
             clearTimeout(id);
         };
 }());
+
+function formatMoney(input) {
+	if (!input) input = 0;
+	if (input >= 1000000000000)
+		return (input / 1000000000000).toFixed(2) + 'T';
+	if (input >= 1000000000)
+		return (input / 1000000000).toFixed(2) + 'B';
+	if (input >= 1000000)
+		return (input / 1000000).toFixed(2) + 'M';
+	if (input >= 1000)
+		return (input / 1000).toFixed(2) + 'K';
+
+	return input.toFixed(0);
+}
