@@ -4,14 +4,36 @@ PlayerShip.allPlayersDead = 0;
 PlayerShip.allDeadTimer = 0;
 PlayerShip.allDeadTime = 3000;
 
-PlayerShip.colorsRgb = [];
-for (var i = 0; i < Ships.playerColors[0].length; i++) {
-    PlayerShip.colorsRgb[i] = hexToRgb(Ships.playerColors[0][i]);
-}
-
-PlayerShip.shipFragments = Ships.shipFragments(PlayerShip.colorsRgb);
-
 PlayerShip.SHIP_SIZE = 64;
+
+PlayerShip.cursor = {
+	initialize:function(){
+		var blast = document.createElement('canvas');
+		blast.width = 31;
+		blast.height = 31;
+		var blastCtx = blast.getContext('2d');
+
+		blastCtx.lineWidth=2;
+		
+		drawline(blastCtx, "#ffffff", 15, 1, 15, 29);
+		drawline(blastCtx, "#ffffff", 1, 15, 29, 15);
+
+		PlayerShip.cursor.sprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(blast));
+		PlayerShip.cursor.sprite.anchor = {x:0.5,y:0.5};
+		uiContainer.addChild(PlayerShip.cursor.sprite);
+	},
+	update:function(timeDiff) {
+		if (aimLocX && aimLocY){
+/* 			var distance = distanceBetweenPixiPoints(PlayerShip.cursor.sprite.position,{x:aimLocX,y:aimLocY});
+			PlayerShip.cursor.sprite.rotation+=distance * timeDiff; */
+	 		PlayerShip.cursor.sprite.position.x=aimLocX;
+			PlayerShip.cursor.sprite.position.y=aimLocY;
+			PlayerShip.cursor.sprite.visible=true;
+		} else {
+			PlayerShip.cursor.sprite.visible=false;
+		}
+	}
+};
 
 PlayerShip.playerShip = {
     seed: 1,
@@ -20,20 +42,16 @@ PlayerShip.playerShip = {
     maxSpeed: 100,
     offset: PlayerShip.SHIP_SIZE / 2,
     rotation: 0,
-    SHIP_TRAIL_COUNT: Ships.shipTrailCount,
     maxShield: 10,
     currShield: 10,
     shieldRegen: 2,
     shieldDelay: 5000,
     lastDmg: 0,
-    inPlay: 1
+    inPlay: 1,
+	lastTrail:0,
+	colors:Ships.playerColors[0]
 };
 
-PlayerShip.newShip = function () {
-    PlayerShip.playerShip.seed = Date.now();
-    PlayerShip.playerShip.art = Ships.shipArt(PlayerShip.SHIP_SIZE, PlayerShip.playerShip.seed, false, Ships.playerColors[Math.floor(Math.random() * Ships.playerColors.length)]);
-    PlayerShip.playerShip.shipTrail = new Stars.shipTrail(PlayerShip.playerShip);
-};
 
 PlayerShip.updatePlayerShip = function (timeDiff) {
     if (PlayerShip.allPlayersDead === 1) {
@@ -59,10 +77,10 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
         clickLocY = 0;
     } else if (clickLocX && clickLocY && Math.sqrt(Math.pow(PlayerShip.playerShip.xLoc - clickLocX, 2) + Math.pow(PlayerShip.playerShip.yLoc - clickLocY, 2)) > 5) {
 
-        var xDiff = clickLocX - PlayerShip.playerShip.xLoc;
-        var yDiff = clickLocY - PlayerShip.playerShip.yLoc;
-
-        Ships.updateShipSpeed(PlayerShip.playerShip, xDiff, yDiff, timeDiff);
+        Ships.updateShipSpeed(PlayerShip.playerShip, 
+							  clickLocX - PlayerShip.playerShip.xLoc, 
+							  clickLocY - PlayerShip.playerShip.yLoc, 
+							  timeDiff);
     } else {
         clickLocX = 0;
         clickLocY = 0;
@@ -81,26 +99,25 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
             PlayerShip.playerShip.currShield = PlayerShip.playerShip.maxShield;
         }
     }
+    PlayerShip.playerShip.sprite.position.x = PlayerShip.playerShip.xLoc;
+    PlayerShip.playerShip.sprite.position.y = PlayerShip.playerShip.yLoc;
+    PlayerShip.playerShip.sprite.rotation = PlayerShip.playerShip.rotation;
+	Stars.shipTrails.updateShip(PlayerShip.playerShip,timeDiff);
+	if (tintOn && PlayerShip.playerShip.currShield <= PlayerShip.playerShip.maxShield / 2)
+		PlayerShip.playerShip.sprite.tint = calculateTint(PlayerShip.playerShip.currShield/PlayerShip.playerShip.maxShield);
+	else
+		PlayerShip.playerShip.sprite.tint = 0xFFFFFF;
 };
 
 PlayerShip.damagePlayerShip = function (playerShip, damage) {
     playerShip.currShield -= damage;
     playerShip.lastDmg = 0;
     if (playerShip.currShield <= 0 && playerShip.inPlay === 1) {
+        playerShip.sprite.visible=false;
         playerShip.inPlay = 0;
         PlayerShip.allPlayersDead = 1;
         PlayerShip.allDeadTimer = 0;
-        PlayerShip.generateExplosion(playerShip);
-    }
-};
-
-PlayerShip.drawPlayerShip = function (ctx, timeDiff) {
-    if (PlayerShip.playerShip.inPlay === 1) {
-        ctx.save();
-        ctx.translate(PlayerShip.playerShip.xLoc, PlayerShip.playerShip.yLoc);
-        ctx.rotate(PlayerShip.playerShip.rotation);
-        ctx.drawImage(PlayerShip.playerShip.art, -PlayerShip.playerShip.offset, -PlayerShip.playerShip.offset);
-        ctx.restore();
+        Ships.generateExplosion(playerShip);
     }
 };
 
@@ -162,42 +179,17 @@ PlayerShip.drawShield = function (ctx) {
     }
 };
 
-PlayerShip.generateExplosion = function (ship) {
-    for (var i = 0; i < EnemyShips.explosionBits.bitsPerExplosion; i++) {
-        EnemyShips.explosionBits.newExplosionBit(ship, PlayerShip.colorsRgb);
-    }
+PlayerShip.initialize = function () {
+    PlayerShip.playerShip.art = Ships.shipArt(PlayerShip.SHIP_SIZE, PlayerShip.playerShip.seed, false, Ships.playerColors[Math.floor(Math.random() * Ships.playerColors.length)]);
+    PlayerShip.playerShip.xLoc = canvasWidth / 2;
+    PlayerShip.playerShip.yLoc = canvasHeight - (canvasHeight / 6);
 
-    var fragmentCount = 15;
+    PlayerShip.playerShip.sprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(PlayerShip.playerShip.art));
 
-    for (var i = 0; i < fragmentCount; i++) {
+    PlayerShip.playerShip.sprite.anchor = { x: 0.5, y: 0.5 };
 
-        if (EnemyShips.currentExplosionFragment >= EnemyShips.maxExplosionFragments)
-            EnemyShips.currentExplosionFragment = 0;
+    PlayerShip.playerShip.sprite.position.x = PlayerShip.playerShip.xLoc;
+    PlayerShip.playerShip.sprite.position.y = PlayerShip.playerShip.yLoc;
 
-        EnemyShips.fragments[EnemyShips.currentExplosionFragment] = {
-            opacity: 1,
-            xLoc: ship.xLoc - 5 + Math.random() * 10,
-            yLoc: ship.yLoc - 5 + Math.random() * 10,
-            bitmap: PlayerShip.shipFragments[Math.floor(Math.random() * PlayerShip.shipFragments.length)],
-            xSpeed: (ship.xSpeed / 2) - 50 + Math.random() * 100,
-            ySpeed: (ship.ySpeed / 2) - 50 + Math.random() * 100,
-            rotation: Math.random() * 3.14,
-            rotationSpeed: -1 + Math.random() * 2
-        };
-        EnemyShips.fragments[EnemyShips.currentExplosionFragment].width =
-			EnemyShips.fragments[EnemyShips.currentExplosionFragment].bitmap.width;
-
-        EnemyShips.currentExplosionFragment++;
-    }
-
-    if (Ships.currentBlast > Ships.maxBlasts)
-        Ships.currentBlast = 0;
-
-    Ships.blasts[Ships.currentBlast] = {
-        opacity: 1,
-        xLoc: ship.xLoc - 32,
-        yLoc: ship.yLoc - 32
-    };
-
-    Ships.currentBlast++;
+    playerShipContainer.addChild(PlayerShip.playerShip.sprite);
 };

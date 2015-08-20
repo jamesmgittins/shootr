@@ -73,6 +73,8 @@ ShootrUI.renderLevelSelect = function () {
 
     $("#level-select > div").on("click", function (event) {
         changeLevel(event.currentTarget.innerHTML);
+        event.stopPropagation();
+        event.preventDefault();
     });
 };
 
@@ -84,6 +86,7 @@ ShootrUI.updateUI = function () {
     setTimeout(ShootrUI.updateUI, 200);
 
     stats.innerHTML = fps + " fps<br>Credits: " + formatMoney(gameModel.p1.credits) +
+		"<br>Total Credits Earned: " + formatMoney(gameModel.p1.totalCredits) +
 		"<br>Enemies killed: " + enemiesKilled + "/" + enemiesToKill;
 
 	$("#p1-upgrades button").each(function(){
@@ -109,7 +112,7 @@ ShootrUI.updateGamepadSelect = function () {
         }
 
         if (!foundAGamePad)
-            gamePadOptions = "<option value='-1'>No Gamepads Connected</option>"
+            gamePadOptions = "<option value='-1'>No Gamepads Connected</option>";
 
         document.getElementById("gamepad-sel").innerHTML = gamePadOptions;
     } else {
