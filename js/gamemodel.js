@@ -75,6 +75,8 @@ function buyUpgrade(id) {
                     gameModel.p1.upgrades.push({id:upgrades[j].id,qty:1});
                 }
 
+                GameText.bigText.newBigText(upgrades[j].desc);
+
                 upgrades[j].qty++;
                 applyUpgrade(upgrades[j]);
                 save();

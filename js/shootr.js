@@ -35,8 +35,14 @@ var clickLocX, clickLocY;
 var aimLocX, aimLocY;
 
 var lastUpdate = 0;
+
+var playerOneSelectedLevel = -1;
+var playerOneSelectedUpgrade = -1;
 var playerOneAxes = [];
+var playerOneButtonsPressed = [];
+var playerTwoSelectedUpgrade = -1;
 var playerTwoAxes = [];
+var playerTwoButtonsPressed = [];
 
 function changeLevel(level) {
     gameModel.currentLevel = parseInt(level);
@@ -73,15 +79,16 @@ function changeState(state) {
 
 		if (state == states.levelComplete) {
 		    playerShipContainer.visible = false;
+			var levelCompleteBonus = gameModel.currentLevel * 20 * Math.pow(1.2, gameModel.currentLevel - 1);
 			if (gameModel.currentLevel == gameModel.levelsUnlocked) {
 				gameModel.levelsUnlocked++;
-			    $("#message-overlay").html("Level Complete!<br>Credit bonus: " + formatMoney(gameModel.currentLevel * 100) + "<br>You've unlocked level " + gameModel.levelsUnlocked + ". Press start or click to play");
-			    addCredits((gameModel.currentLevel * 100));
+			    $("#message-overlay").html("Level Complete!<br>Credit bonus: " + formatMoney(levelCompleteBonus) + "<br>You've unlocked level " + gameModel.levelsUnlocked + ". Press start or click to play");
+			    addCredits(levelCompleteBonus);
 			    changeLevel(gameModel.levelsUnlocked);
 			    ShootrUI.updateUpgrades();
 			} else {
-			    $("#message-overlay").html("Level Complete<br>Credit bonus: " + formatMoney(gameModel.currentLevel * 100) + "<br>Press start or click to play again");
-			    addCredits((gameModel.currentLevel * 100));
+			    $("#message-overlay").html("Level Complete<br>Credit bonus: " + formatMoney(levelCompleteBonus) + "<br>Press start or click to play again");
+			    addCredits(levelCompleteBonus);
 			}
 			$("#message-overlay").fadeIn(600);
 			resetGame();
@@ -147,10 +154,8 @@ function update() {
 		tintOn = !tintOn;
 		tintFlashTime = 0;
 	}
-    // Update gamepad state
-    if (player1Gamepad > -1 && typeof navigator.getGamepads !== 'undefined' && navigator.getGamepads()[player1Gamepad]) {
-        playerOneAxes = navigator.getGamepads()[player1Gamepad].axes;
-    }
+
+	updateGamepads();
 
 	Stars.stars.update(timeDiff);
 	Stars.shipTrails.update(timeDiff);
@@ -163,6 +168,7 @@ function update() {
 		Bullets.updatePlayerBullets(timeDiff);
 		EnemyShips.update(timeDiff);
 		Bullets.updateEnemyBullets(timeDiff);
+		PlayerShip.controllerPointer.update();
     }
 	
 	Bullets.blasts.updateBlasts(timeDiff);
@@ -170,7 +176,8 @@ function update() {
 	Bullets.explosionBits.update(timeDiff);
 	Ships.explosionBits.update(timeDiff);
 	Ships.fragments.update(timeDiff);
-
+	GameText.credits.update(timeDiff);
+	GameText.bigText.update(timeDiff);
 	renderer.render(stage);
     PlayerShip.drawShield(shield1Ctx);
 
@@ -245,7 +252,8 @@ function startGame() {
 	Stars.stars.initialize();
 	Stars.shipTrails.initialize();
     PlayerShip.initialize();
-	PlayerShip.cursor.initialize();
+    PlayerShip.cursor.initialize();
+    PlayerShip.controllerPointer.initialize();
     Bullets.playerBullets.initialize();
 	Bullets.enemyBullets.initialize();
 	Bullets.blasts.initialize();
@@ -253,6 +261,9 @@ function startGame() {
 	Bullets.explosionBits.initialize();
 	Ships.fragments.initialize();
 	Ships.explosionBits.initialize();
+	
+	GameText.credits.initialize();
+	GameText.bigText.initialize();
 	
 	resetGame();
 
@@ -274,8 +285,6 @@ function clickCanvas(data) {
         changeState(states.running);
     }
 }
-
-startGame();
 
 window.onkeydown = function (e) {
     switch (e.keyCode) {
@@ -339,3 +348,108 @@ window.onkeyup = function (e) {
     }
     return false;
 };
+
+function updateGamepads() {
+    // Update gamepad state
+    if (player1Gamepad > -1 && typeof navigator.getGamepads !== 'undefined' && navigator.getGamepads()[player1Gamepad]) {
+
+        playerOneAxes = navigator.getGamepads()[player1Gamepad].axes;
+        playerOneButtons = navigator.getGamepads()[player1Gamepad].buttons;
+
+        for (var i = 0; i < playerOneButtons.length; i++) {
+
+            if (playerOneButtons[i].pressed) {
+
+                if (!playerOneButtonsPressed[i]) {
+
+                    switch (i) {
+                        // start button
+                        case 9:
+                            if (currentState == states.running) {
+                                changeState(states.paused);
+                            } else {
+                                changeState(states.running);
+                            }
+                            break;
+                        // A button
+                        case 0:
+                            if (playerOneSelectedUpgrade > -1) {
+                                setTimeout(function () {
+                                    $("#p1-upgrades button.selected").trigger('click');
+                                });
+                                
+                            } else if (playerOneSelectedLevel > -1) {
+                                setTimeout(function () {
+                                    $("#level-select div.selected").trigger('click');
+                                });
+                            }
+                            break;
+                        // up
+                        case 12:
+                            playerOneSelectedLevel = -1;
+                            if (playerOneSelectedUpgrade == -1) {
+                                playerOneSelectedUpgrade = 0;
+                            } else {
+                                playerOneSelectedUpgrade--;
+                                if (playerOneSelectedUpgrade < 0)
+                                    playerOneSelectedUpgrade = $('#p1-upgrades button').length - 1;
+                            }
+                            setTimeout(function () {
+                                ShootrUI.updateUpgrades();
+                                ShootrUI.renderLevelSelect();
+                            });
+                            break;
+                        // down
+                        case 13:
+                            playerOneSelectedLevel = -1;
+                            if (playerOneSelectedUpgrade == -1) {
+                                playerOneSelectedUpgrade = 0;
+                            } else {
+                                playerOneSelectedUpgrade++;
+                                if (playerOneSelectedUpgrade >= $('#p1-upgrades button').length)
+                                    playerOneSelectedUpgrade = 0;
+                            }
+                            setTimeout(function () {
+                                ShootrUI.updateUpgrades();
+                                ShootrUI.renderLevelSelect();
+                            });
+                            break;
+                        // left
+                        case 14:
+                            playerOneSelectedUpgrade = -1;
+                            if (playerOneSelectedLevel == -1) {
+                                playerOneSelectedLevel = gameModel.currentLevel;
+                            } else {
+                                playerOneSelectedLevel--;
+                                if (playerOneSelectedLevel < 1)
+                                    playerOneSelectedLevel = gameModel.levelsUnlocked;
+                            }
+                            setTimeout(function () {
+                                ShootrUI.updateUpgrades();
+                                ShootrUI.renderLevelSelect();
+                            });
+                            break;
+                        // right
+                        case 15:
+                            playerOneSelectedUpgrade = -1;
+                            if (playerOneSelectedLevel == -1) {
+                                playerOneSelectedLevel = gameModel.currentLevel;
+                            } else {
+                                playerOneSelectedLevel++;
+                                if (playerOneSelectedLevel > gameModel.levelsUnlocked)
+                                    playerOneSelectedLevel = 1;
+                            }
+                            setTimeout(function () {
+                                ShootrUI.updateUpgrades();
+                                ShootrUI.renderLevelSelect();
+                            });
+                            break;
+                    }
+                }
+            }
+            playerOneButtonsPressed[i] = playerOneButtons[i].pressed;
+        }
+    }
+}
+
+startGame();

@@ -31,7 +31,7 @@ Ships.blasts = {
         	Ships.blasts.currentBlast = 0;
 
 		Ships.blasts.sprite[Ships.blasts.currentBlast].visible = true;
-		Ships.blasts.sprite[Ships.blasts.currentBlast].scale = {x:3,y:3};
+		Ships.blasts.sprite[Ships.blasts.currentBlast].scale = {x:2,y:2};
 		Ships.blasts.sprite[Ships.blasts.currentBlast].position.x = x;
 		Ships.blasts.sprite[Ships.blasts.currentBlast].position.y = y;
 
@@ -50,8 +50,8 @@ Ships.blasts = {
 	update : function(timeDiff) {
 	    for (var i=0; i< Ships.blasts.maxBlasts; i++) {
 	        if (Ships.blasts.sprite[i].visible) {
-	            Ships.blasts.sprite[i].scale.y -= (16 * timeDiff);
-	            Ships.blasts.sprite[i].scale.x -= (16 * timeDiff);
+	            Ships.blasts.sprite[i].scale.y -= (10 * timeDiff);
+	            Ships.blasts.sprite[i].scale.x -= (10 * timeDiff);
 	            if (Ships.blasts.sprite[i].scale.x <= 0)
 	                Ships.blasts.sprite[i].visible = false;
 	        }

@@ -6,6 +6,35 @@ PlayerShip.allDeadTime = 3000;
 
 PlayerShip.SHIP_SIZE = 64;
 
+PlayerShip.controllerPointer = {
+    initialize: function () {
+        var blast = document.createElement('canvas');
+        blast.width = 10;
+        blast.height = 16;
+        var blastCtx = blast.getContext('2d');
+
+        blastCtx.lineWidth = 2;
+
+        drawline(blastCtx, "#0b0", 1, 1, 9, 8);
+        drawline(blastCtx, "#0b0", 1, 15, 9, 8);
+
+        PlayerShip.controllerPointer.sprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(blast));
+        PlayerShip.controllerPointer.sprite.anchor = { x: 0.5, y: 0.5 };
+        uiContainer.addChild(PlayerShip.controllerPointer.sprite);
+    },
+    update: function (timeDiff) {
+        if (playerOneAxes[2] > 0.25 || playerOneAxes[2] < -0.25 || playerOneAxes[3] > 0.25 || playerOneAxes[3] < -0.25) {
+
+            PlayerShip.controllerPointer.sprite.position.x = PlayerShip.playerShip.xLoc + playerOneAxes[2] * 70;
+            PlayerShip.controllerPointer.sprite.position.y = PlayerShip.playerShip.yLoc - 16 + playerOneAxes[3] * 70;
+            PlayerShip.controllerPointer.sprite.rotation = Math.atan2(playerOneAxes[3], playerOneAxes[2]);
+            PlayerShip.controllerPointer.sprite.visible = true;
+        } else {
+            PlayerShip.controllerPointer.sprite.visible = false;
+        }
+    }
+};
+
 PlayerShip.cursor = {
 	initialize:function(){
 		var blast = document.createElement('canvas');
@@ -15,8 +44,8 @@ PlayerShip.cursor = {
 
 		blastCtx.lineWidth=2;
 		
-		drawline(blastCtx, "#ffffff", 15, 1, 15, 29);
-		drawline(blastCtx, "#ffffff", 1, 15, 29, 15);
+		drawline(blastCtx, "#0b0", 15, 1, 15, 29);
+		drawline(blastCtx, "#0b0", 1, 15, 29, 15);
 
 		PlayerShip.cursor.sprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(blast));
 		PlayerShip.cursor.sprite.anchor = {x:0.5,y:0.5};
@@ -24,8 +53,6 @@ PlayerShip.cursor = {
 	},
 	update:function(timeDiff) {
 		if (aimLocX && aimLocY){
-/* 			var distance = distanceBetweenPixiPoints(PlayerShip.cursor.sprite.position,{x:aimLocX,y:aimLocY});
-			PlayerShip.cursor.sprite.rotation+=distance * timeDiff; */
 	 		PlayerShip.cursor.sprite.position.x=aimLocX;
 			PlayerShip.cursor.sprite.position.y=aimLocY;
 			PlayerShip.cursor.sprite.visible=true;

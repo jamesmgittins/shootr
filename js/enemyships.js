@@ -112,14 +112,12 @@ EnemyShips.destroy = function (ship) {
 	if (ship.wave.shipsDestroyed >= ship.wave.shipsInWave) {
 		ship.wave.shipContainer.visible = false;
 	    addCredits(ship.wave.shipHealth * ship.wave.shipsInWave * 0.5);
-	    setTimeout(function () {
-	        $("#message-overlay-small").html("Wave destroyed<br>" + formatMoney(ship.wave.shipHealth * ship.wave.shipsInWave * 0.5) + " bonus credits!")
-                .show().delay(1500).fadeOut(1000);
-	    });
+		GameText.credits.newCreditText(canvasWidth/2,canvasHeight/3,"Wave destroyed\nBonus Credits: " + formatMoney(ship.wave.shipHealth * ship.wave.shipsInWave * 0.5));
 	}
 	enemiesKilled++;
 	Ships.generateExplosion(ship);
 	addCredits(ship.wave.shipHealth);
+	GameText.credits.newCreditText(ship.xLoc,ship.yLoc - 15,"+" + formatMoney(ship.wave.shipHealth));
 
 	if (enemiesKilled >= enemiesToKill) {
 	    EnemyShips.allDeadTimer = 0;
@@ -154,6 +152,54 @@ EnemyShips.checkForBulletCollisions = function (ship){
     }
 };
 
+EnemyShips.updateShip = function (eShip, timeDiff) {
+	if (eShip.inPlay) {
+		if (enemiesKilled >= enemiesToKill) {
+			eShip.inPlay = 0;
+			if (eShip.xLoc > 0 && eShip.yLoc > 0)
+				Ships.generateExplosion(eShip);
+		}
+		if (Math.sqrt(Math.pow(eShip.xLoc - eShip.xTar, 2) +
+						Math.pow(eShip.yLoc - eShip.yTar, 2)) > 5) {
+
+			var xDiff = eShip.xTar - eShip.xLoc;
+			var yDiff = eShip.yTar - eShip.yLoc;
+
+			Ships.updateShipSpeed(eShip, xDiff, yDiff, timeDiff);
+			Ships.updateRotation(eShip, timeDiff);
+
+			eShip.sprite.position.x = eShip.xLoc;
+			eShip.sprite.position.y = eShip.yLoc;
+			eShip.sprite.rotation = -eShip.rotation;
+
+		} else {
+			eShip.nextCoord++;
+
+			if (eShip.nextCoord >= eShip.wave.wavePattern.xCoords.length) {
+				eShip.inPlay = 0;
+				eShip.sprite.visible = false;
+				eShip.wave.shipsExited++;	
+			} else {
+				eShip.xTar = canvasWidth * eShip.wave.wavePattern.xCoords[eShip.nextCoord];
+				eShip.yTar = canvasHeight * eShip.wave.wavePattern.yCoords[eShip.nextCoord];
+			}
+		}
+		EnemyShips.checkForBulletCollisions(eShip);
+		EnemyShips.checkForPlayerCollision(eShip);
+		Stars.shipTrails.updateShip(eShip,timeDiff);
+
+		if (tintOn)
+			eShip.sprite.tint = calculateTint(eShip.health / eShip.wave.shipHealth);
+		else
+			eShip.sprite.tint = 0xFFFFFF;
+
+		if (eShip.inPlay && eShip.wave.lastBullet >= EnemyShips.waveBulletFrequency && Math.random() > 0.9) {
+			Bullets.enemyBullets.newEnemyBullet(eShip);
+			eShip.wave.lastBullet = 0;
+		}
+	}
+};
+
 EnemyShips.update = function (timeDiff) {
 
     EnemyShips.lastWave += timeDiff * 1000;
@@ -182,52 +228,7 @@ EnemyShips.update = function (timeDiff) {
                         EnemyShips.waves[i].lastShipSpawned = 0;
                     }
                 } else {
-                    if (EnemyShips.waves[i].ships[j].inPlay) {
-                        var eShip = EnemyShips.waves[i].ships[j];
-                        if (enemiesKilled >= enemiesToKill) {
-                            eShip.inPlay = 0;
-                            if (eShip.xLoc > 0 && eShip.yLoc > 0)
-                                Ships.generateExplosion(eShip);
-                        }
-                        if (Math.sqrt(Math.pow(eShip.xLoc - eShip.xTar, 2) +
-                                        Math.pow(eShip.yLoc - eShip.yTar, 2)) > 5) {
-
-                            var xDiff = eShip.xTar - eShip.xLoc;
-                            var yDiff = eShip.yTar - eShip.yLoc;
-
-                            Ships.updateShipSpeed(eShip, xDiff, yDiff, timeDiff);
-                            Ships.updateRotation(eShip, timeDiff);
-
-                            eShip.sprite.position.x = eShip.xLoc;
-                            eShip.sprite.position.y = eShip.yLoc;
-                            eShip.sprite.rotation = -eShip.rotation;
-							
-                        } else {
-                            eShip.nextCoord++;
-                            
-                            if (eShip.nextCoord >= EnemyShips.waves[i].wavePattern.xCoords.length) {
-                                eShip.inPlay = 0;
-                                eShip.sprite.visible = false;
-								EnemyShips.waves[i].shipsExited++;	
-							} else {
-                                eShip.xTar = canvasWidth * EnemyShips.waves[i].wavePattern.xCoords[eShip.nextCoord];
-                                eShip.yTar = canvasHeight * EnemyShips.waves[i].wavePattern.yCoords[eShip.nextCoord];
-                            }
-                        }
-                        EnemyShips.checkForBulletCollisions(eShip);
-                        EnemyShips.checkForPlayerCollision(eShip);
-						Stars.shipTrails.updateShip(eShip,timeDiff);
-						
-						if (tintOn)
-							eShip.sprite.tint = calculateTint(eShip.health / eShip.wave.shipHealth);
-						else
-							eShip.sprite.tint = 0xFFFFFF;
-
-                        if (eShip.inPlay && EnemyShips.waves[i].lastBullet >= EnemyShips.waveBulletFrequency && Math.random() > 0.9) {
-                            Bullets.enemyBullets.newEnemyBullet(eShip);
-                            EnemyShips.waves[i].lastBullet = 0;
-                        }
-                    }
+					EnemyShips.updateShip(EnemyShips.waves[i].ships[j],timeDiff);
                 }
             }
 			if (EnemyShips.waves[i].shipsExited + EnemyShips.waves[i].shipsDestroyed >= EnemyShips.waves[i].shipsInWave) {
