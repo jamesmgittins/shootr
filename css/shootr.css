@@ -4,10 +4,10 @@
 
 .canvas-container {
     position:relative;
-    border: 1px dashed #050;
-    background-color:#000;
-    cursor:crosshair;
     clear:both;
+    border: 1px dashed #050;
+    padding:1px;
+	cursor:none;
 }
 
 #p1-shield-div {

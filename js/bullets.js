@@ -1,7 +1,7 @@
 ﻿var Bullets = {};
 
 Bullets.blasts = {
-    art: (function () {
+    texture: (function () {
         var blast = document.createElement('canvas');
         blast.width = 32;
         blast.height = 32;
@@ -16,19 +16,46 @@ Bullets.blasts = {
         blastCtx.fillStyle = radgrad;
         blastCtx.fillRect(0, 0, 32, 32);
 
-        return blast;
+        return PIXI.Texture.fromCanvas(blast);
     }()),
     maxBlasts: 20,
     currentBlast: 0,
-    xLoc: [],
-    yLoc: [],
-    opacity:[]
+	sprite:[],
+	newBlast : function(x, y) {
+		if (Bullets.blasts.currentBlast >= Bullets.blasts.maxBlasts)
+        	Bullets.blasts.currentBlast = 0;
+
+		Bullets.blasts.sprite[Bullets.blasts.currentBlast].visible = true;
+		Bullets.blasts.sprite[Bullets.blasts.currentBlast].scale = {x:1,y:1};
+		Bullets.blasts.sprite[Bullets.blasts.currentBlast].position.x = x;
+		Bullets.blasts.sprite[Bullets.blasts.currentBlast].position.y = y;
+
+		Bullets.blasts.currentBlast++;
+	},
+	initialize:function() {
+		Bullets.blasts.sprites = new PIXI.Container();
+		for (var i=0; i<Bullets.blasts.maxBlasts;i++){
+			Bullets.blasts.sprite[i] = new PIXI.Sprite(Bullets.blasts.texture);
+			Bullets.blasts.sprite[i].visible = false;
+			Bullets.blasts.sprite[i].anchor = { x: 0.5, y: 0.5 };
+			Bullets.blasts.sprites.addChild(Bullets.blasts.sprite[i]);
+		}
+		explosionContainer.addChild(Bullets.blasts.sprites);
+	},
+	updateBlasts : function(timeDiff) {
+	    for (var i=0; i< Bullets.blasts.maxBlasts; i++) {
+	        if (Bullets.blasts.sprite[i].visible) {
+	            Bullets.blasts.sprite[i].scale.y -= (5 * timeDiff);
+	            Bullets.blasts.sprite[i].scale.x = Bullets.blasts.sprite[i].scale.y;
+	            if (Bullets.blasts.sprite[i].scale.x <= 0)
+	                Bullets.blasts.sprite[i].visible = false;
+	        }
+	    }	
+	}
 };
 
-
-
 Bullets.enemyBullets = {
-    art: (function () {
+    texture: (function () {
         var blast = document.createElement('canvas');
         blast.width = 8;
         blast.height = 8;
@@ -43,24 +70,24 @@ Bullets.enemyBullets = {
         blastCtx.fillStyle = radgrad;
         blastCtx.fillRect(0, 0, 8, 8);
 
-        return blast;
+        return PIXI.Texture.fromCanvas(blast);
     })(),
-    offset: -4,
-    maxEnemyBullets : 10,
+    maxEnemyBullets : 20,
     currentEnemyBullet : 0,
     enemyShotSpeed : 100,
     enemyShotStrength: 1,
-
     xLoc: [],
     yLoc: [],
     ySpeed: [],
     xSpeed: [],
     inPlay: [],
-
-    r: 256,
-    g: 256,
-    b: 256,
-
+	sprite: [],
+	resetAll: function (){
+		for (var i=0; i<Bullets.enemyBullets.maxEnemyBullets; i++) {
+			Bullets.enemyBullets.inPlay[i]=0;
+			Bullets.enemyBullets.sprite[i].visible=false;
+		}
+	},
     newEnemyBullet : function (ship) {
         if (Bullets.enemyBullets.currentEnemyBullet >= Bullets.enemyBullets.maxEnemyBullets) {
             Bullets.enemyBullets.currentEnemyBullet = 0;
@@ -78,12 +105,26 @@ Bullets.enemyBullets = {
 
         Bullets.enemyBullets.inPlay[Bullets.enemyBullets.currentEnemyBullet] = 1;
 
+		Bullets.enemyBullets.sprite[Bullets.enemyBullets.currentEnemyBullet].visible = true;
+        Bullets.enemyBullets.sprite[Bullets.enemyBullets.currentEnemyBullet].position.x = ship.xLoc;
+        Bullets.enemyBullets.sprite[Bullets.enemyBullets.currentEnemyBullet].position.y = ship.yLoc - 16;
+		
         Bullets.enemyBullets.currentEnemyBullet++;
+    },
+    initialize : function () {
+        Bullets.enemyBullets.sprites = new PIXI.Container();
+        for (var i = 0; i < Bullets.enemyBullets.maxEnemyBullets; i++) {
+            Bullets.enemyBullets.sprite[i] = new PIXI.Sprite(Bullets.enemyBullets.texture);
+            Bullets.enemyBullets.sprite[i].visible = false;
+            Bullets.enemyBullets.sprite[i].anchor = { x: 0.5, y: 0.5 };
+            Bullets.enemyBullets.sprites.addChild(Bullets.enemyBullets.sprite[i]);
+        }
+        bulletContainer.addChild(Bullets.enemyBullets.sprites);
     }
 };
 
 Bullets.playerBullets = {
-    art: (function () {
+    texture: (function () {
         var blast = document.createElement('canvas');
         blast.width = 8;
         blast.height = 8;
@@ -98,53 +139,89 @@ Bullets.playerBullets = {
         blastCtx.fillStyle = radgrad;
         blastCtx.fillRect(0, 0, 8, 8);
 
-        return blast;
+        return PIXI.Texture.fromCanvas(blast);
     })(),
-    offset : -4,
 	maxPlayerBullets : 100,
 	shotFrequency : 1000,
 	lastPlayerShot : 0,
 	shotSpeed : 150,
 	strength : 1,
-	
-	xLoc : [],
-    yLoc : [],
+	xLoc: [],
+    yLoc: [],
     ySpeed : [],
     xSpeed : [],
-	inPlay : [],
-    
-	r : 255,
-    g : 255,
-    b : 255,
-	
-	resetPlayerBullet : function (i) {
+    inPlay: [],
+    sprite: [],
+	resetAll: function (){
+		for (var i=0; i<Bullets.playerBullets.maxPlayerBullets; i++) {
+			Bullets.playerBullets.inPlay[i]=0;
+			Bullets.playerBullets.sprite[i].visible=false;
+		}
+	},
+    resetPlayerBullet: function (i) {          
+
         Bullets.playerBullets.xLoc[i] = PlayerShip.playerShip.xLoc;
         Bullets.playerBullets.yLoc[i] = PlayerShip.playerShip.yLoc - 16;
         Bullets.playerBullets.ySpeed[i] = Bullets.playerBullets.shotSpeed;
         Bullets.playerBullets.xSpeed[i] = 0;
         Bullets.playerBullets.inPlay[i] = 1;
-	}
+        Bullets.playerBullets.sprite[i].visible = true;
+        Bullets.playerBullets.sprite[i].position.x = PlayerShip.playerShip.xLoc;
+        Bullets.playerBullets.sprite[i].position.y = PlayerShip.playerShip.yLoc - 16;
+        
+    },
+    initialize : function () {
+        Bullets.playerBullets.sprites = new PIXI.Container();
+        for (var i = 0; i < Bullets.playerBullets.maxPlayerBullets; i++) {
+            Bullets.playerBullets.sprite[i] = new PIXI.Sprite(Bullets.playerBullets.texture);
+            Bullets.playerBullets.sprite[i].visible = false;
+            Bullets.playerBullets.sprite[i].anchor = { x: 0.5, y: 0.5 };
+            Bullets.playerBullets.sprites.addChild(Bullets.playerBullets.sprite[i]);
+        }
+        bulletContainer.addChild(Bullets.playerBullets.sprites);
+    }
 };
 
 Bullets.explosionBits = {
     bitsPerExplosion: 16,
-    maxExplosionBits: 256,
+    maxExplosionBits: 64,
     currentExplosionBit: 0,
-    opacity: [],
-    xLoc: [],
-    yLoc: [],
-    color: { r: Bullets.playerBullets.r, g: Bullets.playerBullets.g, b: Bullets.playerBullets.b },
+    sprite:[],
     xSpeed: [],
     ySpeed: [],
-
+    update:function(timeDiff){
+        for (var i = 0; i < Bullets.explosionBits.maxExplosionBits; i++) {
+            if (Bullets.explosionBits.sprite[i].visible) {
+                Bullets.explosionBits.sprite[i].alpha -= 0.5 * timeDiff;
+                if (Bullets.explosionBits.sprite[i].alpha <= 0) {
+                    Bullets.explosionBits.sprite[i].visible = false;
+                } else {
+                    Bullets.explosionBits.sprite[i].position.x += Bullets.explosionBits.xSpeed[i] * timeDiff;
+                    Bullets.explosionBits.sprite[i].position.y += Bullets.explosionBits.ySpeed[i] * timeDiff;
+                }
+            }
+        }
+    },
+    initialize:function(){
+        Bullets.explosionBits.sprites = new PIXI.Container();
+        for (var i = 0; i < Bullets.explosionBits.maxExplosionBits; i++) {
+            Bullets.explosionBits.sprite[i] = new PIXI.Sprite(Stars.stars.texture);
+            Bullets.explosionBits.sprite[i].visible = false;
+            Bullets.explosionBits.sprites.addChild(Bullets.explosionBits.sprite[i]);
+        }
+        starContainer.addChild(Bullets.explosionBits.sprites);
+    },
     newExplosionBit: function (x, y) {
 
         if (Bullets.explosionBits.currentExplosionBit >= Bullets.explosionBits.maxExplosionBits)
             Bullets.explosionBits.currentExplosionBit = 0;
 
-        Bullets.explosionBits.opacity[Bullets.explosionBits.currentExplosionBit] = 255;
-        Bullets.explosionBits.xLoc[Bullets.explosionBits.currentExplosionBit] = x;
-        Bullets.explosionBits.yLoc[Bullets.explosionBits.currentExplosionBit] = y;
+        Bullets.explosionBits.sprite[Bullets.explosionBits.currentExplosionBit].visible = true;
+        Bullets.explosionBits.sprite[Bullets.explosionBits.currentExplosionBit].alpha = 1;
+        Bullets.explosionBits.sprite[Bullets.explosionBits.currentExplosionBit].position.x = x;
+        Bullets.explosionBits.sprite[Bullets.explosionBits.currentExplosionBit].position.y = y;
+		Bullets.explosionBits.sprite[Bullets.explosionBits.currentExplosionBit].scale.x = 
+			Bullets.explosionBits.sprite[Bullets.explosionBits.currentExplosionBit].scale.y = 1 + Math.random();
         Bullets.explosionBits.xSpeed[Bullets.explosionBits.currentExplosionBit] = -100 + Math.random() * 200;
         Bullets.explosionBits.ySpeed[Bullets.explosionBits.currentExplosionBit] = -100 + Math.random() * 200;
         
@@ -152,31 +229,11 @@ Bullets.explosionBits = {
     }
 };
 
-Bullets.frequencyUpgrades = 0;
-
-Bullets.upgradeFrequency = function () {
-    if (gameModel.p1.credits > upgradePrice(10, 1.2, Bullets.frequencyUpgrades)) {
-        gameModel.p1.credits -= upgradePrice(10, 1.2, Bullets.frequencyUpgrades);
-        Bullets.frequencyUpgrades++;
-        Bullets.playerBullets.shotFrequency -= 10;
-        $('#btn-freq span').text('₡' + upgradePrice(10, 1.2, Bullets.frequencyUpgrades).toFixed(0));
-		save();
-    }
-};
-
 Bullets.generateExplosion = function (x, y) {
     for (var i = 0; i < Bullets.explosionBits.bitsPerExplosion; i++) {
         Bullets.explosionBits.newExplosionBit(x, y);
     }
-
-    if (Bullets.blasts.currentBlast > Bullets.blasts.maxBlasts)
-        Bullets.blasts.currentBlast = 0;
-
-    Bullets.blasts.opacity[Bullets.blasts.currentBlast] = 1;
-    Bullets.blasts.xLoc[Bullets.blasts.currentBlast] = x - 16;
-    Bullets.blasts.yLoc[Bullets.blasts.currentBlast] = y - 16;
-
-    Bullets.blasts.currentBlast++;
+	Bullets.blasts.newBlast(x,y);
 };
 
 Bullets.updatePlayerBullets = function (timeDiff) {
@@ -191,11 +248,14 @@ Bullets.updatePlayerBullets = function (timeDiff) {
                 Bullets.playerBullets.resetPlayerBullet(i);
 
                 if (playerOneAxes[2] > 0.25 || playerOneAxes[2] < -0.25 || playerOneAxes[3] > 0.25 || playerOneAxes[3] < -0.25) {
+
                     var multi = Math.sqrt(Math.pow(playerOneAxes[2], 2) + Math.pow(playerOneAxes[3], 2));
 
                     Bullets.playerBullets.xSpeed[i] = playerOneAxes[2] / multi * Bullets.playerBullets.shotSpeed;
                     Bullets.playerBullets.ySpeed[i] = -1 * playerOneAxes[3] / multi * Bullets.playerBullets.shotSpeed;
+
                 } else if (aimLocX && aimLocY) {
+
                     var xDiff = aimLocX - Bullets.playerBullets.xLoc[i];
                     var yDiff = Bullets.playerBullets.yLoc[i] - aimLocY;
                     var multi = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
@@ -208,9 +268,14 @@ Bullets.updatePlayerBullets = function (timeDiff) {
         } else {
             Bullets.playerBullets.xLoc[i] += Bullets.playerBullets.xSpeed[i] * timeDiff;
             Bullets.playerBullets.yLoc[i] -= Bullets.playerBullets.ySpeed[i] * timeDiff;
+
+            Bullets.playerBullets.sprite[i].position.x = Bullets.playerBullets.xLoc[i];
+            Bullets.playerBullets.sprite[i].position.y = Bullets.playerBullets.yLoc[i];
+
             if (Bullets.playerBullets.yLoc[i] < 0 || Bullets.playerBullets.yLoc[i] > canvasHeight ||
                     Bullets.playerBullets.xLoc[i] < 0 || Bullets.playerBullets.xLoc[i] > canvasWidth) {
                 Bullets.playerBullets.inPlay[i] = 0;
+                Bullets.playerBullets.sprite[i].visible = false;
             }
         }
     }
@@ -224,38 +289,27 @@ Bullets.updateEnemyBullets = function (timeDiff) {
             if (enemiesKilled >= enemiesToKill) {
                 Bullets.enemyBullets.inPlay[i] = 0;
                 Bullets.generateExplosion(Bullets.enemyBullets.xLoc[i], Bullets.enemyBullets.yLoc[i]);
+                Bullets.enemyBullets.sprite[i].visible = false;
             } else {
                 Bullets.enemyBullets.xLoc[i] += Bullets.enemyBullets.xSpeed[i] * timeDiff;
                 Bullets.enemyBullets.yLoc[i] -= Bullets.enemyBullets.ySpeed[i] * timeDiff;
-
+				
                 if (Bullets.enemyBullets.yLoc[i] < 0 || Bullets.enemyBullets.yLoc[i] > canvasHeight ||
                     Bullets.enemyBullets.xLoc[i] < 0 || Bullets.enemyBullets.xLoc[i] > canvasWidth) {
                     Bullets.enemyBullets.inPlay[i] = 0;
+					Bullets.enemyBullets.sprite[i].visible=false;
                 } else {
                     if (Ships.detectCollision(PlayerShip.playerShip, Bullets.enemyBullets.xLoc[i], Bullets.enemyBullets.yLoc[i])) {
                         Bullets.enemyBullets.inPlay[i] = 0;
+                        Bullets.enemyBullets.sprite[i].visible = false;
                         Bullets.generateExplosion(Bullets.enemyBullets.xLoc[i], Bullets.enemyBullets.yLoc[i]);
                         PlayerShip.damagePlayerShip(PlayerShip.playerShip, Bullets.enemyBullets.enemyShotStrength);
-                    }
+                    } else {
+						Bullets.enemyBullets.sprite[i].position.x = Bullets.enemyBullets.xLoc[i];
+			            Bullets.enemyBullets.sprite[i].position.y = Bullets.enemyBullets.yLoc[i];
+					}
                 }
             }
         }
-    }
-};
-
-
-
-
-Bullets.drawPlayerBullets = function () {
-    for (var i = 0; i < Bullets.playerBullets.maxPlayerBullets; i++) {
-        if (Bullets.playerBullets.inPlay[i]) {
-            ctx.drawImage(Bullets.playerBullets.art, Bullets.playerBullets.xLoc[i] + Bullets.playerBullets.offset, Bullets.playerBullets.yLoc[i] + Bullets.playerBullets.offset);
-        }
-            
-    }
-    for (var i = 0; i < Bullets.enemyBullets.maxEnemyBullets; i++) {
-        if (Bullets.enemyBullets.inPlay[i]) {
-            ctx.drawImage(Bullets.enemyBullets.art, Bullets.enemyBullets.xLoc[i] + Bullets.enemyBullets.offset, Bullets.enemyBullets.yLoc[i] + Bullets.enemyBullets.offset);
-        }   
     }
 };

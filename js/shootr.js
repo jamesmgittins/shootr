@@ -62,7 +62,8 @@ function changeState(state) {
 		currentState = state;
 
 		if (state == states.running) {
-			$("#message-overlay").fadeOut();
+		    $("#message-overlay").fadeOut();
+		    playerShipContainer.visible = true;
 		}
 
 		if (state == states.paused) {
@@ -71,6 +72,7 @@ function changeState(state) {
 		}
 
 		if (state == states.levelComplete) {
+		    playerShipContainer.visible = false;
 			if (gameModel.currentLevel == gameModel.levelsUnlocked) {
 				gameModel.levelsUnlocked++;
 			    $("#message-overlay").html("Level Complete!<br>Credit bonus: " + formatMoney(gameModel.currentLevel * 100) + "<br>You've unlocked level " + gameModel.levelsUnlocked + ". Press start or click to play");
@@ -86,6 +88,7 @@ function changeState(state) {
 		}
 
 		if (state == states.levelFailed) {
+		    playerShipContainer.visible = false;
 			resetGame();
 			$("#message-overlay").html("You have failed to complete the level<br>Press start or click to try again");
 			$("#message-overlay").fadeIn(600);
@@ -94,6 +97,10 @@ function changeState(state) {
 }
 
 function resetGame() {
+    enemyShipContainer.removeChildren();
+	Bullets.enemyBullets.resetAll();
+	Bullets.playerBullets.resetAll();
+	
     EnemyShips.waves = [];
 	enemiesKilled = 0;
 	enemiesToKill = enemiesToKillConstant + Math.floor(gameModel.currentLevel / 2);
@@ -118,7 +125,12 @@ function resetGame() {
     }
     $("#p1-shield-div").removeClass("destroyed");
     destroyedWarning = false;
+    PlayerShip.playerShip.sprite.visible = true;
 }
+var tintOnTime = 0.1;
+var tintOffTime = 0.3;
+var tintFlashTime = 0;
+var tintOn = false;
 
 function update() {
     
@@ -130,57 +142,52 @@ function update() {
     var timeDiff = (Math.min(100, Math.max(updateTime - lastUpdate, 0))) / 1000;
     lastUpdate = updateTime;
 
+	tintFlashTime += timeDiff;
+	if ((tintOn && tintFlashTime >= tintOnTime) || (tintFlashTime >= tintOffTime)) {
+		tintOn = !tintOn;
+		tintFlashTime = 0;
+	}
     // Update gamepad state
     if (player1Gamepad > -1 && typeof navigator.getGamepads !== 'undefined' && navigator.getGamepads()[player1Gamepad]) {
         playerOneAxes = navigator.getGamepads()[player1Gamepad].axes;
     }
 
-    if (currentState == states.running) {
-        // update game state
-        PlayerShip.updatePlayerShip(timeDiff);
-
-        Bullets.updatePlayerBullets(timeDiff);
-
-        EnemyShips.update(timeDiff);
-
-        Bullets.updateEnemyBullets(timeDiff);
-    }
-    
-    //resetCanvas();
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-    // render current game state
-	Stars.drawStars(timeDiff);
-
-	if (currentState == states.running || currentState == states.paused) {
-	    Stars.drawShipTrails(timeDiff);
-	    Stars.drawExplosions(timeDiff);
-	}
-
-	//ctx.putImageData(canvasData, 0, 0);
-
-	if (currentState == states.running || currentState == states.paused) {
+	Stars.stars.update(timeDiff);
+	Stars.shipTrails.update(timeDiff);
+	PlayerShip.cursor.update(timeDiff);
 	
-	    Bullets.drawPlayerBullets();
-        EnemyShips.drawShips(ctx, timeDiff);
-	    EnemyShips.drawShipFragments(ctx, timeDiff);
-	    PlayerShip.drawPlayerShipLine(ctx);
-	    PlayerShip.drawPlayerShip(ctx, timeDiff);
-	    PlayerShip.drawShield(shield1Ctx);
-	}
+    if (currentState == states.running) {
+		
+        // update game state
+		PlayerShip.updatePlayerShip(timeDiff);
+		Bullets.updatePlayerBullets(timeDiff);
+		EnemyShips.update(timeDiff);
+		Bullets.updateEnemyBullets(timeDiff);
+    }
+	
+	Bullets.blasts.updateBlasts(timeDiff);
+	Ships.blasts.update(timeDiff);
+	Bullets.explosionBits.update(timeDiff);
+	Ships.explosionBits.update(timeDiff);
+	Ships.fragments.update(timeDiff);
+
+	renderer.render(stage);
+    PlayerShip.drawShield(shield1Ctx);
+
     ShootrUI.updateFps(updateTime);
 }
 
-function resetCanvas() {
-	// reset canvas data
-	var len = canvasWidth * canvasHeight * 4;
-	for (var i =3; i < len; i+=4) {
-		if (canvasDataArr[i] !== 0)
-			canvasDataArr[i] = 0;
-	}
-}
-
 var coords;
+var stage;
+
+var starContainer;
+var bulletContainer;
+var enemyShipContainer;
+var playerShipContainer;
+var explosionContainer;
+var uiContainer;
+
+var renderer;
 
 function startGame() {
 	
@@ -188,55 +195,64 @@ function startGame() {
 
 	// create game canvas
 	canvas = document.getElementById('game_canvas');
+
+	renderer = PIXI.autoDetectRenderer(canvasWidth, canvasHeight, { view: canvas, backgroundColor: 0x000000 });
+	
+	stage = new PIXI.Container();
+	
+	// set interactions
+	stage.interactive = true;
+	stage.hitArea = new PIXI.Rectangle(0, 0, canvasWidth, canvasHeight);
+	stage.defaultCursor = 'crosshair';
+	stage.tap = clickCanvas;
+	stage.click = clickCanvas;
+	stage.mousemove = function(data){
+		aimLocX = data.data.getLocalPosition(stage).x;
+        aimLocY = data.data.getLocalPosition(stage).y;
+		if (aimLocX < 0 || aimLocX > canvasWidth || aimLocY < 0 || aimLocY > canvasHeight) {
+			aimLocX=0;
+			aimLocY=0;	
+		}
+	};
+	$("#message-overlay").off("click").on("click", function () {
+	    if (currentState != states.running) {
+	        changeState(states.running);
+	    }
+	});
+	
+	// create different sprite layers
+	starContainer = new PIXI.Container();
+	bulletContainer = new PIXI.Container();
+	enemyShipContainer = new PIXI.Container();
+	playerShipContainer = new PIXI.Container();
+	playerShipContainer.visible=false;
+	explosionContainer = new PIXI.Container();
+	uiContainer = new PIXI.Container();
+	
+	stage.addChild(starContainer);
+	stage.addChild(bulletContainer);
+	stage.addChild(enemyShipContainer);
+	stage.addChild(playerShipContainer);
+	stage.addChild(explosionContainer);
+	stage.addChild(uiContainer);
     
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-
-    ctx = canvas.getContext("2d");
-
     shield1 = document.getElementById('p1-shield');
     shield1Ctx = shield1.getContext("2d");
     shield1.width = 100;
     shield1.height = 25;
-		
-    canvasData = ctx.createImageData(canvasWidth, canvasHeight);
-	canvasDataArr = canvasData.data;
 
-	canvas.addEventListener('click', function (event) {
-	    if (currentState == states.running) {
-	        coords = canvas.relMouseCoords(event);
-	        clickLocX = coords.x;
-	        clickLocY = coords.y;
-	        aimLocX = 0;
-	        aimLocY = 0;
-	    } else {
-	        changeState(states.running);
-	    }
-	});
-	canvas.addEventListener("mousemove", function (event) {
-	    coords = canvas.relMouseCoords(event);
-	    aimLocX = coords.x;
-	    aimLocY = coords.y;
-	});
-	canvas.addEventListener("mouseout", function (event) {
-	    aimLocX = 0;
-	    aimLocY = 0;
-	});
-	canvas.addEventListener("touchend", function (event) {
-	    aimLocX = 0;
-	    aimLocY = 0;
-	});
-
-	$("#message-overlay").off("click").on("click", function () {
-	    $("#game_canvas").trigger("click");
-	});
-	
-    Stars.resetStars();
-    
-    PlayerShip.playerShip.art = Ships.shipArt(PlayerShip.SHIP_SIZE, PlayerShip.playerShip.seed, false, Ships.playerColors[Math.floor(Math.random() * Ships.playerColors.length)]);
-    PlayerShip.playerShip.xLoc = canvasWidth / 2;
-    PlayerShip.playerShip.yLoc = canvasHeight - (canvasHeight / 6);
-    PlayerShip.playerShip.shipTrail = new Stars.shipTrail(PlayerShip.playerShip);
+	// init game objects and sprites
+	Stars.stars.initialize();
+	Stars.shipTrails.initialize();
+    PlayerShip.initialize();
+	PlayerShip.cursor.initialize();
+    Bullets.playerBullets.initialize();
+	Bullets.enemyBullets.initialize();
+	Bullets.blasts.initialize();
+	Ships.blasts.initialize();
+	Bullets.explosionBits.initialize();
+	Ships.fragments.initialize();
+	Ships.explosionBits.initialize();
 	
 	resetGame();
 
@@ -246,6 +262,17 @@ function startGame() {
     ShootrUI.updateUI();
     ShootrUI.updateUpgrades();
     changeLevel(gameModel.currentLevel);
+}
+
+function clickCanvas(data) {
+    if (currentState == states.running) {
+        clickLocX = data.data.getLocalPosition(stage).x;
+        clickLocY = data.data.getLocalPosition(stage).y;
+        aimLocX = 0;
+        aimLocY = 0;
+    } else {
+        changeState(states.running);
+    }
 }
 
 startGame();
@@ -281,7 +308,6 @@ window.onkeydown = function (e) {
     }
     return false;
 };
-
 window.onkeyup = function (e) {
     switch (e.keyCode) {
         case 87:

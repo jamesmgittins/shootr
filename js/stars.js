@@ -1,146 +1,155 @@
-﻿var Stars = {};
+var Stars = {};
 
 Stars.NUM_STARS = 200;
 
 Stars.stars = {
-	xLoc : [],
-	yLoc : [],
-	speed : [],
-	opacity : [],
-	r : [],
-	g : [],
-	b : []
-};
+	texture: (function() {
+		var blast = document.createElement('canvas');
+		blast.width = 1;
+		blast.height = 1;
+		var blastCtx = blast.getContext('2d');
 
-Stars.resetStar = function(i) {
-        Stars.stars.xLoc[i] = Math.random() * canvasWidth;
-        Stars.stars.yLoc[i] = 0;
-        Stars.stars.speed[i] = 10 + Math.random() * 30;
-        Stars.stars.opacity[i] = 10 + Math.floor(Stars.stars.speed[i] / 40 * 245);
-        Stars.stars.r[i] = 128 + Math.random() * 128 | 0;
-        Stars.stars.g[i] = 128 + Math.random() * 128 | 0;
-        Stars.stars.b[i] = 128 + Math.random() * 128 | 0;
-};
+		// draw shape
+		blastCtx.fillStyle = "#ffffff";
+		blastCtx.fillRect(0, 0, 1, 1);
 
-Stars.resetStars = function() {
-    for (var i = 0; i < Stars.NUM_STARS; i++) {
-        Stars.resetStar(i);
-        Stars.stars.yLoc[i] = Math.random() * canvasHeight;
-    }
-};
+		return PIXI.Texture.fromCanvas(blast);
+	})(),
+	speed: [],
+	sprite: [],
+	initialize: function() {
 
-Stars.drawStars = function (timeDiff) {
+		Stars.stars.sprites = new PIXI.Container();
 
-	for (var i = 0; i < Stars.NUM_STARS; i++) {
-        Stars.stars.yLoc[i] += Stars.stars.speed[i] * timeDiff;
-        if (Stars.stars.yLoc[i] > canvasHeight) {
-            Stars.resetStar(i);
-        }
-        drawPixel(Math.round(Stars.stars.xLoc[i]), Math.round(Stars.stars.yLoc[i]), 
-				  Stars.stars.r[i], Stars.stars.g[i], Stars.stars.b[i], Stars.stars.opacity[i]);
-    }
-};
+		for (var i = 0; i < Stars.NUM_STARS; i++) {
+			Stars.stars.speed[i] = 10 + Math.random() * 10;
+			Stars.stars.sprite[i] = new PIXI.Sprite(Stars.stars.texture);
+			Stars.stars.sprite[i].position.x = Math.random() * canvasWidth;
+			Stars.stars.sprite[i].position.y = Math.random() * canvasHeight;
+			Stars.stars.sprite[i].anchor = {
+				x: 0.5,
+				y: 0.5
+			};
+			if (Math.random() > 0.8)
+				Stars.stars.sprite[i].tint = 0x808080 + Math.random() * 0x808080;
+			if(Stars.stars.speed[i]>17)			
+				Stars.stars.sprite[i].scale.x = Stars.stars.sprite[i].scale.y = 2;
+			Stars.stars.sprites.addChild(Stars.stars.sprite[i]);
+		}
+		starContainer.addChild(Stars.stars.sprites);
 
-Stars.shipTrail = function (ship) {
-    this.xLoc = [];
-    this.yLoc = [];
-    this.speed = [];
-    this.xSpeed = [];
-    this.opacity = [];
-    this.r = [];
-    this.b = [];
-    this.g = [];
-    this.ship = ship;
-};
+	},
+	update: function(timeDiff) {
 
-Stars.resetTrail = function (shipTrail, i) {
-
-    shipTrail.xLoc[i] = shipTrail.ship.trailX - 2 + Math.random() * 4;
-    shipTrail.yLoc[i] = shipTrail.ship.trailY;
-
-    if (shipTrail.ship.enemyShip) {    
-        shipTrail.speed[i] = -100 + Math.random() * -100;
-        shipTrail.opacity[i] = 150 + Math.floor(-1 * shipTrail.speed[i] / 200 * 105);
-    } else {
-        shipTrail.speed[i] = 100 + Math.random() * 100;
-        shipTrail.opacity[i] = 150 + Math.floor(shipTrail.speed[i] / 200 * 105);
-    }
-    shipTrail.xSpeed[i] = -20 + Math.random() * 40;
-
-    shipTrail.r[i] = 128 + Math.random() * 128 | 0;
-    shipTrail.g[i] = 128 + Math.random() * 128 | 0;
-    shipTrail.b[i] = 0;
-};
-
-Stars.drawShipTrails = function (timeDiff) {
-    if (PlayerShip.playerShip.inPlay === 1) {
-        Stars.drawShipTrail(PlayerShip.playerShip.shipTrail, timeDiff);
-    }
-	
-	if (EnemyShips.waves.length > 0) {
-		for (var i = 0; i < EnemyShips.waves.length; i++) {
-			if (EnemyShips.waves[i] && !EnemyShips.waves[i].finished) {
-				for (var j = 0; j < EnemyShips.waves[i].shipsInWave; j++) {
-					if (EnemyShips.waves[i].ships[j] && EnemyShips.waves[i].ships[j].inPlay) {
-						Stars.drawShipTrail(EnemyShips.waves[i].ships[j].shipTrail, timeDiff);
-					}
-				}			
+		for (var i = 0; i < Stars.NUM_STARS; i++) {
+			Stars.stars.sprite[i].position.y += Stars.stars.speed[i] * timeDiff;
+			if (Stars.stars.sprite[i].position.y > canvasHeight + 5) {
+				Stars.stars.sprite[i].position.y = -5;
+				Stars.stars.sprite[i].position.x = Math.random() * canvasWidth;
+				if (Math.random() > 0.8)
+					Stars.stars.sprite[i].tint = 0x808080 + Math.random() * 0x808080;
+				else
+					Stars.stars.sprite[i].tint = 0xFFFFFF;
 			}
-		}		
+		}
 	}
 };
 
-Stars.drawExplosions = function (timeDiff) {
-    for (var i = 0; i < Bullets.explosionBits.maxExplosionBits; i++) {
+Stars.shipTrails = {
+	texture: (function() {
+		var blast = document.createElement('canvas');
+		blast.width = 1;
+		blast.height = 2;
+		var blastCtx = blast.getContext('2d');
 
-        if (Bullets.explosionBits.opacity[i] && Bullets.explosionBits.opacity[i] > 0) {
+		// draw shape
+		blastCtx.fillStyle = "#ffff00";
+		blastCtx.fillRect(0, 0, 1, 2);
 
-            Bullets.explosionBits.xLoc[i] += Bullets.explosionBits.xSpeed[i] * timeDiff;
-            Bullets.explosionBits.yLoc[i] += Bullets.explosionBits.ySpeed[i] * timeDiff;
+		return PIXI.Texture.fromCanvas(blast);
+	})(),
+	texture2: (function() {
+		var blast = document.createElement('canvas');
+		blast.width = 1;
+		blast.height = 2;
+		var blastCtx = blast.getContext('2d');
 
-            drawPixel(Math.round(Bullets.explosionBits.xLoc[i]), Math.round(Bullets.explosionBits.yLoc[i]), Bullets.explosionBits.color.r,
-                        Bullets.explosionBits.color.g, Bullets.explosionBits.color.b, Bullets.explosionBits.opacity[i]);
+		// draw shape
+		blastCtx.fillStyle = "#ff5600";
+		blastCtx.fillRect(0, 0, 1, 2);
 
-            Bullets.explosionBits.opacity[i] -= 30000 * timeDiff / Bullets.explosionBits.opacity[i];
-        }
-    }
-    for (var i = 0; i < EnemyShips.explosionBits.maxExplosionBits; i++) {
+		return PIXI.Texture.fromCanvas(blast);
+	})(),
+	maxTrails: 200,
+	currTrail: 0,
+	speedY: [],
+	speedX: [],
+	sprite: [],
+	newPart: function(ship) {
+		if (Stars.shipTrails.currTrail >= Stars.shipTrails.maxTrails)
+			Stars.shipTrails.currTrail = 0;
 
-        if (EnemyShips.explosionBits.opacity[i] && EnemyShips.explosionBits.opacity[i] > 0) {
+		Stars.shipTrails.sprite[Stars.shipTrails.currTrail].visible = true;
+		Stars.shipTrails.sprite[Stars.shipTrails.currTrail].alpha = 1;
+		Stars.shipTrails.sprite[Stars.shipTrails.currTrail].position = {
+			x: ship.trailX - 3 + (Math.random() * 6),
+			y: ship.trailY
+		};
+		Stars.shipTrails.sprite[Stars.shipTrails.currTrail].scale.x = 1 + Math.random() * 2;
+		Stars.shipTrails.sprite[Stars.shipTrails.currTrail].scale.y = 1 + Math.random() * 2;
+		Stars.shipTrails.speedY[Stars.shipTrails.currTrail] = (ship.enemyShip ? -1 : 1) * (150 + Math.random() * 100);
+		Stars.shipTrails.speedX[Stars.shipTrails.currTrail] = -10 + Math.random() * 20;
 
-            EnemyShips.explosionBits.xLoc[i] += EnemyShips.explosionBits.xSpeed[i] * timeDiff;
-            EnemyShips.explosionBits.yLoc[i] += EnemyShips.explosionBits.ySpeed[i] * timeDiff;
+		Stars.shipTrails.currTrail++;
+	},
+	initialize: function() {
+		Stars.shipTrails.sprites = new PIXI.Container();
+		Stars.shipTrails.sprites2 = new PIXI.Container();
+		
+		for (var i = 0; i < Stars.shipTrails.maxTrails; i++) {
 
-            
+			if (Math.random() > 0.4) {
+				Stars.shipTrails.sprite[i] = new PIXI.Sprite(Stars.shipTrails.texture);
+				Stars.shipTrails.sprites.addChild(Stars.shipTrails.sprite[i]);
+			} else {
+				Stars.shipTrails.sprite[i] = new PIXI.Sprite(Stars.shipTrails.texture2);
+				Stars.shipTrails.sprites2.addChild(Stars.shipTrails.sprite[i]);
+			}
 
-            if (EnemyShips.explosionBits.vertical[i]) {
-                drawPixel(Math.round(EnemyShips.explosionBits.xLoc[i]), Math.round(EnemyShips.explosionBits.yLoc[i]), EnemyShips.explosionBits.color[i].r,
-                    EnemyShips.explosionBits.color[i].g, EnemyShips.explosionBits.color[i].b, EnemyShips.explosionBits.opacity[i], 1, 3);
-            } else {
-                drawPixel(Math.round(EnemyShips.explosionBits.xLoc[i]), Math.round(EnemyShips.explosionBits.yLoc[i]), EnemyShips.explosionBits.color[i].r,
-                    EnemyShips.explosionBits.color[i].g, EnemyShips.explosionBits.color[i].b, EnemyShips.explosionBits.opacity[i], 3, 1);
-            }
-            EnemyShips.explosionBits.opacity[i] -= 20000 * timeDiff / EnemyShips.explosionBits.opacity[i];
-        }
-    }
-};
 
-Stars.drawShipTrail = function (shipTrail, timeDiff) {
-    var shipTrailCount = shipTrail.ship.enemyShip && shipTrail.ship.health < shipTrail.ship.wave.shipHealth ? 10 : shipTrail.ship.SHIP_TRAIL_COUNT;
-    //var shipTrailCount = shipTrail.ship.SHIP_TRAIL_COUNT;
+			Stars.shipTrails.sprite[i].visible = false;
+			Stars.shipTrails.sprite[i].anchor = {
+				x: 0.5,
+				y: 0
+			};
 
-    for (var i = 0; i < shipTrailCount; i++) {
+		}
+		starContainer.addChild(Stars.shipTrails.sprites2);
+		starContainer.addChild(Stars.shipTrails.sprites);
 
-        if (shipTrail.opacity[i] && shipTrail.opacity[i] > 10) {
-            drawPixel(Math.round(shipTrail.xLoc[i]), Math.round(shipTrail.yLoc[i]), shipTrail.r[i],
-                    shipTrail.g[i], shipTrail.b[i], shipTrail.opacity[i],1,3);
+	},
+	updateShip: function(ship, timeDiff) {
+		ship.lastTrail += timeDiff * 1000;
+		if (ship.lastTrail > 30) {
+			ship.lastTrail = 0;
+			Stars.shipTrails.newPart(ship);
+		}
+	},
+	update: function(timeDiff) {
+		for (var i = 0; i < Stars.shipTrails.maxTrails; i++) {
+			if (Stars.shipTrails.sprite[i].visible) {
 
-            shipTrail.yLoc[i] += shipTrail.speed[i] * timeDiff;
-            shipTrail.xLoc[i] += shipTrail.xSpeed[i] * timeDiff;
+				Stars.shipTrails.sprite[i].scale.x -= 7 * timeDiff;
+				Stars.shipTrails.sprite[i].scale.y -= 7 * timeDiff;
 
-            shipTrail.opacity[i] -= 1500 / shipTrail.opacity[i];
-        } else {
-            Stars.resetTrail(shipTrail, i);
-        }
-    }
+				if (Stars.shipTrails.sprite[i].scale.x <= 0) {
+					Stars.shipTrails.sprite[i].visible = false;
+				} else {
+					Stars.shipTrails.sprite[i].position.y += Stars.shipTrails.speedY[i] * timeDiff;
+					Stars.shipTrails.sprite[i].position.x += Stars.shipTrails.speedX[i] * timeDiff;
+				}
+
+			}
+		}
+	}
 };
