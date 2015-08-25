@@ -125,6 +125,7 @@ EnemyShips.destroy = function (ship) {
 			EnemyShips.waves[i].shipContainer.visible=false;
 		}
 	}
+	Powerups.newPowerup(ship.xLoc,ship.yLoc);
 };
 
 EnemyShips.checkForPlayerCollision = function (ship) {

@@ -14,6 +14,13 @@ function calculateTintFromString(value) {
 	return parseInt(value.replace('#','0x'));
 }
 
+function RotateVector2d(x, y, radians) {
+    return {
+        x: x * Math.cos(radians) - y * Math.sin(radians),
+        y: x * Math.sin(radians) + y * Math.cos(radians)
+    };
+}
+
 // convert HEX color to RGB
 function hexToRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);

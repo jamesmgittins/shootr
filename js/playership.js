@@ -20,6 +20,7 @@ PlayerShip.controllerPointer = {
 
         PlayerShip.controllerPointer.sprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(blast));
         PlayerShip.controllerPointer.sprite.anchor = { x: 0.5, y: 0.5 };
+        PlayerShip.controllerPointer.sprite.visible = false;
         uiContainer.addChild(PlayerShip.controllerPointer.sprite);
     },
     update: function (timeDiff) {
@@ -76,7 +77,11 @@ PlayerShip.playerShip = {
     lastDmg: 0,
     inPlay: 1,
 	lastTrail:0,
-	colors:Ships.playerColors[0]
+	colors: Ships.playerColors[0],
+
+	spreadShot: 0,
+	crossShot: 0,
+    powerupTime:0
 };
 
 
@@ -88,6 +93,14 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
         }
         return;
     }
+
+    PlayerShip.playerShip.powerupTime += timeDiff;
+    if (PlayerShip.playerShip.powerupTime >= Powerups.powerupLength) {
+        PlayerShip.playerShip.spreadShot = 0;
+        PlayerShip.playerShip.crossShot = 0;
+    }
+    
+
     if (playerOneAxes[0] > 0.25 || playerOneAxes[0] < -0.25 || playerOneAxes[1] > 0.25 || playerOneAxes[1] < -0.25) {
         Ships.updateShipSpeedFromController(PlayerShip.playerShip, playerOneAxes[0], playerOneAxes[1], timeDiff);
         clickLocX = 0;
@@ -207,7 +220,7 @@ PlayerShip.drawShield = function (ctx) {
 };
 
 PlayerShip.initialize = function () {
-    PlayerShip.playerShip.art = Ships.shipArt(PlayerShip.SHIP_SIZE, PlayerShip.playerShip.seed, false, Ships.playerColors[Math.floor(Math.random() * Ships.playerColors.length)]);
+    PlayerShip.playerShip.art = Ships.shipArt(PlayerShip.SHIP_SIZE, gameModel.p1.shipSeed, false, Ships.playerColors[Math.floor(Math.random() * Ships.playerColors.length)]);
     PlayerShip.playerShip.xLoc = canvasWidth / 2;
     PlayerShip.playerShip.yLoc = canvasHeight - (canvasHeight / 6);
 

@@ -2,11 +2,13 @@ var gameModel = {
 	levelsUnlocked : 1,
 	currentLevel : 1,
 	p1 : {
+		shipSeed: 1,
 		credits: 0,
 		totalCredits: 0,
 		upgrades:[]
 	},
 	p2 : {
+		shipSeed: 12345,
 		credits: 0,
 		totalCredits: 0,
 		upgrades:[]

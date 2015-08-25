@@ -107,6 +107,7 @@ function resetGame() {
     enemyShipContainer.removeChildren();
 	Bullets.enemyBullets.resetAll();
 	Bullets.playerBullets.resetAll();
+	Powerups.reset();
 	
     EnemyShips.waves = [];
 	enemiesKilled = 0;
@@ -169,6 +170,7 @@ function update() {
 		EnemyShips.update(timeDiff);
 		Bullets.updateEnemyBullets(timeDiff);
 		PlayerShip.controllerPointer.update();
+		Powerups.update(timeDiff);
     }
 	
 	Bullets.blasts.updateBlasts(timeDiff);
@@ -261,6 +263,7 @@ function startGame() {
 	Bullets.explosionBits.initialize();
 	Ships.fragments.initialize();
 	Ships.explosionBits.initialize();
+	Powerups.initialize();
 	
 	GameText.credits.initialize();
 	GameText.bigText.initialize();
