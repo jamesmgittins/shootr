@@ -26,48 +26,65 @@ ShootrUI.updateFps = function (updateTime) {
         fpsCounter = 0;
     }
 };
+var lastUpgradesHtml = "";
 
 ShootrUI.updateUpgrades = function () {
 
     var upgradesHtml = "";
     var price;
 
+    var counter = 0;
+
     for (var i = 0; i < upgrades.length; i++) {
 
         if (upgrades[i].levelUnlocked <= gameModel.levelsUnlocked) {
+
             if (upgrades[i].qty >= upgrades[i].maxQty && upgrades[i].maxQty != -1) {
-                upgradesHtml = upgradesHtml + "<button class='disabled'><span>(" +
+                upgradesHtml = upgradesHtml + "<button class='disabled" + (counter == playerOneSelectedUpgrade ? "selected" : "") + "'><span>(" +
                     upgrades[i].qty + "/" + upgrades[i].maxQty + ")</span> " +
                     upgrades[i].desc + "<span class='price'></span></button>";
             } else {
                 price = upgradePrice(upgrades[i]);
-                upgradesHtml = upgradesHtml + "<button onclick=\"buyUpgrade('" + upgrades[i].id + "');\" data-price='" +
+                var buttonClass = (counter == playerOneSelectedUpgrade ? "selected" : "") + (price >= gameModel.p1.credits ? " disabled" : "")
+                var spanWidth = price < gameModel.p1.credits ? '100%' : (gameModel.p1.credits / price * 100).toFixed(1) + '%';
+                
+                upgradesHtml = upgradesHtml + "<button class='" + buttonClass + "' onclick=\"buyUpgrade('" + upgrades[i].id + "');\" data-price='" +
                     price + "'><span>(" +
                     (upgrades[i].maxQty != -1 ? upgrades[i].qty + "/" + upgrades[i].maxQty + ")</span>" : upgrades[i].qty + "/&infin;)</span> ") +
-                    upgrades[i].desc + "<span class='price'>" + formatMoney(price) + "</span></button>";
+                    upgrades[i].desc + "<span class='price'>" + formatMoney(price) + "</span><span class='prog' style='width:" + spanWidth + "'></span></button>";
             }
+            counter++;
         }
-
     }
-
-    $("#p1-upgrades").html(upgradesHtml);
-	$("#p1-upgrades button").each(function(){
-		if ($(this).data('price') > gameModel.p1.credits) {
-			$(this).addClass("disabled");
-		}
-	});
+    if (upgradesHtml != lastUpgradesHtml) {
+        document.getElementById('p1-upgrades').innerHTML = upgradesHtml;
+        lastUpgradesHtml = upgradesHtml;
+        var upgradeTabText = "Upgrades" + ($("#p1-upgrades > button:not(.disabled)").length > 0 ? " (" + $("#p1-upgrades > button:not(.disabled)").length + ")" : "");
+        $("li.upgrades > a").text(upgradeTabText)
+    };
 };
 
 ShootrUI.renderLevelSelect = function () {
     var firstLevel = Math.max(1, -2 + gameModel.currentLevel);
     var lastLevel = Math.min(gameModel.levelsUnlocked, 2 + gameModel.currentLevel);
 
+    if (playerOneSelectedLevel > -1) {
+        firstLevel = Math.max(1, -2 + playerOneSelectedLevel);
+        lastLevel = Math.min(gameModel.levelsUnlocked, 2 + playerOneSelectedLevel);
+    }
+
     var levelsHtml = "";
     for (var i = firstLevel; i <= lastLevel; i++) {
+        var classAttr = "";
+
         if (i == gameModel.currentLevel)
-            levelsHtml = levelsHtml + "<div class='current'>" + i + "</div>";
-        else
-            levelsHtml = levelsHtml + "<div>" + i + "</div>";
+            classAttr = "current";
+
+        if (i == playerOneSelectedLevel)
+            classAttr = classAttr + " selected";
+        
+
+        levelsHtml = levelsHtml + "<div class='" + classAttr + "'>" + i + "</div>";
     }
     $("#level-select").html(levelsHtml);
 
@@ -81,6 +98,7 @@ ShootrUI.renderLevelSelect = function () {
 var stats = document.getElementById("p1-stats");
 var stats2 = document.getElementById("p2-stats");
 
+var lastCredits = 0;
 ShootrUI.updateUI = function () {
     // run every 200 ms
     setTimeout(ShootrUI.updateUI, 200);
@@ -89,13 +107,10 @@ ShootrUI.updateUI = function () {
 		"<br>Total Credits Earned: " + formatMoney(gameModel.p1.totalCredits) +
 		"<br>Enemies killed: " + enemiesKilled + "/" + enemiesToKill;
 
-	$("#p1-upgrades button").each(function(){
-	    if ($(this).data('price') > gameModel.p1.credits || !$(this).data('price')) {
-			$(this).addClass("disabled");
-		} else {
-			$(this).removeClass("disabled");			
-		}
-	});
+    if (gameModel.p1.credits != lastCredits) {
+        lastCredits = gameModel.p1.credits;
+        ShootrUI.updateUpgrades();
+    }
 };
 
 ShootrUI.updateGamepadSelect = function () {
@@ -126,3 +141,29 @@ window.addEventListener("gamepadconnected", function (e) {
 window.addEventListener("gamepaddisconnected", function (e) {
     ShootrUI.updateGamepadSelect();
 });
+
+
+ShootrUI.tabSwitch = function (tab) {
+    switch (tab) {
+        case "game":
+            $("#upgradetab,#optionstab,#level-select").addClass("hidden-xs");
+            $(".canvas-container").removeClass("hidden-xs");
+            $("ul.nav-pills > li").removeClass("active");
+            $("ul.nav-pills > li.game").addClass("active");
+            break;
+        case "upgrades":
+            $(".canvas-container,#optionstab,#level-select").addClass("hidden-xs");
+            $("#upgradetab").removeClass("hidden-xs");
+            $("ul.nav-pills > li").removeClass("active");
+            $("ul.nav-pills > li.upgrades").addClass("active");
+            changeState(states.paused);
+            break;
+        case "options":
+            $(".canvas-container,#upgradetab").addClass("hidden-xs");
+            $("#optionstab,#level-select").removeClass("hidden-xs");
+            $("ul.nav-pills > li").removeClass("active");
+            $("ul.nav-pills > li.options").addClass("active");
+            changeState(states.paused);
+            break;
+    }
+};

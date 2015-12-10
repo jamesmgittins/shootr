@@ -142,6 +142,7 @@ Bullets.playerBullets = {
         return PIXI.Texture.fromCanvas(blast);
     })(),
 	maxPlayerBullets : 100,
+	currBullet:0,
 	shotFrequency : 1000,
 	lastPlayerShot : 0,
 	shotSpeed : 150,
@@ -179,7 +180,52 @@ Bullets.playerBullets = {
             Bullets.playerBullets.sprites.addChild(Bullets.playerBullets.sprite[i]);
         }
         bulletContainer.addChild(Bullets.playerBullets.sprites);
-    }
+    },
+	newBullet : function(speed) {
+		Bullets.playerBullets.resetPlayerBullet(Bullets.playerBullets.currBullet);
+		Bullets.playerBullets.xSpeed[Bullets.playerBullets.currBullet] = speed.x;
+		Bullets.playerBullets.ySpeed[Bullets.playerBullets.currBullet] = speed.y;
+		Bullets.playerBullets.currBullet++;
+		if (Bullets.playerBullets.currBullet >= Bullets.playerBullets.maxPlayerBullets) {
+			Bullets.playerBullets.currBullet = 0;
+		}
+	},
+	fireBullets : function () {
+		
+		var speed = {
+			x:0,
+			y:Bullets.playerBullets.shotSpeed
+		};
+
+		if (playerOneAxes[2] > 0.25 || playerOneAxes[2] < -0.25 || playerOneAxes[3] > 0.25 || playerOneAxes[3] < -0.25) {
+
+			var multi = Math.sqrt(Math.pow(playerOneAxes[2], 2) + Math.pow(playerOneAxes[3], 2));
+
+			speed.x = playerOneAxes[2] / multi * Bullets.playerBullets.shotSpeed;
+			speed.y = -1 * playerOneAxes[3] / multi * Bullets.playerBullets.shotSpeed;
+
+		} else if (aimLocX && aimLocY) {
+
+			var xDiff = aimLocX - PlayerShip.playerShip.xLoc;
+			var yDiff = (PlayerShip.playerShip.yLoc - 16) - aimLocY;
+			var multi = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
+
+			speed.x = xDiff / multi * Bullets.playerBullets.shotSpeed;
+			speed.y = yDiff / multi * Bullets.playerBullets.shotSpeed;
+		}
+		
+		Bullets.playerBullets.newBullet(speed);
+		
+		if (PlayerShip.playerShip.spreadShot) {
+			Bullets.playerBullets.newBullet(RotateVector2d(speed.x, speed.y, -0.12));
+			Bullets.playerBullets.newBullet(RotateVector2d(speed.x, speed.y, 0.12));
+		} else if (PlayerShip.playerShip.crossShot) {
+			Bullets.playerBullets.newBullet(RotateVector2d(speed.x, speed.y, Math.PI));
+			Bullets.playerBullets.newBullet(RotateVector2d(speed.x, speed.y, Math.PI/2));
+			Bullets.playerBullets.newBullet(RotateVector2d(speed.x, speed.y, -Math.PI/2));
+		}
+		Bullets.playerBullets.lastPlayerShot = 0;
+	}
 };
 
 Bullets.explosionBits = {
@@ -241,45 +287,27 @@ Bullets.updatePlayerBullets = function (timeDiff) {
     Bullets.playerBullets.lastPlayerShot += timeDiff * 1000;
 
     for (var i = 0; i < Bullets.playerBullets.maxPlayerBullets; i++) {
-        if (Bullets.playerBullets.inPlay[i] !== 1 && PlayerShip.playerShip.inPlay) {
-
-            if (Bullets.playerBullets.lastPlayerShot >= Bullets.playerBullets.shotFrequency && EnemyShips.allDeadTimer == 0) {
-
-                Bullets.playerBullets.resetPlayerBullet(i);
-
-                if (playerOneAxes[2] > 0.25 || playerOneAxes[2] < -0.25 || playerOneAxes[3] > 0.25 || playerOneAxes[3] < -0.25) {
-
-                    var multi = Math.sqrt(Math.pow(playerOneAxes[2], 2) + Math.pow(playerOneAxes[3], 2));
-
-                    Bullets.playerBullets.xSpeed[i] = playerOneAxes[2] / multi * Bullets.playerBullets.shotSpeed;
-                    Bullets.playerBullets.ySpeed[i] = -1 * playerOneAxes[3] / multi * Bullets.playerBullets.shotSpeed;
-
-                } else if (aimLocX && aimLocY) {
-
-                    var xDiff = aimLocX - Bullets.playerBullets.xLoc[i];
-                    var yDiff = Bullets.playerBullets.yLoc[i] - aimLocY;
-                    var multi = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
-
-                    Bullets.playerBullets.xSpeed[i] = xDiff / multi * Bullets.playerBullets.shotSpeed;
-                    Bullets.playerBullets.ySpeed[i] = yDiff / multi * Bullets.playerBullets.shotSpeed;
-                }
-                Bullets.playerBullets.lastPlayerShot = 0;
-            }
-        } else {
+        if (Bullets.playerBullets.inPlay[i] === 1) {
             Bullets.playerBullets.xLoc[i] += Bullets.playerBullets.xSpeed[i] * timeDiff;
             Bullets.playerBullets.yLoc[i] -= Bullets.playerBullets.ySpeed[i] * timeDiff;
 
             Bullets.playerBullets.sprite[i].position.x = Bullets.playerBullets.xLoc[i];
             Bullets.playerBullets.sprite[i].position.y = Bullets.playerBullets.yLoc[i];
 
-            if (Bullets.playerBullets.yLoc[i] < 0 || Bullets.playerBullets.yLoc[i] > canvasHeight ||
+            if (Bullets.playerBullets.yLoc[i] < -16 || Bullets.playerBullets.yLoc[i] > canvasHeight ||
                     Bullets.playerBullets.xLoc[i] < 0 || Bullets.playerBullets.xLoc[i] > canvasWidth) {
                 Bullets.playerBullets.inPlay[i] = 0;
                 Bullets.playerBullets.sprite[i].visible = false;
             }
         }
     }
+	
+	if (Bullets.playerBullets.lastPlayerShot >= Bullets.playerBullets.shotFrequency && EnemyShips.allDeadTimer == 0 && PlayerShip.playerShip.inPlay) {
+		Bullets.playerBullets.fireBullets();
+	}
 };
+
+
 
 Bullets.updateEnemyBullets = function (timeDiff) {
     for (var i = 0; i < Bullets.enemyBullets.maxEnemyBullets; i++) {

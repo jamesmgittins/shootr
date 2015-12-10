@@ -1,8 +1,10 @@
-﻿<html>
+<html>
 <head>
     <title>Shootr</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href='http://fonts.googleapis.com/css?family=Dosis:300' rel='stylesheet' type='text/css'>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000">
+    <link href='//fonts.googleapis.com/css?family=Dosis:300' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="css/shootr.css">
@@ -14,25 +16,28 @@
 <body>
 	<div class="container-fluid">
 		<div class="row">
-			<div class="col-xs-12 col-sm-4">
-                <button onclick="ShootrUI.pauseGame();">Pause</button>
+            <ul class="nav nav-pills visible-xs">
+                <li role="presentation" class="active game text-center"><a href="#" onclick="ShootrUI.tabSwitch('game')">Game</a></li>
+                <li role="presentation" class="upgrades text-center"><a href="#" onclick="ShootrUI.tabSwitch('upgrades')">Uprades</a></li>
+                <li role="presentation" class="options text-center"><a href="#" onclick="ShootrUI.tabSwitch('options')">Options</a></li>
+            </ul>
+			<div class="col-xs-12 col-sm-4 hidden-xs" id="upgradetab">
+                <button onclick="ShootrUI.pauseGame();" class="hidden-xs">Pause</button>
                 <select id="gamepad-sel" onchange="ShootrUI.selectGamepad(this, 1);"><option>Select Gamepad</option></select>
                 <div id="p1-shield-div"><canvas id="p1-shield"></canvas></div>
-				<div id="p1-stats"></div>
+								<div id="p1-stats"></div>
                 <div id="p1-upgrades"></div>
 			</div>
 			<div class="col-xs-12 col-sm-4 col-no-pad">
-                <div class="col-xs-12" id="level-select"></div>
+                <div class="col-xs-12 hidden-xs" id="level-select"></div>
                 <div class="canvas-container">
                     <canvas id="game_canvas"></canvas>
                     <div id="message-overlay">Click or press start to begin</div>
-                    <div id="message-overlay-small" style="display:none;"></div>
-                </div>
+                </div> 
 			</div>
-			<div class="col-xs-12 col-sm-4">
+			<div class="col-xs-12 col-sm-4 hidden-xs" id="optionstab">
                 <button onclick="if (confirm('You will lose all progress')) { resetSaveGame(); }">Reset Game</button>
-                <div id="p2-shield-div" class="warning"><canvas id="p2-shield"></canvas></div>
-                <div id="p2-stats"></div>
+								<button onclick="$('.canvas-container').requestFullScreen();">Full screen</button>
             </div>
 		</div>	
 	</div>
@@ -43,6 +48,8 @@
     <script src="js/playership.js"></script>
     <script src="js/enemyships.js"></script>
     <script src="js/bullets.js"></script>
+    <script src="js/powerups.js"></script>
+	<script src="js/gametext.js"></script>
     <script src="js/shootrui.js"></script>
     <script src="js/shootr.js"></script>
 </body>

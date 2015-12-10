@@ -1,4 +1,24 @@
-﻿canvas {
+﻿ul.nav-pills {
+    margin:-20px auto 5px;
+    width:100%;
+}
+
+ul.nav-pills > li {
+    width:33%;
+}
+
+.nav-pills>li.active>a {
+    background-color:#050;
+}
+.nav-pills>li.active>a, .nav-pills>li.active>a:hover{
+    background-color:#050;
+}
+.nav-pills>li>a {
+    color:#0B0;
+    font-weight:bold;
+}
+
+canvas {
 	 width:100%;
 }
 
@@ -71,18 +91,6 @@ body {
     text-align:center;
     padding:0 15px;
 }
-#message-overlay-small {
-    position:absolute;
-    left:0;
-    right:0;
-    top:50px;
-    bottom:0;
-    height:200px;
-    font-size:20px;
-    text-align:center;
-    padding:0 15px;
-}
-
 #p1-upgrades button > span {
     font-weight:bold;
     float:left;
@@ -109,6 +117,19 @@ body {
     background-color: #000700;
 }
 
+#level-select > div:hover,
+#level-select > div.selected,
+#p1-upgrades > button:hover,
+#p1-upgrades > button.selected {
+    animation:selected 2s infinite;
+}
+
+@keyframes selected {
+    0% {background-color:#003000;}
+    50% {background-color:#004000;}
+    100% {background-color:#003000;}
+}
+
 #level-select > div.current {
     border-style: solid;
     font-weight: bold;
@@ -126,6 +147,7 @@ button,select {
     border: 2px outset #0b0;
     width:100%;
     text-align:center;
+    position:relative;
 }
 
 button.disabled {
@@ -133,6 +155,14 @@ button.disabled {
 	border-color:#070;
 }
 
+button > span.prog {
+    position:absolute;
+    bottom:-1px;
+    left:0;
+    height:1px;
+    width:1%;
+    background-color:#070;
+}
 button:active {
     border: 1px inset #0b0;
     margin: 6px;

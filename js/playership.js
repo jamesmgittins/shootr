@@ -6,6 +6,36 @@ PlayerShip.allDeadTime = 3000;
 
 PlayerShip.SHIP_SIZE = 64;
 
+PlayerShip.controllerPointer = {
+    initialize: function () {
+        var blast = document.createElement('canvas');
+        blast.width = 10;
+        blast.height = 16;
+        var blastCtx = blast.getContext('2d');
+
+        blastCtx.lineWidth = 2;
+
+        drawline(blastCtx, "#0b0", 1, 1, 9, 8);
+        drawline(blastCtx, "#0b0", 1, 15, 9, 8);
+
+        PlayerShip.controllerPointer.sprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(blast));
+        PlayerShip.controllerPointer.sprite.anchor = { x: 0.5, y: 0.5 };
+        PlayerShip.controllerPointer.sprite.visible = false;
+        uiContainer.addChild(PlayerShip.controllerPointer.sprite);
+    },
+    update: function (timeDiff) {
+        if (playerOneAxes[2] > 0.25 || playerOneAxes[2] < -0.25 || playerOneAxes[3] > 0.25 || playerOneAxes[3] < -0.25) {
+
+            PlayerShip.controllerPointer.sprite.position.x = PlayerShip.playerShip.xLoc + playerOneAxes[2] * 70;
+            PlayerShip.controllerPointer.sprite.position.y = PlayerShip.playerShip.yLoc - 16 + playerOneAxes[3] * 70;
+            PlayerShip.controllerPointer.sprite.rotation = Math.atan2(playerOneAxes[3], playerOneAxes[2]);
+            PlayerShip.controllerPointer.sprite.visible = true;
+        } else {
+            PlayerShip.controllerPointer.sprite.visible = false;
+        }
+    }
+};
+
 PlayerShip.cursor = {
 	initialize:function(){
 		var blast = document.createElement('canvas');
@@ -15,8 +45,8 @@ PlayerShip.cursor = {
 
 		blastCtx.lineWidth=2;
 		
-		drawline(blastCtx, "#ffffff", 15, 1, 15, 29);
-		drawline(blastCtx, "#ffffff", 1, 15, 29, 15);
+		drawline(blastCtx, "#0b0", 15, 1, 15, 29);
+		drawline(blastCtx, "#0b0", 1, 15, 29, 15);
 
 		PlayerShip.cursor.sprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(blast));
 		PlayerShip.cursor.sprite.anchor = {x:0.5,y:0.5};
@@ -24,8 +54,6 @@ PlayerShip.cursor = {
 	},
 	update:function(timeDiff) {
 		if (aimLocX && aimLocY){
-/* 			var distance = distanceBetweenPixiPoints(PlayerShip.cursor.sprite.position,{x:aimLocX,y:aimLocY});
-			PlayerShip.cursor.sprite.rotation+=distance * timeDiff; */
 	 		PlayerShip.cursor.sprite.position.x=aimLocX;
 			PlayerShip.cursor.sprite.position.y=aimLocY;
 			PlayerShip.cursor.sprite.visible=true;
@@ -49,7 +77,11 @@ PlayerShip.playerShip = {
     lastDmg: 0,
     inPlay: 1,
 	lastTrail:0,
-	colors:Ships.playerColors[0]
+	colors: Ships.playerColors[0],
+
+	spreadShot: 0,
+	crossShot: 0,
+    powerupTime:0
 };
 
 
@@ -61,6 +93,14 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
         }
         return;
     }
+
+    PlayerShip.playerShip.powerupTime += timeDiff;
+    if (PlayerShip.playerShip.powerupTime >= Powerups.powerupLength) {
+        PlayerShip.playerShip.spreadShot = 0;
+        PlayerShip.playerShip.crossShot = 0;
+    }
+    
+
     if (playerOneAxes[0] > 0.25 || playerOneAxes[0] < -0.25 || playerOneAxes[1] > 0.25 || playerOneAxes[1] < -0.25) {
         Ships.updateShipSpeedFromController(PlayerShip.playerShip, playerOneAxes[0], playerOneAxes[1], timeDiff);
         clickLocX = 0;
@@ -180,7 +220,7 @@ PlayerShip.drawShield = function (ctx) {
 };
 
 PlayerShip.initialize = function () {
-    PlayerShip.playerShip.art = Ships.shipArt(PlayerShip.SHIP_SIZE, PlayerShip.playerShip.seed, false, Ships.playerColors[Math.floor(Math.random() * Ships.playerColors.length)]);
+    PlayerShip.playerShip.art = Ships.shipArt(PlayerShip.SHIP_SIZE, gameModel.p1.shipSeed, false, Ships.playerColors[Math.floor(Math.random() * Ships.playerColors.length)]);
     PlayerShip.playerShip.xLoc = canvasWidth / 2;
     PlayerShip.playerShip.yLoc = canvasHeight - (canvasHeight / 6);
 

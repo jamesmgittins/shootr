@@ -6,12 +6,23 @@ function distanceBetweenPixiPoints(p1, p2) {
     return Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
 }
 
+function rgbToHex(r,g,b) {
+	return b | (g << 8) | (r << 16);
+}
+
 function calculateTint(damageFactor) {
 	return (255 * damageFactor) | ((255 * damageFactor) << 8) | (255 << 16);
 }
 
 function calculateTintFromString(value) {
 	return parseInt(value.replace('#','0x'));
+}
+
+function RotateVector2d(x, y, radians) {
+    return {
+        x: x * Math.cos(radians) - y * Math.sin(radians),
+        y: x * Math.sin(radians) + y * Math.cos(radians)
+    };
 }
 
 // convert HEX color to RGB
