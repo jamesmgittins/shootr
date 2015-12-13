@@ -1,4 +1,24 @@
-﻿canvas {
+﻿ul.nav-pills {
+    margin:-20px auto 5px;
+    width:100%;
+}
+
+ul.nav-pills > li {
+    width:33%;
+}
+
+.nav-pills>li.active>a {
+    background-color:#050;
+}
+.nav-pills>li.active>a, .nav-pills>li.active>a:hover{
+    background-color:#050;
+}
+.nav-pills>li>a {
+    color:#0B0;
+    font-weight:bold;
+}
+
+canvas {
 	 width:100%;
 }
 

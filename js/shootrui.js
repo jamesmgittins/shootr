@@ -59,6 +59,8 @@ ShootrUI.updateUpgrades = function () {
     if (upgradesHtml != lastUpgradesHtml) {
         document.getElementById('p1-upgrades').innerHTML = upgradesHtml;
         lastUpgradesHtml = upgradesHtml;
+        var upgradeTabText = "Upgrades" + ($("#p1-upgrades > button:not(.disabled)").length > 0 ? " (" + $("#p1-upgrades > button:not(.disabled)").length + ")" : "");
+        $("li.upgrades > a").text(upgradeTabText)
     };
 };
 
@@ -139,3 +141,29 @@ window.addEventListener("gamepadconnected", function (e) {
 window.addEventListener("gamepaddisconnected", function (e) {
     ShootrUI.updateGamepadSelect();
 });
+
+
+ShootrUI.tabSwitch = function (tab) {
+    switch (tab) {
+        case "game":
+            $("#upgradetab,#optionstab,#level-select").addClass("hidden-xs");
+            $(".canvas-container").removeClass("hidden-xs");
+            $("ul.nav-pills > li").removeClass("active");
+            $("ul.nav-pills > li.game").addClass("active");
+            break;
+        case "upgrades":
+            $(".canvas-container,#optionstab,#level-select").addClass("hidden-xs");
+            $("#upgradetab").removeClass("hidden-xs");
+            $("ul.nav-pills > li").removeClass("active");
+            $("ul.nav-pills > li.upgrades").addClass("active");
+            changeState(states.paused);
+            break;
+        case "options":
+            $(".canvas-container,#upgradetab").addClass("hidden-xs");
+            $("#optionstab,#level-select").removeClass("hidden-xs");
+            $("ul.nav-pills > li").removeClass("active");
+            $("ul.nav-pills > li.options").addClass("active");
+            changeState(states.paused);
+            break;
+    }
+};

@@ -15,6 +15,9 @@ var Powerups = {
 		
 		return PIXI.Texture.fromCanvas(blast);
 	})(),
+	lastTrail:0,
+	tint:0,
+	tintMod:7,
     powerupLength:10,
 	maxPowerups: 1,
 	currPowerup: 0,
@@ -52,10 +55,20 @@ var Powerups = {
 	            Powerups.sprite[i].position.x += Powerups.xSpeed[i] * timeDiff;
 	            Powerups.sprite[i].position.y += Powerups.ySpeed[i] * timeDiff;
 	            Powerups.sprite[i].rotation += Powerups.rotSpeed[i] * timeDiff;
+				
+				Powerups.lastTrail += timeDiff * 1000;
+				if (Powerups.lastTrail > 60) {
+					Powerups.lastTrail = 0;
+					Stars.shipTrails.newPowerupPart(
+						Powerups.sprite[i].position.x - 20 + (Math.random() * 40), 
+						Powerups.sprite[i].position.y - 20 + (Math.random() * 40));
+				}
 	            
-	            Powerups.sprite[i].tint++;
-	            if (Powerups.sprite[i].tint >= 0xffffff)
-                    Powerups.sprite[i].tint = Math.random() * 0xffffff;
+				Powerups.tint += Powerups.tintMod;
+	            Powerups.sprite[i].tint = rgbToHex(255,Math.min(255,Math.max(Powerups.tint,0)),0);
+				
+	            if (Powerups.tint >= 255 || Powerups.tint <= 0)
+                    Powerups.tintMod *= -1;
 
 	            if (Ships.detectCollision(PlayerShip.playerShip, Powerups.sprite[i].position.x - 10, Powerups.sprite[i].position.y) ||
                     Ships.detectCollision(PlayerShip.playerShip, Powerups.sprite[i].position.x + 10, Powerups.sprite[i].position.y) ||
@@ -75,7 +88,7 @@ var Powerups = {
 	                    PlayerShip.playerShip.powerupTime = 0;
 	                    PlayerShip.playerShip.crossShot = 1;
 	                } else {
-	                    GameText.bigText.newBigText("Double your credits!");
+	                    GameText.bigText.newBigText("Double credits!");
 	                    Powerups.sprite[i].visible = false;
 	                    addCredits(gameModel.p1.credits);
 	                }
@@ -87,8 +100,6 @@ var Powerups = {
 	    if (Powerups.lastPowerupSpawned > Powerups.minFrequency && Math.random() > Powerups.chance) {
 		    Powerups.lastPowerupSpawned = 0;
 		    Powerups.sprite[Powerups.currPowerup].visible = true;
-
-		    Powerups.sprite[Powerups.currPowerup].tint = Math.random() * 0xffffff;
 		    
 		    Powerups.sprite[Powerups.currPowerup].position = { x: x, y: y };
 		    Powerups.sprite[Powerups.currPowerup].rotation = Math.random() * 5;

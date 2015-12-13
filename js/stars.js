@@ -82,9 +82,28 @@ Stars.shipTrails = {
 	})(),
 	maxTrails: 200,
 	currTrail: 0,
+	fadeSpeed: [],
 	speedY: [],
 	speedX: [],
 	sprite: [],
+	newPowerupPart:function(x,y) {
+		if (Stars.shipTrails.currTrail >= Stars.shipTrails.maxTrails)
+			Stars.shipTrails.currTrail = 0;
+
+		Stars.shipTrails.fadeSpeed[Stars.shipTrails.currTrail] = 1;
+		Stars.shipTrails.sprite[Stars.shipTrails.currTrail].visible = true;
+		Stars.shipTrails.sprite[Stars.shipTrails.currTrail].alpha = 1;
+		Stars.shipTrails.sprite[Stars.shipTrails.currTrail].position = {
+			x: x,
+			y: y
+		};
+		Stars.shipTrails.sprite[Stars.shipTrails.currTrail].scale.x = 1 + Math.random() * 2;
+		Stars.shipTrails.sprite[Stars.shipTrails.currTrail].scale.y = 1 + Math.random() * 2;
+		Stars.shipTrails.speedY[Stars.shipTrails.currTrail] = -40 + Math.random() * 80;
+		Stars.shipTrails.speedX[Stars.shipTrails.currTrail] = -40 + Math.random() * 80;
+
+		Stars.shipTrails.currTrail++;
+	},
 	newPart: function(ship) {
 		if (Stars.shipTrails.currTrail >= Stars.shipTrails.maxTrails)
 			Stars.shipTrails.currTrail = 0;
@@ -95,6 +114,7 @@ Stars.shipTrails = {
 			x: ship.trailX - 3 + (Math.random() * 6),
 			y: ship.trailY
 		};
+		Stars.shipTrails.fadeSpeed[Stars.shipTrails.currTrail] = 7;
 		Stars.shipTrails.sprite[Stars.shipTrails.currTrail].scale.x = 1 + Math.random() * 2;
 		Stars.shipTrails.sprite[Stars.shipTrails.currTrail].scale.y = 1 + Math.random() * 2;
 		Stars.shipTrails.speedY[Stars.shipTrails.currTrail] = (ship.enemyShip ? -1 : 1) * (150 + Math.random() * 100);
@@ -139,8 +159,8 @@ Stars.shipTrails = {
 		for (var i = 0; i < Stars.shipTrails.maxTrails; i++) {
 			if (Stars.shipTrails.sprite[i].visible) {
 
-				Stars.shipTrails.sprite[i].scale.x -= 7 * timeDiff;
-				Stars.shipTrails.sprite[i].scale.y -= 7 * timeDiff;
+				Stars.shipTrails.sprite[i].scale.x -= Stars.shipTrails.fadeSpeed[i] * timeDiff;
+				Stars.shipTrails.sprite[i].scale.y -= Stars.shipTrails.fadeSpeed[i] * timeDiff;
 
 				if (Stars.shipTrails.sprite[i].scale.x <= 0) {
 					Stars.shipTrails.sprite[i].visible = false;
