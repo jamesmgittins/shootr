@@ -14,6 +14,8 @@ var w = false;
 var a = false;
 var s = false;
 var d = false;
+var q = false;
+var ekey = false;
 
 var states = {
     running: 0,
@@ -51,9 +53,10 @@ function changeLevel(level) {
     var levelDifficultyModifier = Math.pow(1.2, gameModel.currentLevel - 1);
 	
     Bullets.enemyBullets.enemyShotStrength = gameModel.currentLevel * levelDifficultyModifier;
-	Bullets.enemyBullets.enemyShotSpeed = 100 + (gameModel.currentLevel * 2);
+	Bullets.enemyBullets.enemyShotSpeed = Math.min(100 + (gameModel.currentLevel * 2), 250);
 	EnemyShips.waveBulletFrequency = 3000 - gameModel.currentLevel;
 	EnemyShips.shipHealth = 2 * gameModel.currentLevel * levelDifficultyModifier;
+	EnemyShips.maxBulletsPerShot = Math.min(10, gameModel.currentLevel / 5);
 	enemiesKilled = 0;
 	enemiesToKill = enemiesToKillConstant + Math.floor(gameModel.currentLevel / 5);
 	if (gameModel.currentLevel != gameModel.levelsUnlocked)
@@ -135,26 +138,22 @@ function resetGame() {
     destroyedWarning = false;
     PlayerShip.playerShip.sprite.visible = true;
 }
-var tintOnTime = 0.1;
-var tintOffTime = 0.3;
-var tintFlashTime = 0;
-var tintOn = false;
+
+var tintPercent = 0;
+var tintNumber = 0;
 
 function update() {
     
 	requestAnimationFrame(update);
-	//setTimeout(update); // use instead of request animation frame to turn of v-sync
+	//setTimeout(update); // use instead of request animation frame to turn off v-sync
 
-    // get time difference since last frame
-    var updateTime = new Date().getTime();
-    var timeDiff = (Math.min(100, Math.max(updateTime - lastUpdate, 0))) / 1000;
-    lastUpdate = updateTime;
+	// get time difference since last frame
+	var updateTime = new Date().getTime();
+	var timeDiff = (Math.min(100, Math.max(updateTime - lastUpdate, 0))) / 1000;
+	lastUpdate = updateTime;
 
-	tintFlashTime += timeDiff;
-	if ((tintOn && tintFlashTime >= tintOnTime) || (tintFlashTime >= tintOffTime)) {
-		tintOn = !tintOn;
-		tintFlashTime = 0;
-	}
+	tintNumber += timeDiff * 6;
+	tintPercent = Math.abs(Math.sin(tintNumber));
 
 	updateGamepads();
 
@@ -291,8 +290,14 @@ function clickCanvas(data) {
 
 window.onkeydown = function (e) {
     switch (e.keyCode) {
+				case 81:
+						q = true;
+						break;
         case 87:
             w = true;
+            break;
+				case 69:
+            ekey = true;
             break;
         case 65:
             a = true;
@@ -322,8 +327,14 @@ window.onkeydown = function (e) {
 };
 window.onkeyup = function (e) {
     switch (e.keyCode) {
+				case 81:
+						q = false;
+						break;
         case 87:
             w = false;
+            break;
+				case 69:
+            ekey = false;
             break;
         case 65:
             a = false;
@@ -364,7 +375,6 @@ function updateGamepads() {
             if (playerOneButtons[i].pressed) {
 
                 if (!playerOneButtonsPressed[i]) {
-
                     switch (i) {
                         // start button
                         case 9:
@@ -387,6 +397,12 @@ function updateGamepads() {
                                 });
                             }
                             break;
+												// L-bumper
+												case 4:
+												break;
+												// R-bumper
+												case 5:
+												break;
                         // up
                         case 12:
                             playerOneSelectedLevel = -1;

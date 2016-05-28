@@ -99,38 +99,60 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
         PlayerShip.playerShip.spreadShot = 0;
         PlayerShip.playerShip.crossShot = 0;
     }
-    
+	
+		PlayerShip.playerShip.rolling += timeDiff;
+		if (PlayerShip.playerShip.rolling < 0.3) {
+			if (PlayerShip.playerShip.rollingLeft) {
+				Ships.updateShipSpeed(PlayerShip.playerShip, -1, 0, timeDiff * 2.5);
+			} else {
+				Ships.updateShipSpeed(PlayerShip.playerShip, 1, 0, timeDiff * 2.5);
+			}
+			Ships.updateRotation(PlayerShip.playerShip, timeDiff);
+			PlayerShip.playerShip.sprite.scale.x = 1 - (PlayerShip.playerShip.rolling > 0.15 ? PlayerShip.playerShip.rolling - 0.15 : PlayerShip.playerShip.rolling) * 13.333;
+			Bullets.playerBullets.lastPlayerShot = 0;
+		} else {
+			if (playerOneAxes[0] > 0.25 || playerOneAxes[0] < -0.25 || playerOneAxes[1] > 0.25 || playerOneAxes[1] < -0.25) {
+					Ships.updateShipSpeedFromController(PlayerShip.playerShip, playerOneAxes[0], playerOneAxes[1], timeDiff);
+					clickLocX = 0;
+					clickLocY = 0;
+			} else if (w || a || s || d) {
+					var xDiff = 0;
+					var yDiff = 0;
+					if (w) yDiff--;
+					if (a) xDiff--;
+					if (s) yDiff++;
+					if (d) xDiff++;
+					Ships.updateShipSpeed(PlayerShip.playerShip, xDiff, yDiff, timeDiff);
+					clickLocX = 0;
+					clickLocY = 0;
+			} else if (clickLocX && clickLocY && Math.sqrt(Math.pow(PlayerShip.playerShip.xLoc - clickLocX, 2) + Math.pow(PlayerShip.playerShip.yLoc - clickLocY, 2)) > 5) {
 
-    if (playerOneAxes[0] > 0.25 || playerOneAxes[0] < -0.25 || playerOneAxes[1] > 0.25 || playerOneAxes[1] < -0.25) {
-        Ships.updateShipSpeedFromController(PlayerShip.playerShip, playerOneAxes[0], playerOneAxes[1], timeDiff);
-        clickLocX = 0;
-        clickLocY = 0;
-    } else if (w || a || s || d) {
-        var xDiff = 0;
-        var yDiff = 0;
-        if (w) yDiff--;
-        if (a) xDiff--;
-        if (s) yDiff++;
-        if (d) xDiff++;
-        Ships.updateShipSpeed(PlayerShip.playerShip, xDiff, yDiff, timeDiff);
-        clickLocX = 0;
-        clickLocY = 0;
-    } else if (clickLocX && clickLocY && Math.sqrt(Math.pow(PlayerShip.playerShip.xLoc - clickLocX, 2) + Math.pow(PlayerShip.playerShip.yLoc - clickLocY, 2)) > 5) {
+					Ships.updateShipSpeed(PlayerShip.playerShip, 
+									clickLocX - PlayerShip.playerShip.xLoc, 
+									clickLocY - PlayerShip.playerShip.yLoc, 
+									timeDiff);
+			} else {
+					clickLocX = 0;
+					clickLocY = 0;
+					PlayerShip.playerShip.xSpeed = 0;
+					PlayerShip.playerShip.ySpeed = 0;
+			}
+			var maxRot = PlayerShip.playerShip.xSpeed / 500;
+			var timeMult = timeDiff;
 
-        Ships.updateShipSpeed(PlayerShip.playerShip, 
-							  clickLocX - PlayerShip.playerShip.xLoc, 
-							  clickLocY - PlayerShip.playerShip.yLoc, 
-							  timeDiff);
-    } else {
-        clickLocX = 0;
-        clickLocY = 0;
-        PlayerShip.playerShip.xSpeed = 0;
-        PlayerShip.playerShip.ySpeed = 0;
-    }
-    var maxRot = PlayerShip.playerShip.xSpeed / 500;
-    var timeMult = timeDiff;
-
-    Ships.updateRotation(PlayerShip.playerShip, timeDiff);
+			Ships.updateRotation(PlayerShip.playerShip, timeDiff);
+			PlayerShip.playerShip.sprite.scale.x = 1;
+			
+			if (PlayerShip.playerShip.rolling < 1) {
+				Bullets.playerBullets.lastPlayerShot = 0;
+			} else {
+				if (q || ekey || playerOneButtonsPressed[4] || playerOneButtonsPressed[5]) {
+					PlayerShip.playerShip.rolling = 0;
+					PlayerShip.playerShip.rollingLeft = q || playerOneButtonsPressed[4];
+					Sounds.dodge.play();
+				}
+			}
+		}
 
     PlayerShip.playerShip.lastDmg += timeDiff * 1000;
     if(PlayerShip.playerShip.lastDmg >= PlayerShip.playerShip.shieldDelay && PlayerShip.playerShip.currShield < PlayerShip.playerShip.maxShield) {
@@ -143,7 +165,7 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
     PlayerShip.playerShip.sprite.position.y = PlayerShip.playerShip.yLoc;
     PlayerShip.playerShip.sprite.rotation = PlayerShip.playerShip.rotation;
 	Stars.shipTrails.updateShip(PlayerShip.playerShip,timeDiff);
-	if (tintOn && PlayerShip.playerShip.currShield <= PlayerShip.playerShip.maxShield / 2)
+	if (PlayerShip.playerShip.currShield <= PlayerShip.playerShip.maxShield * 0.7)
 		PlayerShip.playerShip.sprite.tint = calculateTint(PlayerShip.playerShip.currShield/PlayerShip.playerShip.maxShield);
 	else
 		PlayerShip.playerShip.sprite.tint = 0xFFFFFF;
@@ -152,12 +174,14 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
 PlayerShip.damagePlayerShip = function (playerShip, damage) {
     playerShip.currShield -= damage;
     playerShip.lastDmg = 0;
+		Sounds.damage.play();
     if (playerShip.currShield <= 0 && playerShip.inPlay === 1) {
         playerShip.sprite.visible=false;
         playerShip.inPlay = 0;
         PlayerShip.allPlayersDead = 1;
         PlayerShip.allDeadTimer = 0;
         Ships.generateExplosion(playerShip);
+				Sounds.shipExplosion.play();
     }
 };
 
@@ -227,6 +251,8 @@ PlayerShip.initialize = function () {
     PlayerShip.playerShip.sprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(PlayerShip.playerShip.art));
 
     PlayerShip.playerShip.sprite.anchor = { x: 0.5, y: 0.5 };
+	
+   	PlayerShip.playerShip.rolling = 100;
 
     PlayerShip.playerShip.sprite.position.x = PlayerShip.playerShip.xLoc;
     PlayerShip.playerShip.sprite.position.y = PlayerShip.playerShip.yLoc;

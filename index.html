@@ -33,23 +33,30 @@
                 <div class="canvas-container">
                     <canvas id="game_canvas"></canvas>
                     <div id="message-overlay">Click or press start to begin</div>
-                </div> 
+                </div>
 			</div>
 			<div class="col-xs-12 col-sm-4 hidden-xs" id="optionstab">
-                <button onclick="if (confirm('You will lose all progress')) { resetSaveGame(); }">Reset Game</button>
-								<button onclick="$('.canvas-container').requestFullScreen();">Full screen</button>
-            </div>
-		</div>	
+				<button onclick="if (confirm('You will lose all progress')) { resetSaveGame(); }">Reset Game</button>
+				<button onclick="ShootrUI.toggleFullscreen()">Full screen</button>
+				<div>
+					<p>
+						Volume: <span id="vol-display"></span>%
+					</p>
+					<input id="vol-slider" type="range" min="0" max="1" step="0.01" onchange="ShootrUI.updateVolume(this);"/>
+				</div>
+      </div>
+		</div>
 	</div>
     <script src="js/utilfunctions.js"></script>
-	<script src="js/gamemodel.js"></script>
     <script src="js/stars.js"></script>
     <script src="js/ships.js"></script>
     <script src="js/playership.js"></script>
     <script src="js/enemyships.js"></script>
     <script src="js/bullets.js"></script>
+		<script src="js/gamemodel.js"></script>
     <script src="js/powerups.js"></script>
-	<script src="js/gametext.js"></script>
+	  <script src="js/gametext.js"></script>
+  	<script src="js/sounds.js"></script>
     <script src="js/shootrui.js"></script>
     <script src="js/shootr.js"></script>
 </body>
