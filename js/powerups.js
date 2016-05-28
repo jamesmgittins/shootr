@@ -75,6 +75,8 @@ var Powerups = {
                     Ships.detectCollision(PlayerShip.playerShip, Powerups.sprite[i].position.x, Powerups.sprite[i].position.y - 10) ||
                     Ships.detectCollision(PlayerShip.playerShip, Powerups.sprite[i].position.x, Powerups.sprite[i].position.y + 10)) {
 
+								Sounds.powerup.play();
+								
 	                var number = Math.random();
 
 	                if (number > 0.6) {

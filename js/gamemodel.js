@@ -1,6 +1,7 @@
 var gameModel = {
 	levelsUnlocked : 1,
 	currentLevel : 1,
+	masterVolume : 0.5,
 	p1 : {
 		shipSeed: 1,
 		credits: 0,
@@ -32,6 +33,9 @@ function load() {
 	    gameModel = JSON.parse(localStorage.getItem("gameModel"));
 
 	loadUpgrades();
+	
+	$("#vol-slider").val(gameModel.masterVolume);
+	$("#vol-display").text((gameModel.masterVolume * 100).toFixed());
 }
 
 function loadUpgrades() {
@@ -78,7 +82,7 @@ function buyUpgrade(id) {
                 }
 
                 GameText.bigText.newBigText(upgrades[j].desc);
-
+								Sounds.powerup.play();
                 upgrades[j].qty++;
                 applyUpgrade(upgrades[j]);
                 save();
@@ -112,7 +116,7 @@ var upgrades = [
 	{
 		desc:"+5% Fire Rate",
 		basePrice: 750,
-        baseVal: 1000,
+    baseVal: Bullets.playerBullets.shotFrequency,
 		priceMult: 1.40,
 		effectMultiplier: 0.95,
 		id:"Bullets.playerBullets.shotFrequency",
@@ -122,7 +126,7 @@ var upgrades = [
 	{
 		desc:"+30% Shot Damage",
 		basePrice: 20,
-		baseVal: 1.8,
+		baseVal: Bullets.playerBullets.strength,
 		priceMult: 1.36,
 		effectMultiplier: 1.3,
 		id:"Bullets.playerBullets.strength",
@@ -132,7 +136,7 @@ var upgrades = [
     {
         desc: "+5% Shot Speed",
         basePrice: 1200,
-        baseVal: 150,
+        baseVal: Bullets.playerBullets.shotSpeed,
         priceMult: 1.55,
         effectMultiplier: 1.05,
         id: "Bullets.playerBullets.shotSpeed",

@@ -1,4 +1,4 @@
-﻿var Ships = {};
+var Ships = {};
 
 Ships.playerColors = [
 	["#e3f2fd", "#bbdefb", "#90caf9", "#64b5f6", "#42a5f5", "#2196f3", "#1e88e5" ,"#1976d2" ,"#1565c0", "#0d47a1"] // blue
@@ -123,7 +123,7 @@ Ships.shipArt = function (size, seed, enemy, colors) {
 var collisionCushion = 3; // num pixels to reduce collision area by
 
 Ships.detectShipCollision = function(enemyShip, playerShip) {
-    if (playerShip.inPlay === 1 &&
+    if (playerShip.inPlay === 1 && playerShip.rolling > 0.3 &&
         enemyShip.yLoc < playerShip.yLoc + playerShip.offset * 2 &&
 		enemyShip.yLoc + enemyShip.offset * 2 > playerShip.yLoc &&
 		enemyShip.xLoc < playerShip.xLoc + playerShip.offset * 2 &&
@@ -152,19 +152,22 @@ Ships.detectShipCollision = function(enemyShip, playerShip) {
 };
 
 Ships.detectCollision = function (ship, xLoc, yLoc) {
-    if (ship.inPlay === 1 && yLoc > ship.yLoc - ship.offset && yLoc < ship.yLoc + ship.offset) {
-        var yPos = yLoc - (ship.yLoc - ship.offset);
+	if (!ship.enemyShip && ship.rolling < 0.3)
+		return false;
+	
+	if (ship.inPlay === 1 && yLoc > ship.yLoc - ship.offset && yLoc < ship.yLoc + ship.offset) {
+		var yPos = yLoc - (ship.yLoc - ship.offset);
 		var xOffset;
-        if (!ship.enemyShip) {
-            xOffset = ship.offset * (yPos / (ship.offset * 2));
-        } else {
-            xOffset = ship.offset * (((ship.offset * 2 )- yPos) / (ship.offset * 2));
-        }
-        if (xLoc > ship.xLoc - xOffset + collisionCushion && xLoc < ship.xLoc + xOffset - collisionCushion) {
-            return true;
-        }
-    }
-    return false;
+		if (!ship.enemyShip) {
+			xOffset = ship.offset * (yPos / (ship.offset * 2));
+		} else {
+			xOffset = ship.offset * (((ship.offset * 2 )- yPos) / (ship.offset * 2));
+		}
+		if (xLoc > ship.xLoc - xOffset + collisionCushion && xLoc < ship.xLoc + xOffset - collisionCushion) {
+			return true;
+		}
+	}
+	return false;
 };
 
 

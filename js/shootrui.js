@@ -1,4 +1,4 @@
-﻿ShootrUI = {};
+ShootrUI = {};
 
 var player1Gamepad = -1;
 var player2Gamepad = -1;
@@ -17,6 +17,39 @@ ShootrUI.pauseGame = function () {
 var fps = 60;
 var fpsCounter = 0;
 var lastFps = 0;
+
+ShootrUI.toggleFullscreen = function() {
+	if (document.fullscreenElement ||
+			document.webkitFullscreenElement ||
+			document.mozFullScreenElement ||
+			document.msFullscreenElement) {
+		if (document.exitFullscreen) {
+			document.exitFullscreen();
+		} else if (document.webkitExitFullscreen) {
+			document.webkitExitFullscreen();
+		} else if (document.mozCancelFullScreen) {
+			document.mozCancelFullScreen();
+		} else if (document.msExitFullscreen) {
+			document.msExitFullscreen();
+		}
+	} else {
+		var i = $('body')[0];
+		if (i.requestFullscreen) {
+			i.requestFullscreen();
+		} else if (i.webkitRequestFullscreen) {
+			i.webkitRequestFullscreen();
+		} else if (i.mozRequestFullScreen) {
+			i.mozRequestFullScreen();
+		} else if (i.msRequestFullscreen) {
+			i.msRequestFullscreen();
+		}
+	}
+};
+
+ShootrUI.updateVolume = function(element) {
+	gameModel.masterVolume = element.value;
+	$("#vol-display").text((gameModel.masterVolume * 100).toFixed());
+};
 
 ShootrUI.updateFps = function (updateTime) {
     fpsCounter++;
@@ -121,6 +154,8 @@ ShootrUI.updateGamepadSelect = function () {
 
         for (var i = 0; i < navigator.getGamepads().length; i++) {
             if (typeof navigator.getGamepads()[i] !== 'undefined') {
+								if (player1Gamepad == -1)
+										player1Gamepad = i;
                 gamePadOptions += "<option value=" + i + (i == player1Gamepad ? " selected " : "") + ">" + navigator.getGamepads()[i].id + "</option>";
                 foundAGamePad = true;
             }

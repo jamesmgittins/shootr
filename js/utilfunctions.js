@@ -10,8 +10,12 @@ function rgbToHex(r,g,b) {
 	return b | (g << 8) | (r << 16);
 }
 
-function calculateTint(damageFactor) {
+function calculateTintOld(damageFactor) {
 	return (255 * damageFactor) | ((255 * damageFactor) << 8) | (255 << 16);
+}
+
+function calculateTint(damageFactor) {
+	return (255 - (255 * (1 - damageFactor) * tintPercent)) | ((255 - (255 * (1 - damageFactor) * tintPercent)) << 8) | (255 << 16);
 }
 
 function calculateTintFromString(value) {

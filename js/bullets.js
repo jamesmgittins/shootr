@@ -1,4 +1,4 @@
-﻿var Bullets = {};
+var Bullets = {};
 
 Bullets.blasts = {
     texture: (function () {
@@ -93,6 +93,9 @@ Bullets.enemyBullets = {
             Bullets.enemyBullets.currentEnemyBullet = 0;
         }
 
+				if (ship.xLoc < 0 || ship.xLoc > canvasWidth || ship.yLoc < 0 || ship.yLoc > canvasHeight)
+					return;
+			
         Bullets.enemyBullets.xLoc[Bullets.enemyBullets.currentEnemyBullet] = ship.xLoc;
         Bullets.enemyBullets.yLoc[Bullets.enemyBullets.currentEnemyBullet] = ship.yLoc + 16;
     
@@ -104,8 +107,10 @@ Bullets.enemyBullets = {
         Bullets.enemyBullets.ySpeed[Bullets.enemyBullets.currentEnemyBullet] = yDiff / multi * Bullets.enemyBullets.enemyShotSpeed;
 
         Bullets.enemyBullets.inPlay[Bullets.enemyBullets.currentEnemyBullet] = 1;
+			
+				Sounds.enemyShot.play();
 
-		Bullets.enemyBullets.sprite[Bullets.enemyBullets.currentEnemyBullet].visible = true;
+				Bullets.enemyBullets.sprite[Bullets.enemyBullets.currentEnemyBullet].visible = true;
         Bullets.enemyBullets.sprite[Bullets.enemyBullets.currentEnemyBullet].position.x = ship.xLoc;
         Bullets.enemyBullets.sprite[Bullets.enemyBullets.currentEnemyBullet].position.y = ship.yLoc - 16;
 		
@@ -143,16 +148,17 @@ Bullets.playerBullets = {
     })(),
 	maxPlayerBullets : 100,
 	currBullet:0,
-	shotFrequency : 1000,
+	shotFrequency : 200,
 	lastPlayerShot : 0,
-	shotSpeed : 150,
-	strength : 1,
+	shotSpeed : 300,
+	strength : 0.25,
 	xLoc: [],
-    yLoc: [],
-    ySpeed : [],
-    xSpeed : [],
-    inPlay: [],
-    sprite: [],
+	yLoc: [],
+	ySpeed : [],
+	xSpeed : [],
+	inPlay: [],
+	sprite: [],
+	bulletStrength :[],
 	resetAll: function (){
 		for (var i=0; i<Bullets.playerBullets.maxPlayerBullets; i++) {
 			Bullets.playerBullets.inPlay[i]=0;
@@ -160,7 +166,7 @@ Bullets.playerBullets = {
 		}
 	},
     resetPlayerBullet: function (i) {          
-
+			Bullets.playerBullets.bulletStrength[i] = Bullets.playerBullets.strength;
         Bullets.playerBullets.xLoc[i] = PlayerShip.playerShip.xLoc;
         Bullets.playerBullets.yLoc[i] = PlayerShip.playerShip.yLoc - 16;
         Bullets.playerBullets.ySpeed[i] = Bullets.playerBullets.shotSpeed;
@@ -215,6 +221,7 @@ Bullets.playerBullets = {
 		}
 		
 		Bullets.playerBullets.newBullet(speed);
+		Sounds.playerBullets.play();
 		
 		if (PlayerShip.playerShip.spreadShot) {
 			Bullets.playerBullets.newBullet(RotateVector2d(speed.x, speed.y, -0.12));
@@ -229,8 +236,8 @@ Bullets.playerBullets = {
 };
 
 Bullets.explosionBits = {
-    bitsPerExplosion: 16,
-    maxExplosionBits: 64,
+    bitsPerExplosion: 12,
+    maxExplosionBits: 128,
     currentExplosionBit: 0,
     sprite:[],
     xSpeed: [],
@@ -238,7 +245,7 @@ Bullets.explosionBits = {
     update:function(timeDiff){
         for (var i = 0; i < Bullets.explosionBits.maxExplosionBits; i++) {
             if (Bullets.explosionBits.sprite[i].visible) {
-                Bullets.explosionBits.sprite[i].alpha -= 0.5 * timeDiff;
+                Bullets.explosionBits.sprite[i].alpha -= 2 * timeDiff;
                 if (Bullets.explosionBits.sprite[i].alpha <= 0) {
                     Bullets.explosionBits.sprite[i].visible = false;
                 } else {
