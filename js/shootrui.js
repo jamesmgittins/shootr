@@ -80,7 +80,7 @@ ShootrUI.updateUpgrades = function () {
                 price = upgradePrice(upgrades[i]);
                 var buttonClass = (counter == playerOneSelectedUpgrade ? "selected" : "") + (price >= gameModel.p1.credits ? " disabled" : "")
                 var spanWidth = price < gameModel.p1.credits ? '100%' : (gameModel.p1.credits / price * 100).toFixed(1) + '%';
-                
+
                 upgradesHtml = upgradesHtml + "<button class='" + buttonClass + "' onclick=\"buyUpgrade('" + upgrades[i].id + "');\" data-price='" +
                     price + "'><span>(" +
                     (upgrades[i].maxQty != -1 ? upgrades[i].qty + "/" + upgrades[i].maxQty + ")</span>" : upgrades[i].qty + "/&infin;)</span> ") +
@@ -115,7 +115,7 @@ ShootrUI.renderLevelSelect = function () {
 
         if (i == playerOneSelectedLevel)
             classAttr = classAttr + " selected";
-        
+
 
         levelsHtml = levelsHtml + "<div class='" + classAttr + "'>" + i + "</div>";
     }
@@ -147,7 +147,7 @@ ShootrUI.updateUI = function () {
 };
 
 ShootrUI.updateGamepadSelect = function () {
-    if (typeof navigator.getGamepads !== 'undefined') {
+    if (navigator.getGamepads && typeof navigator.getGamepads !== 'undefined') {
 
         var gamePadOptions = "<option value='-1'>Select Gamepad</option>";
         var foundAGamePad = false;
