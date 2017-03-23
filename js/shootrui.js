@@ -147,13 +147,13 @@ ShootrUI.updateUI = function () {
 };
 
 ShootrUI.updateGamepadSelect = function () {
-    if (typeof navigator.getGamepads !== 'undefined' && navigator.getGamepads()) {
+    if (typeof navigator.getGamepads !== 'undefined') {
 
         var gamePadOptions = "<option value='-1'>Select Gamepad</option>";
         var foundAGamePad = false;
 
         for (var i = 0; i < navigator.getGamepads().length; i++) {
-            if (typeof navigator.getGamepads()[i] !== 'undefined') {
+            if (navigator.getGamepads()[i]) {
 								if (player1Gamepad == -1)
 										player1Gamepad = i;
                 gamePadOptions += "<option value=" + i + (i == player1Gamepad ? " selected " : "") + ">" + navigator.getGamepads()[i].id + "</option>";
