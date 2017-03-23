@@ -147,7 +147,7 @@ ShootrUI.updateUI = function () {
 };
 
 ShootrUI.updateGamepadSelect = function () {
-    if (navigator.getGamepads && typeof navigator.getGamepads !== 'undefined') {
+    if (typeof navigator.getGamepads !== 'undefined' && navigator.getGamepads()) {
 
         var gamePadOptions = "<option value='-1'>Select Gamepad</option>";
         var foundAGamePad = false;
