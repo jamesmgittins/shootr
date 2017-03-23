@@ -19,7 +19,7 @@ var gameModel = {
 function save() {
 	if (typeof (Storage) === "undefined")
 		return;
-	
+
 	setTimeout(function () {
 	    localStorage.setItem("gameModel", JSON.stringify(gameModel));
 	});
@@ -28,12 +28,12 @@ function save() {
 function load() {
 	if (typeof (Storage) === "undefined")
 		return;
-	
+
 	if (localStorage.getItem("gameModel") !== null)
 	    gameModel = JSON.parse(localStorage.getItem("gameModel"));
 
 	loadUpgrades();
-	
+
 	$("#vol-slider").val(gameModel.masterVolume);
 	$("#vol-display").text((gameModel.masterVolume * 100).toFixed());
 }
@@ -82,7 +82,7 @@ function buyUpgrade(id) {
                 }
 
                 GameText.bigText.newBigText(upgrades[j].desc);
-		
+
 		Sounds.powerup.play();
 
                 upgrades[j].qty++;
@@ -141,11 +141,8 @@ var upgrades = [
 	},
     {
         desc: "+5% Shot Speed",
-
-        baseVal: 150,
-
+        basePrice: 150,
         baseVal: Bullets.playerBullets.shotSpeed,
-
         priceMult: 1.55,
         effectMultiplier: 1.05,
         id: "Bullets.playerBullets.shotSpeed",
