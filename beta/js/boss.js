@@ -37,6 +37,8 @@ Boss.randomLocation = function() {
   if (!gameModel.bossesDefeated)
     gameModel.bossesDefeated = 0;
 
+    Math.seedrandom(new Date().getTime());
+
   var currentLevel = Constants.levelsPerBoss * (gameModel.bossesDefeated + 1);
   var xLocation = 0;
   var yLocation = 0;

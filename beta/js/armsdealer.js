@@ -231,7 +231,7 @@ ArmsDealer.createItemLayout = function(item, buy, full) {
 
 	var iconWidth = 128;
 
-	var name = new PIXI.Text((item.ultra ? item.ultraName + "\n": "") + item.name, {
+	var name = new PIXI.Text((item.ultra ||  item.hyper ? item.ultraName + "\n": "") + item.name, {
 		font: (22 * scalingFactor) + 'px Dosis',
 		fill: '#FFF',
 		stroke: "#000",
@@ -268,12 +268,12 @@ ArmsDealer.createItemLayout = function(item, buy, full) {
 	var comparison;
 	if (item.type == "weapon") {
 		comparison = ArmsDealer.weaponComparison(item);
-		details.text = (item.ultra ? item.ultraText + "\n" : "") + formatMoney(item.dps) + " DPS " + comparison.dps + "\n"  + (item.bullets > 1 ? item.bullets + "x " : "") + formatMoney(item.shotsPerSecond) + " Shots per second " + comparison.shotsPerSecond + "\n" + (item.accuracy * 100).toFixed(2) + "% Accuracy " + comparison.accuracy;
+		details.text = (item.ultra || item.hyper ? item.ultraText + "\n" : "") + formatMoney(item.dps) + " DPS " + comparison.dps + "\n"  + (item.bullets > 1 ? item.bullets + "x " : "") + formatMoney(item.shotsPerSecond) + " Shots per second " + comparison.shotsPerSecond + "\n" + (item.accuracy * 100).toFixed(2) + "% Accuracy " + comparison.accuracy;
 		level.text = "Level " + item.level + (comparison.equipped ? " Weapon Slot [EQUIPPED]" : " Weapon Slot Required");
 		level.tint = level.defaultTint = item.level > Math.max(gameModel.p1.ship.frontWeaponLevel, gameModel.p1.ship.turretWeaponLevel, gameModel.p1.ship.rearWeaponLevel) ? Loadout.invalidLevelTint : MainMenu.buttonTint;
 	} else {
 		comparison = ArmsDealer.shieldComparison(item);
-		details.text = (item.ultra ? item.ultraText + "\n" : "") + formatMoney(item.capacity) + " Capacity " + comparison.capacity + "\n" + formatMoney(item.chargePerSecond) + " Recharge Rate" + comparison.chargePerSecond + "\n" + item.chargeDelay.toFixed(2) + " Second Recharge Delay " + comparison.chargeDelay;
+		details.text = (item.ultra || item.hyper ? item.ultraText + "\n" : "") + formatMoney(item.capacity) + " Capacity " + comparison.capacity + "\n" + formatMoney(item.chargePerSecond) + " Recharge Rate" + comparison.chargePerSecond + "\n" + item.chargeDelay.toFixed(2) + " Second Recharge Delay " + comparison.chargeDelay;
 		level.text = "Level " + item.level + (comparison.equipped ? " Shield Slot [EQUIPPED]" : " Shield Slot Required");
 		level.tint = level.defaultTint = item.level > gameModel.p1.ship.shieldLevel ? Loadout.invalidLevelTint : MainMenu.buttonTint;
 	}
@@ -860,7 +860,7 @@ ArmsDealer.moveSelection = function(colDelta, rowDelta) {
 			if (colDelta == -1) {
 				ArmsDealer.select(buttons[buttons.length - 1]);
 			} else {
-				ArmsDealer.select(buttons[row * ArmsDealer.gridWidth])	
+				ArmsDealer.select(buttons[row * ArmsDealer.gridWidth])
 			}
 		}
 	}	else {

@@ -740,7 +740,7 @@ Bullets.missiles = {
 		sprite.position.y = position.y * scalingFactor;
 		sprite.lowHealthSeek = weapon.lowHealthSeek;
 
-		sprite.tint = weapon.ultra ? 0xffffff : 0x999999;
+		sprite.tint = weapon.ultra || weapon.hyper ? 0xffffff : 0x999999;
 
 		var wobble = (1 - weapon.accuracy) * 0.5;
 		angle += -wobble + Math.random() * wobble * 2;
