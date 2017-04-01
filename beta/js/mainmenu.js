@@ -125,31 +125,40 @@ SettingsMenu = {
     {title:"Full Screen", click:function(){
       ShootrUI.toggleFullscreen();
     }},
+    {title:"Music: OFF", click:function(){
+      if (!gameModel.music) {
+        gameModel.music = true;
+        SettingsMenu.menuOptions[2].text.text = "Music: ON";
+      } else {
+        gameModel.music = false;
+        SettingsMenu.menuOptions[2].text.text = "Music: OFF";
+      }
+    }},
     {title:"V-Sync: ON", click:function(){
       if (vSyncOff) {
         vSyncOff = false;
-        SettingsMenu.menuOptions[2].text.text = "V-Sync: ON";
+        SettingsMenu.menuOptions[3].text.text = "V-Sync: ON";
       } else {
         vSyncOff = true;
-        SettingsMenu.menuOptions[2].text.text = "V-Sync: OFF";
+        SettingsMenu.menuOptions[3].text.text = "V-Sync: OFF";
       }
     }},
     {title:"Damage Numbers: ON", click:function(){
       if (!gameModel.dmgNumbers) {
         gameModel.dmgNumbers = true;
-        SettingsMenu.menuOptions[3].text.text = "Show Damage Numbers: ON";
+        SettingsMenu.menuOptions[4].text.text = "Show Damage Numbers: ON";
       } else {
         gameModel.dmgNumbers = false;
-        SettingsMenu.menuOptions[3].text.text = "Show Damage Numbers: OFF";
+        SettingsMenu.menuOptions[4].text.text = "Show Damage Numbers: OFF";
       }
     }},
     {title:"Screen Shake: ON", click:function(){
       if (!gameModel.maxScreenShake) {
         gameModel.maxScreenShake = 5;
-        SettingsMenu.menuOptions[4].text.text = "Screen Shake: ON";
+        SettingsMenu.menuOptions[5].text.text = "Screen Shake: ON";
       } else {
         gameModel.maxScreenShake = 0;
-        SettingsMenu.menuOptions[4].text.text = "Screen Shake: OFF";
+        SettingsMenu.menuOptions[5].text.text = "Screen Shake: OFF";
       }
     }},
     {title:"Delete Save Data", click:function(){
@@ -166,20 +175,25 @@ SettingsMenu = {
     SettingsMenu.controllerText.anchor = {x:1,y:0};
     SettingsMenu.controllerText.position = {x:renderer.width * 0.95 - 25,y: renderer.height * 0.05 + 25};
     SettingsMenu.menuContainer.addChild(SettingsMenu.controllerText);
-    if (vSyncOff) {
-      SettingsMenu.menuOptions[2].text.text = "V-Sync: OFF";
+    if (!gameModel.music) {
+      SettingsMenu.menuOptions[2].text.text = "Music: OFF";
     } else {
-      SettingsMenu.menuOptions[2].text.text = "V-Sync: ON";
+      SettingsMenu.menuOptions[2].text.text = "Music: ON";
+    }
+    if (vSyncOff) {
+      SettingsMenu.menuOptions[3].text.text = "V-Sync: OFF";
+    } else {
+      SettingsMenu.menuOptions[3].text.text = "V-Sync: ON";
     }
     if (gameModel.dmgNumbers) {
-      SettingsMenu.menuOptions[3].text.text = "Show Damage Numbers: ON";
+      SettingsMenu.menuOptions[4].text.text = "Show Damage Numbers: ON";
     } else {
-      SettingsMenu.menuOptions[3].text.text = "Show Damage Numbers: OFF";
+      SettingsMenu.menuOptions[4].text.text = "Show Damage Numbers: OFF";
     }
     if (gameModel.maxScreenShake) {
-      SettingsMenu.menuOptions[4].text.text = "Screen Shake: ON";
+      SettingsMenu.menuOptions[5].text.text = "Screen Shake: ON";
     } else {
-      SettingsMenu.menuOptions[4].text.text = "Screen Shake: OFF";
+      SettingsMenu.menuOptions[5].text.text = "Screen Shake: OFF";
     }
   },
   onShow : function() {

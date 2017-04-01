@@ -6,17 +6,23 @@ var createMusicBank = function(audiofiles, volume) {
     soundCount:0,
     volume: volume,
     play:function(){
-      this.sounds[this.soundCount].volume = this.volume * gameModel.masterVolume;
-      this.sounds[this.soundCount].play();
+      if (gameModel.music) {
+        this.sounds[this.soundCount].volume = this.volume * gameModel.masterVolume;
+        this.sounds[this.soundCount].play();
+      }
     },
     pause:function() {
-      this.sounds[this.soundCount].pause();
+      if (gameModel.music) {
+        this.sounds[this.soundCount].pause();
+      }
     },
     reset: function() {
-      this.sounds[this.soundCount].currentTime = 0;
-      this.soundCount++;
-      if (this.soundCount >= this.sounds.length)
-        this.soundCount=0;
+      if (gameModel.music) {
+        this.sounds[this.soundCount].currentTime = 0;
+        this.soundCount++;
+        if (this.soundCount >= this.sounds.length)
+          this.soundCount=0;
+      }
     }
   };
 
