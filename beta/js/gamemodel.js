@@ -1,4 +1,5 @@
 var Constants = {
+	localStorageVariable: "shootrGameModel",
 	difficultyLevelScaling : 1.4,
 	shieldLevelScaling : 1.38,
 	weaponLevelScaling : 1.38,
@@ -64,7 +65,7 @@ function save() {
 		return;
 
 	setTimeout(function () {
-	    localStorage.setItem("gameModel", JSON.stringify(gameModel));
+	    localStorage.setItem(Constants.localStorageVariable, JSON.stringify(gameModel));
 	});
 }
 
@@ -72,8 +73,8 @@ function load() {
 	if (typeof (Storage) === "undefined")
 		return;
 
-	if (localStorage.getItem("gameModel") !== null)
-	    gameModel = JSON.parse(localStorage.getItem("gameModel"));
+	if (localStorage.getItem(Constants.localStorageVariable) !== null)
+	    gameModel = JSON.parse(localStorage.getItem(Constants.localStorageVariable));
 	else {
 		gameModel = {
 			levelsUnlocked : 1,
@@ -112,7 +113,7 @@ function load() {
 }
 
 function resetSaveGame() {
-    localStorage.removeItem('gameModel');
+    localStorage.removeItem(Constants.localStorageVariable);
     location.reload(true);
 }
 
