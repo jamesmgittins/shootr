@@ -1,0 +1,8 @@
+{
+  "name": "Shootr",
+  "main": "index.html",
+  "window":{
+    "width":1024,
+    "height":768
+  }
+}
