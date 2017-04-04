@@ -52,7 +52,7 @@ Stars.StartEndStars = {
 					Stars.StartEndStars.sprite.visible = true;
 					Stars.StartEndStars.sprite.scale.x = Stars.StartEndStars.sprite.scale.y = 1;
 					Stars.StartEndStars.sprite.tint = rgbToHex(star.tint.r,star.tint.g,star.tint.b);
-					Stars.StartEndStars.sprite.xLoc = canvasWidth * 0.15 + (Math.random() * canvasWidth * 0.7)
+					Stars.StartEndStars.sprite.xLoc = canvasWidth * 0.15 + (Math.random() * canvasWidth * 0.7);
 					Stars.StartEndStars.sprite.yLoc = canvasWidth * 0.8;
 					Stars.StartEndStars.sprite.ySpeed = 0;
 					Stars.stars.speedFactor = 0;
@@ -65,7 +65,7 @@ Stars.StartEndStars = {
 					Stars.StartEndStars.sprite.star = star;
 					Stars.StartEndStars.sprite.visible = true;
 					Stars.StartEndStars.sprite.tint = rgbToHex(star.tint.r,star.tint.g,star.tint.b);
-					Stars.StartEndStars.sprite.xLoc = canvasWidth * 0.15 + (Math.random() * canvasWidth * 0.7)
+					Stars.StartEndStars.sprite.xLoc = canvasWidth * 0.15 + (Math.random() * canvasWidth * 0.7);
 					Stars.StartEndStars.sprite.yLoc = 0 - canvasWidth * 0.1;
 					Stars.StartEndStars.sprite.ySpeed = Stars.StartEndStars.maxSpeed;
 					Stars.StartEndStars.sprite.position = {x:Stars.StartEndStars.sprite.xLoc * scalingFactor, y:Stars.StartEndStars.sprite.yLoc * scalingFactor};
@@ -74,7 +74,7 @@ Stars.StartEndStars = {
 			}
 		}
 	}
-}
+};
 
 Stars.nebulaBackground = {
 	size: 640,
@@ -174,7 +174,7 @@ Stars.stars = {
 		if (!Stars.stars.sprites.visible)
 			return;
 
-		Math.seedrandom(Date.now());
+		// Math.seedrandom(Date.now());
 		for (var i = 0; i < Stars.NUM_STARS; i++) {
 
 			Stars.stars.yLoc[i] += (PlayerShip.playerShip.superCharged ? 2 : 1) * Stars.stars.speed[i] * timeDiff * Stars.stars.speedFactor;

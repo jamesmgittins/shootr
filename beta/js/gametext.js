@@ -53,7 +53,7 @@ GameText.status = {
 		};
 		GameText.status.enemies.position = {
 			x: Math.max(sideSpace / 2, GameText.status.enemies.getBounds().width / 1.9),
-			y: 100 * scalingFactor
+			y: 80 * scalingFactor
 		};
 
 		GameText.status.container.addChild(GameText.status.enemies);
@@ -101,15 +101,15 @@ GameText.status = {
 
 		// distance plot
 		GameText.status.distanceLine = new PIXI.Graphics();
-		GameText.status.distanceLine.lineStyle(Math.round(1 * scalingFactor), 0x808080);
-		GameText.status.distanceLine.moveTo(barWidth, 150 * scalingFactor);
-		GameText.status.distanceLine.lineTo(sideSpace - barWidth, 150 * scalingFactor);
+		GameText.status.distanceLine.lineStyle(Math.round(1 * scalingFactor), Constants.itemColors.super);
+		GameText.status.distanceLine.moveTo(barWidth, 110 * scalingFactor);
+		GameText.status.distanceLine.lineTo(sideSpace - barWidth, 110 * scalingFactor);
 		GameText.status.container.addChild(GameText.status.distanceLine);
 
 		GameText.status.distanceMarker = new PIXI.Graphics();
-		GameText.status.distanceMarker.lineStyle(Math.round(1 * scalingFactor), 0x808080);
-		GameText.status.distanceMarker.moveTo(barWidth, 140 * scalingFactor);
-		GameText.status.distanceMarker.lineTo(barWidth, 160 * scalingFactor);
+		GameText.status.distanceMarker.lineStyle(Math.round(1 * scalingFactor), MainMenu.buttonTint);
+		GameText.status.distanceMarker.moveTo(barWidth, 102 * scalingFactor);
+		GameText.status.distanceMarker.lineTo(barWidth, 118 * scalingFactor);
 		GameText.status.container.addChild(GameText.status.distanceMarker);
 
 		// shield bar stuff
@@ -281,9 +281,9 @@ GameText.status = {
 		}
 		var distanceMarkerPosition = barWidth + (sideSpace - (barWidth * 2)) - ((Math.max(0, timeLeft) / levelTime) * (sideSpace - (barWidth * 2)));
 		GameText.status.distanceMarker.clear();
-		GameText.status.distanceMarker.lineStyle(Math.round(1 * scalingFactor), 0x808080);
-		GameText.status.distanceMarker.moveTo(distanceMarkerPosition, 140 * scalingFactor);
-		GameText.status.distanceMarker.lineTo(distanceMarkerPosition, 160 * scalingFactor);
+		GameText.status.distanceMarker.lineStyle(Math.round(1 * scalingFactor), MainMenu.buttonTint);
+		GameText.status.distanceMarker.moveTo(distanceMarkerPosition, 102 * scalingFactor);
+		GameText.status.distanceMarker.lineTo(distanceMarkerPosition, 118 * scalingFactor);
 
 		GameText.status.enemies.text = (distance * Math.max(0, timeLeft) / levelTime).toFixed(1) + " Light Years to Target";
 		GameText.status.fps.text = fps + " fps";
@@ -299,7 +299,6 @@ GameText.status = {
 		// update charge bar
 		if (GameText.status.chargeBar.percentage != PlayerShip.playerShip.charge) {
 			GameText.status.chargeBar.percentage = Math.min(100, PlayerShip.playerShip.charge);
-			var barWidth = Math.round(sideSpace / 8);
 
 			GameText.status.chargeBar.clear();
 
@@ -352,9 +351,8 @@ GameText.status = {
 				} else {
 					crate.alpha = 1;
 				}
-			})
+			});
 		}
-		;
 
 	},
 	resize: function() {
@@ -579,7 +577,7 @@ GameText.levelComplete = {
 			}
 
 			if (this.lootTimer > gameModel.lootCollected.length * this.secondsPerLoot) {
-				this.lootLayouts.forEach(function(layout){layout.visible=false;})
+				this.lootLayouts.forEach(function(layout){layout.visible=false;});
 				this.textMessage.text = "Level Complete\nPress " + ShootrUI.getInputButtonDescription(buttonTypes.select) + " to Continue";
 				this.textMessage.visible = true;
 			}
@@ -636,11 +634,11 @@ GameText.levelComplete = {
 		var arr = this.container.children;
 		arr.forEach(function(ele){
 			GameText.levelComplete.container.removeChild(ele);
-			ele.destroy;
+			ele.destroy();
 		});
 	},
 	checkForClick:function() {
 		if (this.container.visible)
 			this.clicked = true;
 	}
-}
+};

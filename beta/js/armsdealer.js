@@ -26,7 +26,7 @@ ArmsDealer.generateShield = function(level, seed, ultra) {
 
 	return ArmsDealer.generateShieldItem(level, seed, weaponRarity);
 
-}
+};
 
 
 ArmsDealer.generateShieldItem = function(level, seed, rarity) {
@@ -52,7 +52,7 @@ ArmsDealer.generateShieldItem = function(level, seed, rarity) {
 		chargeDelay: chargeDelay,
 		price: Math.round((capacity + chargePerSecond) * 17 * (5 / chargeDelay)),
 		id: gameModel.weaponIdCounter++
-	}
+	};
 };
 
 ArmsDealer.hide = function() {
@@ -67,7 +67,7 @@ ArmsDealer.show = function() {
 var arrow = {
 	up: "\u2191",
 	down: "\u2193"
-}
+};
 
 ArmsDealer.shieldComparison = function(item) {
 	var shield = typeof gameModel.p1.shield !== "undefined" ? gameModel.p1.shield : {
@@ -84,7 +84,7 @@ ArmsDealer.shieldComparison = function(item) {
 		chargeDelay: item.chargeDelay <= shield.chargeDelay ? arrow.up : arrow.down,
 		equipped:item.id == shield.id
 	};
-}
+};
 
 ArmsDealer.weaponComparison = function(item, compareTo) {
 
@@ -114,7 +114,7 @@ ArmsDealer.weaponComparison = function(item, compareTo) {
 			shotsPerSecond: (item.shotsPerSecond >= compareTo.shotsPerSecond ? arrow.up : arrow.down),
 			accuracy: (item.accuracy >= compareTo.accuracy ? arrow.up : arrow.down),
 			equipped : item.id == frontWeapon.id || item.id == rearWeapon.id || item.id == turretWeapon.id
-		}
+		};
 	}
 
 	return {
@@ -123,11 +123,16 @@ ArmsDealer.weaponComparison = function(item, compareTo) {
 		shotsPerSecond: (item.shotsPerSecond >= frontWeapon.shotsPerSecond ? arrow.up : arrow.down) + (item.shotsPerSecond >= turretWeapon.shotsPerSecond ? arrow.up : arrow.down) + (item.shotsPerSecond >= rearWeapon.shotsPerSecond ? arrow.up : arrow.down),
 		accuracy: (item.accuracy >= frontWeapon.accuracy ? arrow.up : arrow.down) + (item.accuracy >= turretWeapon.accuracy ? arrow.up : arrow.down) + (item.accuracy >= rearWeapon.accuracy ? arrow.up : arrow.down),
 		equipped : item.id == frontWeapon.id || item.id == rearWeapon.id || item.id == turretWeapon.id
-	}
-}
+	};
+};
 
 ArmsDealer.createItemIcon = function(item, options) {
+
 	var itemContainer = new PIXI.Container();
+	var scale = scalingFactor;
+
+	if (options.scale)
+		scale = scalingFactor * options.scale;
 
 	var backgroundCol = item.hyper ? Constants.itemColors.hyper : item.ultra ? Constants.itemColors.ultra : item.super ? Constants.itemColors.super :Constants.itemColors.normal;
 	var borderCol = item.hyper ? Constants.itemBorders.hyper : item.ultra ? Constants.itemBorders.ultra : item.super ? Constants.itemBorders.super :Constants.itemBorders.normal;
@@ -135,9 +140,9 @@ ArmsDealer.createItemIcon = function(item, options) {
 	var border = new PIXI.Graphics();
 	border.beginFill(backgroundCol);
 	border.lineStyle(2, borderCol);
-	border.drawRect(0, 0, 128 * scalingFactor, 128 * scalingFactor);
+	border.drawRect(0, 0, 128 * scale, 128 * scale);
 	border.beginFill(borderCol);
-	border.drawRect(0, 0, 128 * scalingFactor, 24 * scalingFactor);
+	border.drawRect(0, 0, 128 * scale, 24 * scale);
 	itemContainer.addChild(border);
 
 	var svgToUse = "img/shield.svg";
@@ -148,10 +153,10 @@ ArmsDealer.createItemIcon = function(item, options) {
 
 	var pic = new PIXI.Sprite(PIXI.Texture.fromImage(svgToUse, undefined, undefined, 0.4));
 
-	pic.scale.x = pic.scale.y = 0.3 * scalingFactor;
+	pic.scale.x = pic.scale.y = 0.3 * scale;
 
 	pic.anchor = {x:0.5,y:0.5};
-	pic.position = {x:64 * scalingFactor,y:64 * scalingFactor};
+	pic.position = {x:64 * scale,y:64 * scale};
 	itemContainer.addChild(pic);
 
 	var levelTooHigh = false;
@@ -169,15 +174,15 @@ ArmsDealer.createItemIcon = function(item, options) {
 
 
 	var levelText = new PIXI.Text(item.level, {
-		font: (20 * scalingFactor) + 'px Dosis',
+		font: (20 * scale) + 'px Dosis',
 		fill: levelTooHigh ? '#A00' : backgroundCol,
-		stroke: levelTooHigh? '#000' : borderCol,
-		strokeThickness: 5,
+		stroke: levelTooHigh? '#A00' : borderCol,
+		strokeThickness: levelTooHigh ? 3 : 0,
 		align: 'left'
-	})
+	});
 	levelText.position = {
-		x: 3 * scalingFactor,
-		y: -1 * scalingFactor
+		x: 3 * scale,
+		y: levelTooHigh ? -1 * scale : 1 * scale
 	};
 
 	itemContainer.addChild(levelText);
@@ -190,16 +195,16 @@ ArmsDealer.createItemIcon = function(item, options) {
 	}
 	if (comparison.equipped) {
 		var equippedText = new PIXI.Text("EQUIPPED", {
-			font: (16 * scalingFactor) + 'px Dosis',
+			font: (20 * scale) + 'px Dosis',
 			fill: backgroundCol,
 			stroke: backgroundCol,
-			strokeThickness: 1,
+			strokeThickness: 0,
 			align: 'left'
-		})
+		});
 		equippedText.anchor = {x:1, y:0};
 		equippedText.position = {
-			x: (128 - 5) * scalingFactor,
-			y: 3 * scalingFactor
+			x: (128 - 5) * scale,
+			y: 1 * scale
 		};
 		equippedText.tint = equippedText.defaultTint = 0xAAAAAA;
 		itemContainer.addChild(equippedText);
@@ -208,29 +213,27 @@ ArmsDealer.createItemIcon = function(item, options) {
 		if (comparison.upgrade) {
 			border.beginFill(backgroundCol);
 			border.lineStyle(0, borderCol);
-			border.drawPolygon([97 * scalingFactor, 25 * scalingFactor, 110 * scalingFactor, 8 * scalingFactor, 123 * scalingFactor, 25 * scalingFactor]);
-			// border.drawRect(100 * scalingFactor, 4 * scalingFactor, 16 * scalingFactor, 16 * scalingFactor);
+			border.drawPolygon([97 * scale, 25 * scale, 110 * scale, 8 * scale, 123 * scale, 25 * scale]);
 		} else {
 			border.beginFill(borderCol);
 			border.lineStyle(0, borderCol);
-			border.drawPolygon([97 * scalingFactor, 24 * scalingFactor, 110 * scalingFactor, 40 * scalingFactor, 123 * scalingFactor, 24 * scalingFactor]);
-			// border.drawRect(100 * scalingFactor, 24 * scalingFactor, 16 * scalingFactor, 16 * scalingFactor);
+			border.drawPolygon([97 * scale, 24 * scale, 110 * scale, 40 * scale, 123 * scale, 24 * scale]);
 		}
 	}
 
 	var price = options.buy ? item.price : item.price / 2;
 
 	var priceText = new PIXI.Text(formatMoney(price) + " Credits", {
-		font: (16 * scalingFactor) + 'px Dosis',
+		font: (18 * scale) + 'px Dosis',
 		fill: '#FFF',
 		stroke: "#000",
-		strokeThickness: 4,
+		strokeThickness: 3,
 		align: 'left'
-	})
+	});
 	priceText.anchor = {x:0.5, y:1};
 	priceText.position = {
-		x: 64 * scalingFactor,
-		y: (128 - 3) * scalingFactor
+		x: 64 * scale,
+		y: (128 - 3) * scale
 	};
 
 	if (options.loadout) {
@@ -246,7 +249,7 @@ ArmsDealer.createItemIcon = function(item, options) {
 
 	priceText.tint = priceText.defaultTint = levelText.tint = levelText.defaultTint = pic.tint = pic.defaultTint = border.tint = border.defaultTint = 0xAAAAAA;
 	return itemContainer;
-}
+};
 
 ArmsDealer.createItemLayout = function(item, buy, full) {
 
@@ -263,7 +266,7 @@ ArmsDealer.createItemLayout = function(item, buy, full) {
 		stroke: "#000",
 		strokeThickness: 0,
 		align: 'left'
-	})
+	});
 	name.position = {
 		x: (iconWidth + 10) * scalingFactor,
 		y: 5 * scalingFactor
@@ -277,7 +280,7 @@ ArmsDealer.createItemLayout = function(item, buy, full) {
 		stroke: "#000",
 		strokeThickness: 0,
 		align: 'left'
-	})
+	});
 	details.position = {
 		x: (iconWidth + 10) * scalingFactor,
 		y: name.position.y + name.height + 5 * scalingFactor
@@ -290,7 +293,7 @@ ArmsDealer.createItemLayout = function(item, buy, full) {
 		stroke: "#000",
 		strokeThickness: 0,
 		align: 'left'
-	})
+	});
 	var comparison;
 	if (item.type == "weapon") {
 		comparison = ArmsDealer.weaponComparison(item);
@@ -321,7 +324,7 @@ ArmsDealer.createItemLayout = function(item, buy, full) {
 		stroke: "#000",
 		strokeThickness: 0,
 		align: 'left'
-	})
+	});
 	price.position = {
 		x: (iconWidth + 10) * scalingFactor,
 		y: level.position.y + level.height + 5 * scalingFactor
@@ -343,7 +346,7 @@ ArmsDealer.createItemLayout = function(item, buy, full) {
 	itemContainer.addChild(icon);
 
 	return itemContainer;
-}
+};
 
 ArmsDealer.initialize = function() {
 	if (!ArmsDealer.menuContainer) {
@@ -433,7 +436,7 @@ ArmsDealer.initialize = function() {
 				button.text.visible = false;
 			});
 			if (ArmsDealer.buyButtons.length > 0)
-				ArmsDealer.select(ArmsDealer.buyButtons[0])
+				ArmsDealer.select(ArmsDealer.buyButtons[0]);
 		}
 	};
 	ArmsDealer.menuContainer.addChild(ArmsDealer.buyText);
@@ -475,7 +478,7 @@ ArmsDealer.initialize = function() {
 				button.text.visible = true;
 			});
 			if (ArmsDealer.sellButtons.length > 0)
-				ArmsDealer.select(ArmsDealer.sellButtons[0])
+				ArmsDealer.select(ArmsDealer.sellButtons[0]);
 		}
 	};
 
@@ -511,7 +514,7 @@ ArmsDealer.initialize = function() {
 	ArmsDealer.buyOptions = [];
 
 	var numOptions = Math.round(2 + Math.random() * 2);
-	for (var i = 0; i <numOptions; i++)
+	for (var j = 0; j <numOptions; j++)
 		ArmsDealer.buyOptions.push(Math.random() > 0.8 ? ArmsDealer.generateShield(level, seed++, false) : Weapons.generateWeapon(level, seed++, false));
 
 	ArmsDealer.buyButtons = [];
@@ -527,7 +530,7 @@ ArmsDealer.initialize = function() {
 		gameModel.purchaseHistory.forEach(function(history) {
 			if (history == item.seed)
 				itemBought = true;
-		})
+		});
 		if (!itemBought) {
 			var text = ArmsDealer.createItemLayout(item, true);
 			text.position.x = position.x;
@@ -544,17 +547,17 @@ ArmsDealer.initialize = function() {
 			ArmsDealer.buyButtons.push({
 				text: text,
 				index: index
-			})
+			});
 		}
 
 	});
 
 	ArmsDealer.sellOptions = [];
 
-	gameModel.p1.frontWeapon && ArmsDealer.sellOptions.push(gameModel.p1.frontWeapon);
-	gameModel.p1.turretWeapon && ArmsDealer.sellOptions.push(gameModel.p1.turretWeapon);
-	gameModel.p1.rearWeapon && ArmsDealer.sellOptions.push(gameModel.p1.rearWeapon);
-	gameModel.p1.shield && ArmsDealer.sellOptions.push(gameModel.p1.shield);
+	if (gameModel.p1.frontWeapon) ArmsDealer.sellOptions.push(gameModel.p1.frontWeapon);
+	if (gameModel.p1.turretWeapon) ArmsDealer.sellOptions.push(gameModel.p1.turretWeapon);
+	if (gameModel.p1.rearWeapon) ArmsDealer.sellOptions.push(gameModel.p1.rearWeapon);
+	if (gameModel.p1.shield) ArmsDealer.sellOptions.push(gameModel.p1.shield);
 
 	gameModel.p1.weapons.forEach(function(weapon) {
 		var included = false;
@@ -562,37 +565,37 @@ ArmsDealer.initialize = function() {
 			if (item.id == weapon.id)
 				included = true;
 		});
-		!included && ArmsDealer.sellOptions.push(weapon);
-	})
+		if (!included) ArmsDealer.sellOptions.push(weapon);
+	});
 	gameModel.p1.shields.forEach(function(shield) {
 		var included = false;
 		ArmsDealer.sellOptions.forEach(function(item){
 			if (item.id == shield.id)
 				included = true;
 		});
-		!included && ArmsDealer.sellOptions.push(shield);
-	})
+		if (!included) ArmsDealer.sellOptions.push(shield);
+	});
 	ArmsDealer.sellButtons = [];
-	var position = {
+	var sellPosition = {
 		x: colWidth / 2,
 		y: ArmsDealer.buyText.position.y + 30 * scalingFactor
 	};
 	ArmsDealer.sellOptions.forEach(function(item, index) {
 		var text = ArmsDealer.createItemLayout(item, false);
-		text.position.x = position.x;
-		text.position.y = position.y;
+		text.position.x = sellPosition.x;
+		text.position.y = sellPosition.y;
 		ArmsDealer.menuContainer.addChild(text);
-		position.x = position.x + colWidth;
-		if (position.x > colWidth * ArmsDealer.gridWidth) {
-			position = {
+		sellPosition.x = sellPosition.x + colWidth;
+		if (sellPosition.x > colWidth * ArmsDealer.gridWidth) {
+			sellPosition = {
 				x: colWidth / 2,
-				y: position.y + text.height + 30 * scalingFactor
+				y: sellPosition.y + text.height + 30 * scalingFactor
 			};
 		}
 		ArmsDealer.sellButtons.push({
 			text: text,
 			index: index
-		})
+		});
 	});
 
 	ArmsDealer.buyTab.click();
@@ -640,14 +643,14 @@ ArmsDealer.checkMouseOver = function() {
 			ArmsDealer.select(button);
 			return true;
 		}
-	})
+	});
 
 	ArmsDealer.sellButtons.forEach(function(button) {
 		if (MainMenu.checkButton(button)) {
 			ArmsDealer.select(button);
 			return true;
 		}
-	})
+	});
 
 	return false;
 };
@@ -712,7 +715,7 @@ ArmsDealer.showDialog = function(index, buy) {
 ArmsDealer.cancelItem = function() {
 	ArmsDealer.menuContainer.removeChild(ArmsDealer.dialogContainer);
 	ArmsDealer.dialogContainer = false;
-}
+};
 
 ArmsDealer.buyItem = function(index) {
 	var item = ArmsDealer.buyOptions[index];
@@ -733,7 +736,7 @@ ArmsDealer.buyItem = function(index) {
 	} else {
 		Sounds.enemyShot.play();
 	}
-}
+};
 
 ArmsDealer.sellItem = function(index) {
 	var item = ArmsDealer.sellOptions[index];
@@ -781,7 +784,7 @@ ArmsDealer.sellItem = function(index) {
 			ArmsDealer.select(ArmsDealer.sellButtons[index - 1]);
 		}
 	}
-}
+};
 
 ArmsDealer.checkClicks = function() {
 
@@ -818,7 +821,7 @@ ArmsDealer.checkClicks = function() {
 			ArmsDealer.showDialog(button.index, true);
 			return true;
 		}
-	})
+	});
 
 	ArmsDealer.sellButtons.forEach(function(button) {
 		if (MainMenu.checkButton(button)) {
@@ -826,7 +829,7 @@ ArmsDealer.checkClicks = function() {
 			ArmsDealer.showDialog(button.index, false);
 			return true;
 		}
-	})
+	});
 
 	return false;
 };
@@ -848,23 +851,23 @@ ArmsDealer.select = function(button) {
 		if (buyButton.index == button.index && ArmsDealer.currentTab == "buy")
 			ArmsDealer.currentSelection = index;
 		buyButton.text.children.forEach(function(child) {
-			child.tint = child.defaultTint
+			child.tint = child.defaultTint;
 		});
-	})
+	});
 
 	ArmsDealer.sellButtons.forEach(function(sellButton, index) {
 		if (sellButton.index == button.index && ArmsDealer.currentTab == "sell")
 			ArmsDealer.currentSelection = index;
 		sellButton.text.children.forEach(function(child) {
 			if (child.tint != Loadout.invalidLevelTint)
-				child.tint = child.defaultTint
+				child.tint = child.defaultTint;
 		});
-	})
+	});
 
 	if (button.text.children && button.text.children.length > 0)
 		button.text.children.forEach(function(child) {
 			if (child.tint != Loadout.invalidLevelTint)
-				child.tint = MainMenu.selectedButtonTint
+				child.tint = MainMenu.selectedButtonTint;
 		});
 	else
 		button.text.tint = MainMenu.selectedButtonTint;
@@ -874,7 +877,7 @@ ArmsDealer.moveSelection = function(colDelta, rowDelta) {
 	var buttons = ArmsDealer.currentTab == "buy" ? ArmsDealer.buyButtons : ArmsDealer.sellButtons;
 	var selection = gridSelection(colDelta, rowDelta, ArmsDealer.currentSelection, buttons.length, ArmsDealer.gridWidth);
 	ArmsDealer.select(buttons[selection]);
-}
+};
 
 ArmsDealer.up = function() {
 	if (!ArmsDealer.menuContainer.visible)
@@ -895,7 +898,7 @@ ArmsDealer.up = function() {
 	ArmsDealer.moveSelection(0, -1);
 
 	return true;
-}
+};
 
 ArmsDealer.down = function() {
 	if (!ArmsDealer.menuContainer.visible)
@@ -916,7 +919,7 @@ ArmsDealer.down = function() {
 	ArmsDealer.moveSelection(0, 1);
 
 	return true;
-}
+};
 
 ArmsDealer.left = function() {
 	if (!ArmsDealer.menuContainer.visible)
@@ -937,7 +940,7 @@ ArmsDealer.left = function() {
 	ArmsDealer.moveSelection(-1, 0);
 
 	return true;
-}
+};
 
 ArmsDealer.right = function() {
 	if (!ArmsDealer.menuContainer.visible)
@@ -958,7 +961,7 @@ ArmsDealer.right = function() {
 	ArmsDealer.moveSelection(1, 0);
 
 	return true;
-}
+};
 
 ArmsDealer.aButtonPress = function() {
 	if (!ArmsDealer.menuContainer.visible)

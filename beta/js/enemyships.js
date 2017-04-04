@@ -192,7 +192,7 @@ EnemyShips.damageEnemyShip = function(ship, xLoc, yLoc, damage) {
 			EnemyShips.destroy(ship);
 		}
 	}
-}
+};
 
 EnemyShips.checkForBulletCollisions = function (ship){
 	Bullets.playerBullets.sprite.forEach(function(sprite){
@@ -254,7 +254,7 @@ EnemyShips.updateShip = function (eShip, timeDiff) {
 				if (eShip.lastParticle > 0.1) {
 					Stars.shipTrails.newPowerupPart(eShip.sprite.position.x - (20 * scalingFactor) + (Math.random() * 40 * scalingFactor),
 																				eShip.sprite.position.y - (20 * scalingFactor) + (Math.random() * 40 * scalingFactor),
-																				calculateTintFromString(eShip.wave.colors[Math.floor(Math.random() * eShip.wave.colors.length)]))
+																				calculateTintFromString(eShip.wave.colors[Math.floor(Math.random() * eShip.wave.colors.length)]));
 					eShip.lastParticle = 0;
 				}
 

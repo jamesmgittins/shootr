@@ -369,5 +369,4 @@ StarNames = {
     else
       return StarNames.alphaPrefix[Math.floor(Math.random() * StarNames.alphaPrefix.length)] + "-" + (Math.random() * 34563).toFixed();
   }
-  
-}
+};

@@ -179,7 +179,7 @@ Bullets.enemyBullets = {
 	initialize: function() {
 		Bullets.enemyBullets.texture = (function() {
 			var blast = document.createElement('canvas');
-			var size = 12 * scalingFactor
+			var size = 12 * scalingFactor;
 			blast.width = size + 4;
 			blast.height = size + 4;
 			var blastCtx = blast.getContext('2d');
@@ -257,7 +257,7 @@ Bullets.playerBullets = {
 			blastCtx.fillRect(0, 0, size, size);
 
 			return PIXI.Texture.fromCanvas(blast);
-		})()
+		})();
 
 		Bullets.playerBullets.sprite.forEach(function(sprite){
 			sprite.texture = Bullets.playerBullets.texture;
@@ -405,7 +405,7 @@ Bullets.getTurretAngle = function() {
 		return Math.atan2(xDiff, yDiff);
 	}
 	return 0;
-}
+};
 
 Bullets.explosionBits = {
 	bitsPerExplosion: 10,
@@ -579,9 +579,9 @@ Bullets.railgunBeams = {
 			y: position.y
 		};
 		var damage = sprite.superCharged ? weapon.damagePerShot * 2 : weapon.damagePerShot;
-		if (weapon.rear) {
-			damage *= 0.5
-		};
+		if (weapon.rear)
+			damage *= 0.5;
+
 		for (var i = 0; i < 128; i++) {
 			location.x += vector.x;
 			location.y += vector.y;
@@ -591,13 +591,13 @@ Bullets.railgunBeams = {
 			if (Math.random() > 0.7)
 				Stars.shipTrails.newPowerupPart(location.x * scalingFactor, location.y * scalingFactor, 0x6060A0);
 
-			EnemyShips.activeShips.forEach(function(ship) {
-				if (!ship.damagedByRailgun && distanceBetweenPoints(location.x, location.y, ship.xLoc, ship.yLoc) <= 24) {
-					EnemyShips.damageEnemyShip(ship, location.x, location.y, damage);
-					ship.damagedByRailgun = true;
+			for (var j = 0; i < EnemyShips.activeShips.length; j ++) {
+				if (!EnemyShips.activeShips[j].damagedByRailgun && distanceBetweenPoints(location.x, location.y, EnemyShips.activeShips[j].xLoc, EnemyShips.activeShips[j].yLoc) <= 24) {
+					EnemyShips.damageEnemyShip(EnemyShips.activeShips[j], location.x, location.y, damage);
+					EnemyShips.activeShips[j].damagedByRailgun = true;
 					damage *= 0.5;
 				}
-			});
+			}
 		}
 		EnemyShips.activeShips.forEach(function(ship) {
 			ship.damagedByRailgun = false;
@@ -681,7 +681,7 @@ Bullets.railgunBeams = {
 
 		}
 	}
-}
+};
 
 Bullets.missiles = {
 	texture: function() {
@@ -777,8 +777,9 @@ Bullets.missiles = {
 // 		Bullets.missiles.trackingLines.clear();
 // 		Bullets.missiles.trackingLines.lineStyle(1, 0xFF0000);
 
+		for (var missileCount = 0; missileCount < Bullets.missiles.sprites.length; missileCount++) {
+			var sprite = Bullets.missiles.sprites[missileCount];
 
-		Bullets.missiles.sprites.forEach(function(sprite) {
 			if (sprite.visible) {
 
 				if (sprite.target && sprite.target.inPlay === 1) {
@@ -795,10 +796,10 @@ Bullets.missiles = {
 
 					// look for target
 					if (sprite.lowHealthSeek) {
-						EnemyShips.activeShips.forEach(function(ship) {
-							if (!sprite.target || sprite.target.health > ship.health)
-								sprite.target = ship;
-						});
+						for (var enemyShipCount=0; enemyShipCount < EnemyShips.activeShips.length; enemyShipCount++) {
+							if (!sprite.target || sprite.target.health > EnemyShips.activeShips[enemyShipCount].health)
+								sprite.target = EnemyShips.activeShips[enemyShipCount];
+						}
 					} else {
 						var angle = Math.atan2(sprite.speed.x, -sprite.speed.y);
 						var vector = RotateVector2d(0, -5, angle);
@@ -815,12 +816,12 @@ Bullets.missiles = {
 							if (location.x < -20 || location.x > canvasWidth + 20 || location.y < -20 || location.y > canvasHeight + 20)
 								i = 128;
 
-							EnemyShips.activeShips.forEach(function(ship) {
-								if (!sprite.target && distanceBetweenPoints(location.x, location.y, ship.xLoc, ship.yLoc) <= shipDistance) {
-									closestShip = ship;
-									shipDistance = distanceBetweenPoints(location.x, location.y, ship.xLoc, ship.yLoc);
+							for (var j = 0; j < EnemyShips.activeShips.length; j++) {
+								if (!sprite.target && distanceBetweenPoints(location.x, location.y, EnemyShips.activeShips[j].xLoc, EnemyShips.activeShips[j].yLoc) <= shipDistance) {
+									closestShip = EnemyShips.activeShips[j];
+									shipDistance = distanceBetweenPoints(location.x, location.y, EnemyShips.activeShips[j].xLoc, EnemyShips.activeShips[j].yLoc);
 								}
-							});
+							}
 							sprite.target = closestShip;
 						}
 					}
@@ -836,9 +837,9 @@ Bullets.missiles = {
 // 				}
 
 				if (magnitude(sprite.speed.x, sprite.speed.y) > Bullets.missiles.maxVelocity) {
-					var factor = Bullets.missiles.maxVelocity / magnitude(sprite.speed.x, sprite.speed.y);
-					sprite.speed.x *= factor;
-					sprite.speed.y *= factor;
+					var speedFactor = Bullets.missiles.maxVelocity / magnitude(sprite.speed.x, sprite.speed.y);
+					sprite.speed.x *= speedFactor;
+					sprite.speed.y *= speedFactor;
 				}
 
 				sprite.xLoc += sprite.speed.x * timeDiff;
@@ -858,16 +859,16 @@ Bullets.missiles = {
 					Bullets.missiles.discardedSprites.push(sprite);
 				}
 
-				EnemyShips.activeShips.forEach(function(ship) {
-					if (sprite.visible && Ships.detectCollision(ship, sprite.xLoc, sprite.yLoc)) {
+				for (var k = 0; k < EnemyShips.activeShips.length; k++) {
+					if (sprite.visible && Ships.detectCollision(EnemyShips.activeShips[k], sprite.xLoc, sprite.yLoc)) {
 						sprite.visible = false;
 						Bullets.missiles.discardedSprites.push(sprite);
-						EnemyShips.damageEnemyShip(ship, sprite.xLoc, sprite.yLoc, sprite.damage);
+						EnemyShips.damageEnemyShip(EnemyShips.activeShips[k], sprite.xLoc, sprite.yLoc, sprite.damage);
 						Bullets.missiles.generateExplosion(sprite.xLoc, sprite.yLoc);
 					}
-				});
+				}
 			}
-		});
+		}
 
 		if (PlayerShip.playerShip.inPlay && PlayerShip.playerShip.rolling > 1 && (timeLeft > 0 || Boss.bossActive())) {
 
@@ -933,7 +934,7 @@ Bullets.missiles = {
 
 		}
 	}
-}
+};
 
 
 Bullets.updateEnemyBullets = function(timeDiff) {

@@ -91,7 +91,7 @@ Loadout.selectPosition = function(index) {
   Loadout.locationSelector.lineTo(0, 0);
 
   Loadout.locationSelector.visible = true;
-}
+};
 
 Loadout.showWeapons = function() {
 
@@ -108,20 +108,21 @@ Loadout.showWeapons = function() {
 
   var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
   var positionText = "";
+  var equippedWeapon;
 
   switch(Loadout.currentPosition) {
     case Loadout.positions.frontWeapon:
-      var equippedWeapon = gameModel.p1.frontWeapon;
+      equippedWeapon = gameModel.p1.frontWeapon;
       Loadout.levelAllowed = gameModel.p1.ship.frontWeaponLevel;
       positionText = " Front";
       break;
     case Loadout.positions.turretWeapon:
-      var equippedWeapon = gameModel.p1.turretWeapon;
+      equippedWeapon = gameModel.p1.turretWeapon;
       Loadout.levelAllowed = gameModel.p1.ship.turretWeaponLevel;
       positionText = " Turret";
       break;
     case Loadout.positions.rearWeapon:
-      var equippedWeapon = gameModel.p1.rearWeapon;
+      equippedWeapon = gameModel.p1.rearWeapon;
       Loadout.levelAllowed = gameModel.p1.ship.rearWeaponLevel;
       positionText = " Rear";
       break;
@@ -136,7 +137,7 @@ Loadout.showWeapons = function() {
 
   gameModel.p1.weapons.sort(function(a,b){
     return b.dps - a.dps;
-  })
+  });
 
   for (var i=0; i<gameModel.p1.weapons.length; i++) {
     if (!equippedWeapon || gameModel.p1.weapons[i].id != equippedWeapon.id) {
@@ -152,9 +153,9 @@ Loadout.showWeapons = function() {
         index : index,
         weapon : gameModel.p1.weapons[i],
         // text : new PIXI.Text("Level " + gameModel.p1.weapons[i].level + " " + gameModel.p1.weapons[i].name + equippedText + "\n" + formatMoney(gameModel.p1.weapons[i].dps) + " DPS / " + gameModel.p1.weapons[i].shotsPerSecond.toFixed(2) + " shots per second", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'left' })
-        text : ArmsDealer.createItemIcon(gameModel.p1.weapons[i], {buy:false, loadout:true, slotLevel : Loadout.levelAllowed, compareItem:equippedWeapon})
-      }
-      Loadout.weapons[index].text.scale = {x:0.8, y:0.8};
+        text : ArmsDealer.createItemIcon(gameModel.p1.weapons[i], {buy:false, loadout:true, slotLevel : Loadout.levelAllowed, compareItem:equippedWeapon, scale:0.8})
+      };
+      // Loadout.weapons[index].text.scale = {x:0.8, y:0.8};
       Loadout.weapons[index].defaultTint = gameModel.p1.weapons[i].level <= Loadout.levelAllowed ? MainMenu.buttonTint : MainMenu.unselectableTint;
       Loadout.weapons[index].text.tint = Loadout.weapons[index].defaultTint;
       Loadout.weapons[index].text.position = {x:startingXPos + (currentCol * positionSpacing * scalingFactor), y:renderer.height * 0.18 + (currentRow * positionSpacing * scalingFactor) - (20 * scalingFactor)};
@@ -168,7 +169,7 @@ Loadout.showWeapons = function() {
       index++;
     }
   }
-}
+};
 
 Loadout.selectShield = function(index) {
 
@@ -183,14 +184,14 @@ Loadout.selectShield = function(index) {
 
   var iconPosition = Loadout.menuOptions[3].equippedIcon.position;
   Loadout.menuOptions[3].text.removeChild(Loadout.menuOptions[3].equippedIcon);
-  Loadout.menuOptions[3].equippedIcon = ArmsDealer.createItemIcon(Loadout.shields[index].weapon, {buy:false, loadout:true});
+  Loadout.menuOptions[3].equippedIcon = ArmsDealer.createItemIcon(Loadout.shields[index].weapon, {buy:false, loadout:true, scale:0.7});
   Loadout.menuOptions[3].equippedIcon.position = iconPosition;
-  Loadout.menuOptions[3].equippedIcon.scale = {x:0.7, y:0.7};
+  // Loadout.menuOptions[3].equippedIcon.scale = {x:0.7, y:0.7};
   Loadout.menuOptions[3].text.addChild(Loadout.menuOptions[3].equippedIcon);
 
   Loadout.showShields();
   Loadout.selectPosition(Loadout.currentPosition);
-}
+};
 
 Loadout.selectWeapon = function(index) {
 
@@ -227,9 +228,9 @@ Loadout.selectWeapon = function(index) {
 
       var iconPosition = Loadout.menuOptions[0].equippedIcon.position;
       Loadout.menuOptions[0].text.removeChild(Loadout.menuOptions[0].equippedIcon);
-      Loadout.menuOptions[0].equippedIcon = ArmsDealer.createItemIcon(Loadout.weapons[index].weapon, {buy:false, loadout:true});
+      Loadout.menuOptions[0].equippedIcon = ArmsDealer.createItemIcon(Loadout.weapons[index].weapon, {buy:false, loadout:true, scale:0.7});
       Loadout.menuOptions[0].equippedIcon.position = iconPosition;
-      Loadout.menuOptions[0].equippedIcon.scale = {x:0.7, y:0.7};
+      // Loadout.menuOptions[0].equippedIcon.scale = {x:0.7, y:0.7};
       Loadout.menuOptions[0].text.addChild(Loadout.menuOptions[0].equippedIcon);
 
       Loadout.showWeapons();
@@ -242,9 +243,9 @@ Loadout.selectWeapon = function(index) {
 
       var iconPosition = Loadout.menuOptions[1].equippedIcon.position;
       Loadout.menuOptions[1].text.removeChild(Loadout.menuOptions[1].equippedIcon);
-      Loadout.menuOptions[1].equippedIcon = ArmsDealer.createItemIcon(Loadout.weapons[index].weapon, {buy:false, loadout:true});
+      Loadout.menuOptions[1].equippedIcon = ArmsDealer.createItemIcon(Loadout.weapons[index].weapon, {buy:false, loadout:true, scale:0.7});
       Loadout.menuOptions[1].equippedIcon.position = iconPosition;
-      Loadout.menuOptions[1].equippedIcon.scale = {x:0.7, y:0.7};
+      // Loadout.menuOptions[1].equippedIcon.scale = {x:0.7, y:0.7};
       Loadout.menuOptions[1].text.addChild(Loadout.menuOptions[1].equippedIcon);
 
       Loadout.showWeapons();
@@ -257,9 +258,9 @@ Loadout.selectWeapon = function(index) {
 
       var iconPosition = Loadout.menuOptions[2].equippedIcon.position;
       Loadout.menuOptions[2].text.removeChild(Loadout.menuOptions[2].equippedIcon);
-      Loadout.menuOptions[2].equippedIcon = ArmsDealer.createItemIcon(Loadout.weapons[index].weapon, {buy:false, loadout:true});
+      Loadout.menuOptions[2].equippedIcon = ArmsDealer.createItemIcon(Loadout.weapons[index].weapon, {buy:false, loadout:true, scale:0.7});
       Loadout.menuOptions[2].equippedIcon.position = iconPosition;
-      Loadout.menuOptions[2].equippedIcon.scale = {x:0.7, y:0.7};
+      // Loadout.menuOptions[2].equippedIcon.scale = {x:0.7, y:0.7};
       Loadout.menuOptions[2].text.addChild(Loadout.menuOptions[2].equippedIcon);
 
       Loadout.showWeapons();
@@ -267,7 +268,7 @@ Loadout.selectWeapon = function(index) {
   }
   Loadout.updateTotalDPS();
   Loadout.selectPosition(Loadout.currentPosition);
-}
+};
 
 Loadout.showShields = function() {
 
@@ -296,7 +297,7 @@ Loadout.showShields = function() {
 
   gameModel.p1.shields.sort(function(a,b){
     return b.capacity - a.capacity;
-  })
+  });
 
   for (var i=0; i<gameModel.p1.shields.length; i++) {
     if (!equippedShield || gameModel.p1.shields[i].id != equippedShield.id) {
@@ -304,9 +305,9 @@ Loadout.showShields = function() {
         index : index,
         weapon : gameModel.p1.shields[i],
         // text : new PIXI.Text("Level " + gameModel.p1.shields[i].level + " " + gameModel.p1.shields[i].name + "\n" + formatMoney(gameModel.p1.shields[i].capacity) + " Capacity / " + formatMoney(gameModel.p1.shields[i].chargePerSecond) + " charge per sec", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'left' })
-        text : ArmsDealer.createItemIcon(gameModel.p1.shields[i], {buy:false, loadout:true, compareItem : gameModel.p1.shield})
-      }
-      Loadout.shields[index].text.scale = {x:0.8, y:0.8};
+        text : ArmsDealer.createItemIcon(gameModel.p1.shields[i], {buy:false, loadout:true, compareItem : gameModel.p1.shield, scale:0.8})
+      };
+      // Loadout.shields[index].text.scale = {x:0.8, y:0.8};
       Loadout.shields[index].defaultTint = gameModel.p1.shields[i].level <= Loadout.levelAllowed ? MainMenu.buttonTint : MainMenu.unselectableTint;
       Loadout.shields[index].text.tint = Loadout.shields[index].defaultTint;
       Loadout.shields[index].text.position = {x:startingXPos + (currentCol * positionSpacing * scalingFactor), y:renderer.height * 0.18 + (currentRow * positionSpacing * scalingFactor) - (20 * scalingFactor)};
@@ -319,7 +320,7 @@ Loadout.showShields = function() {
       index++;
     }
   }
-}
+};
 
 Loadout.updateTotalDPS = function() {
   var total = 0;
@@ -330,7 +331,7 @@ Loadout.updateTotalDPS = function() {
   if (gameModel.p1.rearWeapon)
     total += gameModel.p1.rearWeapon.dps;
   Loadout.totalDPS.text = "Total Damage Per Second: " + formatMoney(total);
-}
+};
 
 
 Loadout.hide = function() {
@@ -441,13 +442,13 @@ Loadout.initialize = function () {
                                                 { font: Math.round(12 * scalingFactor) + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'left' });
 
     if (weapon) {
-      Loadout.menuOptions[i].equippedIcon = ArmsDealer.createItemIcon(weapon, {buy:false, loadout:true});
+      Loadout.menuOptions[i].equippedIcon = ArmsDealer.createItemIcon(weapon, {buy:false, loadout:true, scale:0.7});
       Loadout.menuOptions[i].text.addChild(Loadout.menuOptions[i].equippedIcon);
     } else {
       Loadout.menuOptions[i].equippedIcon = new PIXI.Container();
     }
     Loadout.menuOptions[i].equippedIcon.position = {x:renderer.width * 0.2 + (25 * scalingFactor), y:renderer.height * 0.18 + (i * positionSpacing * scalingFactor) - (20 * scalingFactor)};
-    Loadout.menuOptions[i].equippedIcon.scale = {x:0.7, y:0.7};
+    // Loadout.menuOptions[i].equippedIcon.scale = {x:0.7, y:0.7};
 
 
     Loadout.menuOptions[i].positionText.tint = Loadout.menuOptions[i].positionText.defaultTint = MainMenu.buttonTint;
@@ -605,11 +606,9 @@ Loadout.up = function() {
     return false;
 
   if (Loadout.weaponMenuOpen) {
-    var selection = gridSelection(0, -1, Loadout.weaponSelection, Loadout.weapons.length, Loadout.gridWidth);
-    Loadout.select(Loadout.weapons[selection]);
+    Loadout.select(Loadout.weapons[gridSelection(0, -1, Loadout.weaponSelection, Loadout.weapons.length, Loadout.gridWidth)]);
   } else if (Loadout.shieldMenuOpen) {
-    var selection = gridSelection(0, -1, Loadout.weaponSelection, Loadout.shields.length, Loadout.gridWidth);
-    Loadout.select(Loadout.shields[selection]);
+    Loadout.select(Loadout.shields[gridSelection(0, -1, Loadout.weaponSelection, Loadout.shields.length, Loadout.gridWidth)]);
   }
   else {
     var selection = Loadout.currentSelection - 1;
@@ -620,18 +619,16 @@ Loadout.up = function() {
   }
 
   return true;
-}
+};
 
 Loadout.down = function() {
   if (!Loadout.menuContainer.visible)
     return false;
 
   if (Loadout.weaponMenuOpen) {
-    var selection = gridSelection(0, 1, Loadout.weaponSelection, Loadout.weapons.length, Loadout.gridWidth);
-    Loadout.select(Loadout.weapons[selection]);
+    Loadout.select(Loadout.weapons[gridSelection(0, 1, Loadout.weaponSelection, Loadout.weapons.length, Loadout.gridWidth)]);
   } else if (Loadout.shieldMenuOpen) {
-    var selection = gridSelection(0, 1, Loadout.weaponSelection, Loadout.shields.length, Loadout.gridWidth);
-    Loadout.select(Loadout.shields[selection]);
+    Loadout.select(Loadout.shields[gridSelection(0, 1, Loadout.weaponSelection, Loadout.shields.length, Loadout.gridWidth)]);
   } else {
     var selection = Loadout.currentSelection + 1;
     if (selection >= Loadout.menuOptions.length)
@@ -641,7 +638,7 @@ Loadout.down = function() {
   }
 
   return true;
-}
+};
 
 Loadout.left = function() {
   if (!Loadout.menuContainer.visible)
@@ -654,7 +651,7 @@ Loadout.left = function() {
     var selection = gridSelection(-1, 0, Loadout.weaponSelection, Loadout.shields.length, Loadout.gridWidth);
     Loadout.select(Loadout.shields[selection]);
   }
-}
+};
 
 Loadout.right = function() {
   if (!Loadout.menuContainer.visible)
@@ -667,7 +664,7 @@ Loadout.right = function() {
       var selection = gridSelection(1, 0, Loadout.weaponSelection, Loadout.shields.length, Loadout.gridWidth);
       Loadout.select(Loadout.shields[selection]);
     }
-}
+};
 
 Loadout.aButton = function() {
   if (!Loadout.menuContainer.visible)
@@ -679,11 +676,14 @@ Loadout.aButton = function() {
     Loadout.selectShield(Loadout.weaponSelection);
   } else {
     Loadout.menuOptions[Loadout.currentSelection].click();
-    Loadout.weaponMenuOpen ? Loadout.select(Loadout.weapons[Loadout.weaponSelection]) : Loadout.select(Loadout.shields[Loadout.weaponSelection]);
+    if (Loadout.weaponMenuOpen)
+      Loadout.select(Loadout.weapons[Loadout.weaponSelection]);
+    else
+      Loadout.select(Loadout.shields[Loadout.weaponSelection]);
   }
 
   return true;
-}
+};
 
 Loadout.bButtonPress = function() {
   if (!Loadout.menuContainer.visible)

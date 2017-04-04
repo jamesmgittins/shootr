@@ -17,7 +17,7 @@ StarChart = {
     var level = Math.max(1,Math.abs(StarChart.selectedStar.x),Math.abs(StarChart.selectedStar.y));
     changeLevel(level);
 		StarChart.currentPosition = {x:gameModel.currentSystem.x*-1,y:gameModel.currentSystem.y*-1};
-    StarChart.currentStar = StarChart.generateStar(gameModel.currentSystem.x, gameModel.currentSystem.y)
+    StarChart.currentStar = StarChart.generateStar(gameModel.currentSystem.x, gameModel.currentSystem.y);
   }},
   tradeRouteText : {
     initialize : function() {
@@ -77,7 +77,7 @@ StarChart = {
       sprite.anchor = { x: 0.5, y: 0.5 };
       StarChart.Stars.sprites.addChild(sprite);
 			StarChart.Stars.starsArray.push(sprite);
-      return sprite
+      return sprite;
     },
     clearStars : function() {
 			StarChart.Stars.starsArray = [];
@@ -241,7 +241,7 @@ StarChart.starField = {
 		if (StarChart.starField.sprites) {
 			StarChart.starField.sprites.children.forEach(function(child){
 				StarChart.starField.sprites.removeChild(child);
-			})
+			});
 		} else {
 			StarChart.starField.sprites = new PIXI.Container();
 			StarChart.menuContainer.addChild(StarChart.starField.sprites);
@@ -342,7 +342,7 @@ StarChart.initializeHistory = function() {
       StarChart.history[i].line.destroy();
     }
   }
-  StarChart.history = []
+  StarChart.history = [];
 	gameModel.history.forEach(function(history){
 		var line = new PIXI.Graphics();
     line.alpha = 0.25;
@@ -350,7 +350,7 @@ StarChart.initializeHistory = function() {
     StarChart.menuContainer.addChild(line);
 	});
 
-}
+};
 
 StarChart.createBackground = function() {
   if (!StarChart.menuBackground) {
@@ -374,7 +374,7 @@ StarChart.createBackground = function() {
   StarChart.backgroundOverlay.drawRect(0, 0, renderer.width, renderer.height);
   StarChart.backgroundOverlay.alpha = 0;
 
-}
+};
 
 StarChart.initialize = function () {
 
@@ -389,7 +389,7 @@ StarChart.initialize = function () {
 	StarChart.menuContainer.visible = false;
 
 
-  StarChart.createBackground()
+  StarChart.createBackground();
 
   StarChart.starField.initialize();
 
@@ -456,7 +456,7 @@ StarChart.initialize = function () {
 	StarChart.cursorSprite.position.y = renderer.height * 0.5;
 	StarChart.menuContainer.addChild(StarChart.cursorSprite);
 
-}
+};
 
   StarChart.resize = function () {
 		var visible = StarChart.menuContainer.visible;
@@ -499,7 +499,7 @@ StarChart.initialize = function () {
 
 		if (StarChart.shipSprite)
 	    StarChart.shipSprite.texture = PIXI.Texture.fromCanvas(Ships.shipArt(32, gameModel.p1.ship.seed, false, Ships.enemyColors[gameModel.p1.ship.colorIndex]));
-  }
+  };
 
 
   StarChart.select = function(button) {
@@ -542,11 +542,11 @@ StarChart.initialize = function () {
     }
 
 		if (StarChart.selectedStar) {
-			StarChart.selectedStar = StarChart.chart[StarChart.selectedStar.x][StarChart.selectedStar.y]
+			StarChart.selectedStar = StarChart.chart[StarChart.selectedStar.x][StarChart.selectedStar.y];
 			StarChart.selectedStar.sprite = StarChart.Stars.nextStar();
 		}
 
-	}
+	};
 
   StarChart.initializeStars = function() {
 		StarChart.createBackground();
@@ -598,7 +598,7 @@ StarChart.initialize = function () {
     StarChart.menuContainer.addChild(StarChart.shipSprite);
 
 		StarChart.starField.resetPositions();
-  }
+  };
 
   StarChart.checkMouseOver = function () {
     if (!StarChart.menuContainer.visible)
@@ -657,15 +657,15 @@ StarChart.initialize = function () {
 					StarChart.fastTravelButton.text.position = {x:renderer.width * 0.5,y: renderer.height * 0.95 - 25};
 				}
 			}
-		})
-  }
+		});
+  };
 
 	StarChart.deselectStar = function() {
 		StarChart.selectGraphic.visible=false;
 		StarChart.starInfo.visible=false;
 		StarChart.selectedStar=undefined;
 		StarChart.launchButton.text.visible=false;
-	}
+	};
 
   StarChart.checkClicks = function() {
 
@@ -700,7 +700,7 @@ StarChart.initialize = function () {
     }
 
     return false;
-  }
+  };
 
   StarChart.show = function() {
 // 		StarChart.initialize();
@@ -718,11 +718,11 @@ StarChart.initialize = function () {
 		StarChart.fastTravelButton.text.text = StarChart.fastTravelButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.leftShoulder) + ")";
 
     StarChart.tradeRouteText.initialize();
-  }
+  };
 
   StarChart.hide = function() {
     StarChart.menuContainer.visible = false;
-  }
+  };
 
   StarChart.calcFade = function (x,y,bounds) {
 
@@ -742,7 +742,7 @@ StarChart.initialize = function () {
       bottomAlpha = (limit - (y - bounds.y - (bounds.height - limit))) / limit;
 
     return Math.min(leftAlpha,rightAlpha,bottomAlpha,topAlpha);
-  }
+  };
 
 	StarChart.distanceBetweenStars = function(x1,y1,x2,y2) {
 		var star1 = StarChart.generateStar(x1,y1);
@@ -754,7 +754,7 @@ StarChart.initialize = function () {
 		return StarChart.distanceBetweenStars(StarChart.currentStar.x, StarChart.currentStar.y, StarChart.selectedStar.x, StarChart.selectedStar.y);
 // 		return (8 * distanceBetweenPoints(StarChart.selectedStar.x + StarChart.selectedStar.xWobble,StarChart.selectedStar.y +
 // 			StarChart.selectedStar.yWobble,StarChart.currentStar.x + StarChart.currentStar.xWobble,StarChart.currentStar.y + StarChart.currentStar.yWobble));
-	}
+	};
 
   StarChart.getStarInfoText = function() {
 
@@ -772,7 +772,7 @@ StarChart.initialize = function () {
       (Math.max(Math.abs(StarChart.selectedStar.x - gameModel.currentSystem.x),Math.abs(StarChart.selectedStar.y - gameModel.currentSystem.y)) === 0 ? "\n You are currently in this system" : "") +
       "\n Coordinates: ( " + StarChart.selectedStar.x + " , " + StarChart.selectedStar.y + " )" +
       (gameModel.bossPosition && gameModel.bossPosition.x == StarChart.selectedStar.x && gameModel.bossPosition.y == StarChart.selectedStar.y ? "\n WARNING dangerous enemy detected": "");
-  }
+  };
 
 	StarChart.calculateTint = function(star) {
 		var factor = Math.min(StarChart.zoom * 2,1);
@@ -782,7 +782,7 @@ StarChart.initialize = function () {
 			255 - (255 - star.tint.g) * factor,
 			255 - (255 - star.tint.b) * factor
 		);
-	}
+	};
 
 	StarChart.movementSpeed = 3;
 
@@ -938,11 +938,11 @@ StarChart.initialize = function () {
 
     if (StarChart.selectedStar) {
 			if (!StarChart.selectedStar.sprite || !StarChart.selectedStar.sprite.visible) {
-        StarChart.deselectStar()
+        StarChart.deselectStar();
       } else {
 				StarChart.selectGraphic.position.x = StarChart.selectedStar.sprite.position.x + 2 - StarChart.selectGraphic.getBounds().width / 2;
 				StarChart.selectGraphic.position.y = StarChart.selectedStar.sprite.position.y + 2 - StarChart.selectGraphic.getBounds().height / 2;
-				StarChart.starInfo.position.x = StarChart.selectedStar.sprite.position.x + StarChart.selectGraphic.getBounds().width / 2
+				StarChart.starInfo.position.x = StarChart.selectedStar.sprite.position.x + StarChart.selectGraphic.getBounds().width / 2;
 				StarChart.starInfo.position.y = StarChart.selectedStar.sprite.position.y + StarChart.selectGraphic.getBounds().height / 2;
 
 				if (StarChart.starInfo.charCounter < StarChart.getStarInfoText().length) {
@@ -991,4 +991,4 @@ StarChart.initialize = function () {
 			}
     }
 
-	}
+	};

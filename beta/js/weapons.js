@@ -63,7 +63,7 @@ Weapons.plasmaCannon = function(level,seed,rarity) {
 		price: Math.round(dps * 30),
 		id: gameModel.weaponIdCounter++,
 		weaponType : Weapons.types.plasmaCannon
-	}
+	};
 
 	if (rarity.ultra || rarity.hyper) {
 		if (Math.random() > 0.7 ) {
@@ -79,7 +79,7 @@ Weapons.plasmaCannon = function(level,seed,rarity) {
 	}
 
 	return plasmaCannon;
-}
+};
 
 Weapons.laserCannon = function(level,seed,rarity) {
 
@@ -103,16 +103,16 @@ Weapons.laserCannon = function(level,seed,rarity) {
 		price: Math.round(dps * 30),
 		id: gameModel.weaponIdCounter++,
 		weaponType : Weapons.types.laserCannon
-	}
+	};
 
 	if (rarity.ultra || rarity.hyper) {
 		laserCannon.splitBeamOnKill = true;
 		laserCannon.ultraName = "Chain Reaction";
-		laserCannon.ultraText = "Whenever this gun destroys an enemy, the beam will split"
+		laserCannon.ultraText = "Whenever this gun destroys an enemy, the beam will split";
 	}
 
 	return laserCannon;
-}
+};
 
 Weapons.missileLauncher = function(level, seed, rarity) {
 
@@ -136,7 +136,7 @@ Weapons.missileLauncher = function(level, seed, rarity) {
 		price: Math.round(dps * 30),
 		id: gameModel.weaponIdCounter++,
 		weaponType : Weapons.types.missileLauncher
-	}
+	};
 
 	if (rarity.ultra || rarity.hyper) {
 		missileLauncher.lowHealthSeek = true;
@@ -145,7 +145,7 @@ Weapons.missileLauncher = function(level, seed, rarity) {
 	}
 
 	return missileLauncher;
-}
+};
 
 Weapons.getIconSvg =  function(item) {
   if (item.weaponType == Weapons.types.plasmaCannon) {
@@ -159,7 +159,7 @@ Weapons.getIconSvg =  function(item) {
     return "img/target-laser.svg";
   if (item.weaponType == Weapons.types.missileLauncher)
     return "img/barbed-arrow.svg";
-}
+};
 
 Weapons.generateWeapon = function(level, seed, ultra) {
 
@@ -184,9 +184,9 @@ Weapons.update = function(timeDiff) {
   Bullets.updatePlasmaBullets(timeDiff);
   Bullets.railgunBeams.update(timeDiff);
   Bullets.missiles.update(timeDiff);
-}
+};
 
 Weapons.reset = function() {
   Bullets.missiles.reset();
   Bullets.playerBullets.resetAll();
-}
+};

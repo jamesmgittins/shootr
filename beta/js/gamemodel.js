@@ -33,7 +33,7 @@ var Constants = {
 		lightText : 0xB2DFDB,
 		darkText : 0x80D8FF
 	}
-}
+};
 
 var gameModel = {
 	weaponIdCounter:0
@@ -44,7 +44,7 @@ var calculateShipLevel = function() {
 		(gameModel.p1.turretWeapon ? gameModel.p1.turretWeapon.level : 0) +
 		(gameModel.p1.rearWeapon ? gameModel.p1.rearWeapon.level : 0) +
 		(gameModel.p1.shield ? gameModel.p1.shield.level : 0)) / 4);
-}
+};
 
 var calculateIncome = function() {
 	var amount = 0;
@@ -57,7 +57,7 @@ var calculateIncome = function() {
 		));
 	}
 	return amount * 100;
-}
+};
 
 var calculateIncomeSinceLastCheck = function() {
 	if (gameModel.lastTradeUpdate < new Date().getTime() - 120000) {
@@ -68,7 +68,7 @@ var calculateIncomeSinceLastCheck = function() {
 		return amountEarned;
 	}
 	return 0;
-}
+};
 
 function save() {
 	if (typeof (Storage) === "undefined")

@@ -332,7 +332,7 @@ Ships.explosionBits = {
 				Ships.explosionBits.sprite[i].alpha -= 0.7 * timeDiff;
 				if (Ships.explosionBits.sprite[i].alpha <= 0) {
 					Ships.explosionBits.sprite[i].visible = false;
-					Ships.explosionBits.discardedSprites.push(Ships.explosionBits.sprite[i])
+					Ships.explosionBits.discardedSprites.push(Ships.explosionBits.sprite[i]);
 				} else {
 					Ships.explosionBits.sprite[i].position.x += Ships.explosionBits.sprite[i].xSpeed * timeDiff;
 					Ships.explosionBits.sprite[i].position.y += Ships.explosionBits.sprite[i].ySpeed * timeDiff;

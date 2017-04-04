@@ -10,7 +10,7 @@ Boss = {
   bulletsLeft:0,
   maxBulletsPerShot:20,
   enemyShip : true
-}
+};
 
 Boss.flightPatterns = [
     {
@@ -27,11 +27,11 @@ Boss.hardFlightPatterns = [
 
 Boss.isInTargetSystem = function() {
   return gameModel.bossPosition && gameModel.bossPosition.x == gameModel.targetSystem.x && gameModel.targetSystem.y == gameModel.bossPosition.y;
-}
+};
 
 Boss.bossActive = function() {
   return Boss.isInTargetSystem() && Boss.health > 0;
-}
+};
 
 Boss.randomLocation = function() {
   if (!gameModel.bossesDefeated)
@@ -54,7 +54,7 @@ Boss.randomLocation = function() {
   gameModel.bossPosition = {x:xLocation, y:yLocation};
   console.log("boss position set to - " + gameModel.bossPosition);
 
-}
+};
 
 Boss.nudgeLocation = function() {
   var currentLevel = Constants.levelsPerBoss * (gameModel.bossesDefeated + 1);
@@ -73,7 +73,7 @@ Boss.nudgeLocation = function() {
 
   gameModel.bossPosition = {x:xLocation, y:yLocation};
 
-}
+};
 
 Boss.update = function(timeDiff) {
 
@@ -190,7 +190,7 @@ Boss.update = function(timeDiff) {
   }
 
 
-}
+};
 
 
 Boss.shield = {
@@ -237,4 +237,4 @@ Boss.shield = {
       Boss.shield.shieldBar.visible = false;
     }
   }
-}
+};
