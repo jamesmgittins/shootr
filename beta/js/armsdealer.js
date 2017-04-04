@@ -356,6 +356,7 @@ ArmsDealer.initialize = function() {
 			//item.destroy();
 		}
 	}
+	ArmsDealer.dialogContainer = false;
 
 	ArmsDealer.gridWidth = Math.floor((renderer.width * 0.9) / ((128 + 4) * scalingFactor));
 
@@ -690,7 +691,6 @@ ArmsDealer.showDialog = function(index, buy) {
 			ArmsDealer.buyItem(index);
 		else
 			ArmsDealer.sellItem(index);
-		ArmsDealer.dialogContainer = false;
 	};
 	ArmsDealer.dialogContainer.addChild(ArmsDealer.dialogOk.text);
 
@@ -698,8 +698,7 @@ ArmsDealer.showDialog = function(index, buy) {
 	ArmsDealer.dialogCancel.text.position = {x:renderer.width * 0.6 - ArmsDealer.dialogCancel.text.width / 2, y:renderer.height * 0.7 - ArmsDealer.dialogCancel.text.height / 2};
 	ArmsDealer.dialogCancel.text.tint = MainMenu.buttonTint;
 	ArmsDealer.dialogCancel.click = function() {
-		ArmsDealer.menuContainer.removeChild(ArmsDealer.dialogContainer);
-		ArmsDealer.dialogContainer = false;
+		ArmsDealer.cancelItem();
 	};
 	ArmsDealer.dialogContainer.addChild(ArmsDealer.dialogCancel.text);
 
@@ -709,6 +708,11 @@ ArmsDealer.showDialog = function(index, buy) {
 		ArmsDealer.select(ArmsDealer.dialogOk);
 	}
 };
+
+ArmsDealer.cancelItem = function() {
+	ArmsDealer.menuContainer.removeChild(ArmsDealer.dialogContainer);
+	ArmsDealer.dialogContainer = false;
+}
 
 ArmsDealer.buyItem = function(index) {
 	var item = ArmsDealer.buyOptions[index];
