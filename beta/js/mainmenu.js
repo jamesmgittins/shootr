@@ -38,7 +38,7 @@ StationMenu = {
       StationMenu.hide();
     }},
     {title:"Weapons Loadout", click:function(){
-      Loadout.show()
+      Loadout.show();
       StationMenu.hide();
     }},
     {title:"Settings", click:function(){
@@ -70,7 +70,7 @@ StationMenu = {
   onHide : function() {
     StationMenu.tradeMoneyText.visible = false;
   },
-  bButton : function(){StationMenu.menuOptions[5].click()}
+  bButton : function(){StationMenu.menuOptions[5].click();}
 };
 
 DeathMenu = {
@@ -88,7 +88,7 @@ DeathMenu = {
       DeathMenu.hide();
     }}],
   currentSelection:0,
-  bButton : function(){DeathMenu.menuOptions[1].click()},
+  bButton : function(){DeathMenu.menuOptions[1].click();},
   onInit:function() {
     var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
     DeathMenu.moneyLostText = new PIXI.Text("You have lost", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'center' });
@@ -116,13 +116,13 @@ PauseMenu = {
       SettingsMenu.onHide = PauseMenu.show;
     }},
     {title:"Return to Station", buttonDesc:buttonTypes.back, click:function(){
-      changeState(states.station)
+      changeState(states.station);
       StationMenu.show();
       SettingsMenu.hide();
       PauseMenu.hide();
     }}],
   currentSelection:0,
-  bButton : function(){PauseMenu.menuOptions[0].click()},
+  bButton : function(){PauseMenu.menuOptions[0].click();},
   onInit : function() {
     // PauseMenu.menuBackground.alpha = 0.8;
   }
@@ -198,7 +198,7 @@ SettingsMenu = {
       SettingsMenu.hide();
     }}],
   currentSelection:0,
-  bButton : function(){SettingsMenu.menuOptions[SettingsMenu.menuOptions.length - 1].click()},
+  bButton : function(){SettingsMenu.menuOptions[SettingsMenu.menuOptions.length - 1].click();},
   onInit : function() {
     var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
     SettingsMenu.controllerText = new PIXI.Text("No controller detected", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
@@ -269,7 +269,7 @@ VolumeMenu = {
       VolumeMenu.hide();
     }}],
   currentSelection:0,
-  bButton : function(){VolumeMenu.menuOptions[3].click()},
+  bButton : function(){VolumeMenu.menuOptions[3].click();},
   onInit : function() {
     var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
     VolumeMenu.volumeText = new PIXI.Text((gameModel.masterVolume * 100).toFixed() + "%", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'center' });
@@ -331,7 +331,7 @@ InitializeMenu = function (menu) {
     if (menu.onInit) {
       menu.onInit();
     }
-  }
+  };
 
   menu.initialize();
 
@@ -341,7 +341,7 @@ InitializeMenu = function (menu) {
       menu.initialize();
       menu.menuContainer.visible = visible;
     }
-  }
+  };
 
   menu.select = function(index) {
     menu.currentSelection = index;
@@ -378,7 +378,7 @@ InitializeMenu = function (menu) {
     }
 
     return false;
-  }
+  };
 
   menu.up = function() {
     if (!menu.menuContainer.visible)
@@ -390,7 +390,7 @@ InitializeMenu = function (menu) {
 
     menu.select(selection);
     return true;
-  }
+  };
 
   menu.down = function() {
     if (!menu.menuContainer.visible)
@@ -402,7 +402,7 @@ InitializeMenu = function (menu) {
 
     menu.select(selection);
     return true;
-  }
+  };
 
   menu.aButton = function() {
     if (!menu.menuContainer.visible)
@@ -410,7 +410,7 @@ InitializeMenu = function (menu) {
 
     menu.menuOptions[menu.currentSelection].click();
     return true;
-  }
+  };
 
   menu.bButtonPress = function() {
     if (!menu.menuContainer.visible)
@@ -418,20 +418,20 @@ InitializeMenu = function (menu) {
 
     menu.bButton();
     return true;
-  }
+  };
 
   menu.show = function() {
     menu.initialize();
     menu.menuContainer.visible = true;
     if (menu.onShow)
       menu.onShow();
-  }
+  };
 
   menu.hide = function() {
     menu.menuContainer.visible = false;
     if (menu.onHide)
       menu.onHide();
-  }
+  };
 
 };
 
@@ -443,9 +443,9 @@ MainMenu.checkButton = function(button) {
     return true;
   }
   return false;
-}
+};
 
-MainMenu.controllerStatus = {up:false,down:false,left:false,right:false,a:false,b:false}
+MainMenu.controllerStatus = {up:false,down:false,left:false,right:false,a:false,b:false};
 
 MainMenu.updateGamepad = function() {
   if (playerOneAxes[0] < -0.5 || playerOneButtonsPressed[14] || a) {
@@ -570,7 +570,7 @@ MainMenu.updateGamepad = function() {
   } else {
     MainMenu.controllerStatus.r1 = false;
   }
-}
+};
 
 ResizeMenus = function() {
   StarChart.resize();
@@ -580,7 +580,7 @@ ResizeMenus = function() {
   for (var i=Menus.length-1; i>=0;i--) {
     Menus[i].resize();
   }
-}
+};
 
 InitializeMenus = function() {
   for (var i=Menus.length-1; i>=0;i--) {
@@ -590,7 +590,7 @@ InitializeMenus = function() {
   Shipyard.initialize();
   Loadout.initialize();
   ArmsDealer.initialize();
-}
+};
 
 CheckForMenuMouseOver = function() {
   StarChart.checkMouseOver();
@@ -601,7 +601,7 @@ CheckForMenuMouseOver = function() {
   for (var i=0; i<Menus.length;i++) {
     Menus[i].checkMouseOver();
   }
-}
+};
 
 CheckForMenuClick = function() {
   var clickedAlready = false;
@@ -622,4 +622,4 @@ CheckForMenuClick = function() {
     if (!clickedAlready)
       clickedAlready = Menus[i].checkClicks();
   }
-}
+};

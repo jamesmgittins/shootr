@@ -1,6 +1,6 @@
 var Stars = {};
 
-Stars.NUM_STARS = 200;
+Stars.NUM_STARS = 250;
 
 Stars.StartEndStars = {
 	acceleration : 0.4,
@@ -142,6 +142,17 @@ Stars.stars = {
 	yLoc: [],
 	speedFactor : 1,
 	show:function() {
+		Math.seedrandom(Date.now());
+		for (var i = 0; i < Stars.NUM_STARS; i++) {
+			Stars.stars.speed[i] = 10 + Math.random() * 10;
+			Stars.stars.xLoc[i] = canvasWidth / Stars.NUM_STARS * i;
+			Stars.stars.yLoc[i] = -10 + (canvasWidth + 10) * Math.random();
+
+			if (Math.random() > 0.8)
+				Stars.stars.sprite[i].tint = 0x808080 + Math.random() * 0x808080;
+
+			Stars.stars.sprite[i].scale.x = Stars.stars.sprite[i].scale.y = (Stars.stars.speed[i] / 10);
+		}
 		Stars.stars.sprites.visible = true;
 	},
 	hide:function() {
