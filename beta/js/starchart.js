@@ -400,7 +400,7 @@ StarChart.initialize = function () {
 
   StarChart.selectGraphic = new PIXI.Graphics();
   StarChart.selectGraphic.lineStyle(2, 0xFFFFFF);
-  StarChart.selectGraphic.drawRect(0,0,72,72);
+  StarChart.selectGraphic.drawRect(0,0,32 * scalingFactor,32 * scalingFactor);
   StarChart.selectGraphic.anchor={x:0.5,y:0.5};
   StarChart.selectGraphic.visible=false;
 
@@ -637,11 +637,11 @@ StarChart.initialize = function () {
 
     if (StarChart.selectedStarDistance() < StarChart.maxDistance && StarChart.selectedStarDistance() > 0) {
       StarChart.launchButton.text.visible=true;
-      StarChart.selectGraphic.tint = 0x008000;
+      StarChart.selectGraphic.tint = MainMenu.buttonTint;
 
     } else {
       StarChart.launchButton.text.visible=false;
-      StarChart.selectGraphic.tint = 0x800000;
+      StarChart.selectGraphic.tint = MainMenu.unselectableTint;
     }
 		StarChart.launchButton.text.position = {x:renderer.width * 0.5,y: renderer.height * 0.95 - 25};
 

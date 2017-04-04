@@ -129,6 +129,7 @@ Loadout.showWeapons = function() {
 
   var screenPosition = renderer.height * 0.18;
   var positionSpacing = 110;
+  var startingXPos = renderer.width * 0.65 + (renderer.width * 0.35 - positionSpacing * Loadout.gridWidth * scalingFactor) / 2;
   var index = 0;
   var currentCol = 0;
   var currentRow = 0;
@@ -156,7 +157,7 @@ Loadout.showWeapons = function() {
       Loadout.weapons[index].text.scale = {x:0.8, y:0.8};
       Loadout.weapons[index].defaultTint = gameModel.p1.weapons[i].level <= Loadout.levelAllowed ? MainMenu.buttonTint : MainMenu.unselectableTint;
       Loadout.weapons[index].text.tint = Loadout.weapons[index].defaultTint;
-      Loadout.weapons[index].text.position = {x:renderer.width * 0.7 + (currentCol * positionSpacing * scalingFactor), y:renderer.height * 0.18 + (currentRow * positionSpacing * scalingFactor) - (20 * scalingFactor)};
+      Loadout.weapons[index].text.position = {x:startingXPos + (currentCol * positionSpacing * scalingFactor), y:renderer.height * 0.18 + (currentRow * positionSpacing * scalingFactor) - (20 * scalingFactor)};
       Loadout.weaponsContainer.addChild(Loadout.weapons[index].text);
 
       currentCol++;
@@ -288,6 +289,7 @@ Loadout.showShields = function() {
 
   var screenPosition = renderer.height * 0.18;
   var positionSpacing = 110;
+  var startingXPos = renderer.width * 0.65 + (renderer.width * 0.35 - positionSpacing * Loadout.gridWidth * scalingFactor) / 2;
   var index = 0;
   var currentCol = 0;
   var currentRow = 0;
@@ -307,7 +309,7 @@ Loadout.showShields = function() {
       Loadout.shields[index].text.scale = {x:0.8, y:0.8};
       Loadout.shields[index].defaultTint = gameModel.p1.shields[i].level <= Loadout.levelAllowed ? MainMenu.buttonTint : MainMenu.unselectableTint;
       Loadout.shields[index].text.tint = Loadout.shields[index].defaultTint;
-      Loadout.shields[index].text.position = {x:renderer.width * 0.7 + (currentCol * positionSpacing * scalingFactor), y:renderer.height * 0.18 + (currentRow * positionSpacing * scalingFactor) - (20 * scalingFactor)};
+      Loadout.shields[index].text.position = {x:startingXPos + (currentCol * positionSpacing * scalingFactor), y:renderer.height * 0.18 + (currentRow * positionSpacing * scalingFactor) - (20 * scalingFactor)};
       Loadout.weaponsContainer.addChild(Loadout.shields[index].text);
       currentCol++;
       if (currentCol > Loadout.gridWidth - 1) {

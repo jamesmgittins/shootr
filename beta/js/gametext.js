@@ -39,7 +39,7 @@ GameText.status = {
 		var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
 		var barWidth = Math.round(sideSpace / 8);
 
-		GameText.status.enemies = new PIXI.Text(distance.toFixed(1) + " Light Years From Destination", {
+		GameText.status.enemies = new PIXI.Text(distance.toFixed(1) + " Light Years to Target", {
 			font: fontSize + 'px Dosis',
 			fill: '#FFF',
 			stroke: "#000",
@@ -285,7 +285,7 @@ GameText.status = {
 		GameText.status.distanceMarker.moveTo(distanceMarkerPosition, 140 * scalingFactor);
 		GameText.status.distanceMarker.lineTo(distanceMarkerPosition, 160 * scalingFactor);
 
-		GameText.status.enemies.text = (distance * Math.max(0, timeLeft) / levelTime).toFixed(1) + " Light Years From Destination";
+		GameText.status.enemies.text = (distance * Math.max(0, timeLeft) / levelTime).toFixed(1) + " Light Years to Target";
 		GameText.status.fps.text = fps + " fps";
 
 		GameText.status.credits.timer += timeDiff;

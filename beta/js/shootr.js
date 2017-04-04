@@ -365,18 +365,43 @@ function updateAfterScreenSizeChange() {
 			animationFrameId = requestAnimationFrame(update);
 		}
 	}, 100);
-
 }
 
-function resizeElements() {
+var minAspectRatio = 16 / 10
+var maxAspectRatio = 21 / 9;
+
+function resizeCanvas() {
 	canvas = document.getElementById('game_canvas');
 
 	var height = window.innerHeight;
 	var width = window.innerWidth;
 
-	renderer.resize(width * resolutionFactor,height * resolutionFactor);
+	if (width / height > maxAspectRatio) {
+		width = height * maxAspectRatio;
+	}
+	if (width / height < minAspectRatio) {
+		// width = height * minAspectRatio;
+		height = width / minAspectRatio;
+	}
+
+	canvas.style.width = Math.round(width) + "px";
+	canvas.style.height = Math.round(height) + "px";
+
 	canvas.width=width * resolutionFactor;
 	canvas.height=height * resolutionFactor;
+
+	if (renderer)
+		renderer.resize(canvas.width, canvas.height);
+	else
+		renderer = PIXI.autoDetectRenderer(canvas.width, canvas.height, { view: canvas, backgroundColor: 0x000900, antialias:gameModel.antialiasing });
+
+	scalingFactor = canvas.height / 640;
+
+}
+
+function resizeElements() {
+
+	resizeCanvas()
 
 	stageTexture.resize(canvas.height, canvas.height, false);
 
@@ -387,7 +412,6 @@ function resizeElements() {
 	stageSprite.width = canvas.height;
 
 	stageSprite.position.x = (canvas.width - canvas.height) / 2;
-	scalingFactor = canvas.height / 640;
 	PlayerShip.updateSize();
 	PlayerShip.controllerPointer.resize();
 	Powerups.resize();
@@ -415,17 +439,10 @@ function startGame() {
 
 	load();
 
-	// create game canvas
-	canvas = document.getElementById('game_canvas');
+	resizeCanvas();
 
 	window.addEventListener("resize",updateAfterScreenSizeChange);
 
-	canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-
-	scalingFactor = canvas.height / 640;
-
-	renderer = PIXI.autoDetectRenderer(canvas.width, canvas.height, { view: canvas, backgroundColor: 0x000900, antialias:gameModel.antialiasing });
 	PlayerShip.setBackgroundFromShipColor();
 
 	// stageTexture = new PIXI.RenderTexture(renderer, canvas.height, canvas.height);
@@ -531,6 +548,12 @@ function startGame() {
 }
 
 window.onload = function() {
-	// loader = PIXI.loader.load(startGame);
-	startGame();
+	loader = PIXI.loader
+		.add("fonts/dosis-v6-latin-300.woff2")
+		.add("fonts/dosis-v6-latin-300.woff")
+		.add("fonts/dosis-v6-latin-300.ttf")
+		.add("fonts/dosis-v6-latin-300.eot")
+		.add("fonts/dosis-v6-latin-300.svg")
+		.load(startGame);
+	// startGame();
 };
