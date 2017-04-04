@@ -42,23 +42,23 @@ PlayerShip.controllerPointer = {
 };
 
 PlayerShip.playerShip = {
-    seed: 1,
-    xLoc: 320,
-    yLoc: 480,
-    maxSpeed: 100,
-    offset: PlayerShip.SHIP_SIZE / 2,
-    rotation: 0,
-    maxShield: 10,
-    currShield: 10,
-    shieldRegen: 2,
-    shieldDelay: 5000,
-    lastDmg: 0,
-    inPlay: 1,
-		charge:0,
+  seed: 1,
+  xLoc: 320,
+  yLoc: 480,
+  maxSpeed: 100,
+  offset: PlayerShip.SHIP_SIZE / 2,
+  rotation: 0,
+  maxShield: 10,
+  currShield: 10,
+  shieldRegen: 2,
+  shieldDelay: 5000,
+  lastDmg: 0,
+  inPlay: 1,
+	charge:0,
 	lastTrail:0,
 	spreadShot: 0,
 	crossShot: 0,
-    powerupTime:0
+  powerupTime:0
 };
 
 
@@ -248,7 +248,7 @@ PlayerShip.updateSize = function() {
 	PlayerShip.playerShip.artWhite = Ships.shipArt(PlayerShip.SHIP_SIZE, gameModel.p1.ship.seed, false, Ships.enemyColors[gameModel.p1.ship.colorIndex], true);
 	PlayerShip.playerShip.sprite.texture = PlayerShip.playerShip.sprite.nonDamageTexture = PIXI.Texture.fromCanvas(PlayerShip.playerShip.art);
 	PlayerShip.playerShip.sprite.damageTexture = PIXI.Texture.fromCanvas(PlayerShip.playerShip.artWhite);
-}
+};
 
 PlayerShip.initialize = function () {
 	PlayerShip.playerShip.art = Ships.shipArt(PlayerShip.SHIP_SIZE, gameModel.p1.ship.seed, false, Ships.enemyColors[gameModel.p1.ship.colorIndex]);
@@ -269,4 +269,22 @@ PlayerShip.initialize = function () {
 	PlayerShip.playerShip.sprite.position.y = PlayerShip.playerShip.yLoc * scalingFactor;
 
 	playerShipContainer.addChild(PlayerShip.playerShip.sprite);
+};
+
+PlayerShip.reset = function() {
+	PlayerShip.playerShip.currShield = PlayerShip.playerShip.maxShield;
+	PlayerShip.playerShip.xLoc = canvasWidth / 2;
+	PlayerShip.playerShip.yLoc = canvasHeight - (canvasHeight / 6);
+	PlayerShip.playerShip.inPlay = 1;
+	PlayerShip.playerShip.charge = 0;
+	PlayerShip.allPlayersDead = 0;
+	PlayerShip.allDeadAllDeadTimer = 0;
+};
+
+PlayerShip.setBackgroundFromShipColor = function() {
+	// var color = hexToRgb(Ships.enemyColors[gameModel.p1.ship.colorIndex][Ships.enemyColors[gameModel.p1.ship.colorIndex].length - 1]);
+	// var maxColorPart = 20;
+	// var factor = 50 / (color.r + color.g + color.b);
+	// renderer.backgroundColor = rgbToHex(color.r * factor, color.g * factor, color.b * factor);
+	renderer.backgroundColor = 0x000000;;
 };

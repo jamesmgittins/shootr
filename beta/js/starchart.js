@@ -25,7 +25,7 @@ StarChart = {
         StarChart.menuContainer.removeChild(StarChart.tradeRouteText.text);
       }
       StarChart.tradeRouteText.text = new PIXI.Text(gameModel.history.length + " trade routes cleared\nEarning " + formatMoney(calculateIncome()) + " credits per hour" ,
-        { font: (MainMenu.fontSize * scalingFactor) + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'center' });
+        { font: (MainMenu.fontSize * scalingFactor) + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
     	StarChart.tradeRouteText.text.tint = MainMenu.buttonTint;
       StarChart.tradeRouteText.text.anchor = {x:0,y:0};
       StarChart.tradeRouteText.text.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.05};
@@ -33,6 +33,7 @@ StarChart = {
       StarChart.menuContainer.addChild(StarChart.tradeRouteText.text);
     }
   },
+  fadeTime : 2,
 	distanceToPlot : 20,
   zoom : 1,
 	minZoom:0.2,
@@ -249,13 +250,14 @@ StarChart.starField = {
 
 		StarChart.starField.lastPosition = {x:StarChart.currentPosition.x,y:StarChart.currentPosition.y};
 
-    var bounds = StarChart.menuBackground.getBounds();
+    // var bounds = StarChart.menuBackground.getBounds();
+    // var bounds = renderer;
 
 		for (var i = 0; i < StarChart.starField.numStars; i++) {
 			StarChart.starField.speed[i] = 1 + Math.random() * 50;
 			StarChart.starField.sprite[i] = new PIXI.Sprite(StarChart.starField.texture);
-			StarChart.starField.xLoc[i] = bounds.x + Math.random() * bounds.width;
-			StarChart.starField.yLoc[i] = bounds.y + Math.random() * bounds.height;
+			StarChart.starField.xLoc[i] = 0 + Math.random() * renderer.width;
+			StarChart.starField.yLoc[i] = 0 + Math.random() * renderer.height;
 			StarChart.starField.sprite[i].position.x = StarChart.starField.xLoc[i];
 			StarChart.starField.sprite[i].position.y = StarChart.starField.yLoc[i];
 			StarChart.starField.sprite[i].anchor = {
@@ -267,7 +269,7 @@ StarChart.starField = {
 				StarChart.starField.sprite[i].tint = 0x808080 + Math.random() * 0x808080;
 
 			StarChart.starField.sprite[i].scale.x = StarChart.starField.sprite[i].scale.y = Math.max(1,(StarChart.starField.speed[i] / 25));
-			StarChart.starField.sprite[i].alpha = Math.min(1,(StarChart.starField.speed[i] / 25));
+			StarChart.starField.sprite[i].baseAlpha = StarChart.starField.sprite[i].alpha = Math.min(1,(StarChart.starField.speed[i] / 25));
 
 			StarChart.starField.sprites.addChild(StarChart.starField.sprite[i]);
 		}
@@ -276,7 +278,13 @@ StarChart.starField = {
 	},
 	update: function() {
 
-    var bounds = StarChart.menuBackground.getBounds();
+    // var bounds = StarChart.menuBackground.getBounds();
+    var bounds = {
+      x:-10,
+      y:-10,
+      width:renderer.width + 20,
+      height:renderer.height + 20
+    };
 
     var xMovement = StarChart.currentPosition.x - StarChart.starField.lastPosition.x;
     var yMovement = StarChart.currentPosition.y - StarChart.starField.lastPosition.y;
@@ -302,14 +310,25 @@ StarChart.starField = {
 
       StarChart.starField.sprite[i].position.x = StarChart.starField.xLoc[i];
 			StarChart.starField.sprite[i].position.y = StarChart.starField.yLoc[i];
+
+      if (StarChart.zoom < 1) {
+        StarChart.starField.sprite[i].alpha = StarChart.starField.sprite[i].baseAlpha * StarChart.zoom;
+      } else {
+        StarChart.starField.sprite[i].alpha = StarChart.starField.sprite[i].baseAlpha;
+      }
 		}
 	},
 	resetPositions : function() {
+    var bounds = {
+      x:-10,
+      y:-10,
+      width:renderer.width + 20,
+      height:renderer.height + 20
+    };
 		StarChart.starField.lastPosition = {x:StarChart.currentPosition.x,y:StarChart.currentPosition.y};
-
 		for (var i = 0; i < StarChart.starField.numStars; i++) {
-			StarChart.starField.xLoc[i] = StarChart.menuBackground.position.x + Math.random() * StarChart.menuBackground.width;
-			StarChart.starField.yLoc[i] = StarChart.menuBackground.position.y + Math.random() * StarChart.menuBackground.height;
+			StarChart.starField.xLoc[i] = bounds.x + Math.random() * bounds.width;
+			StarChart.starField.yLoc[i] = bounds.y + Math.random() * bounds.height;
 			StarChart.starField.sprite[i].position.x = StarChart.starField.xLoc[i];
 			StarChart.starField.sprite[i].position.y = StarChart.starField.yLoc[i];
 		}
@@ -333,6 +352,30 @@ StarChart.initializeHistory = function() {
 
 }
 
+StarChart.createBackground = function() {
+  if (!StarChart.menuBackground) {
+    StarChart.menuBackground = new PIXI.Graphics();
+    StarChart.menuContainer.addChild(StarChart.menuBackground);
+  }
+
+  StarChart.menuBackground.clear();
+  StarChart.menuBackground.beginFill(MainMenu.backgroundColor);
+  // StarChart.menuBackground.drawRect(0, 0, renderer.width, renderer.height);
+  StarChart.menuBackground.drawRect(0, renderer.height * 0.05, renderer.width, renderer.height * 0.9);
+  StarChart.menuBackground.alpha = MainMenu.backgroundAlpha;
+
+  if (!StarChart.backgroundOverlay) {
+    StarChart.backgroundOverlay = new PIXI.Graphics();
+    StarChart.menuContainer.addChild(StarChart.backgroundOverlay);
+  }
+
+  StarChart.backgroundOverlay.clear();
+  StarChart.backgroundOverlay.beginFill(0x000000);
+  StarChart.backgroundOverlay.drawRect(0, 0, renderer.width, renderer.height);
+  StarChart.backgroundOverlay.alpha = 0;
+
+}
+
 StarChart.initialize = function () {
 
 	if (StarChart.menuContainer) {
@@ -346,12 +389,7 @@ StarChart.initialize = function () {
 	StarChart.menuContainer.visible = false;
 
 
-  StarChart.menuBackground = new PIXI.Graphics();
-
-  StarChart.menuBackground.beginFill(0x000000);
-  StarChart.menuBackground.drawRect(0, 0, renderer.width, renderer.height);
-
-  StarChart.menuContainer.addChild(StarChart.menuBackground);
+  StarChart.createBackground()
 
   StarChart.starField.initialize();
 
@@ -424,9 +462,8 @@ StarChart.initialize = function () {
 		var visible = StarChart.menuContainer.visible;
 // 		StarChart.initialize();
 		StarChart.menuContainer.visible = visible;
-    StarChart.menuBackground.clear();
-    StarChart.menuBackground.beginFill(0x000000);
-    StarChart.menuBackground.drawRect(0, 0, renderer.width, renderer.height);
+
+    StarChart.createBackground();
 
 		StarChart.menuContainer.removeChild(StarChart.backButton.text);
 		StarChart.menuContainer.removeChild(StarChart.launchButton.text);
@@ -512,9 +549,7 @@ StarChart.initialize = function () {
 	}
 
   StarChart.initializeStars = function() {
-		StarChart.menuBackground.clear();
-    StarChart.menuBackground.beginFill(0x000000);
-    StarChart.menuBackground.drawRect(0, 0, renderer.width, renderer.height);
+		StarChart.createBackground();
 
     StarChart.Stars.clearStars();
     StarChart.initializeHistory();
@@ -672,6 +707,12 @@ StarChart.initialize = function () {
     StarChart.initializeStars();
     StarChart.menuContainer.visible = true;
 
+    StarChart.menuBackground.clear();
+    StarChart.menuBackground.beginFill(MainMenu.backgroundColor);
+    // StarChart.menuBackground.drawRect(0, 0, renderer.width, renderer.height);
+    StarChart.menuBackground.drawRect(0, renderer.height * 0.05, renderer.width, renderer.height * 0.9);
+
+    StarChart.backgroundOverlay.alpha = 0;
 		StarChart.backButton.text.text = StarChart.backButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.back) + ")";
 		StarChart.launchButton.text.text = StarChart.launchButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.select) + ")";
 		StarChart.fastTravelButton.text.text = StarChart.fastTravelButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.leftShoulder) + ")";
@@ -748,6 +789,28 @@ StarChart.initialize = function () {
   StarChart.update = function(timeDiff) {
     if (!StarChart.menuContainer.visible)
       return;
+
+    if (StarChart.menuBackground.height < renderer.height) {
+      var amountToMove = (1 / StarChart.fadeTime * timeDiff) * 0.05 * renderer.height;
+      yPos = StarChart.menuBackground.getBounds().y - amountToMove;
+      if (yPos < 0)
+        yPos = 0;
+
+      StarChart.menuBackground.clear();
+      StarChart.menuBackground.beginFill(MainMenu.backgroundColor);
+      StarChart.menuBackground.drawRect(
+        0,
+        yPos,
+        renderer.width,
+        renderer.height - (2 * yPos));
+    }
+
+    if (StarChart.backgroundOverlay.alpha < 1) {
+      StarChart.backgroundOverlay.alpha += 1 / StarChart.fadeTime * timeDiff;
+    } else {
+      StarChart.backgroundOverlay.alpha = 1;
+    }
+
 
     var starSpacing = (StarChart.menuBackground.getBounds().width / 7) * StarChart.zoom;
     var bounds = StarChart.menuBackground.getBounds();

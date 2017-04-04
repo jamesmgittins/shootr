@@ -54,6 +54,7 @@ ShootrUI.updateFps = function (updateTime) {
         fpsCounter = 0;
     }
 };
+
 var inputTypes ={mouseKeyboard:"MK",controller:"CT"};
 var lastUsedInput = inputTypes.mouseKeyboard;
 var controllerTypes = {xbox:"XBOX",playStation:"PS"};
@@ -147,6 +148,7 @@ window.addEventListener("gamepaddisconnected", function (e) {
 
 
 function mouseWheelHandler(e) {
+  setLastUsedInput(inputTypes.mouseKeyboard);
 	var e = window.event || e; // old IE support
 	var delta = (e.wheelDelta || -e.detail);
 	StarChart.mousewheel(delta);
@@ -167,8 +169,20 @@ function clickCanvas(data) {
 	}
 }
 
+function setLastUsedInput(type) {
+
+  if (lastUsedInput != type) {
+    lastUsedInput = type;
+    if (lastUsedInput == inputTypes.controller) {
+      document.getElementById("the-body").className = "controller";
+    } else {
+      document.getElementById("the-body").className = "";
+    }
+  }
+}
+
 window.onkeydown = function (e) {
-	lastUsedInput = inputTypes.mouseKeyboard;
+	setLastUsedInput(inputTypes.mouseKeyboard);
 	switch (e.keyCode) {
 		case 80:
 			if (currentState == states.running)
@@ -275,10 +289,6 @@ window.onkeyup = function (e) {
 	return false;
 };
 
-function updateLastInput(type) {
-
-}
-
 function updateGamepads() {
     // Update gamepad state
     if (player1Gamepad > -1 && typeof navigator.getGamepads !== 'undefined' && navigator.getGamepads()[player1Gamepad]) {
@@ -290,7 +300,7 @@ function updateGamepads() {
 
             if (playerOneButtons[i].pressed) {
 
-							lastUsedInput = inputTypes.controller;
+							setLastUsedInput(inputTypes.controller);
 
                 if (!playerOneButtonsPressed[i]) {
                     switch (i) {
@@ -309,4 +319,74 @@ function updateGamepads() {
         }
     }
 	MainMenu.updateGamepad();
+}
+
+
+function getBackgroundSprite() {
+
+  var size = renderer.height;
+  var nebulaCanvas = document.createElement('canvas');
+  nebulaCanvas.height = nebulaCanvas.width = size;
+
+  var ctx = nebulaCanvas.getContext('2d');
+
+  var x = y = size / 2;
+  var width = size * 0.75;
+
+  var radgrad = ctx.createRadialGradient(x, y, 0, x, y, width);
+  radgrad.addColorStop(0, 'rgba(255,255,255,1)');
+  radgrad.addColorStop(0.9, 'rgba(255,255,255,0.2)');
+  radgrad.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = radgrad;
+  ctx.fillRect(0, 0, size, size);
+
+
+  if (!ShootrUI.backgroundSprite) {
+    ShootrUI.backgroundSprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(nebulaCanvas));
+  } else {
+    ShootrUI.backgroundSprite.texture = PIXI.Texture.fromCanvas(nebulaCanvas);
+  }
+
+  ShootrUI.backgroundSprite.size = size;
+
+  ShootrUI.backgroundSprite.tint = Constants.uiColors.background;
+  resizeBackgroundSprite();
+  return ShootrUI.backgroundSprite;
+}
+
+function resizeBackgroundSprite() {
+  if (ShootrUI.backgroundSprite) {
+    ShootrUI.backgroundSprite.scale.x = renderer.width / ShootrUI.backgroundSprite.size;
+    ShootrUI.backgroundSprite.scale.y = renderer.height / ShootrUI.backgroundSprite.size;
+  }
+}
+
+function gridSelection(colDelta, rowDelta, currPos, listSize, numColumns) {
+
+	var row = Math.floor(currPos / numColumns)
+	var col = currPos - row * numColumns;
+
+	var maxCol = numColumns - 1;
+	var maxRow = Math.floor(listSize / numColumns)
+
+	col = col + colDelta >= 0 ? (col + colDelta <= maxCol ? col + colDelta : col + colDelta - numColumns) : (col + colDelta + numColumns);
+	row = row + rowDelta >= 0 ? (row + rowDelta <= maxRow ? row + rowDelta : row + rowDelta - maxRow - 1) : (row + rowDelta + maxRow + 1);
+
+	if (listSize - 1 < row * numColumns + col) {
+		if (colDelta == 0) {
+			if (rowDelta < 0)
+        return Math.max(0, row - 1) * numColumns + col;
+			else
+				return col;
+		} else {
+			if (colDelta == -1) {
+				return listSize - 1;
+			} else {
+				return row * numColumns;
+			}
+		}
+	}	else {
+		return row * numColumns + col;
+	}
+
 }

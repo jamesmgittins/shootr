@@ -86,7 +86,8 @@ ArmsDealer.shieldComparison = function(item) {
 	};
 }
 
-ArmsDealer.weaponComparison = function(item) {
+ArmsDealer.weaponComparison = function(item, compareTo) {
+
 	var frontWeapon = typeof gameModel.p1.frontWeapon !== "undefined" ? gameModel.p1.frontWeapon : {
 		dps: 0,
 		shotsPerSecond: 0,
@@ -106,6 +107,16 @@ ArmsDealer.weaponComparison = function(item) {
 		id : 0
 	};
 
+	if (compareTo) {
+		return {
+			upgrade: item.dps > compareTo.dps,
+			dps: (item.dps >= compareTo.dps ? arrow.up : arrow.down),
+			shotsPerSecond: (item.shotsPerSecond >= compareTo.shotsPerSecond ? arrow.up : arrow.down),
+			accuracy: (item.accuracy >= compareTo.accuracy ? arrow.up : arrow.down),
+			equipped : item.id == frontWeapon.id || item.id == rearWeapon.id || item.id == turretWeapon.id
+		}
+	}
+
 	return {
 		upgrade: item.dps > frontWeapon.dps || item.dps > turretWeapon.dps || item.dps > rearWeapon.dps,
 		dps: (item.dps >= frontWeapon.dps ? arrow.up : arrow.down) + (item.dps >= turretWeapon.dps ? arrow.up : arrow.down) + (item.dps >= rearWeapon.dps ? arrow.up : arrow.down),
@@ -115,14 +126,18 @@ ArmsDealer.weaponComparison = function(item) {
 	}
 }
 
-ArmsDealer.createItemIcon = function(item, buy) {
+ArmsDealer.createItemIcon = function(item, options) {
 	var itemContainer = new PIXI.Container();
 
+	var backgroundCol = item.hyper ? Constants.itemColors.hyper : item.ultra ? Constants.itemColors.ultra : item.super ? Constants.itemColors.super :Constants.itemColors.normal;
+	var borderCol = item.hyper ? Constants.itemBorders.hyper : item.ultra ? Constants.itemBorders.ultra : item.super ? Constants.itemBorders.super :Constants.itemBorders.normal;
 
 	var border = new PIXI.Graphics();
-	border.beginFill(item.hyper ? Constants.itemColors.hyper : item.ultra ? Constants.itemColors.ultra : item.super ? Constants.itemColors.super :Constants.itemColors.normal);
-	border.lineStyle(2, item.hyper ? Constants.itemBorders.hyper : item.ultra ? Constants.itemBorders.ultra : item.super ? Constants.itemBorders.super :Constants.itemBorders.normal);
+	border.beginFill(backgroundCol);
+	border.lineStyle(2, borderCol);
 	border.drawRect(0, 0, 128 * scalingFactor, 128 * scalingFactor);
+	border.beginFill(borderCol);
+	border.drawRect(0, 0, 128 * scalingFactor, 24 * scalingFactor);
 	itemContainer.addChild(border);
 
 	var svgToUse = "img/shield.svg";
@@ -131,7 +146,7 @@ ArmsDealer.createItemIcon = function(item, buy) {
 		svgToUse = Weapons.getIconSvg(item);
 	}
 
-	var pic = new PIXI.Sprite(PIXI.Texture.fromImage(svgToUse, undefined, undefined, 0.5));
+	var pic = new PIXI.Sprite(PIXI.Texture.fromImage(svgToUse, undefined, undefined, 0.4));
 
 	pic.scale.x = pic.scale.y = 0.3 * scalingFactor;
 
@@ -141,38 +156,43 @@ ArmsDealer.createItemIcon = function(item, buy) {
 
 	var levelTooHigh = false;
 
-	if (item.type == "shield" && item.level > gameModel.p1.ship.shieldLevel)
+	if (options.slotLevel && options.slotLevel < item.level) {
 		levelTooHigh = true;
+	} else {
+		if (item.type == "shield" && item.level > gameModel.p1.ship.shieldLevel)
+			levelTooHigh = true;
 
-	if (item.type == "weapon" && item.level > Math.max(gameModel.p1.ship.frontWeaponLevel, gameModel.p1.ship.turretWeaponLevel, gameModel.p1.ship.rearWeaponLevel))
-		levelTooHigh = true;
+		if (item.type == "weapon" && item.level > Math.max(gameModel.p1.ship.frontWeaponLevel, gameModel.p1.ship.turretWeaponLevel, gameModel.p1.ship.rearWeaponLevel))
+			levelTooHigh = true;
+	}
+
 
 
 	var levelText = new PIXI.Text(item.level, {
-		font: (18 * scalingFactor) + 'px Dosis',
-		fill: levelTooHigh ? '#F00' : '#FFF',
-		stroke: '#000',
-		strokeThickness: 0,
+		font: (20 * scalingFactor) + 'px Dosis',
+		fill: levelTooHigh ? '#A00' : backgroundCol,
+		stroke: levelTooHigh? '#000' : borderCol,
+		strokeThickness: 5,
 		align: 'left'
 	})
 	levelText.position = {
-		x: 5 * scalingFactor,
-		y: 3 * scalingFactor
+		x: 3 * scalingFactor,
+		y: -1 * scalingFactor
 	};
 
 	itemContainer.addChild(levelText);
 
 	var comparison;
 	if (item.type == "weapon") {
-		comparison = ArmsDealer.weaponComparison(item);
+		comparison = ArmsDealer.weaponComparison(item, options.compareItem);
 	} else {
-		comparison = ArmsDealer.shieldComparison(item);
+		comparison = ArmsDealer.shieldComparison(item, options.compareItem);
 	}
 	if (comparison.equipped) {
 		var equippedText = new PIXI.Text("EQUIPPED", {
-			font: (12 * scalingFactor) + 'px Dosis',
-			fill: '#FFF',
-			stroke: "#000",
+			font: (16 * scalingFactor) + 'px Dosis',
+			fill: backgroundCol,
+			stroke: backgroundCol,
 			strokeThickness: 1,
 			align: 'left'
 		})
@@ -184,29 +204,27 @@ ArmsDealer.createItemIcon = function(item, buy) {
 		equippedText.tint = equippedText.defaultTint = 0xAAAAAA;
 		itemContainer.addChild(equippedText);
 	} else {
-		var upgradeText = new PIXI.Text(comparison.upgrade ? arrow.up : arrow.down, {
-			font: (18 * scalingFactor) + 'px Dosis',
-			fill: comparison.upgrade ? '#00BB00' : '#B00',
-			stroke: "#000",
-			strokeThickness: 1,
-			align: 'left'
-		});
-		upgradeText.anchor = {x:1, y:0};
-		upgradeText.position = {
-			x: (128 - 5) * scalingFactor,
-			y: 3 * scalingFactor
-		};
-		upgradeText.tint = upgradeText.defaultTint = 0xAAAAAA;
-		itemContainer.addChild(upgradeText);
+
+		if (comparison.upgrade) {
+			border.beginFill(backgroundCol);
+			border.lineStyle(0, borderCol);
+			border.drawPolygon([97 * scalingFactor, 25 * scalingFactor, 110 * scalingFactor, 8 * scalingFactor, 123 * scalingFactor, 25 * scalingFactor]);
+			// border.drawRect(100 * scalingFactor, 4 * scalingFactor, 16 * scalingFactor, 16 * scalingFactor);
+		} else {
+			border.beginFill(borderCol);
+			border.lineStyle(0, borderCol);
+			border.drawPolygon([97 * scalingFactor, 24 * scalingFactor, 110 * scalingFactor, 40 * scalingFactor, 123 * scalingFactor, 24 * scalingFactor]);
+			// border.drawRect(100 * scalingFactor, 24 * scalingFactor, 16 * scalingFactor, 16 * scalingFactor);
+		}
 	}
 
-	var price = buy ? item.price : item.price / 2;
+	var price = options.buy ? item.price : item.price / 2;
 
 	var priceText = new PIXI.Text(formatMoney(price) + " Credits", {
-		font: (12 * scalingFactor) + 'px Dosis',
+		font: (16 * scalingFactor) + 'px Dosis',
 		fill: '#FFF',
 		stroke: "#000",
-		strokeThickness: 1,
+		strokeThickness: 4,
 		align: 'left'
 	})
 	priceText.anchor = {x:0.5, y:1};
@@ -215,17 +233,25 @@ ArmsDealer.createItemIcon = function(item, buy) {
 		y: (128 - 3) * scalingFactor
 	};
 
+	if (options.loadout) {
+		if (item.type == "weapon") {
+			priceText.text = formatMoney(item.dps) + " DPS";
+		} else {
+			priceText.text = formatMoney(item.capacity) + " Capacity";
+		}
+	}
+
+
 	itemContainer.addChild(priceText);
 
 	priceText.tint = priceText.defaultTint = levelText.tint = levelText.defaultTint = pic.tint = pic.defaultTint = border.tint = border.defaultTint = 0xAAAAAA;
-
 	return itemContainer;
 }
 
 ArmsDealer.createItemLayout = function(item, buy, full) {
 
 	if (!full)
-		return ArmsDealer.createItemIcon(item, buy);
+		return ArmsDealer.createItemIcon(item, {buy:buy});
 
 	var itemContainer = new PIXI.Container();
 
@@ -235,7 +261,7 @@ ArmsDealer.createItemLayout = function(item, buy, full) {
 		font: (22 * scalingFactor) + 'px Dosis',
 		fill: '#FFF',
 		stroke: "#000",
-		strokeThickness: 1,
+		strokeThickness: 0,
 		align: 'left'
 	})
 	name.position = {
@@ -249,7 +275,7 @@ ArmsDealer.createItemLayout = function(item, buy, full) {
 		font: (16 * scalingFactor) + 'px Dosis',
 		fill: '#FFF',
 		stroke: "#000",
-		strokeThickness: 1,
+		strokeThickness: 0,
 		align: 'left'
 	})
 	details.position = {
@@ -262,7 +288,7 @@ ArmsDealer.createItemLayout = function(item, buy, full) {
 		font: (16 * scalingFactor) + 'px Dosis',
 		fill: '#FFF',
 		stroke: "#000",
-		strokeThickness: 1,
+		strokeThickness: 0,
 		align: 'left'
 	})
 	var comparison;
@@ -270,12 +296,12 @@ ArmsDealer.createItemLayout = function(item, buy, full) {
 		comparison = ArmsDealer.weaponComparison(item);
 		details.text = (item.ultra || item.hyper ? item.ultraText + "\n" : "") + formatMoney(item.dps) + " DPS " + comparison.dps + "\n"  + (item.bullets > 1 ? item.bullets + "x " : "") + formatMoney(item.shotsPerSecond) + " Shots per second " + comparison.shotsPerSecond + "\n" + (item.accuracy * 100).toFixed(2) + "% Accuracy " + comparison.accuracy;
 		level.text = "Level " + item.level + (comparison.equipped ? " Weapon Slot [EQUIPPED]" : " Weapon Slot Required");
-		level.tint = level.defaultTint = item.level > Math.max(gameModel.p1.ship.frontWeaponLevel, gameModel.p1.ship.turretWeaponLevel, gameModel.p1.ship.rearWeaponLevel) ? Loadout.invalidLevelTint : MainMenu.buttonTint;
+		level.tint = level.defaultTint = item.level > Math.max(gameModel.p1.ship.frontWeaponLevel, gameModel.p1.ship.turretWeaponLevel, gameModel.p1.ship.rearWeaponLevel) ? MainMenu.unselectableTint : MainMenu.buttonTint;
 	} else {
 		comparison = ArmsDealer.shieldComparison(item);
 		details.text = (item.ultra || item.hyper ? item.ultraText + "\n" : "") + formatMoney(item.capacity) + " Capacity " + comparison.capacity + "\n" + formatMoney(item.chargePerSecond) + " Recharge Rate" + comparison.chargePerSecond + "\n" + item.chargeDelay.toFixed(2) + " Second Recharge Delay " + comparison.chargeDelay;
 		level.text = "Level " + item.level + (comparison.equipped ? " Shield Slot [EQUIPPED]" : " Shield Slot Required");
-		level.tint = level.defaultTint = item.level > gameModel.p1.ship.shieldLevel ? Loadout.invalidLevelTint : MainMenu.buttonTint;
+		level.tint = level.defaultTint = item.level > gameModel.p1.ship.shieldLevel ? MainMenu.unselectableTint : MainMenu.buttonTint;
 	}
 
 	if (full)
@@ -293,14 +319,14 @@ ArmsDealer.createItemLayout = function(item, buy, full) {
 		font: (16 * scalingFactor) + 'px Dosis',
 		fill: '#FFF',
 		stroke: "#000",
-		strokeThickness: 1,
+		strokeThickness: 0,
 		align: 'left'
 	})
 	price.position = {
 		x: (iconWidth + 10) * scalingFactor,
 		y: level.position.y + level.height + 5 * scalingFactor
 	};
-	price.tint = price.defaultTint = buy && item.price > gameModel.p1.credits ? Loadout.invalidLevelTint : MainMenu.buttonTint;
+	price.tint = price.defaultTint = buy && item.price > gameModel.p1.credits ? MainMenu.unselectableTint : MainMenu.buttonTint;
 
 	itemContainer.addChild(name);
 	if (full)
@@ -308,7 +334,7 @@ ArmsDealer.createItemLayout = function(item, buy, full) {
 	itemContainer.addChild(level);
 	itemContainer.addChild(price);
 
-	var icon = ArmsDealer.createItemIcon(item, buy);
+	var icon = ArmsDealer.createItemIcon(item, {buy:buy});
 	// icon.anchor = {x:1,y:0};
 	icon.position = {x:0, y:10 * scalingFactor};
 	icon.children.forEach(function(child) {
@@ -335,8 +361,9 @@ ArmsDealer.initialize = function() {
 
 	ArmsDealer.menuContainer.visible = false;
 	ArmsDealer.menuBackground = new PIXI.Graphics();
-	ArmsDealer.menuBackground.beginFill(0x090909);
-	ArmsDealer.menuBackground.drawRect(renderer.width * 0.05, renderer.height * 0.05, renderer.width * 0.9, renderer.height * 0.9);
+	ArmsDealer.menuBackground.beginFill(MainMenu.backgroundColor);
+	ArmsDealer.menuBackground.drawRect(0, renderer.height * 0.05, renderer.width, renderer.height * 0.9);
+	ArmsDealer.menuBackground.alpha = MainMenu.backgroundAlpha;
 
 	ArmsDealer.menuContainer.addChild(ArmsDealer.menuBackground);
 
@@ -344,11 +371,12 @@ ArmsDealer.initialize = function() {
 
 	ArmsDealer.titleText = new PIXI.Text(ArmsDealer.menuTitle, {
 		font: fontSize + 'px Dosis',
-		fill: '#060',
+		fill: '#FFF',
 		stroke: "#000",
-		strokeThickness: 1,
+		strokeThickness: 0,
 		align: 'center'
 	});
+	ArmsDealer.titleText.tint = MainMenu.titleTint;
 	ArmsDealer.titleText.position = {
 		x: renderer.width * 0.05 + 25,
 		y: renderer.height * 0.05 + 25
@@ -357,11 +385,12 @@ ArmsDealer.initialize = function() {
 
 	var currentCredits = new PIXI.Text(formatMoney(gameModel.p1.credits) + " Credits", {
 		font: fontSize + 'px Dosis',
-		fill: '#0D0',
+		fill: '#FFF',
 		stroke: "#000",
-		strokeThickness: 1,
+		strokeThickness: 0,
 		align: 'center'
 	});
+	currentCredits.tint = MainMenu.titleTint;
 	currentCredits.anchor = {
 		x: 1,
 		y: 0
@@ -376,7 +405,7 @@ ArmsDealer.initialize = function() {
 		font: fontSize + 'px Dosis',
 		fill: '#FFF',
 		stroke: "#000",
-		strokeThickness: 1,
+		strokeThickness: 0,
 		align: 'center'
 	});
 	ArmsDealer.buyText.position = {
@@ -416,7 +445,7 @@ ArmsDealer.initialize = function() {
 		font: fontSize + 'px Dosis',
 		fill: '#FFF',
 		stroke: "#000",
-		strokeThickness: 1,
+		strokeThickness: 0,
 		align: 'center'
 	});
 	ArmsDealer.sellText.position = {
@@ -453,7 +482,7 @@ ArmsDealer.initialize = function() {
 		font: fontSize + 'px Dosis',
 		fill: '#FFF',
 		stroke: "#000",
-		strokeThickness: 1,
+		strokeThickness: 0,
 		align: 'center'
 	});
 	ArmsDealer.backButton.text.tint = MainMenu.buttonTint;
@@ -629,11 +658,12 @@ ArmsDealer.showDialog = function(index, buy) {
 	ArmsDealer.dialogContainer = new PIXI.Container();
 
 	var background = new PIXI.Graphics();
-	background.beginFill(0x091209);
-	background.drawRect(renderer.width * 0.2, renderer.height * 0.1, renderer.width * 0.6, renderer.height * 0.8);
+	background.beginFill(0x003030);
+	background.drawRect(renderer.width * 0.25, renderer.height * 0.2, renderer.width * 0.5, renderer.height * 0.6);
+	background.alpha = 0.99;
 	ArmsDealer.dialogContainer.addChild(background);
 
-	var itemLayout = ArmsDealer.createItemLayout(item, true, true);
+	var itemLayout = ArmsDealer.createItemLayout(item, buy, true);
 	itemLayout.position = {x:renderer.width / 2 - itemLayout.width / 2, y:renderer.height/2.5 - itemLayout.height / 2};
 
 	ArmsDealer.dialogContainer.addChild(itemLayout);
@@ -837,36 +867,9 @@ ArmsDealer.select = function(button) {
 };
 
 ArmsDealer.moveSelection = function(colDelta, rowDelta) {
-	var buttons = ArmsDealer.currentTab == "buy" ? ArmsDealer.buyButtons : ArmsDealer.sellButtons
-
-	var row = Math.floor(ArmsDealer.currentSelection / ArmsDealer.gridWidth)
-	var col = ArmsDealer.currentSelection - row * ArmsDealer.gridWidth;
-
-
-	var maxCol = ArmsDealer.gridWidth - 1;
-	var maxRow = Math.floor(buttons.length / ArmsDealer.gridWidth)
-
-	col = col + colDelta >= 0 ? (col + colDelta <= maxCol ? col + colDelta : col + colDelta - ArmsDealer.gridWidth) : (col + colDelta + ArmsDealer.gridWidth);
-	row = row + rowDelta >= 0 ? (row + rowDelta <= maxRow ? row + rowDelta : row + rowDelta - maxRow - 1) : (row + rowDelta + maxRow + 1);
-
-	if (buttons.length - 1 < row * ArmsDealer.gridWidth + col) {
-		if (colDelta == 0) {
-			if (col < buttons.length)
-				ArmsDealer.select(buttons[col]);
-			else
-				// ArmsDealer.select(buttons[col - buttons.length])
-				ArmsDealer.select(buttons[buttons.length - 1]);
-		} else {
-			if (colDelta == -1) {
-				ArmsDealer.select(buttons[buttons.length - 1]);
-			} else {
-				ArmsDealer.select(buttons[row * ArmsDealer.gridWidth])
-			}
-		}
-	}	else {
-		ArmsDealer.select(buttons[row * ArmsDealer.gridWidth + col]);
-	}
-
+	var buttons = ArmsDealer.currentTab == "buy" ? ArmsDealer.buyButtons : ArmsDealer.sellButtons;
+	var selection = gridSelection(colDelta, rowDelta, ArmsDealer.currentSelection, buttons.length, ArmsDealer.gridWidth);
+	ArmsDealer.select(buttons[selection]);
 }
 
 ArmsDealer.up = function() {

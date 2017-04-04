@@ -32,6 +32,10 @@ body, html {
 	cursor:crosshair;
 }
 
+body.controller {
+  cursor:none;
+}
+
 canvas {
 	position:absolute;
 	width:100%;

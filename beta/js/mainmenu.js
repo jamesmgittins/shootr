@@ -7,12 +7,18 @@ MainMenu = {
     }},
     {title:"Settings", click:function(){
       SettingsMenu.show();
+      SettingsMenu.onHide = MainMenu.show;
+      MainMenu.hide();
     }},
     {title:"Exit", click:function(){}}],
   currentSelection:0,
   bButton : function(){},
-  buttonTint : 0x00DD00,
-  selectedButtonTint : 0xFFFFFF
+  buttonTint : Constants.uiColors.darkText,
+  titleTint : Constants.uiColors.darkText,
+  selectedButtonTint : 0xFFFFFF,
+  unselectableTint : 0xF44336,
+  backgroundAlpha : 0.5,
+  backgroundColor : 0x0288D1
 };
 
 StationMenu = {
@@ -37,6 +43,8 @@ StationMenu = {
     }},
     {title:"Settings", click:function(){
       SettingsMenu.show();
+      SettingsMenu.onHide = StationMenu.show;
+      StationMenu.hide();
     }},
     {title:"Main Menu", buttonDesc:buttonTypes.back, click:function(){
       StationMenu.hide();
@@ -45,7 +53,8 @@ StationMenu = {
   currentSelection:0,
   onInit:function() {
     var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
-    StationMenu.tradeMoneyText = new PIXI.Text("You have lost", { font: fontSize + 'px Dosis', fill: '#060', stroke: "#000", strokeThickness: 1, align: 'center' });
+    StationMenu.tradeMoneyText = new PIXI.Text("You have lost", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+    StationMenu.tradeMoneyText.tint = MainMenu.titleTint;
     StationMenu.tradeMoneyText.anchor = {x:1,y:0};
     StationMenu.tradeMoneyText.position = {x:renderer.width * 0.95 - 25,y: renderer.height * 0.05 + 25};
     StationMenu.tradeMoneyText.visible = false;
@@ -82,14 +91,15 @@ DeathMenu = {
   bButton : function(){DeathMenu.menuOptions[1].click()},
   onInit:function() {
     var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
-    DeathMenu.moneyLostText = new PIXI.Text("You have lost", { font: fontSize + 'px Dosis', fill: '#060', stroke: "#000", strokeThickness: 1, align: 'center' });
+    DeathMenu.moneyLostText = new PIXI.Text("You have lost", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'center' });
+    DeathMenu.moneyLostText.tint = MainMenu.titleTint;
     DeathMenu.moneyLostText.anchor = {x:0.5,y:0.5};
     DeathMenu.moneyLostText.position = {x:0.5 * renderer.width, y:renderer.height / 5 - (MainMenu.fontSize * 3 * scalingFactor)};
     DeathMenu.menuContainer.addChild(DeathMenu.moneyLostText);
   },
   onShow:function(){
     DeathMenu.select(0);
-    DeathMenu.moneyLostText.text = "You have lost " + formatMoney(gameModel.p1.temporaryCredits) + " credits\nand " + gameModel.lootCollected + " cargo crate" + (gameModel.lootCollected > 1 ? "s" : "");
+    DeathMenu.moneyLostText.text = "You have lost " + formatMoney(gameModel.p1.temporaryCredits) + " credits\nand " + gameModel.lootCollected.length + " cargo crate" + (gameModel.lootCollected.length > 1 ? "s" : "");
   }
 };
 
@@ -102,9 +112,11 @@ PauseMenu = {
     }},
     {title:"Settings", click:function(){
       SettingsMenu.show();
+      PauseMenu.hide();
+      SettingsMenu.onHide = PauseMenu.show;
     }},
     {title:"Return to Station", buttonDesc:buttonTypes.back, click:function(){
-      stageSprite.visible=false;
+      changeState(states.station)
       StationMenu.show();
       SettingsMenu.hide();
       PauseMenu.hide();
@@ -112,7 +124,7 @@ PauseMenu = {
   currentSelection:0,
   bButton : function(){PauseMenu.menuOptions[0].click()},
   onInit : function() {
-    PauseMenu.menuBackground.alpha = 0.8;
+    // PauseMenu.menuBackground.alpha = 0.8;
   }
 };
 
@@ -121,6 +133,13 @@ SettingsMenu = {
   menuOptions:[
     {title:"Volume",click:function(){
       VolumeMenu.show();
+      var settingsOnHide = SettingsMenu.onHide;
+      SettingsMenu.onHide = undefined;
+      VolumeMenu.onHide = function(){
+        SettingsMenu.show();
+        SettingsMenu.onHide = settingsOnHide;
+      };
+      SettingsMenu.hide();
     }},
     {title:"Full Screen", click:function(){
       ShootrUI.toggleFullscreen();
@@ -161,6 +180,17 @@ SettingsMenu = {
         SettingsMenu.menuOptions[5].text.text = "Screen Shake: OFF";
       }
     }},
+    {title:"Antialiasing: ON", click:function(){
+      if (!gameModel.antialiasing) {
+        gameModel.antialiasing = true;
+        SettingsMenu.menuOptions[6].text.text = "Antialiasing: ON";
+      } else {
+        gameModel.antialiasing = false;
+        SettingsMenu.menuOptions[6].text.text = "Antialiasing: OFF";
+      }
+      save();
+      location.reload(true);
+    }},
     {title:"Delete Save Data", click:function(){
       resetSaveGame();
     }},
@@ -171,7 +201,8 @@ SettingsMenu = {
   bButton : function(){SettingsMenu.menuOptions[SettingsMenu.menuOptions.length - 1].click()},
   onInit : function() {
     var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
-    SettingsMenu.controllerText = new PIXI.Text("No controller detected", { font: fontSize + 'px Dosis', fill: '#060', stroke: "#000", strokeThickness: 1, align: 'center' });
+    SettingsMenu.controllerText = new PIXI.Text("No controller detected", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+    SettingsMenu.controllerText.tint = MainMenu.titleTint;
     SettingsMenu.controllerText.anchor = {x:1,y:0};
     SettingsMenu.controllerText.position = {x:renderer.width * 0.95 - 25,y: renderer.height * 0.05 + 25};
     SettingsMenu.menuContainer.addChild(SettingsMenu.controllerText);
@@ -194,6 +225,11 @@ SettingsMenu = {
       SettingsMenu.menuOptions[5].text.text = "Screen Shake: ON";
     } else {
       SettingsMenu.menuOptions[5].text.text = "Screen Shake: OFF";
+    }
+    if (gameModel.antialiasing) {
+      SettingsMenu.menuOptions[6].text.text = "Antialiasing: ON";
+    } else {
+      SettingsMenu.menuOptions[6].text.text = "Antialiasing: OFF";
     }
   },
   onShow : function() {
@@ -236,7 +272,8 @@ VolumeMenu = {
   bButton : function(){VolumeMenu.menuOptions[3].click()},
   onInit : function() {
     var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
-    VolumeMenu.volumeText = new PIXI.Text((gameModel.masterVolume * 100).toFixed() + "%", { font: fontSize + 'px Dosis', fill: '#060', stroke: "#000", strokeThickness: 1, align: 'center' });
+    VolumeMenu.volumeText = new PIXI.Text((gameModel.masterVolume * 100).toFixed() + "%", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'center' });
+    VolumeMenu.volumeText.tint = MainMenu.titleTint;
     VolumeMenu.volumeText.anchor = {x:0.5,y:0.5};
     VolumeMenu.volumeText.position = {x:0.5 * renderer.width, y:renderer.height / 5 - (MainMenu.fontSize * 2.5 * scalingFactor)};
     VolumeMenu.menuContainer.addChild(VolumeMenu.volumeText);
@@ -264,19 +301,21 @@ InitializeMenu = function (menu) {
     menu.menuContainer.visible = false;
 
     menu.menuBackground = new PIXI.Graphics();
-    menu.menuBackground.beginFill(0x090909);
-    menu.menuBackground.drawRect(renderer.width * 0.05, renderer.height * 0.05, renderer.width * 0.9, renderer.height * 0.9);
+    menu.menuBackground.beginFill(MainMenu.backgroundColor);
+    menu.menuBackground.drawRect(0, renderer.height * 0.05, renderer.width, renderer.height * 0.9);
+    menu.menuBackground.alpha = MainMenu.backgroundAlpha;
 
     menu.menuContainer.addChild(menu.menuBackground);
 
     var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
 
-    menu.titleText = new PIXI.Text(menu.menuTitle, { font: fontSize + 'px Dosis', fill: '#060', stroke: "#000", strokeThickness: 1, align: 'center' });
+    menu.titleText = new PIXI.Text(menu.menuTitle, { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+    menu.titleText.tint = MainMenu.titleTint;
     menu.titleText.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.05 + 25};
     menu.menuContainer.addChild(menu.titleText);
 
     for (var i=0; i< menu.menuOptions.length;i++) {
-      menu.menuOptions[i].text = new PIXI.Text(menu.menuOptions[i].title, { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'center' });
+      menu.menuOptions[i].text = new PIXI.Text(menu.menuOptions[i].title, { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
       if (menu.menuOptions[i].buttonDesc)
         menu.menuOptions[i].text.text = menu.menuOptions[i].title + " (" + ShootrUI.getInputButtonDescription(menu.menuOptions[i].buttonDesc) + ")";
       menu.menuOptions[i].text.tint = MainMenu.buttonTint;
@@ -414,6 +453,8 @@ MainMenu.updateGamepad = function() {
       var clickedAlready = false;
       clickedAlready = Shipyard.left();
       if (!clickedAlready)
+          clickedAlready = Loadout.left();
+      if (!clickedAlready)
           clickedAlready = ArmsDealer.left();
     }
     MainMenu.controllerStatus.left = true;
@@ -425,6 +466,8 @@ MainMenu.updateGamepad = function() {
     if (!MainMenu.controllerStatus.right) {
       var clickedAlready = false;
       clickedAlready = Shipyard.right();
+      if (!clickedAlready)
+          clickedAlready = Loadout.right();
       if (!clickedAlready)
           clickedAlready = ArmsDealer.right();
     }

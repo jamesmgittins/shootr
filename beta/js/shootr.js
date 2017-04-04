@@ -163,6 +163,13 @@ function changeState(state) {
 				Boss.randomLocation();
 			}
 
+			gameModel.lootCollected.forEach(function(item) {
+				if (item.type == Constants.itemTypes.weapon)
+					gameModel.p1.weapons.push(item);
+				if (item.type == Constants.itemTypes.shield)
+					gameModel.p1.shields.push(item);
+			});
+
 			addToHistory(gameModel.currentSystem, gameModel.targetSystem);
 			gameModel.currentSystem = gameModel.targetSystem;
 			gameModel.timeStep++;
@@ -219,15 +226,11 @@ function resetGame() {
 	})
 
 	timeLeft = levelTime;
-	PlayerShip.playerShip.currShield = PlayerShip.playerShip.maxShield;
-	PlayerShip.playerShip.xLoc = canvasWidth / 2;
-	PlayerShip.playerShip.yLoc = canvasHeight - (canvasHeight / 6);
-	PlayerShip.playerShip.inPlay = 1;
-	PlayerShip.playerShip.charge = 0;
-	PlayerShip.allPlayersDead = 0;
-	PlayerShip.allDeadAllDeadTimer = 0;
+	PlayerShip.reset();
 	Stars.StartEndStars.sprite.visible = false;
-	gameModel.lootCollected = 0;
+	gameModel.lootCollected = [];
+	GameText.status.lootIcons = [];
+	GameText.levelComplete.lootLayouts = [];
 	gameModel.p1.temporaryCredits = 0;
 
 	for (var i = 0; i < Bullets.enemyBullets.maxEnemyBullets; i++) {
@@ -314,8 +317,6 @@ function update() {
 
 		ShootrUI.updateFps(updateTime);
 
-		// stageTexture.clear();
-		// stageTexture.render(stage);
 		renderer.render(stage, stageTexture);
 
 		StarChart.update(timeDiff);
@@ -379,6 +380,7 @@ function resizeElements() {
 
 	stageTexture.resize(canvas.height, canvas.height, false);
 
+	resizeBackgroundSprite();
 	stageBackgroundCreate();
 
 	stageSprite.height = canvas.height;
@@ -417,16 +419,14 @@ function startGame() {
 	canvas = document.getElementById('game_canvas');
 
 	window.addEventListener("resize",updateAfterScreenSizeChange);
-// 	$(window).on("resize",updateAfterScreenSizeChange);
 
-// 	canvas.width = $(window).width();
-//   canvas.height = $(window).height();
 	canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
 	scalingFactor = canvas.height / 640;
 
-	renderer = PIXI.autoDetectRenderer(canvas.width, canvas.height, { view: canvas, backgroundColor: 0x000900 });
+	renderer = PIXI.autoDetectRenderer(canvas.width, canvas.height, { view: canvas, backgroundColor: 0x000900, antialias:gameModel.antialiasing });
+	PlayerShip.setBackgroundFromShipColor();
 
 	// stageTexture = new PIXI.RenderTexture(renderer, canvas.height, canvas.height);
 	stageTexture = PIXI.RenderTexture.create(canvas.height, canvas.height);
@@ -437,6 +437,8 @@ function startGame() {
 	stageSprite.screenShake = 1;
 	gameContainer = new PIXI.Container();
 	stageSprite.visible=false;
+
+	gameContainer.addChild(getBackgroundSprite());
 
 	gameContainer.addChild(stageSprite);
 
@@ -451,13 +453,16 @@ function startGame() {
 	gameContainer.tap = clickCanvas;
 	gameContainer.click = clickCanvas;
 	gameContainer.mousedown = function(data) {
+		setLastUsedInput(inputTypes.mouseKeyboard);
 		window.focus();
 		StarChart.mousedown(data);
 	};
 	gameContainer.mouseup = function(data) {
+		setLastUsedInput(inputTypes.mouseKeyboard);
 		StarChart.mouseup(data);
 	};
 	gameContainer.mousemove = function(data){
+		setLastUsedInput(inputTypes.mouseKeyboard);
 		aimLocX = data.data.getLocalPosition(stageSprite).x;
     aimLocY = data.data.getLocalPosition(stageSprite).y;
 		cursorPosition = data.data.getLocalPosition(gameContainer);

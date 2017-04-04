@@ -128,6 +128,7 @@ var Powerups = {
 	ySpeed: [],
 	rotSpeed: [],
 	chance : 0.95,
+	baseChance : 0.95,
 	lastPowerupSpawned : 0,
 	minFrequency: 15,
 	inPLay:function(){
@@ -236,29 +237,50 @@ var Powerups = {
 					} else {
 						GameText.bigText.newBigText("Cargo Crate Collected!");
 						Powerups.sprite[i].visible = false;
-						gameModel.lootCollected++;
+						// gameModel.lootCollected++;
+
+						var baseSeed = Date.now();
+						var level = gameModel.currentLevel > 1 ? Math.max(1,Math.round(gameModel.currentLevel + (Math.random() * 2.6) - 1)) : gameModel.currentLevel;
+						if (Math.random() > 0.75) {
+							var shield = ArmsDealer.generateShield(level, baseSeed + i, true);
+							gameModel.lootCollected.push(shield);
+							GameText.levelComplete.lootLayouts.push(ArmsDealer.createItemLayout(shield, false, true));
+							GameText.status.lootIcons.push(ArmsDealer.createItemIcon(shield, {buy:false}));
+						} else {
+							var weapon = Weapons.generateWeapon(level, baseSeed + i, true);
+							gameModel.lootCollected.push(weapon);
+							GameText.levelComplete.lootLayouts.push(ArmsDealer.createItemLayout(weapon, false, true));
+							GameText.status.lootIcons.push(ArmsDealer.createItemIcon(weapon, {buy:false}));
+						}
+
 					}
 				}
 			}
 		}
 	},
 	newPowerup : function (x, y) {
-	    if (Powerups.lastPowerupSpawned > Powerups.minFrequency && Math.random() > Powerups.chance) {
-		    Powerups.lastPowerupSpawned = 0;
-		    Powerups.sprite[Powerups.currPowerup].visible = true;
-		    Powerups.xLoc[Powerups.currPowerup] = x;
+	  if (Powerups.lastPowerupSpawned > Powerups.minFrequency) {
+			if (Math.random() > Powerups.chance) {
+				Powerups.chance = Powerups.baseChance;
+
+				Powerups.lastPowerupSpawned = 0;
+				Powerups.sprite[Powerups.currPowerup].visible = true;
+				Powerups.xLoc[Powerups.currPowerup] = x;
 				Powerups.yLoc[Powerups.currPowerup] = y;
-		    Powerups.sprite[Powerups.currPowerup].position = { x: x * scalingFactor, y: y * scalingFactor};
+				Powerups.sprite[Powerups.currPowerup].position = { x: x * scalingFactor, y: y * scalingFactor};
 				//Powerups.sprite[Powerups.currPowerup].scale = {x:scalingFactor,y:scalingFactor};
-		    Powerups.sprite[Powerups.currPowerup].rotation = Math.random() * 5;
-		    Powerups.rotSpeed[Powerups.currPowerup] = -2 + Math.random() * 4;
+				Powerups.sprite[Powerups.currPowerup].rotation = Math.random() * 5;
+				Powerups.rotSpeed[Powerups.currPowerup] = -2 + Math.random() * 4;
 
-		    var xDiff = (canvasWidth / 2) - x;
-		    var yDiff = (canvasHeight / 2) - y;
-		    var multi = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
+				var xDiff = (canvasWidth / 2) - x;
+				var yDiff = (canvasHeight / 2) - y;
+				var multi = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
 
-		    Powerups.xSpeed[Powerups.currPowerup] = xDiff / multi * Powerups.maxSpeed;
-		    Powerups.ySpeed[Powerups.currPowerup] = yDiff / multi * Powerups.maxSpeed;
+				Powerups.xSpeed[Powerups.currPowerup] = xDiff / multi * Powerups.maxSpeed;
+				Powerups.ySpeed[Powerups.currPowerup] = yDiff / multi * Powerups.maxSpeed;
+			} else {
+				Powerups.chance *= Powerups.baseChance;
+			}
 		}
 	}
 };

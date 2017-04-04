@@ -69,7 +69,8 @@ Ships.enemyColors = [
 	["#FFF3E0", "#FFE0B2", "#FFCC80", "#FFB74D", "#FFA726", "#FF9800", "#FB8C00", "#F57C00", "#EF6C00", "#E65100"], // Orange
 	["#efebe9", "#d7ccc8", "#bcaaa4", "#a1887f", "#8d6e63", "#795548", "#6d4c41", "#5d4037", "#4e342e", "#3e2723"], // Brown
 	["#fafafa", "#f5f5f5", "#eeeeee", "#e0e0e0", "#bdbdbd", "#9e9e9e", "#757575", "#616161", "#424242", "#212121"], // Grey
-	["#eceff1", "#cfd8dc", "#b0bec5", "#90a4ae", "#78909c", "#607d8b", "#546e7a", "#455a64", "#37474f", "#263238"]  // Blue Grey
+	["#eceff1", "#cfd8dc", "#b0bec5", "#90a4ae", "#78909c", "#607d8b", "#546e7a", "#455a64", "#37474f", "#263238"], // Blue Grey
+	["#E8F5E9", "#C8E6C9", "#A5D6A7", "#81C784", "#66BB6A", "#4CAF50", "#43A047", "#388E3C", "#2E7D32", "#1B5E20"]  // Green
  ];
 // Ships.enemyColors = [["#FF0000"]];
 
@@ -93,11 +94,11 @@ Ships.shipArt = function (size, seed, enemy, colors, white) {
 		shadowCtx.save();
 		shadowCtx.shadowBlur = 20;
 		shadowCtx.shadowColor = "#000";
-    shadowCtx.fillStyle = "#000";
+    shadowCtx.fillStyle = "rgba(0,0,0,1)";
 		shadowCtx.beginPath();
     shadowCtx.moveTo(1 + size / 2, 1 + Math.round(size * 0.05));
-    shadowCtx.lineTo(1 + Math.round(size * 0.75), 1 + Math.round(size * 0.8));
-		shadowCtx.lineTo(1 + Math.round(size * 0.25), 1 + Math.round(size * 0.8));
+    shadowCtx.lineTo(1 + Math.round(size * 0.8), 1 + Math.round(size * 0.8));
+		shadowCtx.lineTo(1 + Math.round(size * 0.2), 1 + Math.round(size * 0.8));
     shadowCtx.fill();
 		shadowCtx.fill();
 		shadowCtx.fill();

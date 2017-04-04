@@ -19,13 +19,13 @@ Weapons = {
     {
       ultra:true,
       factor:2,
-      chance:0.15,
+      chance:0.08,
       prefix : "Ultra "
     },
     {
       hyper:true,
       factor:3.5,
-      chance:0.05,
+      chance:0.02,
       prefix : "Hyper "
     }
   ]
@@ -50,7 +50,7 @@ Weapons.plasmaCannon = function(level,seed,rarity) {
 		ultra:rarity.ultra,
     hyper:rarity.hyper,
     super:rarity.super,
-		type: "weapon",
+		type: Constants.itemTypes.weapon,
 		name: (bulletsPerShot == 3 ? "Triple " : (bulletsPerShot == 2 ? "Double " : "")) + rarity.prefix + "Plasma Cannon",
 		bullets : bulletsPerShot,
 		seed: seed,
@@ -92,7 +92,7 @@ Weapons.laserCannon = function(level,seed,rarity) {
     super:rarity.super,
 		ultra:rarity.ultra,
     hyper:rarity.hyper,
-		type: "weapon",
+		type: Constants.itemTypes.weapon,
 		name: rarity.prefix + "Railgun",
 		seed: seed,
 		level: level,
@@ -125,7 +125,7 @@ Weapons.missileLauncher = function(level, seed, rarity) {
     super:rarity.super,
 		ultra:rarity.ultra,
     hyper:rarity.hyper,
-		type: "weapon",
+		type: Constants.itemTypes.weapon,
 		name: rarity.prefix + "Missile Launcher",
 		seed: seed,
 		level: level,

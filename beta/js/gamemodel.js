@@ -22,6 +22,16 @@ var Constants = {
 		super:0x0D47A1,
 		ultra:0x311B92,
 		hyper:0xE65100
+	},
+	itemTypes : {
+		weapon:"weapon",
+		shield:"shield"
+	},
+	uiColors : {
+		// background : 0x1B5E20,
+		background : 0x124215,
+		lightText : 0xB2DFDB,
+		darkText : 0x80D8FF
 	}
 }
 
@@ -84,6 +94,7 @@ function load() {
 			masterVolume : 0.5,
 			maxScreenShake : 5,
 			dmgNumbers : false,
+			antialiasing : true,
 			p1 : {
 				ship: Shipyard.generateShip(1, 1, false),
 				weapons: [Weapons.generateWeapon(1,123,false)],
@@ -91,15 +102,7 @@ function load() {
 				credits: 0,
 				totalCredits: 0,
 				temporaryCredits : 0,
-				upgrades:[]
-			},
-			p2 : {
-				ship: {seed:1, range:10},
-				weapons: [],
-				shields: [],
-				credits: 0,
-				totalCredits: 0,
-				upgrades:[]
+				perkPoints:0
 			},
 			currentSystem: {x:0,y:0},
 			targetSystem: {x:0,y:0},

@@ -65,16 +65,19 @@ Shipyard.initialize = function () {
   Shipyard.menuContainer.visible = false;
 
   Shipyard.menuBackground = new PIXI.Graphics();
-  Shipyard.menuBackground.beginFill(0x090909);
-  Shipyard.menuBackground.drawRect(renderer.width * 0.05, renderer.height * 0.05, renderer.width * 0.9, renderer.height * 0.9);
+  Shipyard.menuBackground.beginFill(MainMenu.backgroundColor);
+  Shipyard.menuBackground.drawRect(0, renderer.height * 0.05, renderer.width, renderer.height * 0.9);
+  Shipyard.menuBackground.alpha = MainMenu.backgroundAlpha;
 
   Shipyard.menuContainer.addChild(Shipyard.menuBackground);
 
-  Shipyard.titleText = new PIXI.Text(Shipyard.menuTitle, { font: fontSize + 'px Dosis', fill: '#060', stroke: "#000", strokeThickness: 1, align: 'center' });
+  Shipyard.titleText = new PIXI.Text(Shipyard.menuTitle, { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'center' });
   Shipyard.titleText.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.05 + 25};
+  Shipyard.titleText.tint = MainMenu.titleTint;
   Shipyard.menuContainer.addChild(Shipyard.titleText);
 
-  var currentCredits = new PIXI.Text(formatMoney(gameModel.p1.credits) + " Credits", { font: fontSize + 'px Dosis', fill: '#0D0', stroke: "#000", strokeThickness: 1, align: 'center' });
+  var currentCredits = new PIXI.Text(formatMoney(gameModel.p1.credits) + " Credits", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'center' });
+  currentCredits.tint = MainMenu.titleTint;
   currentCredits.anchor = {x:1,y:0};
   currentCredits.position = {x:renderer.width * 0.95 - 25,y: renderer.height * 0.05 + 25};
   Shipyard.menuContainer.addChild(currentCredits);
@@ -86,7 +89,7 @@ Shipyard.initialize = function () {
   Shipyard.menuContainer.addChild(Shipyard.backButton.text);
 
   var star = StarChart.generateStar(gameModel.currentSystem.x, gameModel.currentSystem.y);
-  var shipLayoutWidth = Shipyard.menuBackground.width / 3;
+  var shipLayoutWidth = renderer.width * 0.9 / 3;
 
   var shipLevel = calculateShipLevel();
 
@@ -97,7 +100,8 @@ Shipyard.initialize = function () {
 
     Shipyard.ships[i] = ship;
     Shipyard.ships[i].background = new PIXI.Graphics();
-    Shipyard.ships[i].background.beginFill(0x191919);
+    Shipyard.ships[i].background.beginFill(0x000000);
+    Shipyard.ships[i].background.alpha = MainMenu.backgroundAlpha;
     Shipyard.ships[i].background.drawRect(renderer.width * 0.05 + i * shipLayoutWidth + 15, renderer.height * 0.15, shipLayoutWidth - 30, renderer.height * 0.7);
 
     var bounds = Shipyard.ships[i].background.getBounds();
@@ -124,17 +128,20 @@ Shipyard.initialize = function () {
 
     var shipDetails = new PIXI.Text(
       frontWeaponString + "\n" + turretWeaponString + "\n" + rearWeaponString + "\n" + shieldString + "\n" + fuelRangeString + "\n" + speedString + "\n",
-      { font: fontSize + 'px Dosis', fill: '#0D0', stroke: "#000", strokeThickness: 1, align: 'left' });
+      { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'left' });
     shipDetails.position = {x:shipBacking.getBounds().x + 5, y:shipBacking.getBounds().y + shipBacking.getBounds().height + 10}
+    shipDetails.tint = MainMenu.buttonTint;
     Shipyard.menuContainer.addChild(shipDetails);
 
-    var shipName = new PIXI.Text("Level " + Shipyard.ships[i].level + " - " + Shipyard.ships[i].name, { font: fontSize + 'px Dosis', fill: '#0D0', stroke: "#000", strokeThickness: 1, align: 'left' });
+    var shipName = new PIXI.Text("Level " + Shipyard.ships[i].level + " - " + Shipyard.ships[i].name, { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'left' });
     shipName.anchor = anchor = {x:0,y:0.5};
+    shipName.tint = MainMenu.titleTint;
     shipName.position = {x:bounds.x + 15, y:bounds.y + (20 * scalingFactor)};
     Shipyard.menuContainer.addChild(shipName);
 
-    var shipPrice = new PIXI.Text(formatMoney(Shipyard.ships[i].price)+ " Credits", { font: fontSize + 'px Dosis', fill: '#0D0', stroke: "#000", strokeThickness: 1, align: 'left' });
+    var shipPrice = new PIXI.Text(formatMoney(Shipyard.ships[i].price)+ " Credits", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'left' });
     shipPrice.anchor = anchor = {x:1,y:0.5};
+    shipPrice.tint = Shipyard.ships[i].price > gameModel.p1.credits ? MainMenu.unselectableTint : MainMenu.titleTint;
     shipPrice.position = {x:bounds.x + bounds.width - 15, y:bounds.y + (20 * scalingFactor)};
     Shipyard.menuContainer.addChild(shipPrice);
 
@@ -169,6 +176,7 @@ Shipyard.buyShip = function(ship) {
   if (ship.price <= gameModel.p1.credits && !ship.buyButton.owned) {
     gameModel.p1.credits -= ship.price;
     gameModel.p1.ship = Shipyard.generateShip(ship.level, ship.seed, ship.ultra)
+    PlayerShip.setBackgroundFromShipColor();
     PlayerShip.updateSize();
     save();
     Shipyard.initialize();

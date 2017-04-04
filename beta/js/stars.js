@@ -199,6 +199,7 @@ Stars.stars = {
 Stars.shipTrails = {
 	spriteArray : [],
 	discardedSprites: [],
+	trailFrequency : 30,
 	newPowerupPart:function(x,y,tint,scale) {
 
 		var part;
@@ -264,7 +265,7 @@ Stars.shipTrails = {
 	},
 	updateShip: function(ship, timeDiff) {
 		ship.lastTrail += timeDiff * 1000;
-		if (ship.lastTrail > 30) {
+		if ((!ship.enemyShip && ship.lastTrail > Stars.shipTrails.trailFrequency + (ship.ySpeed / 2)) || (ship.enemyShip && ship.lastTrail > Stars.shipTrails.trailFrequency)) {
 			ship.lastTrail = 0;
 			Stars.shipTrails.newPart(ship);
 		}
