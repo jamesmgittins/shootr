@@ -89,8 +89,8 @@ Boss.update = function(timeDiff) {
     Boss.patternChanged = false;
     var seed = Date.now();
 
-    Boss.texture = PIXI.Texture.fromCanvas(Ships.shipArt(size, seed, true, this.colors));
-    Boss.damageTexture = PIXI.Texture.fromCanvas(Ships.shipArt(size, seed, true, this.colors, true));
+    Boss.texture = glowTexture(PIXI.Texture.fromCanvas(Ships.shipArt(size, seed, true, this.colors)));
+    Boss.damageTexture = glowTexture(PIXI.Texture.fromCanvas(Ships.shipArt(size, seed, true, this.colors, true)));
 
     if (EnemyShips.discardedSprites.length > 0) {
       Boss.sprite = EnemyShips.discardedSprites.pop();

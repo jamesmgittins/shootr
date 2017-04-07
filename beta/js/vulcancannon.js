@@ -93,6 +93,7 @@ VulcanCannon = {
 
 		return {
 			weapon : weapon,
+			rearAngleMod:0.8,
 			spritePool : SpritePool.create(VulcanCannon.generateTexture(), container),
 			resize : function(){
 				this.spritePool.changeTexture(VulcanCannon.generateTexture());
@@ -134,7 +135,7 @@ VulcanCannon.vulcanCannon = function(level,seed,rarity) {
     hyper:rarity.hyper,
     super:rarity.super,
 		type: Constants.itemTypes.weapon,
-		name: "Vulcan Cannon",
+		name: rarity.prefix + "Vulcan Cannon",
 		bullets : bulletsPerShot,
 		seed: seed,
 		level: level,

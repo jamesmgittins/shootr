@@ -4,7 +4,7 @@ MissileLauncher = {
   maxVelocity: 250,
   acceleration: 250,
   rearAngleMod : 2.5,
-  trailFrequency : 0.05,
+  trailFrequency : 0.02,
 
 	generateTexture : function() {
     var blast = document.createElement('canvas');
@@ -22,7 +22,9 @@ MissileLauncher = {
     // 		blastCtx.fillStyle = "#ff0000";
     // 		blastCtx.fillRect(1, 3, 1, 1); // bottom right point
 
-    return PIXI.Texture.fromCanvas(blast);
+    // return PIXI.Texture.fromCanvas(blast);
+
+    return PIXI.Texture.fromImage("img/missile.svg", undefined, undefined, 0.1);
   },
 
   generateExplosion : function (xLoc, yLoc) {
@@ -104,7 +106,7 @@ MissileLauncher = {
 
         sprite.lastTrail += timeDiff;
         if (sprite.lastTrail > MissileLauncher.trailFrequency) {
-          var posAdjust = RotateVector2d(0, 10 * scalingFactor, sprite.rotation);
+          var posAdjust = RotateVector2d(0, 12 * scalingFactor, sprite.rotation);
           missileTrails.newPart(sprite.position.x + posAdjust.x, sprite.position.y + posAdjust.y);
           sprite.lastTrail = 0;
         }
@@ -137,7 +139,7 @@ MissileLauncher = {
 		sprite.position.y = position.y * scalingFactor;
 		sprite.lowHealthSeek = weapon.lowHealthSeek;
 
-		sprite.tint = weapon.ultra || weapon.hyper ? 0xffffff : 0x999999;
+		sprite.tint = weapon.ultra || weapon.hyper ? 0xffffff : 0xff9999;
 
 		var wobble = (1 - weapon.accuracy) * 0.5;
 		position.angle += -wobble + Math.random() * wobble * 2;
@@ -146,8 +148,9 @@ MissileLauncher = {
 		sprite.target = false;
 		sprite.speed = RotateVector2d(0, -MissileLauncher.startVelocity, position.angle);
 		sprite.damage = damage;
-		sprite.scale.y = 3 * scalingFactor;
-		sprite.scale.x = 1.5 * scalingFactor;
+		// sprite.scale.y = 3 * scalingFactor;
+		// sprite.scale.x = 1.5 * scalingFactor;
+    sprite.scale.x = sprite.scale.y = 0.4 * scalingFactor;
 	},
 
   create: function(weapon, container) {
@@ -180,8 +183,23 @@ MissileLauncher = {
 				MissileLauncher.individualBullet(this.spritePool, speed, position, weapon.damagePerShot * damageModifier, 1, this.weapon);
 			},
       missileTrails : {
-        // spritePool : SpritePool.create(Stars.stars.texture, container),
-        spritePool : SpritePool.create(PlasmaCannon.generateTexture(), container),
+        spritePool : SpritePool.create((function() {
+          var size = 8 * scalingFactor;
+          var blast = document.createElement('canvas');
+          blast.width = size + 4;
+          blast.height = size + 4;
+          var blastCtx = blast.getContext('2d');
+          blastCtx.shadowBlur = 5;
+          blastCtx.shadowColor = "white";
+          var radgrad = blastCtx.createRadialGradient(size / 2 + 2, size / 2 + 2, 0, size / 2 + 2, size / 2 + 2, size / 2);
+          radgrad.addColorStop(0, 'rgba(255,255,255,0.05)');
+          radgrad.addColorStop(0.5, 'rgba(255,255,255,0.1)');
+          radgrad.addColorStop(1, 'rgba(255,255,255,0)');
+          blastCtx.fillStyle = radgrad;
+          blastCtx.fillRect(0, 0, size + 4, size + 4);
+          return PIXI.Texture.fromCanvas(blast);
+        })(), container),
+
         update:function(timeDiff) {
           for (var i = 0; i < this.spritePool.sprites.length; i++) {
             var sprite = this.spritePool.sprites[i];
@@ -201,7 +219,7 @@ MissileLauncher = {
           }
         },
         newPart:function(x, y) {
-          var scale = 0.2 + Math.random() * 0.3;
+          var scale = 1 + Math.random() * 0.5;
           var part = this.spritePool.nextSprite();
           part.fadeSpeed= 2 * scalingFactor;
           // part.tint = tint || (Math.random() > 0.4 ? 0xffff00 : 0xff5600);
@@ -211,8 +229,8 @@ MissileLauncher = {
             x: x,
             y: y
           };
-          part.scale.x = scale * scalingFactor;
-          part.scale.y = scale * scalingFactor;
+          part.scale.x = scale;
+          part.scale.y = scale;
           part.xSpeed = (-40 + Math.random() * 80) * scalingFactor;
           part.ySpeed = (-40 + Math.random() * 80) * scalingFactor;
         }

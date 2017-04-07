@@ -3,7 +3,8 @@ Weapons = {
     plasmaCannon:0,
   	railGun:1,
 	  missileLauncher:2,
-    vulcanCannon:3
+    vulcanCannon:3,
+    bioGelGun: 4
   },
   rarity : [
     {
@@ -120,7 +121,7 @@ Weapons.missileLauncher = function(level, seed, rarity) {
 	var levelMod = Math.pow(Constants.weaponLevelScaling, level - 1);
 	Math.seedrandom(seed);
 	var dps = (level * 9 + (Math.random() * level * 2)) * levelMod * rarity.factor;
-	var shotsPerSecond = 1 + Math.random() * 3;
+	var shotsPerSecond = 1 + Math.random();
 	var damagePerShot = dps / shotsPerSecond;
 	var missileLauncher = {
     super:rarity.super,
@@ -162,6 +163,8 @@ Weapons.getIconSvg =  function(item) {
     return "img/barbed-arrow.svg";
   if (item.weaponType == Weapons.types.vulcanCannon)
       return "img/blaster.svg";
+  if (item.weaponType == Weapons.types.bioGelGun)
+      return "img/biohazard.svg";
 };
 
 Weapons.generateWeapon = function(level, seed, ultra) {
@@ -183,6 +186,9 @@ Weapons.generateWeapon = function(level, seed, ultra) {
   if (Math.random() > 0.7)
   	return VulcanCannon.vulcanCannon(level,seed,weaponRarity);
 
+  if (Math.random() > 0.7)
+  	return BioGelGun.bioGelGun(level,seed,weaponRarity);
+
 	return Weapons.plasmaCannon(level,seed,weaponRarity);
 };
 
@@ -198,6 +204,9 @@ Weapons.createWeaponLogic = function(weapon, container) {
 
   if (weapon.weaponType == Weapons.types.missileLauncher)
     return MissileLauncher.create(weapon, container);
+
+  if (weapon.weaponType == Weapons.types.bioGelGun)
+    return BioGelGun.create(weapon, container);
 };
 
 

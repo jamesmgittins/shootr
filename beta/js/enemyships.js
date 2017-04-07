@@ -74,8 +74,8 @@ EnemyShips.wave = function () {
 
 	var seed = Date.now();
 
-	this.texture = PIXI.Texture.fromCanvas(Ships.shipArt(size, seed, true, this.colors));
-	this.damageTexture = PIXI.Texture.fromCanvas(Ships.shipArt(size, seed, true, this.colors, true));
+	this.texture = glowTexture(PIXI.Texture.fromCanvas(Ships.shipArt(size, seed, true, this.colors)));
+	this.damageTexture = glowTexture(PIXI.Texture.fromCanvas(Ships.shipArt(size, seed, true, this.colors, true)));
 
 	this.maxSpeed = 60 + Math.random() * 30;
 
@@ -172,14 +172,19 @@ EnemyShips.checkForSplashDamage = function (ship){
   }
 };
 
-EnemyShips.damageEnemyShip = function(ship, xLoc, yLoc, damage) {
+EnemyShips.damageEnemyShip = function(ship, xLoc, yLoc, damage, noEffect) {
 	if (ship.health > 0) {
-		Bullets.generateExplosion(xLoc, yLoc);
+
+		if (!noEffect) {
+			Bullets.generateExplosion(xLoc, yLoc);
+			Sounds.enemyDamage.play();
+			ship.sprite.rotation = -ship.rotation - 0.1 + (Math.random() * 0.2);
+			ship.sprite.texture = ship.damageTexture || ship.wave.damageTexture;
+			ship.lastDamaged = 0;
+		}
+
 		ship.health -= damage;
-		ship.lastDamaged = 0;
-		ship.sprite.rotation = -ship.rotation - 0.1 + (Math.random() * 0.2);
-		ship.sprite.texture = ship.damageTexture || ship.wave.damageTexture;
-		Sounds.enemyDamage.play();
+		
 		GameText.damage.newText(damage, ship);
 
 		if (ship.wave) {

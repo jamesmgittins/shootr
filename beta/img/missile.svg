@@ -1,0 +1,49 @@
+<svg width="272.11966" height="639.1786" xmlns="http://www.w3.org/2000/svg">
+ <defs>
+  <filter height="1.049595" y="-0.024798" width="1.964856" x="-0.482428" id="filter3366">
+   <feGaussianBlur id="feGaussianBlur3368" stdDeviation="4.467153"/>
+  </filter>
+  <filter height="1.049595" y="-0.024798" width="2.010802" x="-0.505401" id="filter3370">
+   <feGaussianBlur id="feGaussianBlur3372" stdDeviation="4.467153"/>
+  </filter>
+  <filter height="1.049828" y="-0.024914" width="2.061342" x="-0.530671" id="filter3374">
+   <feGaussianBlur id="feGaussianBlur3376" stdDeviation="4.467153"/>
+  </filter>
+  <filter height="1.045264" y="-0.022632" width="1.776562" x="-0.388281" id="filter3438">
+   <feGaussianBlur id="feGaussianBlur3440" stdDeviation="5.391421"/>
+  </filter>
+  <filter height="1.045264" y="-0.022632" width="1.776562" x="-0.388281" id="filter3442">
+   <feGaussianBlur id="feGaussianBlur3444" stdDeviation="5.391421"/>
+  </filter>
+  <filter height="1.189991" y="-0.094996" width="1.553843" x="-0.276922" id="filter3544">
+   <feGaussianBlur id="feGaussianBlur3546" stdDeviation="5.048538"/>
+  </filter>
+ </defs>
+ <metadata id="metadata7">image/svg+xml</metadata>
+ <g>
+  <title>background</title>
+  <rect fill="none" id="canvas_background" height="641.1786" width="274.11966" y="-1" x="-1"/>
+ </g>
+ <g>
+  <title>Layer 1</title>
+  <path fill="#484848" fill-rule="evenodd" stroke="#000000" stroke-width="1px" d="m89.322553,602.550913l0,-314.15744l92.93404,0l0,315.1879l-92.93404,-1.03046z" id="path2388"/>
+  <path fill="#484848" fill-rule="evenodd" stroke="#000000" stroke-width="1px" d="m88.312403,129.799533l0,-28.28428c0,0 30.30457,-101.01525 48.48732,-101.01525c18.18275,0 45.45687,97.9848 45.45687,97.9848l0,30.30457l-93.94419,1.01016z" id="path2402"/>
+  <path fill="#484848" fill-rule="evenodd" stroke="#000000" stroke-width="1px" d="m89.322543,287.373173l0,-158.59395l92.93404,0l0,159.62441l-92.93404,-1.03046z" id="path2406"/>
+  <path fill="#797979" fill-rule="evenodd" stroke="#5e5e5e" stroke-width="1px" filter="url(#filter3370)" d="m145.859154,592.713311l16.112606,6.736616l0,-483.689307l-21.147793,-92.965361c0,0 5.035187,79.492115 5.035187,94.312682c0,14.820567 1.007035,479.647345 0,475.60537z" id="path3230"/>
+  <path fill="#797979" fill-rule="evenodd" stroke="#5e5e5e" stroke-width="1px" filter="url(#filter3366)" d="m125.214873,592.713311l-16.112606,6.736616l0,-483.689307l22.154829,-92.965361c0,0 -6.042222,79.492115 -6.042222,94.312682c0,14.820567 -1.007035,479.647345 0,475.60537z" id="path3232"/>
+  <path fill="#cecece" fill-rule="evenodd" stroke="#999999" stroke-width="1px" filter="url(#filter3374)" d="m121.78984,189.917224l0,402.662851l29.004949,0l0,-406.70295l0,-68.681624c0,0 -7.251234,-98.308996 -13.052224,-98.308996c-5.80099,0 -14.502482,107.735889 -14.502482,107.735889l-1.450244,63.29483z" id="path3228"/>
+  <path fill="#656565" fill-rule="evenodd" stroke="#7c7c7c" stroke-width="1px" filter="url(#filter3438)" d="m109.525603,597.500153l0,-483.86307l15.15229,-83.84266l-15.15229,27.27412l-17.17259,45.45686l0,498.00521l17.17259,-3.03046z" id="path3378"/>
+  <path fill="#656565" fill-rule="evenodd" stroke="#7c7c7c" stroke-width="1px" filter="url(#filter3442)" d="m164.073843,595.984923l0,-483.86307l-15.15229,-83.84266l15.15229,27.27412l17.17259,45.45686l0,498.00521l-17.17259,-3.03046z" id="path3380"/>
+  <path fill="#555151" fill-rule="evenodd" stroke="#000000" stroke-width="1px" d="m114.576363,602.550913l-20.20305,35.35534l83.84266,0l-21.2132,-35.35534l-42.42641,0z" id="path2404"/>
+  <path fill="#da0101" fill-rule="evenodd" stroke="#727272" stroke-width="1px" d="m98.413923,451.028033c0,0 -126.51498,152.40011 -91.92388,161.62441c15.15229,4.04061 44.44672,-8.08122 44.44672,-8.08122l44.44671,-27.27412" id="path3218"/>
+  <path fill="#da0101" fill-rule="evenodd" stroke="#727272" stroke-width="1px" d="m173.705713,450.615733c0,0 126.51498,152.40011 91.92388,161.62441c-15.15229,4.04061 -44.44672,-8.08122 -44.44672,-8.08122l-44.44671,-27.27412" id="path3220"/>
+  <path fill="#da0101" fill-rule="evenodd" stroke="#727272" stroke-width="1px" d="m129.728653,454.058493l-6.06091,140.41121c0,0 1.01015,18.18274 12.12183,18.18274c11.11167,0 12.12183,-18.18275 12.12183,-18.18275l-8.08122,-140.4112" id="path3226"/>
+  <path fill="#a60101" fill-rule="evenodd" stroke-width="1px" filter="url(#filter3544)" d="m95.383473,578.307253l3.03045,-124.24876c0,0 -35.35534,43.43656 -42.4264,54.54824c-7.07107,11.11168 16.16244,71.72083 21.2132,72.73098c5.05076,1.01015 18.18275,-1.01015 18.18275,-3.03046z" id="path3446"/>
+  <path fill="#a60101" fill-rule="evenodd" stroke-width="1px" filter="url(#filter3544)" d="m176.541913,577.162753l-3.03045,-124.24876c0,0 35.35534,43.43656 42.4264,54.54824c7.07107,11.11168 -16.16244,71.72083 -21.2132,72.73098c-5.05076,1.01015 -18.18275,-1.01015 -18.18275,-3.03046z" id="path3548"/>
+  <path fill="none" fill-rule="evenodd" stroke="#000000" stroke-width="1px" d="m117.859363,604.066143l-10.35406,32.57742" id="path3550"/>
+  <path fill="none" fill-rule="evenodd" stroke="#000000" stroke-width="1px" d="m152.204553,604.066143l11.61675,31.81981" id="path3552"/>
+  <path fill="none" fill-rule="evenodd" stroke="#000000" stroke-width="1px" d="m123.920273,604.318683l-3.03045,31.31473" id="path3554"/>
+  <path fill="none" fill-rule="evenodd" stroke="#000000" stroke-width="1px" d="m146.143633,603.813603l4.04061,30.55712" id="path3556"/>
+  <path fill="none" fill-rule="evenodd" stroke="#000000" stroke-width="1px" d="m135.031953,613.410053l0.25254,19.95052" id="path3558"/>
+ </g>
+</svg>

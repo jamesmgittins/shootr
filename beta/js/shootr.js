@@ -401,7 +401,7 @@ function resizeCanvas() {
 }
 
 function resizeElements() {
-
+	blurFilters = false;
 	resizeCanvas();
 
 	stageTexture.resize(canvas.height, canvas.height, false);

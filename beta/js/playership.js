@@ -87,6 +87,12 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
 			}
 			Ships.updateRotation(PlayerShip.playerShip, timeDiff);
 			PlayerShip.playerShip.sprite.scale.x = (1 - (PlayerShip.playerShip.rolling > 0.15 ? PlayerShip.playerShip.rolling - 0.15 : PlayerShip.playerShip.rolling) * 13.333);
+
+			if (PlayerShip.playerShip.rolling < 0.15) {
+				PlayerShip.playerShip.sprite.scale.y = 1 + (PlayerShip.playerShip.rolling / 0.15) * 0.2;
+			} else {
+				PlayerShip.playerShip.sprite.scale.y = 1 + ((0.3 / PlayerShip.playerShip.rolling) - 1) * 0.2;
+			}
 		} else {
 			if (playerOneAxes[0] > 0.25 || playerOneAxes[0] < -0.25 || playerOneAxes[1] > 0.25 || playerOneAxes[1] < -0.25) {
 					Ships.updateShipSpeedFromController(PlayerShip.playerShip, playerOneAxes[0], playerOneAxes[1], timeDiff);
@@ -168,8 +174,8 @@ PlayerShip.updateSize = function() {
 	PlayerShip.playerShip.colors = Ships.enemyColors[gameModel.p1.ship.colorIndex];
 	PlayerShip.playerShip.art = Ships.shipArt(PlayerShip.SHIP_SIZE, gameModel.p1.ship.seed, false, Ships.enemyColors[gameModel.p1.ship.colorIndex]);
 	PlayerShip.playerShip.artWhite = Ships.shipArt(PlayerShip.SHIP_SIZE, gameModel.p1.ship.seed, false, Ships.enemyColors[gameModel.p1.ship.colorIndex], true);
-	PlayerShip.playerShip.sprite.texture = PlayerShip.playerShip.sprite.nonDamageTexture = PIXI.Texture.fromCanvas(PlayerShip.playerShip.art);
-	PlayerShip.playerShip.sprite.damageTexture = PIXI.Texture.fromCanvas(PlayerShip.playerShip.artWhite);
+	PlayerShip.playerShip.sprite.texture = PlayerShip.playerShip.sprite.nonDamageTexture = glowTexture(PIXI.Texture.fromCanvas(PlayerShip.playerShip.art));
+	PlayerShip.playerShip.sprite.damageTexture = glowTexture(PIXI.Texture.fromCanvas(PlayerShip.playerShip.artWhite));
 };
 
 PlayerShip.initialize = function () {
@@ -179,9 +185,9 @@ PlayerShip.initialize = function () {
 	PlayerShip.playerShip.xLoc = canvasWidth / 2;
 	PlayerShip.playerShip.yLoc = canvasHeight - (canvasHeight / 6);
 
-	PlayerShip.playerShip.sprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(PlayerShip.playerShip.art));
+	PlayerShip.playerShip.sprite = new PIXI.Sprite(glowTexture(PIXI.Texture.fromCanvas(PlayerShip.playerShip.art)));
 	PlayerShip.playerShip.sprite.nonDamageTexture = PlayerShip.playerShip.sprite.texture;
-	PlayerShip.playerShip.sprite.damageTexture = PIXI.Texture.fromCanvas(PlayerShip.playerShip.artWhite);
+	PlayerShip.playerShip.sprite.damageTexture = glowTexture(PIXI.Texture.fromCanvas(PlayerShip.playerShip.artWhite));
 
 	PlayerShip.playerShip.sprite.anchor = { x: 0.5, y: 0.5 };
 

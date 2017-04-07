@@ -163,8 +163,10 @@ var blurFilters;
 
 function glowTexture(texture, options) {
 
-	if (!blurFilters)
+	if (!blurFilters) {
 		blurFilters = [new PIXI.filters.BlurFilter()];
+		blurFilters[0].blur = Math.round(scalingFactor *  2);
+	}
 
 	// defaultSize = true;
 	var resize = options && options.resize ? options.resize : 1;
@@ -178,15 +180,18 @@ function glowTexture(texture, options) {
 	normalSprite.scale = blurredSprite.scale = {x:resize, y:resize};
 	normalSprite.anchor = blurredSprite.anchor = {x:0.5, y:0.5};
 	normalSprite.position = blurredSprite.position = {x:width, y:height};
-	blurredSprite.filters = blurFilters;
-
-	blurredSprite.alpha = options && options.blurAmount ? options.blurAmount : 1;
 
 	var container = new PIXI.Container();
 
-	container.addChild(blurredSprite);
-	container.addChild(normalSprite);
+	// only add blur effect for higher resolutions
+	if (renderer.height > 900) {
+		blurredSprite.filters = blurFilters;
+		blurredSprite.alpha = options && options.blurAmount ? options.blurAmount : 1;
+		container.addChild(blurredSprite);
+	}
 
+
+	container.addChild(normalSprite);
 	renderer.render(container, glowTexture);
 
 	return glowTexture;
