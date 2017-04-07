@@ -259,7 +259,7 @@ function update() {
 
 		// get time difference since last frame
 		var updateTime = new Date().getTime();
-		var slowDownRatio = 1 - (stageSprite.screenShake / gameModel.maxScreenShake * 0.3);
+		var slowDownRatio = gameModel.maxScreenShake ? 1 - (stageSprite.screenShake / gameModel.maxScreenShake * 0.3) : 1;
 		var timeDiff = slowDownRatio * (Math.min(100, Math.max(updateTime - lastUpdate, 0))) / 1000;
 		lastUpdate = updateTime;
 
