@@ -93,15 +93,15 @@ var Terrain = {
   },
   drawShape:function(shape) {
     shape.clear();
-    
+
     var midPoint = canvasHeight / 2;
     var heightMultiplier = (((shape.yLoc - midPoint) / midPoint) / Terrain.terrainGenerator.max) * scalingFactor * Terrain.ySpacing * 10;
     var xLoc = 0;
-    
+
     for (var i=0; i< shape.heightMap.length - 1;i++) {
       var hexVal = 100 * shape.heightMap[i] / Terrain.terrainGenerator.max;
       shape.lineStyle(Math.round(1 * scalingFactor), rgbToHex(hexVal,hexVal,hexVal));
-      
+
       var yPos = shape.yLoc * scalingFactor + (shape.heightMap[i] * heightMultiplier);
       shape.moveTo(xLoc * scalingFactor, yPos);
 
@@ -111,7 +111,7 @@ var Terrain = {
     }
   },
   initialize:function() {
-    
+
     Terrain.container = new PIXI.Container();
     starContainer.addChild(Terrain.container);
     Terrain.terrainGenerator = new TerrainGenerator(9);
@@ -119,11 +119,11 @@ var Terrain = {
     Terrain.currentIndex = 0;
     Terrain.offset = Math.round(Math.random() * (Terrain.terrainGenerator.size / 2))
     Terrain.xSpacing = canvasHeight / Terrain.points;
-    
+
     for (var i = canvasHeight; i > 0; i -= Terrain.ySpacing) {
       Terrain.newShape(i);
     }
-    
+
   },
   show:function() {
     if (Terrain.container)
@@ -144,17 +144,16 @@ var Terrain = {
             needNewShape = true;
           }
           if (shape.yLoc < cutoffPoint) {
-            shape.yLoc += (PlayerShip.playerShip.superCharged ? 2 : 1) * Terrain.speed * timeDiff;
+            shape.yLoc += Terrain.speed * timeDiff;
             Terrain.drawShape(shape);
           } else {
             shape.visible=false;
             Terrain.discardedShapes.push(shape);
           }
-        } 
+        }
       });
       if (needNewShape)
         Terrain.newShape(0);
     }
   },
 };
-

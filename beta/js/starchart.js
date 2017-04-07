@@ -31,6 +31,17 @@ StarChart = {
       StarChart.tradeRouteText.text.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.05};
 
       StarChart.menuContainer.addChild(StarChart.tradeRouteText.text);
+
+      if (StarChart.rangeText) {
+        StarChart.menuContainer.removeChild(StarChart.rangeText);
+      }
+      StarChart.rangeText = new PIXI.Text("Maximum Range\n" + formatMoney(StarChart.maxDistance) + " light years",
+        { font: (MainMenu.fontSize * scalingFactor) + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+      StarChart.rangeText.tint = MainMenu.buttonTint;
+      StarChart.rangeText.anchor = {x:1,y:0};
+      StarChart.rangeText.position = {x:renderer.width * 0.95 - 25,y: renderer.height * 0.05};
+
+      StarChart.menuContainer.addChild(StarChart.rangeText);
     }
   },
   fadeTime : 2,
@@ -427,6 +438,8 @@ StarChart.initialize = function () {
   StarChart.fastTravelButton.text.position = {x:renderer.width * 0.5,y: renderer.height * 0.95 - 25};
   StarChart.menuContainer.addChild(StarChart.fastTravelButton.text);
 
+  StarChart.Stars.initialize();
+
   StarChart.starInfo = new PIXI.Text("", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'left' });
 	StarChart.starInfo.tint = MainMenu.buttonTint;
   StarChart.starInfo.position = {x:0,y:0};
@@ -434,8 +447,6 @@ StarChart.initialize = function () {
   StarChart.menuContainer.addChild(StarChart.starInfo);
 
   StarChart.tradeRouteText.initialize();
-
-  StarChart.Stars.initialize();
 
 	StarChart.locator.initialize();
 
@@ -597,7 +608,16 @@ StarChart.initialize = function () {
 
     StarChart.menuContainer.addChild(StarChart.shipSprite);
 
+    if (StarChart.rangeCircle)
+      StarChart.menuContainer.removeChild(StarChart.rangeCircle);
+
+    StarChart.rangeCircle = new PIXI.Graphics();
+    StarChart.menuContainer.addChild(StarChart.rangeCircle);
+
 		StarChart.starField.resetPositions();
+
+    StarChart.menuContainer.removeChild(StarChart.starInfo);
+    StarChart.menuContainer.addChild(StarChart.starInfo);
   };
 
   StarChart.checkMouseOver = function () {
@@ -965,6 +985,20 @@ StarChart.initialize = function () {
 				}
 			}
     }
+
+    StarChart.rangeCircle.clear();
+    StarChart.rangeCircle.lineStyle(1, 0xFFFFFF);
+    StarChart.rangeCircle.tint = 0x005050;
+    // StarChart.rangeCircle.alpha = 0.5;
+    var circleX = centerPixels.x + ((StarChart.currentPosition.x + StarChart.currentStar.x + StarChart.currentStar.xWobble) * starSpacing);
+    var circleY = centerPixels.y + ((StarChart.currentPosition.y + StarChart.currentStar.y + StarChart.currentStar.yWobble) * starSpacing);
+    var radius = StarChart.maxDistance * starSpacing / 8;
+    StarChart.rangeCircle.drawCircle(
+      circleX,
+      circleY,
+      radius
+    );
+
 
     for (var k = 0; k < StarChart.history.length; k++) {
 

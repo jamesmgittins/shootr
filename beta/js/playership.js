@@ -78,26 +78,6 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
         PlayerShip.playerShip.crossShot = 0;
     }
 
-	// handle super charge activation
-		PlayerShip.playerShip.charge = PlayerShip.playerShip.superCharged ? Math.max(-20, PlayerShip.playerShip.charge - 10 * timeDiff) : Math.max(0, PlayerShip.playerShip.charge - 3 * timeDiff);
-
-		if (PlayerShip.playerShip.charge >= 100) {
-			if (!PlayerShip.playerShip.superChargeMessaged) {
-				GameText.bigText.newBigText("Fully Charged\nPress " + ShootrUI.getInputButtonDescription(buttonTypes.select) + " to Supercharge");
-				PlayerShip.playerShip.superChargeMessaged = true;
-			}
-			if ((playerOneButtonsPressed[0] || spaceBar) && !PlayerShip.playerShip.superCharged) {
-// 				GameText.bigText.newBigText("Supercharge Activated!");
-				PlayerShip.playerShip.superCharged = true;
-			}
-		} else {
-			if (PlayerShip.playerShip.charge < 90)
-				PlayerShip.playerShip.superChargeMessaged = false;
-
-			if (PlayerShip.playerShip.charge <= 0)
-				PlayerShip.playerShip.superCharged = false;
-		}
-
 		PlayerShip.playerShip.rolling += timeDiff;
 		if (PlayerShip.playerShip.rolling < 0.3) {
 			if (PlayerShip.playerShip.rollingLeft) {
@@ -184,64 +164,6 @@ PlayerShip.damagePlayerShip = function (playerShip, damage) {
 	}
 };
 
-PlayerShip.drawPlayerShipLine = function (ctx) {
-    if (PlayerShip.playerShip.inPlay === 1) {
-        if (clickLocX && clickLocY) {
-            ctx.strokeStyle = '#333';
-            ctx.beginPath();
-            ctx.moveTo(PlayerShip.playerShip.xLoc, PlayerShip.playerShip.yLoc);
-            ctx.lineTo(clickLocX, clickLocY);
-            ctx.stroke();
-
-            ctx.strokeStyle = '#0B0';
-            ctx.beginPath();
-            ctx.moveTo(clickLocX - 4, clickLocY - 4);
-            ctx.lineTo(clickLocX + 5, clickLocY + 5);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(clickLocX + 4, clickLocY - 4);
-            ctx.lineTo(clickLocX - 5, clickLocY + 5);
-            ctx.stroke();
-        }
-
-        if (playerOneAxes[2] > 0.25 || playerOneAxes[2] < -0.25 || playerOneAxes[3] > 0.25 || playerOneAxes[3] < -0.25) {
-
-            ctx.strokeStyle = '#333';
-            ctx.beginPath();
-            ctx.moveTo(PlayerShip.playerShip.xLoc, PlayerShip.playerShip.yLoc - 16);
-            ctx.lineTo(PlayerShip.playerShip.xLoc + playerOneAxes[2] * 100, PlayerShip.playerShip.yLoc - 16 + playerOneAxes[3] * 100);
-            ctx.stroke();
-        }
-    }
-};
-
-var lastPlayerShield = 0;
-var destroyedWarning = false;
-var shieldRed = 0;
-var shieldBlue = 255;
-
-PlayerShip.drawShield = function (ctx) {
-    var shieldWidth = PlayerShip.playerShip.currShield / PlayerShip.playerShip.maxShield * 100;
-
-    if (lastPlayerShield != shieldWidth) {
-        shieldRed = Math.floor((100 - shieldWidth) * 2.55);
-        shieldBlue = Math.floor(shieldWidth * 2.55);
-        ctx.fillStyle = "rgb(" + shieldRed + ",0," + shieldBlue + ")";
-        ctx.clearRect(0, 0, 100, 25);
-        ctx.fillRect(0, 0, Math.round(shieldWidth), 25);
-        lastPlayerShield = shieldWidth;
-
-        setTimeout(function () {
-
-            if (shieldWidth <= 0 && !destroyedWarning) {
-                destroyedWarning = true;
-                $("#p1-shield-div").addClass("destroyed");
-            }
-        });
-    }
-};
-
 PlayerShip.updateSize = function() {
 	PlayerShip.playerShip.colors = Ships.enemyColors[gameModel.p1.ship.colorIndex];
 	PlayerShip.playerShip.art = Ships.shipArt(PlayerShip.SHIP_SIZE, gameModel.p1.ship.seed, false, Ships.enemyColors[gameModel.p1.ship.colorIndex]);
@@ -276,15 +198,7 @@ PlayerShip.reset = function() {
 	PlayerShip.playerShip.xLoc = canvasWidth / 2;
 	PlayerShip.playerShip.yLoc = canvasHeight - (canvasHeight / 6);
 	PlayerShip.playerShip.inPlay = 1;
-	PlayerShip.playerShip.charge = 0;
+	PlayerShip.playerShip.lastDmg = 10000;
 	PlayerShip.allPlayersDead = 0;
 	PlayerShip.allDeadAllDeadTimer = 0;
-};
-
-PlayerShip.setBackgroundFromShipColor = function() {
-	// var color = hexToRgb(Ships.enemyColors[gameModel.p1.ship.colorIndex][Ships.enemyColors[gameModel.p1.ship.colorIndex].length - 1]);
-	// var maxColorPart = 20;
-	// var factor = 50 / (color.r + color.g + color.b);
-	// renderer.backgroundColor = rgbToHex(color.r * factor, color.g * factor, color.b * factor);
-	renderer.backgroundColor = 0x000000;;
 };

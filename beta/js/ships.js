@@ -45,8 +45,8 @@ Ships.blasts = {
 	update : function(timeDiff) {
 	    for (var i=0; i< Ships.blasts.maxBlasts; i++) {
 	        if (Ships.blasts.sprite[i].visible) {
-	            Ships.blasts.sprite[i].scale.y -= (10 * timeDiff);
-	            Ships.blasts.sprite[i].scale.x -= (10 * timeDiff);
+	            Ships.blasts.sprite[i].scale.y -= (7 * scalingFactor * timeDiff);
+	            Ships.blasts.sprite[i].scale.x -= (7 * scalingFactor * timeDiff);
 	            if (Ships.blasts.sprite[i].scale.x <= 0)
 	                Ships.blasts.sprite[i].visible = false;
 	        }

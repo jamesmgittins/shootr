@@ -27,13 +27,13 @@ Shipyard.generateShip = function(level, seed, ultra) {
     range : 12 + (level * 0.5) + Math.random() * 2,
 		colorIndex : prefix.index,
     name:(ultra? "Ultra " : "") + prefix.name + " " + Shipyard.suffixes[Math.floor(Math.random() * Shipyard.suffixes.length)],
-  }
+  };
 
   var priceMultiplier = (ship.frontWeaponLevel / level) * (ship.turretWeaponLevel / level) * (ship.rearWeaponLevel / level) * (ship.shieldLevel / level) * (ship.range / 15) * ship.speed;
 
   ship.price = Math.round(level * levelMod * (1500 + 200 * priceMultiplier));
   return ship;
-}
+};
 
 Shipyard.hide = function() {
   Shipyard.menuContainer.visible = false;
@@ -46,8 +46,8 @@ Shipyard.show = function() {
 };
 
 Shipyard.levelReqText = function(value, currentShipValue) {
-  return value + (value - currentShipValue !== 0 ? "   ( " + (value - currentShipValue > 0 ? "+" : "") + (value - currentShipValue) + " )" : "")
-}
+  return value + (value - currentShipValue !== 0 ? "   ( " + (value - currentShipValue > 0 ? "+" : "") + (value - currentShipValue) + " )" : "");
+};
 
 Shipyard.initialize = function () {
   if (!Shipyard.menuContainer) {
@@ -113,7 +113,11 @@ Shipyard.initialize = function () {
     shipBacking.drawRect(bounds.x + 15, bounds.y + bounds.height / 9, bounds.width - 30, bounds.height / 2.5);
     Shipyard.menuContainer.addChild(shipBacking);
 
-    var sprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(Ships.shipArt(PlayerShip.SHIP_SIZE * 2, Shipyard.ships[i].seed, false, Ships.enemyColors[Shipyard.ships[i].colorIndex])));
+    var sprite = new PIXI.Sprite(
+      glowTexture(
+        PIXI.Texture.fromCanvas(Ships.shipArt(PlayerShip.SHIP_SIZE * 2, Shipyard.ships[i].seed, false, Ships.enemyColors[Shipyard.ships[i].colorIndex]))
+      )
+    );
     sprite.anchor = {x:0.5,y:0.5};
     sprite.position = {x:shipBacking.getBounds().x + shipBacking.getBounds().width / 2, y:shipBacking.getBounds().y + shipBacking.getBounds().height / 2};
     Shipyard.menuContainer.addChild(sprite);
@@ -129,7 +133,7 @@ Shipyard.initialize = function () {
     var shipDetails = new PIXI.Text(
       frontWeaponString + "\n" + turretWeaponString + "\n" + rearWeaponString + "\n" + shieldString + "\n" + fuelRangeString + "\n" + speedString + "\n",
       { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'left' });
-    shipDetails.position = {x:shipBacking.getBounds().x + 5, y:shipBacking.getBounds().y + shipBacking.getBounds().height + 10}
+    shipDetails.position = {x:shipBacking.getBounds().x + 5, y:shipBacking.getBounds().y + shipBacking.getBounds().height + 10};
     shipDetails.tint = MainMenu.buttonTint;
     Shipyard.menuContainer.addChild(shipDetails);
 
@@ -175,8 +179,7 @@ Shipyard.resize = function () {
 Shipyard.buyShip = function(ship) {
   if (ship.price <= gameModel.p1.credits && !ship.buyButton.owned) {
     gameModel.p1.credits -= ship.price;
-    gameModel.p1.ship = Shipyard.generateShip(ship.level, ship.seed, ship.ultra)
-    PlayerShip.setBackgroundFromShipColor();
+    gameModel.p1.ship = Shipyard.generateShip(ship.level, ship.seed, ship.ultra);
     PlayerShip.updateSize();
     save();
     Shipyard.initialize();
@@ -185,7 +188,7 @@ Shipyard.buyShip = function(ship) {
   } else {
     Sounds.enemyShot.play();
   }
-}
+};
 
 Shipyard.checkMouseOver = function () {
   if (!Shipyard.menuContainer.visible)
@@ -242,7 +245,7 @@ Shipyard.down = function() {
   Shipyard.select(Shipyard.backButton);
   Shipyard.currentSelection = -1;
   return true;
-}
+};
 
 Shipyard.left = function() {
   if (!Shipyard.menuContainer.visible)
@@ -260,7 +263,7 @@ Shipyard.left = function() {
   }
 
   return true;
-}
+};
 
 Shipyard.right = function() {
   if (!Shipyard.menuContainer.visible)
@@ -278,7 +281,7 @@ Shipyard.right = function() {
   }
 
   return true;
-}
+};
 
 Shipyard.aButton = function() {
   if (!Shipyard.menuContainer.visible)
@@ -290,7 +293,7 @@ Shipyard.aButton = function() {
     Shipyard.buyShip(Shipyard.ships[Shipyard.currentSelection]);
 
   return true;
-}
+};
 
 Shipyard.bButtonPress = function() {
   if (!Shipyard.menuContainer.visible)
@@ -298,7 +301,7 @@ Shipyard.bButtonPress = function() {
 
   Shipyard.bButton();
   return true;
-}
+};
 
 Shipyard.update = function(timeDiff) {
   if (!Shipyard.menuContainer.visible)
@@ -316,7 +319,7 @@ Shipyard.update = function(timeDiff) {
       }
     }
   }
-}
+};
 
 Shipyard.prefixes = [
 {name:"Alabaster",index:10},

@@ -59,29 +59,29 @@ Loadout.selectPosition = function(index) {
 
   switch (index) {
     case 0:
-      Loadout.locationSelector.position.x = Loadout.shipSprite.position.x;
-      Loadout.locationSelector.position.y = Loadout.shipSprite.position.y - Loadout.shipSprite.height / 4;
+      Loadout.locationSelector.position.x = Loadout.shipSprite.position.x + Loadout.renderSprite.position.x;
+      Loadout.locationSelector.position.y = Loadout.shipSprite.position.y + Loadout.renderSprite.position.y - Loadout.shipSprite.height / 8;
       Loadout.showWeapons();
       break;
     case 1:
-      Loadout.locationSelector.position.x = Loadout.shipSprite.position.x;
-      Loadout.locationSelector.position.y = Loadout.shipSprite.position.y;
+      Loadout.locationSelector.position.x = Loadout.shipSprite.position.x + Loadout.renderSprite.position.x;
+      Loadout.locationSelector.position.y = Loadout.shipSprite.position.y + Loadout.renderSprite.position.y;
       Loadout.showWeapons();
       break;
     case 2:
-      Loadout.locationSelector.position.x = Loadout.shipSprite.position.x;
-      Loadout.locationSelector.position.y = Loadout.shipSprite.position.y + Loadout.shipSprite.height / 4;
+      Loadout.locationSelector.position.x = Loadout.shipSprite.position.x + Loadout.renderSprite.position.x;
+      Loadout.locationSelector.position.y = Loadout.shipSprite.position.y + Loadout.renderSprite.position.y + Loadout.shipSprite.height / 8;
       Loadout.locationSelector.clear();
       Loadout.locationSelector.lineStyle(2 * scalingFactor, 0xFFFFFF);
       Loadout.locationSelector.drawCircle(0,0,Loadout.shipSprite.width / 8);
       Loadout.showWeapons();
       break;
     case 3:
-      Loadout.locationSelector.position.x = Loadout.shipSprite.position.x;
-      Loadout.locationSelector.position.y = Loadout.shipSprite.position.y;
+      Loadout.locationSelector.position.x = Loadout.shipSprite.position.x + Loadout.renderSprite.position.x;
+      Loadout.locationSelector.position.y = Loadout.shipSprite.position.y + Loadout.renderSprite.position.y;
       Loadout.locationSelector.clear();
       Loadout.locationSelector.lineStyle(2 * scalingFactor, 0xFFFFFF);
-      Loadout.locationSelector.drawCircle(0,0,Loadout.shipSprite.width / 1.8);
+      Loadout.locationSelector.drawCircle(0,0,Loadout.shipSprite.width / 3);
       Loadout.showShields();
       break;
   }
@@ -108,21 +108,20 @@ Loadout.showWeapons = function() {
 
   var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
   var positionText = "";
-  var equippedWeapon;
 
   switch(Loadout.currentPosition) {
     case Loadout.positions.frontWeapon:
-      equippedWeapon = gameModel.p1.frontWeapon;
+      Loadout.equippedWeapon = gameModel.p1.frontWeapon;
       Loadout.levelAllowed = gameModel.p1.ship.frontWeaponLevel;
       positionText = " Front";
       break;
     case Loadout.positions.turretWeapon:
-      equippedWeapon = gameModel.p1.turretWeapon;
+      Loadout.equippedWeapon = gameModel.p1.turretWeapon;
       Loadout.levelAllowed = gameModel.p1.ship.turretWeaponLevel;
       positionText = " Turret";
       break;
     case Loadout.positions.rearWeapon:
-      equippedWeapon = gameModel.p1.rearWeapon;
+      Loadout.equippedWeapon = gameModel.p1.rearWeapon;
       Loadout.levelAllowed = gameModel.p1.ship.rearWeaponLevel;
       positionText = " Rear";
       break;
@@ -140,7 +139,7 @@ Loadout.showWeapons = function() {
   });
 
   for (var i=0; i<gameModel.p1.weapons.length; i++) {
-    if (!equippedWeapon || gameModel.p1.weapons[i].id != equippedWeapon.id) {
+    if (!Loadout.equippedWeapon || gameModel.p1.weapons[i].id != Loadout.equippedWeapon.id) {
       var equippedText = "";
       if (gameModel.p1.frontWeapon && gameModel.p1.frontWeapon.id == gameModel.p1.weapons[i].id)
         equippedText = " [Equipped Front]";
@@ -153,7 +152,7 @@ Loadout.showWeapons = function() {
         index : index,
         weapon : gameModel.p1.weapons[i],
         // text : new PIXI.Text("Level " + gameModel.p1.weapons[i].level + " " + gameModel.p1.weapons[i].name + equippedText + "\n" + formatMoney(gameModel.p1.weapons[i].dps) + " DPS / " + gameModel.p1.weapons[i].shotsPerSecond.toFixed(2) + " shots per second", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'left' })
-        text : ArmsDealer.createItemIcon(gameModel.p1.weapons[i], {buy:false, loadout:true, slotLevel : Loadout.levelAllowed, compareItem:equippedWeapon, scale:0.8})
+        text : ArmsDealer.createItemIcon(gameModel.p1.weapons[i], {buy:false, loadout:true, slotLevel : Loadout.levelAllowed, compareItem:Loadout.equippedWeapon, scale:0.8})
       };
       // Loadout.weapons[index].text.scale = {x:0.8, y:0.8};
       Loadout.weapons[index].defaultTint = gameModel.p1.weapons[i].level <= Loadout.levelAllowed ? MainMenu.buttonTint : MainMenu.unselectableTint;
@@ -222,7 +221,6 @@ Loadout.selectWeapon = function(index) {
   switch(Loadout.currentPosition) {
     case Loadout.positions.frontWeapon:
       gameModel.p1.frontWeapon = Loadout.weapons[index].weapon;
-      gameModel.p1.frontWeapon.rear = false;
       Loadout.menuOptions[0].equippedText.text = "";
       Loadout.menuOptions[0].equippedText.tint = Loadout.menuOptions[0].equippedText.defaultTint = MainMenu.buttonTint;
 
@@ -232,12 +230,10 @@ Loadout.selectWeapon = function(index) {
       Loadout.menuOptions[0].equippedIcon.position = iconPosition;
       // Loadout.menuOptions[0].equippedIcon.scale = {x:0.7, y:0.7};
       Loadout.menuOptions[0].text.addChild(Loadout.menuOptions[0].equippedIcon);
-
       Loadout.showWeapons();
       break;
     case Loadout.positions.turretWeapon:
       gameModel.p1.turretWeapon = Loadout.weapons[index].weapon;
-      gameModel.p1.turretWeapon.rear = false;
       Loadout.menuOptions[1].equippedText.text = "";
       Loadout.menuOptions[1].equippedText.tint = Loadout.menuOptions[1].equippedText.defaultTint = MainMenu.buttonTint;
 
@@ -247,12 +243,10 @@ Loadout.selectWeapon = function(index) {
       Loadout.menuOptions[1].equippedIcon.position = iconPosition;
       // Loadout.menuOptions[1].equippedIcon.scale = {x:0.7, y:0.7};
       Loadout.menuOptions[1].text.addChild(Loadout.menuOptions[1].equippedIcon);
-
       Loadout.showWeapons();
       break;
     case Loadout.positions.rearWeapon:
       gameModel.p1.rearWeapon = Loadout.weapons[index].weapon;
-      gameModel.p1.rearWeapon.rear = true;
       Loadout.menuOptions[2].equippedText.text = "";
       Loadout.menuOptions[2].equippedText.tint = Loadout.menuOptions[2].equippedText.defaultTint = MainMenu.buttonTint;
 
@@ -262,7 +256,6 @@ Loadout.selectWeapon = function(index) {
       Loadout.menuOptions[2].equippedIcon.position = iconPosition;
       // Loadout.menuOptions[2].equippedIcon.scale = {x:0.7, y:0.7};
       Loadout.menuOptions[2].text.addChild(Loadout.menuOptions[2].equippedIcon);
-
       Loadout.showWeapons();
       break;
   }
@@ -354,6 +347,8 @@ Loadout.initialize = function () {
       item.destroy();
     }
   }
+  Loadout.firingWeapons = [];
+  Loadout.firingWeapon = null;
 
   Loadout.menuContainer.visible = false;
 
@@ -397,16 +392,30 @@ Loadout.initialize = function () {
 
   Loadout.updateTotalDPS();
 
+  Loadout.renderContainer = new PIXI.Container();
+  Loadout.shipRenderTexture = PIXI.RenderTexture.create(renderer.width * 0.3, renderer.height * 0.7);
+  Loadout.renderSprite = new PIXI.Sprite(Loadout.shipRenderTexture);
+  Loadout.menuContainer.addChild(Loadout.renderSprite);
+
+  Loadout.renderSprite.position = {x:renderer.width * 0.35,y:renderer.height * 0.15};
+
   Loadout.shipBackground = new PIXI.Graphics();
   Loadout.shipBackground.beginFill(0x000000);
-  Loadout.shipBackground.drawRect(renderer.width * 0.35, renderer.height * 0.15, renderer.width * 0.3, renderer.height * 0.7);
-  Loadout.shipBackground.alpha = 0.9;
-  Loadout.menuContainer.addChild(Loadout.shipBackground);
+  Loadout.shipBackground.drawRect(0, 0, Loadout.shipRenderTexture.width, Loadout.shipRenderTexture.height);
+  Loadout.shipBackground.alpha = 0.5;
+  Loadout.renderContainer.addChild(Loadout.shipBackground);
 
-  Loadout.shipSprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(Ships.shipArt(PlayerShip.SHIP_SIZE * 2, gameModel.p1.ship.seed, false, Ships.enemyColors[gameModel.p1.ship.colorIndex])));
+  Loadout.bulletContainer = new PIXI.Container();
+  Loadout.renderContainer.addChild(Loadout.bulletContainer);
+
+  Loadout.shipSprite = new PIXI.Sprite(
+    glowTexture(
+      PIXI.Texture.fromCanvas(Ships.shipArt(PlayerShip.SHIP_SIZE, gameModel.p1.ship.seed, false, Ships.enemyColors[gameModel.p1.ship.colorIndex]))
+    )
+  );
   Loadout.shipSprite.anchor = {x:0.5,y:0.5};
-  Loadout.shipSprite.position = {x:renderer.width / 2, y:renderer.height * 0.6};
-  Loadout.menuContainer.addChild(Loadout.shipSprite);
+  Loadout.shipSprite.position = {x:Loadout.shipRenderTexture.width / 2, y:Loadout.shipRenderTexture.height * 0.7};
+  Loadout.renderContainer.addChild(Loadout.shipSprite);
 
   var positionSpacing = 110;
 
@@ -537,14 +546,14 @@ Loadout.checkClicks = function() {
 
   Loadout.weapons.forEach(function(currentValue) {
     if (MainMenu.checkButton(currentValue)) {
-      Loadout.selectWeapon(currentValue.index);
+      setTimeout(function(){Loadout.selectWeapon(currentValue.index);});
       return true;
     }
   });
 
   Loadout.shields.forEach(function(currentValue) {
     if (MainMenu.checkButton(currentValue)) {
-      Loadout.selectShield(currentValue.index);
+      setTimeout(function(){Loadout.selectShield(currentValue.index);});
       return true;
     }
   });
@@ -700,4 +709,62 @@ Loadout.bButtonPress = function() {
     Loadout.backButton.click();
   }
   return true;
+};
+
+Loadout.update = function(timeDiff) {
+  if (!Loadout.menuContainer.visible)
+    return;
+
+  if (Loadout.shipRenderTexture) {
+
+    // if a weapon exists
+    if (Loadout.firingWeapons) {
+
+      // update the bullets
+      Loadout.firingWeapons.forEach(function(weapon){
+        weapon.update(timeDiff);
+      });
+    } else {
+      Loadout.firingWeapons = [];
+    }
+
+    // if weapon selection open
+    if (Loadout.weaponMenuOpen && Loadout.equippedWeapon) {
+
+      // if weapon already set up
+      if (Loadout.firingWeapon && Loadout.firingWeapon.weapon.id === Loadout.equippedWeapon.id) {
+
+        // fire it
+        if (Loadout.currentPosition === Loadout.positions.frontWeapon) {
+          // front
+          if (Loadout.firingWeapon.readyToFire(true, timeDiff)) {
+            Loadout.firingWeapon.fireShot({x: Loadout.shipSprite.position.x / scalingFactor, y: (Loadout.shipSprite.position.y / scalingFactor) - 8, angle:0}, 1);
+          }
+        }
+        if (Loadout.currentPosition === Loadout.positions.turretWeapon) {
+          // turret
+          if (Loadout.firingWeapon.readyToFire(true, timeDiff)) {
+            PlayerShip.playerShip.xLoc = Loadout.shipSprite.position.x;
+            PlayerShip.playerShip.yLoc = Loadout.shipSprite.position.y;
+            Loadout.firingWeapon.fireShot({x: Loadout.shipSprite.position.x / scalingFactor, y: (Loadout.shipSprite.position.y / scalingFactor), angle:Bullets.getTurretAngle()}, 1);
+          }
+        }
+        if (Loadout.currentPosition === Loadout.positions.rearWeapon) {
+          // rear
+          if (Loadout.firingWeapon.readyToFire(true, timeDiff)) {
+            Loadout.firingWeapon.fireShot({x: Loadout.shipSprite.position.x / scalingFactor + 16, y: (Loadout.shipSprite.position.y / scalingFactor) + 16, angle: (Math.PI / 8) * (Loadout.firingWeapon.rearAngleMod || 1)}, 0.5);
+            Loadout.firingWeapon.fireShot({x: Loadout.shipSprite.position.x / scalingFactor - 16, y: (Loadout.shipSprite.position.y / scalingFactor) + 16, angle:(-Math.PI / 8) * (Loadout.firingWeapon.rearAngleMod || 1)}, 0.5);
+          }
+        }
+      } else {
+        // set up weapon
+        Loadout.firingWeapon = Weapons.createWeaponLogic(Loadout.equippedWeapon, Loadout.bulletContainer);
+        Loadout.equippedWeapon.lastShot = 1;
+        Loadout.firingWeapons.push(Loadout.firingWeapon);
+      }
+
+    }
+
+    renderer.render(Loadout.renderContainer, Loadout.shipRenderTexture);
+  }
 };

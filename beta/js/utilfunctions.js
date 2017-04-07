@@ -33,6 +33,16 @@ function RotateVector2d(x, y, radians) {
     };
 }
 
+function dotProduct2d(x1, y1, x2, y2) {
+	var mag1 = magnitude(x1, y1);
+	var mag2 = magnitude(x2, y2);
+	return x1 / mag1 * x2 / mag2 + y1 / mag1 * y2 / mag2;
+}
+
+function AngleVector2d(x1, y1, x2, y2) {
+	return Math.acos(dotProduct2d(x1, y1, x2, y2));
+}
+
 // convert HEX color to RGB
 function hexToRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -41,6 +51,17 @@ function hexToRgb(hex) {
         g: parseInt(result[2], 16),
         b: parseInt(result[3], 16)
     } : null;
+}
+
+function colorTransition(startColor, endColor, percentage) {
+	var startRgb = hexToRgb(startColor);
+	var endRgb = hexToRgb(endColor);
+	percentage = Math.max(0,Math.min(1,percentage));
+	return rgbToHex(
+		startRgb.r + (endRgb.r - startRgb.r) * percentage,
+		startRgb.g + (endRgb.g - startRgb.g) * percentage,
+		startRgb.b + (endRgb.b - startRgb.b) * percentage
+	);
 }
 
 var lastX, lastY;
@@ -94,4 +115,95 @@ function formatMoney(input) {
 		return (Math.round(input / 10)/100).toString() + 'K';
 
 	return (input).toFixed(2);
+}
+
+
+SpritePool = {
+  create : function(texture, container) {
+    var spriteContainer = new PIXI.Container();
+    container.addChild(spriteContainer);
+    return {
+      sprites : [],
+      discardedSprites : [],
+      container : spriteContainer,
+      texture: texture,
+      nextSprite : function() {
+        if (this.discardedSprites.length > 0) {
+          return this.discardedSprites.pop();
+        } else {
+          var sprite = new PIXI.Sprite(this.texture);
+          sprite.anchor = {x:0.5,y:0.5};
+          this.sprites.push(sprite);
+          this.container.addChild(sprite);
+          return sprite;
+        }
+      },
+      discardSprite : function(sprite) {
+				sprite.visible = false;
+        this.discardedSprites.push(sprite);
+      },
+			discardAll : function() {
+				this.discardedSprites = this.sprites.slice();
+				for (var i = 0; i < this.sprites.length; i++) {
+					this.sprites[i].visible = false;
+				}
+			},
+			changeTexture : function(texture) {
+				this.texture = texture;
+				for (var i = 0; i < this.sprites.length; i++) {
+					this.sprites[i].texture = texture;
+					sprite.anchor = {x:0.5,y:0.5};
+				}
+			}
+    };
+  }
+};
+
+var blurFilters;
+
+function glowTexture(texture, options) {
+
+	if (!blurFilters)
+		blurFilters = [new PIXI.filters.BlurFilter()];
+
+	// defaultSize = true;
+	var resize = options && options.resize ? options.resize : 1;
+	var width = texture.width * resize;
+	var height = texture.height * resize;
+
+	var glowTexture = PIXI.RenderTexture.create(width * 2, height * 2);
+
+	var blurredSprite = new PIXI.Sprite(texture);
+	var normalSprite = new PIXI.Sprite(texture);
+	normalSprite.scale = blurredSprite.scale = {x:resize, y:resize};
+	normalSprite.anchor = blurredSprite.anchor = {x:0.5, y:0.5};
+	normalSprite.position = blurredSprite.position = {x:width, y:height};
+	blurredSprite.filters = blurFilters;
+
+	blurredSprite.alpha = options && options.blurAmount ? options.blurAmount : 1;
+
+	var container = new PIXI.Container();
+
+	container.addChild(blurredSprite);
+	container.addChild(normalSprite);
+
+	renderer.render(container, glowTexture);
+
+	return glowTexture;
+}
+
+function recursiveApplyToChildren(container, apply) {
+	apply(container);
+	if (container.children.length > 0) {
+		for (var i = 0; i < container.children.length; i++) {
+			recursiveApplyToChildren(container.children[i], apply);
+		}
+	}
+}
+
+function removeAllFromContainer(container) {
+	for (var i = container.children.length - 1; i >= 0; i--) {
+		container.removeChild(container.children[i]);
+		//item.destroy();
+	}
 }

@@ -74,9 +74,36 @@ function save() {
 	if (typeof (Storage) === "undefined")
 		return;
 
+	purgeDupes();
+
 	setTimeout(function () {
 	    localStorage.setItem(Constants.localStorageVariable, JSON.stringify(gameModel));
 	});
+}
+
+// had issue where 2 shields of same id appeared in inventory
+// this should clean up if it happens again
+function purgeDupes() {
+	var idsTested = [];
+	var weaponsToKeep = [];
+	var shieldsToKeep = [];
+
+	gameModel.p1.weapons.forEach(function(item){
+		if (!idsTested[item.id]) {
+			weaponsToKeep.push(item);
+			idsTested[item.id] = true;
+		}
+	});
+
+	gameModel.p1.shields.forEach(function(item){
+		if (!idsTested[item.id]) {
+			shieldsToKeep.push(item);
+			idsTested[item.id] = true;
+		}
+	});
+
+	gameModel.p1.weapons = weaponsToKeep;
+	gameModel.p1.shields = shieldsToKeep;
 }
 
 function load() {
@@ -108,11 +135,13 @@ function load() {
 			targetSystem: {x:0,y:0},
 			history: [],
 			weaponIdCounter: gameModel.weaponIdCounter,
+			resolutionFactor:1,
 			lastTradeUpdate: new Date().getTime()
 		};
 		gameModel.p1.turretWeapon = gameModel.p1.weapons[0];
 		gameModel.p1.shield = gameModel.p1.shields[0];
 	}
+	purgeDupes();
 }
 
 function resetSaveGame() {

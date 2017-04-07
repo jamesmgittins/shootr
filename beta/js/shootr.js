@@ -25,7 +25,7 @@ var s = false;
 var d = false;
 var q = false;
 var ekey = false;
-var esc = false
+var esc = false;
 var spaceBar = false;
 var enter = false;
 
@@ -83,6 +83,7 @@ function changeLevel(level) {
 		PlayerShip.playerShip.maxShield = 1;
 		PlayerShip.playerShip.currShield = 1;
     PlayerShip.playerShip.shieldRegen = 1;
+		PlayerShip.playerShip.shieldDelay = 5000;
 	}
 
 	if (inSpace) {
@@ -123,7 +124,7 @@ function addToHistory(systemA, systemB) {
 			 (systemsEqual(history.start, systemB) && systemsEqual(history.end, systemA))) {
 			alreadyInHistory = true;
 		}
-	})
+	});
 
 	if (!alreadyInHistory) {
 		gameModel.history.push({start:systemA,end:systemB});
@@ -210,7 +211,6 @@ function changeState(state) {
 }
 
 function resetGame() {
-	Bullets.enemyBullets.resetAll();
 	Weapons.reset();
 	Powerups.reset();
 
@@ -223,7 +223,7 @@ function resetGame() {
 	EnemyShips.sprites.forEach(function(sprite){
 		sprite.visible = false;
 		EnemyShips.discardedSprites.push(sprite);
-	})
+	});
 
 	timeLeft = levelTime;
 	PlayerShip.reset();
@@ -236,8 +236,8 @@ function resetGame() {
 	for (var i = 0; i < Bullets.enemyBullets.maxEnemyBullets; i++) {
 		Bullets.enemyBullets.inPlay[i] = 0;
 	}
-	for (var i = 0; i < EnemyShips.wavePatterns.length; i++) {
-		EnemyShips.wavePatterns[i].inUse = false;
+	for (var j = 0; j < EnemyShips.wavePatterns.length; j++) {
+		EnemyShips.wavePatterns[j].inUse = false;
 	}
 	destroyedWarning = false;
 	PlayerShip.playerShip.sprite.visible = true;
@@ -290,7 +290,7 @@ function update() {
 			PlayerShip.updatePlayerShip(timeDiff);
 			EnemyShips.update(timeDiff);
 			Weapons.update(timeDiff);
-			Bullets.updateEnemyBullets(timeDiff);
+			Bullets.enemyBullets.update(timeDiff);
 			PlayerShip.controllerPointer.update();
 			Powerups.update(timeDiff);
 
@@ -321,6 +321,7 @@ function update() {
 
 		StarChart.update(timeDiff);
 		Shipyard.update(timeDiff);
+		Loadout.update(timeDiff);
 
 		renderer.render(gameContainer);
 
@@ -331,6 +332,7 @@ var stage;
 
 var starContainer;
 var bulletContainer;
+var playerBulletContainer;
 var enemyShipContainer;
 var playerShipContainer;
 var explosionContainer;
@@ -345,7 +347,6 @@ var stageBackground;
 var renderer;
 
 var scalingFactor = 1;
-var resolutionFactor = 1;
 var resizeTimeout;
 
 function updateAfterScreenSizeChange() {
@@ -367,7 +368,7 @@ function updateAfterScreenSizeChange() {
 	}, 100);
 }
 
-var minAspectRatio = 16 / 10
+var minAspectRatio = 16 / 10;
 var maxAspectRatio = 21 / 9;
 
 function resizeCanvas() {
@@ -387,8 +388,8 @@ function resizeCanvas() {
 	canvas.style.width = Math.round(width) + "px";
 	canvas.style.height = Math.round(height) + "px";
 
-	canvas.width=width * resolutionFactor;
-	canvas.height=height * resolutionFactor;
+	canvas.width=width * gameModel.resolutionFactor;
+	canvas.height=height * gameModel.resolutionFactor;
 
 	if (renderer)
 		renderer.resize(canvas.width, canvas.height);
@@ -401,7 +402,7 @@ function resizeCanvas() {
 
 function resizeElements() {
 
-	resizeCanvas()
+	resizeCanvas();
 
 	stageTexture.resize(canvas.height, canvas.height, false);
 
@@ -415,8 +416,7 @@ function resizeElements() {
 	PlayerShip.updateSize();
 	PlayerShip.controllerPointer.resize();
 	Powerups.resize();
-	Bullets.playerBullets.initialize();
-	Bullets.enemyBullets.initialize();
+	Weapons.reset();
 	GameText.resize();
 	gameContainer.hitArea = new PIXI.Rectangle(0, 0, canvas.width, canvas.height);
 	ResizeMenus();
@@ -441,9 +441,10 @@ function startGame() {
 
 	resizeCanvas();
 
-	window.addEventListener("resize",updateAfterScreenSizeChange);
+	var loadMessage = document.getElementById("loading-message");
+	loadMessage.parentNode.removeChild(loadMessage);
 
-	PlayerShip.setBackgroundFromShipColor();
+	window.addEventListener("resize",updateAfterScreenSizeChange);
 
 	// stageTexture = new PIXI.RenderTexture(renderer, canvas.height, canvas.height);
 	stageTexture = PIXI.RenderTexture.create(canvas.height, canvas.height);
@@ -496,6 +497,7 @@ function startGame() {
 	// create different sprite layers
 	starContainer = new PIXI.Container();
 	bulletContainer = new PIXI.Container();
+	playerBulletContainer = new PIXI.Container();
 	enemyShipContainer = new PIXI.Container();
 	playerShipContainer = new PIXI.Container();
 	playerShipContainer.visible=false;
@@ -503,8 +505,10 @@ function startGame() {
 	uiContainer = new PIXI.Container();
 
 	stage.addChild(starContainer);
+
 	stage.addChild(bulletContainer);
 	stage.addChild(enemyShipContainer);
+	stage.addChild(playerBulletContainer);
 	stage.addChild(playerShipContainer);
 	stage.addChild(explosionContainer);
 	stage.addChild(uiContainer);
@@ -518,7 +522,6 @@ function startGame() {
 // 	Terrain.initialize();
 
   PlayerShip.controllerPointer.initialize();
-  Bullets.playerBullets.initialize();
 	Bullets.enemyBullets.initialize();
 	Bullets.blasts.initialize();
 	Ships.blasts.initialize();
@@ -554,6 +557,20 @@ window.onload = function() {
 		.add("fonts/dosis-v6-latin-300.ttf")
 		.add("fonts/dosis-v6-latin-300.eot")
 		.add("fonts/dosis-v6-latin-300.svg")
+		.add("img/perspective-dice-random.svg")
+		.add("img/sapphire.svg")
+		// .add("img/level-one.svg")
+		// .add("img/level-two.svg")
+		// .add("img/level-three.svg")
+		// .add("img/target-laser.svg")
+		// .add("img/barbed-arrow.svg")
+		// .add("img/blaster.svg")
+		// .add("img/shield.svg")
+		.add("img/ship-emblem.svg")
 		.load(startGame);
+
+	// loader.onProgress.add(function(){
+	// 	document.getElementById("loading-message").innerText += ".";
+	// });
 	// startGame();
 };

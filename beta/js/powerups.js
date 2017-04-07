@@ -22,11 +22,14 @@ var MoneyPickup = {
 		blastCtx.font = fontSize + "px Arial";
 		blastCtx.fillText("$",4 * scalingFactor,10 * scalingFactor);
 
-		return PIXI.Texture.fromCanvas(blast);
+		return glowTexture(PIXI.Texture.fromCanvas(blast));
 	},
 	initialize:function(){
-		MoneyPickup.texture = MoneyPickup.createTexture();
-		MoneyPickup.texture = PIXI.Texture.fromImage("img/sapphire.svg",undefined,undefined,0.04 * scalingFactor);
+		// MoneyPickup.texture = MoneyPickup.createTexture();
+		MoneyPickup.texture = glowTexture(
+			PIXI.Texture.fromImage("img/sapphire.svg",undefined,undefined,0.04 * scalingFactor),
+			{resize:0.04 * scalingFactor, blurAmount : 0.5}
+		);
 		MoneyPickup.container = new PIXI.Container();
 		starContainer.addChild(MoneyPickup.container);
 	},
@@ -173,7 +176,10 @@ var Powerups = {
 		MoneyPickup.initialize();
 
 		// Powerups.texture = Powerups.createTexture();
-		Powerups.texture = PIXI.Texture.fromImage("img/perspective-dice-random.svg",undefined,undefined,0.1 * scalingFactor);
+		Powerups.texture = glowTexture(
+			PIXI.Texture.fromImage("img/perspective-dice-random.svg",undefined,undefined,0.1 * scalingFactor),
+			{resize:0.1 * scalingFactor, blurAmount : 0.6}
+		);
 
 		Powerups.sprites = new PIXI.Container();
 		for (var i = 0; i < Powerups.maxPowerups; i++) {

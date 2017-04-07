@@ -155,7 +155,6 @@ Boss.update = function(timeDiff) {
 
   if (Boss.collisionAllowed) {
     EnemyShips.activeShips.push(Boss);
-    EnemyShips.checkForBulletCollisions(Boss);
     EnemyShips.checkForPlayerCollision(Boss);
     Boss.shield.update();
 

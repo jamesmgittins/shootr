@@ -137,7 +137,6 @@ EnemyShips.destroy = function (ship) {
 			GameText.credits.newCreditText(canvasWidth/2,canvasHeight/3,"Wave destroyed\nBonus Credits: " + formatMoney(ship.wave.shipHealth * ship.wave.shipsInWave * 0.5));
 		}
 
-
 		if (Math.random() > 0.8)
 			MoneyPickup.newMoneyPickup(ship.xLoc, ship.yLoc, (ship.wave.shipHealth + Math.random() * ship.wave.shipHealth * 5));
 
@@ -152,10 +151,6 @@ EnemyShips.destroy = function (ship) {
 
 	Sounds.shipExplosion.play();
 	Ships.generateExplosion(ship);
-
-
-	if (!PlayerShip.playerShip.superCharged)
-		PlayerShip.playerShip.charge = Math.min(105,PlayerShip.playerShip.charge + 3);
 };
 
 EnemyShips.checkForPlayerCollision = function (ship) {
@@ -163,6 +158,18 @@ EnemyShips.checkForPlayerCollision = function (ship) {
 			PlayerShip.damagePlayerShip(PlayerShip.playerShip, ship.health);
 			EnemyShips.destroy(ship);
     }
+};
+
+EnemyShips.checkForSplashDamage = function (ship){
+  for (var i = 0; i < Bullets.splashDamage.maxSplashes; i++) {
+    if (Bullets.splashDamage.splashes[i] && Bullets.splashDamage.splashes[i].active) {
+      if (distanceBetweenPoints(ship.xLoc, ship.yLoc, Bullets.splashDamage.splashes[i].xLoc, Bullets.splashDamage.splashes[i].yLoc) < Bullets.splashDamage.splashes[i].spread &&
+        !Bullets.splashDamage.splashes[i].shipsDamaged[ship.id]) {
+          Bullets.splashDamage.splashes[i].shipsDamaged[ship.id] = 1;
+          EnemyShips.damageEnemyShip(ship, ship.xLoc, ship.yLoc, Bullets.splashDamage.splashes[i].damage);
+      }
+    }
+  }
 };
 
 EnemyShips.damageEnemyShip = function(ship, xLoc, yLoc, damage) {
@@ -180,9 +187,6 @@ EnemyShips.damageEnemyShip = function(ship, xLoc, yLoc, damage) {
 
 			stageSprite.screenShake += gameModel.maxScreenShake * percentOfShipDamaged;
 
-			if (!PlayerShip.playerShip.superCharged)
-				PlayerShip.playerShip.charge = Math.min(105,PlayerShip.playerShip.charge + 3 * percentOfShipDamaged);
-
 			if (ship.health + damage > ship.wave.shipHealth / 2 && ship.health < ship.wave.shipHealth / 2) {
 				ship.maxSpeed *= 0.90;
 			}
@@ -192,28 +196,6 @@ EnemyShips.damageEnemyShip = function(ship, xLoc, yLoc, damage) {
 			EnemyShips.destroy(ship);
 		}
 	}
-};
-
-EnemyShips.checkForBulletCollisions = function (ship){
-	Bullets.playerBullets.sprite.forEach(function(sprite){
-		if (sprite.visible) {
-			if (Ships.detectCollision(ship, sprite.xLoc, sprite.yLoc)) {
-
-				EnemyShips.damageEnemyShip(ship, sprite.xLoc, sprite.yLoc, sprite.bulletStrength);
-				sprite.visible = false;
-				Bullets.playerBullets.discardedSprites.push(sprite);
-			}
-		}
-	});
-  for (var i = 0; i < Bullets.splashDamage.maxSplashes; i++) {
-    if (Bullets.splashDamage.splashes[i] && Bullets.splashDamage.splashes[i].active) {
-      if (distanceBetweenPoints(ship.xLoc, ship.yLoc, Bullets.splashDamage.splashes[i].xLoc, Bullets.splashDamage.splashes[i].yLoc) < Bullets.splashDamage.splashes[i].spread &&
-        !Bullets.splashDamage.splashes[i].shipsDamaged[ship.id]) {
-          Bullets.splashDamage.splashes[i].shipsDamaged[ship.id] = 1;
-          EnemyShips.damageEnemyShip(ship, ship.xLoc, ship.yLoc, Bullets.splashDamage.splashes[i].damage);
-        }
-    }
-  }
 };
 
 EnemyShips.updateShip = function (eShip, timeDiff) {
@@ -273,7 +255,7 @@ EnemyShips.updateShip = function (eShip, timeDiff) {
 				eShip.yTar = canvasHeight * eShip.wave.wavePattern.yCoords[eShip.nextCoord];
 			}
 		}
-		EnemyShips.checkForBulletCollisions(eShip);
+		EnemyShips.checkForSplashDamage(eShip);
 		EnemyShips.checkForPlayerCollision(eShip);
 		Stars.shipTrails.updateShip(eShip,timeDiff);
 
@@ -316,6 +298,7 @@ EnemyShips.update = function (timeDiff) {
 			} else {
 				Boss.shield.hide();
 				changeState(states.levelComplete);
+				Weapons.reset();
 			}
 		}
 	}

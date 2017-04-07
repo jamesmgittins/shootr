@@ -194,6 +194,16 @@ SettingsMenu = {
     {title:"Delete Save Data", click:function(){
       resetSaveGame();
     }},
+    {title:"Resolution Options", click:function(){
+      ResolutionMenu.show();
+      var settingsOnHide = SettingsMenu.onHide;
+      SettingsMenu.onHide = undefined;
+      ResolutionMenu.onHide = function(){
+        SettingsMenu.show();
+        SettingsMenu.onHide = settingsOnHide;
+      };
+      SettingsMenu.hide();
+    }},
     {title:"Back", buttonDesc:buttonTypes.back, click:function(){
       SettingsMenu.hide();
     }}],
@@ -280,13 +290,56 @@ VolumeMenu = {
   }
 };
 
+ResolutionMenu = {
+  menuTitle:"Rendering Resolution",
+  currentSelection:0,
+  menuOptions:[],
+  bButton : function(){
+    ResolutionMenu.menuOptions.forEach(function(option){
+      if (option.title == "Back")
+        option.click();
+    });
+  },
+  preInit : function() {
+    var maxFactor = window.devicePixelRatio + 1;
+
+    ResolutionMenu.menuOptions = [];
+    for (var i = 0.5; i <= maxFactor; i += 0.25) {
+      var currentWidth = Math.round(window.innerWidth * i);
+      var currentHeight = Math.round(window.innerHeight * i);
+      var factor = i;
+
+      ResolutionMenu.menuOptions.push({
+        title: Math.round(i * 100) + "% - " + currentWidth + " x " + currentHeight + " px" + (gameModel.resolutionFactor == factor ? " (Current)" : ""),
+        click:(function(){
+          var factor = i;
+          return function() {
+            gameModel.resolutionFactor = factor;
+            updateAfterScreenSizeChange();
+            // save();
+            // location.reload(true);
+          };
+        })()
+      });
+    }
+    ResolutionMenu.menuOptions.push(
+      {title:"Back", buttonDesc:buttonTypes.back, click:function(){
+      ResolutionMenu.hide();
+    }});
+  }
+};
+
 MainMenu.fontSize = 18;
 
-Menus = [DeathMenu,VolumeMenu,SettingsMenu,PauseMenu,StationMenu,MainMenu];
+Menus = [DeathMenu,VolumeMenu,ResolutionMenu,SettingsMenu,PauseMenu,StationMenu,MainMenu];
 
 InitializeMenu = function (menu) {
 
   menu.initialize = function() {
+
+    if (menu.preInit) {
+      menu.preInit();
+    }
 
     if (!menu.menuContainer) {
       menu.menuContainer = new PIXI.Container();
@@ -298,6 +351,7 @@ InitializeMenu = function (menu) {
         item.destroy();
       }
     }
+
     menu.menuContainer.visible = false;
 
     menu.menuBackground = new PIXI.Graphics();
@@ -331,6 +385,7 @@ InitializeMenu = function (menu) {
     if (menu.onInit) {
       menu.onInit();
     }
+
   };
 
   menu.initialize();

@@ -117,7 +117,7 @@ ShootrUI.getInputButtonDescription = function(button) {
 			case buttonTypes.select:
 				return "X";
 			case buttonTypes.back:
-				return "O"
+				return "O";
 			case buttonTypes.leftShoulder:
 				return "L1";
 			case buttonTypes.rightShoulder:
@@ -137,7 +137,7 @@ ShootrUI.getInputButtonDescription = function(button) {
 		}
 		}
 	}
-}
+};
 
 window.addEventListener("gamepadconnected", function (e) {
   ShootrUI.updateGamepadSelect();
@@ -149,7 +149,7 @@ window.addEventListener("gamepaddisconnected", function (e) {
 
 function mouseWheelHandler(e) {
   setLastUsedInput(inputTypes.mouseKeyboard);
-	var e = window.event || e; // old IE support
+	e = window.event || e; // old IE support
 	var delta = (e.wheelDelta || -e.detail);
 	StarChart.mousewheel(delta);
 	e.stopPropagation();
@@ -164,8 +164,10 @@ function clickCanvas(data) {
 		aimLocX = 0;
 		aimLocY = 0;
 	} else {
-		CheckForMenuClick();
-		GameText.levelComplete.checkForClick()
+    setTimeout(function(){
+      CheckForMenuClick();
+  		GameText.levelComplete.checkForClick();
+    });
 	}
 }
 
@@ -330,7 +332,8 @@ function getBackgroundSprite() {
 
   var ctx = nebulaCanvas.getContext('2d');
 
-  var x = y = size / 2;
+  var x = size / 2;
+  var y = size / 2;
   var width = size * 0.75;
 
   var radgrad = ctx.createRadialGradient(x, y, 0, x, y, width);
@@ -363,17 +366,17 @@ function resizeBackgroundSprite() {
 
 function gridSelection(colDelta, rowDelta, currPos, listSize, numColumns) {
 
-	var row = Math.floor(currPos / numColumns)
+	var row = Math.floor(currPos / numColumns);
 	var col = currPos - row * numColumns;
 
 	var maxCol = numColumns - 1;
-	var maxRow = Math.floor(listSize / numColumns)
+	var maxRow = Math.floor(listSize / numColumns);
 
 	col = col + colDelta >= 0 ? (col + colDelta <= maxCol ? col + colDelta : col + colDelta - numColumns) : (col + colDelta + numColumns);
 	row = row + rowDelta >= 0 ? (row + rowDelta <= maxRow ? row + rowDelta : row + rowDelta - maxRow - 1) : (row + rowDelta + maxRow + 1);
 
 	if (listSize - 1 < row * numColumns + col) {
-		if (colDelta == 0) {
+		if (colDelta === 0) {
 			if (rowDelta < 0)
         return Math.max(0, row - 1) * numColumns + col;
 			else

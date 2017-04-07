@@ -1,8 +1,9 @@
 Weapons = {
   types : {
     plasmaCannon:0,
-  	laserCannon:1,
-	  missileLauncher:2
+  	railGun:1,
+	  missileLauncher:2,
+    vulcanCannon:3
   },
   rarity : [
     {
@@ -102,7 +103,7 @@ Weapons.laserCannon = function(level,seed,rarity) {
 		accuracy: 0.5 + Math.random() * 0.5,
 		price: Math.round(dps * 30),
 		id: gameModel.weaponIdCounter++,
-		weaponType : Weapons.types.laserCannon
+		weaponType : Weapons.types.railGun
 	};
 
 	if (rarity.ultra || rarity.hyper) {
@@ -155,10 +156,12 @@ Weapons.getIconSvg =  function(item) {
       return "img/level-two.svg";
     return "img/level-one.svg";
   }
-  if (item.weaponType == Weapons.types.laserCannon)
+  if (item.weaponType == Weapons.types.railGun)
     return "img/target-laser.svg";
   if (item.weaponType == Weapons.types.missileLauncher)
     return "img/barbed-arrow.svg";
+  if (item.weaponType == Weapons.types.vulcanCannon)
+      return "img/blaster.svg";
 };
 
 Weapons.generateWeapon = function(level, seed, ultra) {
@@ -177,16 +180,82 @@ Weapons.generateWeapon = function(level, seed, ultra) {
   if (Math.random() > 0.7)
 		return Weapons.missileLauncher(level,seed,weaponRarity);
 
+  if (Math.random() > 0.7)
+  	return VulcanCannon.vulcanCannon(level,seed,weaponRarity);
+
 	return Weapons.plasmaCannon(level,seed,weaponRarity);
 };
 
+Weapons.createWeaponLogic = function(weapon, container) {
+  if (weapon.weaponType == Weapons.types.plasmaCannon)
+    return PlasmaCannon.create(weapon, container);
+
+  if (weapon.weaponType == Weapons.types.vulcanCannon)
+    return VulcanCannon.create(weapon, container);
+
+  if (weapon.weaponType == Weapons.types.railGun)
+    return RailGun.create(weapon, container);
+
+  if (weapon.weaponType == Weapons.types.missileLauncher)
+    return MissileLauncher.create(weapon, container);
+};
+
+
+
+Weapons.weaponLogic = {};
+
 Weapons.update = function(timeDiff) {
-  Bullets.updatePlasmaBullets(timeDiff);
-  Bullets.railgunBeams.update(timeDiff);
-  Bullets.missiles.update(timeDiff);
+
+  var shouldPlayerShoot = PlayerShip.playerShip.inPlay && PlayerShip.playerShip.rolling > 1 && (timeLeft > 0 || Boss.bossActive());
+
+  if (gameModel.p1.frontWeapon && !Weapons.weaponLogic.frontWeapon)
+    Weapons.weaponLogic.frontWeapon = Weapons.createWeaponLogic(gameModel.p1.frontWeapon, playerBulletContainer);
+
+  if (gameModel.p1.turretWeapon && !Weapons.weaponLogic.turretWeapon)
+    Weapons.weaponLogic.turretWeapon = Weapons.createWeaponLogic(gameModel.p1.turretWeapon, playerBulletContainer);
+
+  if (gameModel.p1.rearWeapon && !Weapons.weaponLogic.rearWeapon)
+    Weapons.weaponLogic.rearWeapon = Weapons.createWeaponLogic(gameModel.p1.rearWeapon, playerBulletContainer);
+
+
+  if (Weapons.weaponLogic.frontWeapon) {
+    Weapons.weaponLogic.frontWeapon.update(timeDiff);
+    if (Weapons.weaponLogic.frontWeapon.readyToFire(shouldPlayerShoot, timeDiff)) {
+      Weapons.weaponLogic.frontWeapon.fireShot({x: PlayerShip.playerShip.xLoc, y: PlayerShip.playerShip.yLoc - 8, angle:0}, 1);
+    }
+  }
+
+  if (Weapons.weaponLogic.turretWeapon) {
+    Weapons.weaponLogic.turretWeapon.update(timeDiff);
+    if (Weapons.weaponLogic.turretWeapon.readyToFire(shouldPlayerShoot, timeDiff)) {
+      Weapons.weaponLogic.turretWeapon.fireShot({x: PlayerShip.playerShip.xLoc, y: PlayerShip.playerShip.yLoc, angle:Bullets.getTurretAngle()}, 1);
+
+      if (PlayerShip.playerShip.spreadShot) {
+        Weapons.weaponLogic.turretWeapon.fireShot({x: PlayerShip.playerShip.xLoc, y: PlayerShip.playerShip.yLoc, angle:Bullets.getTurretAngle() - 0.12}, 1);
+        Weapons.weaponLogic.turretWeapon.fireShot({x: PlayerShip.playerShip.xLoc, y: PlayerShip.playerShip.yLoc, angle:Bullets.getTurretAngle() + 0.12}, 1);
+      } else if (PlayerShip.playerShip.crossShot) {
+        Weapons.weaponLogic.turretWeapon.fireShot({x: PlayerShip.playerShip.xLoc, y: PlayerShip.playerShip.yLoc, angle:Bullets.getTurretAngle() + Math.PI}, 1);
+        Weapons.weaponLogic.turretWeapon.fireShot({x: PlayerShip.playerShip.xLoc, y: PlayerShip.playerShip.yLoc, angle:Bullets.getTurretAngle() + Math.PI / 2}, 1);
+        Weapons.weaponLogic.turretWeapon.fireShot({x: PlayerShip.playerShip.xLoc, y: PlayerShip.playerShip.yLoc, angle:Bullets.getTurretAngle() - Math.PI / 2}, 1);
+      }
+    }
+
+  }
+
+  if (Weapons.weaponLogic.rearWeapon) {
+    Weapons.weaponLogic.rearWeapon.update(timeDiff);
+    if (Weapons.weaponLogic.rearWeapon.readyToFire(shouldPlayerShoot, timeDiff)) {
+      Weapons.weaponLogic.rearWeapon.fireShot({x: PlayerShip.playerShip.xLoc + 16, y: PlayerShip.playerShip.yLoc + 16, angle: (Math.PI / 8) * (Weapons.weaponLogic.rearWeapon.rearAngleMod || 1)}, 0.5);
+      Weapons.weaponLogic.rearWeapon.fireShot({x: PlayerShip.playerShip.xLoc - 16, y: PlayerShip.playerShip.yLoc + 16, angle:(-Math.PI / 8) * (Weapons.weaponLogic.rearWeapon.rearAngleMod || 1)}, 0.5);
+    }
+  }
 };
 
 Weapons.reset = function() {
-  Bullets.missiles.reset();
-  Bullets.playerBullets.resetAll();
+
+  removeAllFromContainer(bulletContainer);
+  removeAllFromContainer(playerBulletContainer);
+
+  Bullets.enemyBullets.initialize();
+  Weapons.weaponLogic = {};
 };

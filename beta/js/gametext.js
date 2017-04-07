@@ -21,6 +21,82 @@ var GameText = {
 	}
 };
 
+GameText.shieldDisplay = {
+	tintMod:1.5,
+	tintNumber:0,
+	startRgb : hexToRgb("#0D47A1"),
+	endRgb : hexToRgb("#1976D2"),
+	create:function(container) {
+
+		var sideSpace = (renderer.width - renderer.height) / 2;
+		var maxHeight = renderer.height * 0.3;
+
+		GameText.shieldDisplay.shieldContainer = new PIXI.Container();
+
+
+		var maskSprite = PIXI.Sprite.fromImage("img/ship-emblem.svg");
+
+		GameText.shieldDisplay.shieldContainer.mask = maskSprite;
+		GameText.shieldDisplay.shieldContainer.addChild(maskSprite);
+
+		var background = new PIXI.Graphics();
+		background.beginFill(0xFFFFFF);
+		background.drawRect(0, 0, maskSprite.width, maskSprite.height);
+		background.tint = 0x560b0b;
+		GameText.shieldDisplay.shieldContainer.addChild(background);
+
+		GameText.shieldDisplay.shieldLevel = new PIXI.Graphics();
+		GameText.shieldDisplay.shieldLevel.beginFill(0xFFFFFF);
+		GameText.shieldDisplay.shieldLevel.drawRect(0, 0, maskSprite.width, maskSprite.height);
+		GameText.shieldDisplay.shieldLevel.tint = 0x0D47A1;
+
+		GameText.shieldDisplay.shieldContainer.addChild(GameText.shieldDisplay.shieldLevel);
+
+		GameText.shieldDisplay.shieldContainer.scale.x = GameText.shieldDisplay.shieldContainer.scale.y = sideSpace > maxHeight ? maxHeight / maskSprite.width : sideSpace / maskSprite.width;
+
+		GameText.shieldDisplay.shieldContainer.position.y = renderer.height - (maskSprite.height * GameText.shieldDisplay.shieldContainer.scale.y);
+		GameText.shieldDisplay.shieldContainer.position.x = (sideSpace - (maskSprite.height * GameText.shieldDisplay.shieldContainer.scale.y)) / 2;
+
+		container.addChild(GameText.shieldDisplay.shieldContainer);
+	},
+	update:function(timeDiff) {
+		var percentage = PlayerShip.playerShip.currShield / PlayerShip.playerShip.maxShield;
+
+		// update shield display
+		if (GameText.shieldDisplay.percentage != percentage) {
+			GameText.shieldDisplay.shieldLevel.clear();
+			GameText.shieldDisplay.shieldLevel.beginFill(0xFFFFFF);
+			var bounds = GameText.shieldDisplay.shieldContainer.mask;
+			GameText.shieldDisplay.shieldLevel.drawRect(
+				0,
+				bounds.height - (bounds.height * percentage),
+				bounds.width,
+				bounds.height);
+			GameText.shieldDisplay.shieldLevel.tint = 0x0D47A1;
+			GameText.shieldDisplay.percentage = percentage;
+		}
+
+		if (PlayerShip.playerShip.lastDmg >= PlayerShip.playerShip.shieldDelay) {
+
+			GameText.shieldDisplay.tintNumber += GameText.shieldDisplay.tintMod * timeDiff;
+
+			var colorFactor = Math.max(0,Math.min(1,GameText.shieldDisplay.tintNumber));
+			GameText.shieldDisplay.shieldLevel.tint = rgbToHex(
+				GameText.shieldDisplay.startRgb.r + (GameText.shieldDisplay.endRgb.r - GameText.shieldDisplay.startRgb.r) * colorFactor,
+				GameText.shieldDisplay.startRgb.g + (GameText.shieldDisplay.endRgb.g - GameText.shieldDisplay.startRgb.g) * colorFactor,
+				GameText.shieldDisplay.startRgb.b + (GameText.shieldDisplay.endRgb.b - GameText.shieldDisplay.startRgb.b) * colorFactor
+			);
+
+
+			if (GameText.shieldDisplay.tintNumber >= 1 && GameText.shieldDisplay.tintMod > 0)
+						GameText.shieldDisplay.tintMod *= -1;
+
+			if (GameText.shieldDisplay.tintNumber <= 0 && GameText.shieldDisplay.tintMod < 0)
+						GameText.shieldDisplay.tintMod *= -1;
+		}
+	}
+};
+
 GameText.status = {
 	lootIcons:[],
 	initialize: function() {
@@ -112,124 +188,8 @@ GameText.status = {
 		GameText.status.distanceMarker.lineTo(barWidth, 118 * scalingFactor);
 		GameText.status.container.addChild(GameText.status.distanceMarker);
 
-		// shield bar stuff
-		GameText.status.shieldBarBackground = new PIXI.Graphics();
-		GameText.status.shieldBarBackground.beginFill(0x200000);
-		GameText.status.shieldBarBackground.drawRect(sideSpace - barWidth * 3, renderer.height * 0.5, barWidth, renderer.height * 0.45);
 
-		GameText.status.container.addChild(GameText.status.shieldBarBackground);
-
-		GameText.status.shieldLabel = new PIXI.Text('S\nH\nI\nE\nL\nD', {
-			font: Math.round(10 * scalingFactor) + 'px Dosis',
-			fill: '#FFF',
-			stroke: "#000",
-			strokeThickness: 0,
-			align: 'center'
-		});
-		GameText.status.shieldLabel.tint = MainMenu.buttonTint;
-		GameText.status.shieldLabel.anchor = {
-			x: 0.5,
-			y: 0.5
-		};
-		GameText.status.shieldLabel.position = {
-			x: sideSpace - barWidth * 3.2,
-			y: (renderer.height * 0.5) + (renderer.height * 0.225)
-		};
-
-		GameText.status.container.addChild(GameText.status.shieldLabel);
-
-		GameText.status.shieldBar = new PIXI.Graphics();
-		GameText.status.shieldBar.beginFill(0xFFFFFF);
-		GameText.status.shieldBar.drawRect(sideSpace - barWidth * 3, renderer.height * 0.5, barWidth, renderer.height * 0.45);
-
-		GameText.status.container.addChild(GameText.status.shieldBar);
-
-		GameText.status.shieldOutline = new PIXI.Graphics();
-		GameText.status.shieldOutline.lineStyle(1, 0xFFFFFF);
-		GameText.status.shieldOutline.drawRect(sideSpace - 2 - barWidth * 3, renderer.height * 0.5 - 2, barWidth + 4, renderer.height * 0.45 + 4);
-		GameText.status.shieldOutline.tint = 0x005500;
-
-		GameText.status.container.addChild(GameText.status.shieldOutline);
-
-		GameText.status.shieldText = new PIXI.Text('', {
-			font: Math.round(10 * scalingFactor) + 'px Dosis',
-			fill: '#FFF',
-			stroke: "#000",
-			strokeThickness: 0,
-			align: 'center'
-		});
-		GameText.status.shieldText.tint = MainMenu.buttonTint;
-		GameText.status.shieldText.anchor = {
-			x: 0.5,
-			y: 0
-		};
-		GameText.status.shieldText.position = {
-			x: sideSpace - barWidth * 2.5,
-			y: renderer.height * 0.6
-		};
-
-		GameText.status.container.addChild(GameText.status.shieldText);
-
-		// charge bar stuff
-		GameText.status.chargeBarBackground = new PIXI.Graphics();
-		GameText.status.chargeBarBackground.beginFill(0x200000);
-		GameText.status.chargeBarBackground.drawRect(2 * barWidth, renderer.height * 0.5, barWidth, renderer.height * 0.45);
-
-		GameText.status.container.addChild(GameText.status.chargeBarBackground);
-
-		GameText.status.chargeLabel = new PIXI.Text('C\nH\nA\nR\nG\nE', {
-			font: Math.round(10 * scalingFactor) + 'px Dosis',
-			fill: '#FFF',
-			stroke: "#000",
-			strokeThickness: 0,
-			align: 'center'
-		});
-		GameText.status.chargeLabel.tint = MainMenu.buttonTint;
-		GameText.status.chargeLabel.anchor = {
-			x: 0.5,
-			y: 0.5
-		};
-		GameText.status.chargeLabel.position = {
-			x: barWidth * 1.8,
-			y: (renderer.height * 0.5) + (renderer.height * 0.225)
-		};
-
-		GameText.status.container.addChild(GameText.status.chargeLabel);
-
-		GameText.status.chargeBar = new PIXI.Graphics();
-		GameText.status.chargeBar.beginFill(0xFFFFFF);
-		GameText.status.chargeBar.drawRect(barWidth * 2, renderer.height * 0.5, barWidth, renderer.height * 0.45);
-		GameText.status.chargeBar.tintNumber = 0;
-		GameText.status.chargeBar.tintMod = 600;
-
-		GameText.status.container.addChild(GameText.status.chargeBar);
-
-		GameText.status.chargeOutline = new PIXI.Graphics();
-		GameText.status.chargeOutline.lineStyle(1, 0xFFFFFF);
-		GameText.status.chargeOutline.drawRect(2 * barWidth - 2, renderer.height * 0.5 - 2, barWidth + 4, renderer.height * 0.45 + 4);
-		GameText.status.chargeOutline.tint = 0x005500;
-
-		GameText.status.container.addChild(GameText.status.chargeOutline);
-
-		GameText.status.superChargeText = new PIXI.Text('Press A', {
-			font: Math.round(12 * scalingFactor) + 'px Dosis',
-			fill: '#FFF',
-			stroke: "#000",
-			strokeThickness: 0,
-			align: 'center'
-		});
-		GameText.status.superChargeText.tint = MainMenu.buttonTint;
-		GameText.status.superChargeText.visible = false;
-		GameText.status.superChargeText.anchor = {
-			x: 0.5,
-			y: 1
-		};
-		GameText.status.superChargeText.position = {
-			x: barWidth * 2.5,
-			y: renderer.height * 0.5 - 10
-		};
-
-		GameText.status.container.addChild(GameText.status.superChargeText);
+		GameText.shieldDisplay.create(GameText.status.container);
 
 		GameText.status.lootContainer = new PIXI.Container();
 		GameText.status.container.addChild(GameText.status.lootContainer);
@@ -246,7 +206,7 @@ GameText.status = {
 	show: function() {
 		GameText.status.initialize();
 		GameText.status.container.visible = true;
-		GameText.status.shieldText.percentage = 0;
+		GameText.shieldDisplay.percentage = 0;
 	},
 	hide: function() {
 		GameText.status.container.visible = false;
@@ -258,27 +218,8 @@ GameText.status = {
 		var sideSpace = (renderer.width - renderer.height) / 2;
 		var barWidth = Math.round(sideSpace / 8);
 
-		var percentage = Math.round(PlayerShip.playerShip.currShield / PlayerShip.playerShip.maxShield * 100);
+		GameText.shieldDisplay.update(timeDiff);
 
-		// update shield display
-		if (GameText.status.shieldText.percentage != percentage) {
-			GameText.status.shieldText.text = formatMoney(Math.max(PlayerShip.playerShip.currShield, 0));
-			GameText.status.shieldText.position.y = renderer.height * 0.5 + ((100 - Math.max(percentage, 0)) / 100 * renderer.height * 0.45) + 5;
-			if (percentage < 30)
-				GameText.status.shieldText.position.y -= 20 * scalingFactor;
-			GameText.status.shieldText.tint = 0xFFFFFF;
-			GameText.status.shieldBar.clear();
-
-			if (percentage > 0) {
-				GameText.status.shieldBar.beginFill(0xFFFFFF);
-				GameText.status.shieldBar.drawRect(sideSpace - barWidth * 3, renderer.height * 0.5 + ((100 - percentage) / 100 * renderer.height * 0.45), barWidth, renderer.height * 0.45 - ((100 - percentage) / 100 * renderer.height * 0.45));
-				GameText.status.shieldBar.tint = percentage < 40 ? 0xAA0000 : Constants.itemColors.super;
-			}
-			if (percentage > 1 && percentage < 99) {
-				Stars.shipTrails.newPowerupPart(0 - (2 * barWidth) - Math.random() * barWidth, renderer.height * 0.5 + ((100 - percentage) / 100 * renderer.height * 0.45) - 1, 0x0000FF);
-			}
-			GameText.status.shieldText.percentage = percentage;
-		}
 		var distanceMarkerPosition = barWidth + (sideSpace - (barWidth * 2)) - ((Math.max(0, timeLeft) / levelTime) * (sideSpace - (barWidth * 2)));
 		GameText.status.distanceMarker.clear();
 		GameText.status.distanceMarker.lineStyle(Math.round(1 * scalingFactor), MainMenu.buttonTint);
@@ -295,36 +236,6 @@ GameText.status = {
 			GameText.status.credits.timer = 0;
 		}
 		GameText.status.credits.tint = GameText.status.credits.timer < 0.1 ? MainMenu.selectedButtonTint : MainMenu.buttonTint;
-
-		// update charge bar
-		if (GameText.status.chargeBar.percentage != PlayerShip.playerShip.charge) {
-			GameText.status.chargeBar.percentage = Math.min(100, PlayerShip.playerShip.charge);
-
-			GameText.status.chargeBar.clear();
-
-			if (PlayerShip.playerShip.charge > 0) {
-				GameText.status.chargeBar.beginFill(0xFFFFFF);
-				GameText.status.chargeBar.drawRect(2 * barWidth, renderer.height * 0.5 + ((100 - GameText.status.chargeBar.percentage) / 100 * renderer.height * 0.45), barWidth, renderer.height * 0.45 - ((100 - GameText.status.chargeBar.percentage) / 100 * renderer.height * 0.45));
-			}
-		}
-
-		if (PlayerShip.playerShip.charge >= 100 && !PlayerShip.playerShip.superCharged) {
-			GameText.status.superChargeText.visible = true;
-			GameText.status.superChargeText.text = "Press " + ShootrUI.getInputButtonDescription(buttonTypes.select);
-			GameText.status.chargeBar.tintNumber += GameText.status.chargeBar.tintMod * timeDiff;
-			GameText.status.gameBorder.tint = GameText.status.chargeBar.tint = rgbToHex(200, Math.min(200, Math.max(GameText.status.chargeBar.tintNumber, 0)), 0);
-
-			if (GameText.status.chargeBar.tintNumber >= 255 && GameText.status.chargeBar.tintMod > 0)
-				GameText.status.chargeBar.tintMod *= -1;
-
-			if (GameText.status.chargeBar.tintNumber <= 0 && GameText.status.chargeBar.tintMod < 0)
-				GameText.status.chargeBar.tintMod *= -1;
-
-		} else {
-			GameText.status.superChargeText.visible = false;
-			GameText.status.chargeBar.tint = rgbToHex(180, 200, 0);
-			GameText.status.gameBorder.tint = 0x005500;
-		}
 
 		// if an icon not yet displayed
 		if (GameText.status.lootContainer.children.length < GameText.status.lootIcons.length) {

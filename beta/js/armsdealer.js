@@ -152,6 +152,7 @@ ArmsDealer.createItemIcon = function(item, options) {
 	}
 
 	var pic = new PIXI.Sprite(PIXI.Texture.fromImage(svgToUse, undefined, undefined, 0.4));
+	// var pic = new PIXI.Sprite(glowTexture(PIXI.Texture.fromImage(svgToUse, undefined, undefined, 0.4),{blurAmount:0.5, resize:0.4}));
 
 	pic.scale.x = pic.scale.y = 0.3 * scale;
 
@@ -513,7 +514,7 @@ ArmsDealer.initialize = function() {
 	Math.seedrandom(seed);
 	ArmsDealer.buyOptions = [];
 
-	var numOptions = Math.round(2 + Math.random() * 2);
+	var numOptions = Math.round(5 + Math.random() * 2);
 	for (var j = 0; j <numOptions; j++)
 		ArmsDealer.buyOptions.push(Math.random() > 0.8 ? ArmsDealer.generateShield(level, seed++, false) : Weapons.generateWeapon(level, seed++, false));
 

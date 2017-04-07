@@ -32,12 +32,12 @@ Stars.StartEndStars = {
 	},
 	update : function(timeDiff) {
 		if (currentState == states.running) {
-
+			Stars.stars.speedFactor = 1;
 			if (Stars.StartEndStars.sprite.visible) {
 				if (Stars.StartEndStars.sprite.yLoc > canvasHeight * 0.1)
 					Stars.StartEndStars.sprite.ySpeed = Math.max(0,Math.min(Stars.StartEndStars.sprite.ySpeed + Stars.StartEndStars.sprite.acceleration * timeDiff, Stars.StartEndStars.maxSpeed));
 
-				Stars.StartEndStars.sprite.yLoc += Stars.StartEndStars.sprite.ySpeed;
+				Stars.StartEndStars.sprite.yLoc += (Stars.StartEndStars.sprite.ySpeed * 50) * timeDiff;
 				Stars.StartEndStars.sprite.position = {x:Stars.StartEndStars.sprite.xLoc * scalingFactor, y:Stars.StartEndStars.sprite.yLoc * scalingFactor};
 				Stars.StartEndStars.sprite.scale.x = Stars.StartEndStars.sprite.scale.y = Math.max(1,Math.min(0.1,1 - Stars.StartEndStars.sprite.ySpeed / Stars.StartEndStars.maxSpeed));
 				Stars.stars.speedFactor = Stars.StartEndStars.sprite.ySpeed / Stars.StartEndStars.maxSpeed;
@@ -72,6 +72,8 @@ Stars.StartEndStars = {
 					Stars.StartEndStars.sprite.acceleration = -1 * Stars.StartEndStars.acceleration;
 				}
 			}
+		} else {
+			Stars.stars.speedFactor = 0;
 		}
 	}
 };
@@ -124,7 +126,7 @@ Stars.nebulaBackground = {
 };
 
 Stars.stars = {
-	texture: (function() {
+	getTexture: function() {
 		var blast = document.createElement('canvas');
 		blast.width = 1;
 		blast.height = 1;
@@ -135,7 +137,7 @@ Stars.stars = {
 		blastCtx.fillRect(0, 0, 1, 1);
 
 		return PIXI.Texture.fromCanvas(blast);
-	})(),
+	},
 	speed: [],
 	sprite: [],
 	xLoc: [],
@@ -159,7 +161,7 @@ Stars.stars = {
 		Stars.stars.sprites.visible = false;
 	},
 	initialize: function() {
-
+		Stars.stars.texture = Stars.stars.getTexture();
 		Math.seedrandom(Date.now());
 
 		Stars.stars.sprites = new PIXI.Container();
@@ -188,7 +190,7 @@ Stars.stars = {
 		// Math.seedrandom(Date.now());
 		for (var i = 0; i < Stars.NUM_STARS; i++) {
 
-			Stars.stars.yLoc[i] += (PlayerShip.playerShip.superCharged ? 2 : 1) * Stars.stars.speed[i] * timeDiff * Stars.stars.speedFactor;
+			Stars.stars.yLoc[i] += Stars.stars.speed[i] * timeDiff * Stars.stars.speedFactor;
 			Stars.stars.sprite[i].position.x = Stars.stars.xLoc[i] * scalingFactor;
 			Stars.stars.sprite[i].position.y = Stars.stars.yLoc[i] * scalingFactor;
 
@@ -235,8 +237,8 @@ Stars.shipTrails = {
 		};
 		part.scale.x = (1 + Math.random() * 2) * scalingFactor * (scale || 1);
 		part.scale.y = (2 + Math.random() * 2) * scalingFactor * (scale || 1);
-		part.xSpeed = (-40 + Math.random() * 80) * scalingFactor;
-		part.ySpeed = (-40 + Math.random() * 80) * scalingFactor;
+		part.xSpeed = (-40 + Math.random() * 80) * scalingFactor * (scale || 1);
+		part.ySpeed = (-40 + Math.random() * 80) * scalingFactor * (scale || 1);
 
 	},
 	newPart: function(ship) {
@@ -273,6 +275,7 @@ Stars.shipTrails = {
 	initialize: function() {
 		Stars.shipTrails.sprites = new PIXI.Container();
 		gameContainer.addChild(Stars.shipTrails.sprites);
+		// blurContainer.addChild(Stars.shipTrails.sprites);
 	},
 	updateShip: function(ship, timeDiff) {
 		ship.lastTrail += timeDiff * 1000;
