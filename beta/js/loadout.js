@@ -410,7 +410,7 @@ Loadout.initialize = function () {
 
   Loadout.shipSprite = new PIXI.Sprite(
     glowTexture(
-      PIXI.Texture.fromCanvas(Ships.shipArt(PlayerShip.SHIP_SIZE, gameModel.p1.ship.seed, false, Ships.enemyColors[gameModel.p1.ship.colorIndex]))
+      PIXI.Texture.fromCanvas(Ships.shipArt(PlayerShip.SHIP_SIZE, gameModel.p1.ship.seed, Ships.enemyColors[gameModel.p1.ship.colorIndex]))
     )
   );
   Loadout.shipSprite.anchor = {x:0.5,y:0.5};

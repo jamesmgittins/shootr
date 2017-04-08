@@ -36,7 +36,7 @@ var Constants = {
 };
 
 var gameModel = {
-	weaponIdCounter:0
+	weaponIdCounter:1
 };
 
 var calculateShipLevel = function() {
@@ -123,8 +123,8 @@ function load() {
 			dmgNumbers : false,
 			antialiasing : true,
 			p1 : {
-				ship: Shipyard.generateShip(1, 1, false),
-				weapons: [Weapons.generateWeapon(1,123,false)],
+				ship: Shipyard.generateShip(1, 3, false),
+				weapons: [Weapons.plasmaCannon(1,123,Weapons.rarity[0])],
 				shields: [ArmsDealer.generateShield(1, 234, false)],
 				credits: 0,
 				totalCredits: 0,

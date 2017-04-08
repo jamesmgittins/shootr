@@ -105,6 +105,14 @@ function drawline(shipctx, strokeStyle, startX, startY, endX, endY) {
 
 function formatMoney(input) {
 	if (!input) input = 0;
+	if (input >= 1000000000000000000000000)
+		return (Math.round(input / 10000000000000000000000) / 100).toString() + 'Sp';
+	if (input >= 1000000000000000000000)
+		return (Math.round(input / 10000000000000000000) / 100).toString() + 'Sx';
+	if (input >= 1000000000000000000)
+		return (Math.round(input / 10000000000000000) / 100).toString() + 'Qi';
+	if (input >= 1000000000000000)
+		return (Math.round(input / 10000000000000) / 100).toString() + 'Q';
 	if (input >= 1000000000000)
 		return (Math.round(input / 10000000000) / 100).toString() + 'T';
 	if (input >= 1000000000)

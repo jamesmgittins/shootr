@@ -192,7 +192,7 @@ StarChart.locator = {
         x:bounds.width / 2 + bounds.x,
         y:bounds.height / 2 + bounds.y
       };
-      
+
       if (distanceBetweenPoints(StarChart.currentStar.x,StarChart.currentStar.y,StarChart.currentPosition.x * -1,StarChart.currentPosition.y * -1) > 2.5 / StarChart.zoom) {
 
 					var xDiff = StarChart.currentStar.x + StarChart.currentStar.xWobble + StarChart.currentPosition.x;
@@ -273,7 +273,7 @@ StarChart.starField = {
 			if (Math.random() > 0.8)
 				StarChart.starField.sprite[i].tint = 0x808080 + Math.random() * 0x808080;
 
-			StarChart.starField.sprite[i].scale.x = StarChart.starField.sprite[i].scale.y = Math.max(1,(StarChart.starField.speed[i] / 25));
+			StarChart.starField.sprite[i].scale.x = StarChart.starField.sprite[i].scale.y = Math.max(1,(StarChart.starField.speed[i] / 25)) * gameModel.resolutionFactor;
 			StarChart.starField.sprite[i].baseAlpha = StarChart.starField.sprite[i].alpha = Math.min(1,(StarChart.starField.speed[i] / 25));
 
 			StarChart.starField.sprites.addChild(StarChart.starField.sprite[i]);
@@ -404,7 +404,7 @@ StarChart.initialize = function () {
   StarChart.menuContainer.addChild(StarChart.plan);
 
   StarChart.selectGraphic = new PIXI.Graphics();
-  StarChart.selectGraphic.lineStyle(2, 0xFFFFFF);
+  StarChart.selectGraphic.lineStyle(1 * scalingFactor, 0xFFFFFF);
   StarChart.selectGraphic.drawRect(0,0,32 * scalingFactor,32 * scalingFactor);
   StarChart.selectGraphic.anchor={x:0.5,y:0.5};
   StarChart.selectGraphic.visible=false;
@@ -472,6 +472,7 @@ StarChart.initialize = function () {
 
 		StarChart.menuContainer.removeChild(StarChart.backButton.text);
 		StarChart.menuContainer.removeChild(StarChart.launchButton.text);
+    StarChart.menuContainer.removeChild(StarChart.fastTravelButton.text);
 		StarChart.menuContainer.removeChild(StarChart.starInfo);
 
 		var fontSize = MainMenu.fontSize * scalingFactor;
@@ -489,11 +490,22 @@ StarChart.initialize = function () {
 		StarChart.launchButton.text.position = {x:renderer.width * 0.5,y: renderer.height * 0.95 - 25};
 		StarChart.menuContainer.addChild(StarChart.launchButton.text);
 
+    StarChart.fastTravelButton.text = new PIXI.Text(StarChart.fastTravelButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.leftShoulder) + ")", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+    StarChart.fastTravelButton.tint = MainMenu.buttonTint;
+    StarChart.fastTravelButton.text.anchor = {x:0.5,y:1};
+    StarChart.fastTravelButton.text.position = {x:renderer.width * 0.5,y: renderer.height * 0.95 - 25};
+    StarChart.menuContainer.addChild(StarChart.fastTravelButton.text);
+
 		StarChart.starInfo = new PIXI.Text("", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'left' });
 		StarChart.starInfo.tint = MainMenu.buttonTint;
 		StarChart.starInfo.position = {x:0,y:0};
 		StarChart.starInfo.visible = false;
 		StarChart.menuContainer.addChild(StarChart.starInfo);
+
+    StarChart.selectGraphic.clear();
+    StarChart.selectGraphic.lineStyle(1 * scalingFactor, 0xFFFFFF);
+    StarChart.selectGraphic.drawRect(0,0,32 * scalingFactor,32 * scalingFactor);
+    StarChart.selectGraphic.anchor={x:0.5,y:0.5};
 
 		StarChart.cursorSprite.position.x = renderer.width * 0.5;
 		StarChart.cursorSprite.position.y = renderer.height * 0.5;
@@ -503,7 +515,7 @@ StarChart.initialize = function () {
 		StarChart.starField.resetPositions();
 
 		if (StarChart.shipSprite)
-	    StarChart.shipSprite.texture = PIXI.Texture.fromCanvas(Ships.shipArt(32, gameModel.p1.ship.seed, false, Ships.enemyColors[gameModel.p1.ship.colorIndex]));
+	    StarChart.shipSprite.texture = PIXI.Texture.fromCanvas(Ships.shipArt(32, gameModel.p1.ship.seed, Ships.enemyColors[gameModel.p1.ship.colorIndex]));
   };
 
 
@@ -596,7 +608,7 @@ StarChart.initialize = function () {
 		if (StarChart.shipSprite)
 			StarChart.menuContainer.removeChild(StarChart.shipSprite);
 
-    var shipTexture = Ships.shipArt(32, gameModel.p1.ship.seed, false, Ships.enemyColors[gameModel.p1.ship.colorIndex]);
+    var shipTexture = Ships.shipArt(32, gameModel.p1.ship.seed, Ships.enemyColors[gameModel.p1.ship.colorIndex]);
     StarChart.shipSprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(shipTexture));
     StarChart.shipSprite.anchor = {x:-0.5,y:0.3};
 
@@ -929,7 +941,7 @@ StarChart.initialize = function () {
     if (gameModel.bossPosition) {
       var skullX = centerPixels.x + ((StarChart.currentPosition.x + gameModel.bossPosition.x + StarChart.bossStar.xWobble) * starSpacing);
       var skullY = centerPixels.y + ((StarChart.currentPosition.y + gameModel.bossPosition.y + StarChart.bossStar.yWobble) * starSpacing);
-      StarChart.skullSprite.position.x = skullX + 30 + 30 * StarChart.zoom;
+      StarChart.skullSprite.position.x = skullX + (10 + 20 * StarChart.zoom) * scalingFactor;
       StarChart.skullSprite.position.y = skullY;
       StarChart.skullSprite.rotation = 0;
       StarChart.skullSprite.anchor = {x:0.5,y:0.5};

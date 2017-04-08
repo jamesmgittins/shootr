@@ -76,7 +76,7 @@ Ships.enemyColors = [
 
 var nextXLoc, nextYLoc;
 
-Ships.shipArt = function (size, seed, enemy, colors, white) {
+Ships.shipArt = function (size, seed, colors, white) {
 		size = Math.round(size * scalingFactor) % 2 === 0 ? Math.round(size * scalingFactor) : Math.round(size * scalingFactor) + 1;
     Math.seedrandom(seed);
     var shipLines = 25;
@@ -92,21 +92,15 @@ Ships.shipArt = function (size, seed, enemy, colors, white) {
     shadowCanvas.height = size + 2;
     var shadowCtx = shadowCanvas.getContext('2d');
 		shadowCtx.save();
-		shadowCtx.shadowBlur = 20;
-		shadowCtx.shadowColor = "#000";
-    shadowCtx.fillStyle = "rgba(0,0,0,1)";
+		shadowCtx.shadowBlur = 5 * scalingFactor;
+		// shadowCtx.shadowColor = "#000";
+
+		var shadowColor = hexToRgb(colors[colors.length-1]);
+		shadowColor = "rgb(" + Math.round(shadowColor.r * 0.5) + "," + Math.round(shadowColor.g * 0.5) + "," + Math.round(shadowColor.b * 0.5) + ")";
+
+		shadowCtx.shadowColor = shadowColor;
+		shadowCtx.fillStyle = shadowColor;
 		shadowCtx.beginPath();
-    shadowCtx.moveTo(1 + size / 2, 1 + Math.round(size * 0.05));
-    shadowCtx.lineTo(1 + Math.round(size * 0.8), 1 + Math.round(size * 0.8));
-		shadowCtx.lineTo(1 + Math.round(size * 0.2), 1 + Math.round(size * 0.8));
-    shadowCtx.fill();
-		shadowCtx.fill();
-		shadowCtx.fill();
-		// shadowCtx.fill();
-		// shadowCtx.fill();
-
-		shadowCtx.restore();
-
 
 		shipctx.shadowBlur = shipctx.lineWidth;
 		shipctx.shadowColor = colors[Math.round(colors.length / 2)];
@@ -114,39 +108,37 @@ Ships.shipArt = function (size, seed, enemy, colors, white) {
     lastX = size / 2;
     lastY = 0;
 
+		shadowCtx.moveTo(1 + size / 2, 0);
+
     var colorindex = 0;
     for (var i = 0; i < shipLines; i++) {
         nextYLoc = (Math.random() * size);
         nextXLoc = (((Math.random() * size / 2) * (nextYLoc / size)) + size / 2);
         drawline(shipctx, white ? "#FFFFFF" : colors[colorindex], lastX, lastY, nextXLoc, nextYLoc);
 
+				shadowCtx.lineTo(1 + nextXLoc, 1 + nextYLoc);
+
         colorindex++;
         if (colorindex >= colors.length - 1)
             colorindex = 0;
     }
+
+		shadowCtx.fill();
+		shadowCtx.fill();
+		shadowCtx.fill();
+		shadowCtx.restore();
+
+		shadowCtx.save();
+    shadowCtx.translate(size / 2 + 1, 0);
+    shadowCtx.scale(-1, 1);
+    shadowCtx.drawImage(shadowCanvas, -size / 2 - 1, 0);
+    shadowCtx.restore();
 
     shipctx.save();
     shipctx.translate(size / 2, 0);
     shipctx.scale(-1, 1);
     shipctx.drawImage(shipCanvas, -size / 2, 0);
     shipctx.restore();
-
-    if (enemy) {
-        var enemyCanvas = document.createElement('canvas');
-        enemyCanvas.width = size;
-        enemyCanvas.height = size;
-        shipctx = enemyCanvas.getContext('2d');
-        shipctx.save();
-        shipctx.scale(1, -1);
-				shipctx.transform(1,0,0,1,0,-size);
-        shipctx.clearRect(0, 0, size, size);
-				shipctx.drawImage(shadowCanvas,0,0,size,size);
-        shipctx.drawImage(shipCanvas, 0, 0, size, size);
-        shipctx.restore();
-        return enemyCanvas;
-    }
-
-//     return shipCanvas;
 		shadowCtx.drawImage(shipCanvas,1,1,size,size);
 	return shadowCanvas;
 };

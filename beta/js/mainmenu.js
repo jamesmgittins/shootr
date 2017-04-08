@@ -45,11 +45,12 @@ StationMenu = {
       SettingsMenu.show();
       SettingsMenu.onHide = StationMenu.show;
       StationMenu.hide();
-    }},
-    {title:"Main Menu", buttonDesc:buttonTypes.back, click:function(){
-      StationMenu.hide();
-      MainMenu.show();
-    }}],
+    }}
+  ],
+  backButton : {title:"Main Menu", buttonDesc:buttonTypes.back, click:function(){
+    StationMenu.hide();
+    MainMenu.show();
+  }},
   currentSelection:0,
   onInit:function() {
     var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
@@ -70,7 +71,7 @@ StationMenu = {
   onHide : function() {
     StationMenu.tradeMoneyText.visible = false;
   },
-  bButton : function(){StationMenu.menuOptions[5].click();}
+  bButton : function(){StationMenu.backButton.click();}
 };
 
 DeathMenu = {
@@ -106,7 +107,7 @@ DeathMenu = {
 PauseMenu = {
   menuTitle:"Pause Menu",
   menuOptions:[
-    {title:"Continue",click:function(){
+    {title:"Continue", buttonDesc:buttonTypes.back, click:function(){
       changeState(states.running);
       PauseMenu.hide();
     }},
@@ -115,7 +116,7 @@ PauseMenu = {
       PauseMenu.hide();
       SettingsMenu.onHide = PauseMenu.show;
     }},
-    {title:"Return to Station", buttonDesc:buttonTypes.back, click:function(){
+    {title:"Return to Station", click:function(){
       changeState(states.station);
       StationMenu.show();
       SettingsMenu.hide();
@@ -204,11 +205,12 @@ SettingsMenu = {
       };
       SettingsMenu.hide();
     }},
-    {title:"Back", buttonDesc:buttonTypes.back, click:function(){
-      SettingsMenu.hide();
-    }}],
+  ],
+  backButton : {title:"Back", buttonDesc:buttonTypes.back, click:function(){
+    SettingsMenu.hide();
+  }},
   currentSelection:0,
-  bButton : function(){SettingsMenu.menuOptions[SettingsMenu.menuOptions.length - 1].click();},
+  bButton : function(){SettingsMenu.backButton.click();},
   onInit : function() {
     var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
     SettingsMenu.controllerText = new PIXI.Text("No controller detected", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
@@ -274,12 +276,13 @@ VolumeMenu = {
     {title:"Mute",click:function(){
       gameModel.masterVolume = 0;
       VolumeMenu.volumeText.text = "Muted";
-    }},
-  {title:"Back", buttonDesc:buttonTypes.back, click:function(){
-      VolumeMenu.hide();
-    }}],
+    }}
+  ],
+  backButton : {title:"Back", buttonDesc:buttonTypes.back, click:function(){
+    VolumeMenu.hide();
+  }},
   currentSelection:0,
-  bButton : function(){VolumeMenu.menuOptions[3].click();},
+  bButton : function(){VolumeMenu.backButton.click();},
   onInit : function() {
     var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
     VolumeMenu.volumeText = new PIXI.Text((gameModel.masterVolume * 100).toFixed() + "%", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'center' });
@@ -294,11 +297,11 @@ ResolutionMenu = {
   menuTitle:"Rendering Resolution",
   currentSelection:0,
   menuOptions:[],
+  backButton:{title:"Back", buttonDesc:buttonTypes.back, click:function(){
+    ResolutionMenu.hide();
+  }},
   bButton : function(){
-    ResolutionMenu.menuOptions.forEach(function(option){
-      if (option.title == "Back")
-        option.click();
-    });
+    ResolutionMenu.backButton.click();
   },
   preInit : function() {
     var maxFactor = window.devicePixelRatio + 1;
@@ -322,10 +325,6 @@ ResolutionMenu = {
         })()
       });
     }
-    ResolutionMenu.menuOptions.push(
-      {title:"Back", buttonDesc:buttonTypes.back, click:function(){
-      ResolutionMenu.hide();
-    }});
   }
 };
 
@@ -367,6 +366,14 @@ InitializeMenu = function (menu) {
     menu.titleText.tint = MainMenu.titleTint;
     menu.titleText.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.05 + 25};
     menu.menuContainer.addChild(menu.titleText);
+
+    if (menu.backButton) {
+      menu.backButton.text = new PIXI.Text(menu.backButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.back) + ")", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+      menu.backButton.text.tint = MainMenu.buttonTint;
+      menu.backButton.text.anchor = {x:0,y:1};
+      menu.backButton.text.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.95 - 25};
+      menu.menuContainer.addChild(menu.backButton.text);
+    }
 
     for (var i=0; i< menu.menuOptions.length;i++) {
       menu.menuOptions[i].text = new PIXI.Text(menu.menuOptions[i].title, { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });

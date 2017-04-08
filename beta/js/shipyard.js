@@ -71,18 +71,18 @@ Shipyard.initialize = function () {
 
   Shipyard.menuContainer.addChild(Shipyard.menuBackground);
 
-  Shipyard.titleText = new PIXI.Text(Shipyard.menuTitle, { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'center' });
+  Shipyard.titleText = new PIXI.Text(Shipyard.menuTitle, { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
   Shipyard.titleText.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.05 + 25};
   Shipyard.titleText.tint = MainMenu.titleTint;
   Shipyard.menuContainer.addChild(Shipyard.titleText);
 
-  var currentCredits = new PIXI.Text(formatMoney(gameModel.p1.credits) + " Credits", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'center' });
+  var currentCredits = new PIXI.Text(formatMoney(gameModel.p1.credits) + " Credits", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
   currentCredits.tint = MainMenu.titleTint;
   currentCredits.anchor = {x:1,y:0};
   currentCredits.position = {x:renderer.width * 0.95 - 25,y: renderer.height * 0.05 + 25};
   Shipyard.menuContainer.addChild(currentCredits);
 
-  Shipyard.backButton.text = new PIXI.Text(Shipyard.backButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.back) + ")", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'center' });
+  Shipyard.backButton.text = new PIXI.Text(Shipyard.backButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.back) + ")", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
   Shipyard.backButton.text.tint = MainMenu.buttonTint;
   Shipyard.backButton.text.anchor = {x:0,y:1};
   Shipyard.backButton.text.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.95 - 25};
@@ -115,7 +115,7 @@ Shipyard.initialize = function () {
 
     var sprite = new PIXI.Sprite(
       glowTexture(
-        PIXI.Texture.fromCanvas(Ships.shipArt(PlayerShip.SHIP_SIZE * 2, Shipyard.ships[i].seed, false, Ships.enemyColors[Shipyard.ships[i].colorIndex]))
+        PIXI.Texture.fromCanvas(Ships.shipArt(PlayerShip.SHIP_SIZE * 2, Shipyard.ships[i].seed, Ships.enemyColors[Shipyard.ships[i].colorIndex]))
       )
     );
     sprite.anchor = {x:0.5,y:0.5};

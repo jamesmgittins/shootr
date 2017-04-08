@@ -66,7 +66,7 @@ EnemyShips.wave = function () {
 
 	this.shipsInWave = EnemyShips.minShipsPerWave + Math.round(Math.random() * (EnemyShips.maxShipsPerWave - EnemyShips.minShipsPerWave));
 	this.shipsDestroyed = 0;
-	var size = Math.round(32 + Math.random() * 32);
+	var size = Math.round(42 + Math.random() * 22);
 	this.colors = Ships.enemyColors[Math.floor(Math.random() * Ships.enemyColors.length)];
 
 	this.shipHealth = EnemyShips.shipHealth;
@@ -74,8 +74,8 @@ EnemyShips.wave = function () {
 
 	var seed = Date.now();
 
-	this.texture = glowTexture(PIXI.Texture.fromCanvas(Ships.shipArt(size, seed, true, this.colors)));
-	this.damageTexture = glowTexture(PIXI.Texture.fromCanvas(Ships.shipArt(size, seed, true, this.colors, true)));
+	this.texture = glowTexture(PIXI.Texture.fromCanvas(Ships.shipArt(size, seed, this.colors)));
+	this.damageTexture = glowTexture(PIXI.Texture.fromCanvas(Ships.shipArt(size, seed, this.colors, true)));
 
 	this.maxSpeed = 60 + Math.random() * 30;
 
@@ -112,6 +112,7 @@ EnemyShips.enemyShip = function (wave) {
 		this.sprite.tint = 0xFFFFFF;
 	} else {
 		this.sprite = new PIXI.Sprite(wave.texture);
+		this.sprite.scale.y = -1;
 		enemyShipContainer.addChild(this.sprite);
 		EnemyShips.sprites.push(this.sprite);
 	}
@@ -184,7 +185,7 @@ EnemyShips.damageEnemyShip = function(ship, xLoc, yLoc, damage, noEffect) {
 		}
 
 		ship.health -= damage;
-		
+
 		GameText.damage.newText(damage, ship);
 
 		if (ship.wave) {
