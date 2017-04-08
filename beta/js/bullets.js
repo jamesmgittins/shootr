@@ -226,7 +226,14 @@ Bullets.getTurretAngle = function() {
 		cursorPosition.x = cursorPosition.y = -100;
 		return Math.atan2(playerOneAxes[2], -playerOneAxes[3]);
 	} else if (aimLocX && aimLocY) {
-		var xDiff = (aimLocX / scalingFactor) - PlayerShip.playerShip.xLoc;
+		var xDiff;
+		if (stageSprite.visible) {
+			if (aimLocX < stageSprite.x || aimLocX > stageSprite.x + stageSprite.width)
+				return 0;
+			xDiff = (aimLocX / scalingFactor) - (PlayerShip.playerShip.xLoc) - (stageSprite.x / scalingFactor);
+		} else {
+			xDiff = (aimLocX / scalingFactor) - (PlayerShip.playerShip.xLoc);
+		}
 		var yDiff = (PlayerShip.playerShip.yLoc) - (aimLocY / scalingFactor);
 		return Math.atan2(xDiff, yDiff);
 	}

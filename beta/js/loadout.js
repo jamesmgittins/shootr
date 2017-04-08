@@ -744,8 +744,8 @@ Loadout.update = function(timeDiff) {
         if (Loadout.currentPosition === Loadout.positions.turretWeapon) {
           // turret
           if (Loadout.firingWeapon.readyToFire(true, timeDiff)) {
-            PlayerShip.playerShip.xLoc = Loadout.shipSprite.position.x;
-            PlayerShip.playerShip.yLoc = Loadout.shipSprite.position.y;
+            PlayerShip.playerShip.xLoc = (Loadout.renderSprite.position.x + Loadout.shipSprite.position.x) / scalingFactor;
+            PlayerShip.playerShip.yLoc = (Loadout.renderSprite.position.y + Loadout.shipSprite.position.y) / scalingFactor;
             Loadout.firingWeapon.fireShot({x: Loadout.shipSprite.position.x / scalingFactor, y: (Loadout.shipSprite.position.y / scalingFactor), angle:Bullets.getTurretAngle()}, 1);
           }
         }

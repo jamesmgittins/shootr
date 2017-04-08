@@ -44,6 +44,13 @@ BioGelGun = {
 							sprite.position.y = (sprite.ship.yLoc + vector.y) * scalingFactor;
 						}
 					} else {
+						if (sprite.weapon.spread) {
+							var speed = RotateVector2d(0, BioGelGun.minSpeed, Math.random() * 2 * Math.PI);
+							BioGelGun.individualBullet(spritePool, speed, {
+								x: sprite.position.x / scalingFactor,
+								y: sprite.position.y / scalingFactor
+							}, sprite.bulletStrength, 0.5, sprite.weapon);
+						}
 						spritePool.discardSprite(sprite);
 					}
 				} else {
@@ -92,7 +99,7 @@ BioGelGun = {
 		sprite.bulletStrength = damage;
 
 		if (weapon.ultra || weapon.hyper) {
-			sprite.tint = rgbToHex(0, 100 + Math.random() * 35, 100);
+			sprite.tint = rgbToHex(0, 150 + Math.random() * 35, 180);
 		} else {
 			sprite.tint = rgbToHex(0, 150 + Math.random() * 20, 0);
 		}
@@ -106,6 +113,7 @@ BioGelGun = {
 		sprite.ship = false;
 
 		sprite.lastEnemyDamaged = 0;
+		sprite.weapon = weapon;
 
 		sprite.visible = true;
 		sprite.scale.x = sprite.scale.y = scale;
@@ -199,8 +207,9 @@ BioGelGun.bioGelGun = function(level,seed,rarity) {
 	};
 
 	if (rarity.ultra || rarity.hyper) {
-			bioGelGun.ultraName = "Spooge";
-			bioGelGun.ultraText = "Bullets will not be destroyed when damaging an enemy";
+			bioGelGun.ultraName = "Toxic Avenger";
+			bioGelGun.ultraText = "Blobs will spread if an enemy is destroyed";
+			bioGelGun.spread = true;
 	}
 
 	return bioGelGun;

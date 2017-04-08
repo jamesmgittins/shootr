@@ -515,7 +515,7 @@ GameText.levelComplete = {
 		this.lootOpening = false;
 		this.lootTimer = 0;
 
-		this.textMessage = new PIXI.Text("Level Complete\nPress " + ShootrUI.getInputButtonDescription(buttonTypes.select) + " to Continue", {
+		this.textMessage = new PIXI.Text("Level Complete\nYou have collected "  + formatMoney(gameModel.p1.temporaryCredits) + " credits\nPress " + ShootrUI.getInputButtonDescription(buttonTypes.select) + " to Continue", {
 			font: 32 * scalingFactor + 'px Dosis',
 			fill: '#FFF',
 			stroke: "#000",
@@ -529,14 +529,12 @@ GameText.levelComplete = {
 		this.container.addChild(this.textMessage);
 
 		if (gameModel.lootCollected.length > 0) {
-			this.textMessage.text = "Level Complete\nYou have collected " + gameModel.lootCollected.length + " crate" + (gameModel.lootCollected.length>1?"s":"") + "\nPress " + ShootrUI.getInputButtonDescription(buttonTypes.select) + " to inspect the contents";
+			this.textMessage.text = "Level Complete\nYou have collected "  + formatMoney(gameModel.p1.temporaryCredits) + " credits\nand " + gameModel.lootCollected.length + " crate" + (gameModel.lootCollected.length>1?"s":"") + "\nPress " + ShootrUI.getInputButtonDescription(buttonTypes.select) + " to inspect the contents";
 			this.lootLayouts.forEach(function(layout) {
 				layout.position = {x:renderer.width / 2 - (layout.width / 2), y:renderer.height / 2 - (layout.height / 2)};
 				layout.visible = false;
 				GameText.levelComplete.container.addChild(layout);
 			});
-		} else {
-			this.textMessage.text = "Level Complete\nPress " + ShootrUI.getInputButtonDescription(buttonTypes.select) + " to Continue";
 		}
 	},
 	hide:function() {

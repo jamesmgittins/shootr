@@ -101,7 +101,7 @@ function changeLevel(level) {
 
 	EnemyShips.waveBulletFrequency = Math.max(2500 - gameModel.currentLevel, 500);
 	EnemyShips.shipHealth = (10 * gameModel.currentLevel * levelDifficultyModifier) - 5 + gameModel.currentLevel;
-	EnemyShips.maxBulletsPerShot = Math.min(10, gameModel.currentLevel / 5);
+	EnemyShips.maxBulletsPerShot = Math.min(8, gameModel.currentLevel / 7);
 	enemiesKilled = 0;
 	enemiesToKill = enemiesToKillConstant + Math.floor(gameModel.currentLevel / 5);
 	Boss.health = EnemyShips.shipHealth * 100;
@@ -137,6 +137,8 @@ function changeState(state) {
 		currentState = state;
 
 		Sounds.music.pause();
+
+		EnemyShips.activeShips = [];
 
 		if (state == states.running) {
 		  stageSprite.visible=true;
@@ -446,7 +448,6 @@ function startGame() {
 
 	window.addEventListener("resize",updateAfterScreenSizeChange);
 
-	// stageTexture = new PIXI.RenderTexture(renderer, canvas.height, canvas.height);
 	stageTexture = PIXI.RenderTexture.create(canvas.height, canvas.height);
 	stageSprite = new PIXI.Sprite(stageTexture);
 	stageSprite.height = canvas.height;
@@ -481,15 +482,11 @@ function startGame() {
 	};
 	gameContainer.mousemove = function(data){
 		setLastUsedInput(inputTypes.mouseKeyboard);
-		aimLocX = data.data.getLocalPosition(stageSprite).x;
-    aimLocY = data.data.getLocalPosition(stageSprite).y;
+		aimLocX = data.data.getLocalPosition(gameContainer).x;
+    aimLocY = data.data.getLocalPosition(gameContainer).y;
 		cursorPosition = data.data.getLocalPosition(gameContainer);
 		StarChart.mousemove(data);
 		CheckForMenuMouseOver();
-		if (aimLocX < 0 || aimLocX > stageSprite.width || aimLocY < 0 || aimLocY > stageSprite.height) {
-			aimLocX=0;
-			aimLocY=0;
-		}
 	};
 	document.addEventListener("mousewheel", mouseWheelHandler, false);
 	document.addEventListener("DOMMouseScroll", mouseWheelHandler, false);

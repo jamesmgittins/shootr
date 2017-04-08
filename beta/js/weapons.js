@@ -177,20 +177,18 @@ Weapons.generateWeapon = function(level, seed, ultra) {
     }
   }
 
-	if (Math.random() > 0.7)
-		return Weapons.laserCannon(level,seed,weaponRarity);
+  var weaponGenFunctions = [
+    Weapons.laserCannon,
+    Weapons.missileLauncher,
+    VulcanCannon.vulcanCannon,
+    BioGelGun.bioGelGun,
+    Weapons.plasmaCannon
+  ];
 
-  if (Math.random() > 0.7)
-		return Weapons.missileLauncher(level,seed,weaponRarity);
-
-  if (Math.random() > 0.7)
-  	return VulcanCannon.vulcanCannon(level,seed,weaponRarity);
-
-  if (Math.random() > 0.7)
-  	return BioGelGun.bioGelGun(level,seed,weaponRarity);
-
-	return Weapons.plasmaCannon(level,seed,weaponRarity);
+  return weaponGenFunctions[Math.floor(Math.random() * weaponGenFunctions.length)](level,seed,weaponRarity);
 };
+
+
 
 Weapons.createWeaponLogic = function(weapon, container) {
   if (weapon.weaponType == Weapons.types.plasmaCannon)
