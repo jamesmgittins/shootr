@@ -8,7 +8,8 @@ Shipyard = {
   bButton : function(){
     Shipyard.backButton.click();
   },
-  ships:[]
+  ships:[],
+  showCurrentCredits:true
 };
 
 Shipyard.generateShip = function(level, seed, ultra) {
@@ -76,11 +77,11 @@ Shipyard.initialize = function () {
   Shipyard.titleText.tint = MainMenu.titleTint;
   Shipyard.menuContainer.addChild(Shipyard.titleText);
 
-  var currentCredits = new PIXI.Text(formatMoney(gameModel.p1.credits) + " Credits", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
-  currentCredits.tint = MainMenu.titleTint;
-  currentCredits.anchor = {x:1,y:0};
-  currentCredits.position = {x:renderer.width * 0.95 - 25,y: renderer.height * 0.05 + 25};
-  Shipyard.menuContainer.addChild(currentCredits);
+  Shipyard.currentCredits = new PIXI.Text(formatMoney(gameModel.p1.credits) + " Credits", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+  Shipyard.currentCredits.tint = MainMenu.titleTint;
+  Shipyard.currentCredits.anchor = {x:1,y:0};
+  Shipyard.currentCredits.position = {x:renderer.width * 0.95 - 25,y: renderer.height * 0.05 + 25};
+  Shipyard.menuContainer.addChild(Shipyard.currentCredits);
 
   Shipyard.backButton.text = new PIXI.Text(Shipyard.backButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.back) + ")", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
   Shipyard.backButton.text.tint = MainMenu.buttonTint;

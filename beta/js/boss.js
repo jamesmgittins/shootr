@@ -52,8 +52,6 @@ Boss.randomLocation = function() {
   }
 
   gameModel.bossPosition = {x:xLocation, y:yLocation};
-  console.log("boss position set to - " + gameModel.bossPosition);
-
 };
 
 Boss.nudgeLocation = function() {

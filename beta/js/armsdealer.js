@@ -11,7 +11,8 @@ ArmsDealer = {
 	},
 	currentSelection: 0,
 	bButton: function() {},
-	gridWidth : 8
+	gridWidth : 8,
+	showCurrentCredits : true
 };
 
 ArmsDealer.generateShield = function(level, seed, ultra) {
@@ -388,23 +389,23 @@ ArmsDealer.initialize = function() {
 	};
 	ArmsDealer.menuContainer.addChild(ArmsDealer.titleText);
 
-	var currentCredits = new PIXI.Text(formatMoney(gameModel.p1.credits) + " Credits", {
+	ArmsDealer.currentCredits = new PIXI.Text(formatMoney(gameModel.p1.credits) + " Credits", {
 		font: fontSize + 'px Dosis',
 		fill: '#FFF',
 		stroke: "#000",
 		strokeThickness: 0,
 		align: 'center'
 	});
-	currentCredits.tint = MainMenu.titleTint;
-	currentCredits.anchor = {
+	ArmsDealer.currentCredits.tint = MainMenu.titleTint;
+	ArmsDealer.currentCredits.anchor = {
 		x: 1,
 		y: 0
 	};
-	currentCredits.position = {
+	ArmsDealer.currentCredits.position = {
 		x: renderer.width * 0.95 - 25,
 		y: renderer.height * 0.05 + 25
 	};
-	ArmsDealer.menuContainer.addChild(currentCredits);
+	ArmsDealer.menuContainer.addChild(ArmsDealer.currentCredits);
 
 	ArmsDealer.buyText = new PIXI.Text("Buy  ("+ShootrUI.getInputButtonDescription(buttonTypes.leftShoulder)+")", {
 		font: fontSize + 'px Dosis',

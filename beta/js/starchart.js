@@ -13,18 +13,23 @@ StarChart = {
 		cursorPosition = {x:-200,y:-200};
   }},
 	fastTravelButton :{title:"Fast Travel", click:function(){
-    gameModel.currentSystem = {x:StarChart.selectedStar.x,y:StarChart.selectedStar.y};
-    var level = Math.max(1,Math.abs(StarChart.selectedStar.x),Math.abs(StarChart.selectedStar.y));
-    changeLevel(level);
-		StarChart.currentPosition = {x:gameModel.currentSystem.x*-1,y:gameModel.currentSystem.y*-1};
-    StarChart.currentStar = StarChart.generateStar(gameModel.currentSystem.x, gameModel.currentSystem.y);
+    if (StarChart.fastTravelButton.text.visible && StarChart.selectedStar) {
+      StarChart.fastTravelButton.text.visible = false;
+      gameModel.currentSystem = {x:StarChart.selectedStar.x,y:StarChart.selectedStar.y};
+      var level = Math.max(1,Math.abs(StarChart.selectedStar.x),Math.abs(StarChart.selectedStar.y));
+      changeLevel(level);
+  		StarChart.currentPosition = {x:gameModel.currentSystem.x*-1,y:gameModel.currentSystem.y*-1};
+      StarChart.currentStar = StarChart.generateStar(gameModel.currentSystem.x, gameModel.currentSystem.y);
+      StarChart.deselectStar();
+      StarChart.selectStar(StarChart.currentStar);
+    }
   }},
   tradeRouteText : {
     initialize : function() {
       if (StarChart.tradeRouteText.text) {
         StarChart.menuContainer.removeChild(StarChart.tradeRouteText.text);
       }
-      StarChart.tradeRouteText.text = new PIXI.Text(gameModel.history.length + " trade routes cleared\nEarning " + formatMoney(calculateIncome()) + " credits per hour" ,
+      StarChart.tradeRouteText.text = new PIXI.Text(gameModel.history.length + " trade routes cleared\nEarning " + formatMoney(calculateIncome()) + " credits per second" ,
         { font: (MainMenu.fontSize * scalingFactor) + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
     	StarChart.tradeRouteText.text.tint = MainMenu.buttonTint;
       StarChart.tradeRouteText.text.anchor = {x:0,y:0};
@@ -784,20 +789,21 @@ StarChart.initialize = function () {
 
   StarChart.getStarInfoText = function() {
 
-		var level = calculateShipLevel();
+    var level = calculateShipLevel();
+		var displayLevel = calculateAdjustedStarLevel(StarChart.selectedStar.level);
 
-		level = Math.max(level,1);
+    var history = findInHistory(gameModel.currentSystem, StarChart.selectedStar);
 
-		var displayLevel = Math.max(Math.floor(level * 0.9), StarChart.selectedStar.level);
-
-
-    return StarChart.selectedStar.name +
+    return (gameModel.bossPosition && gameModel.bossPosition.x == StarChart.selectedStar.x && gameModel.bossPosition.y == StarChart.selectedStar.y ? "WARNING dangerous enemy detected\n": "") +
+      StarChart.selectedStar.name +
       "\n Level: " + displayLevel + (displayLevel > level + 3 ? " (Very Hard)" : (displayLevel > level + 1 ? " (Hard)" : " (Normal)")) +
 			(StarChart.selectedStarDistance() > 0 ? "\n Distance: " + StarChart.selectedStarDistance().toFixed(2)+ " light years" : "") +
       (StarChart.selectedStarDistance() > StarChart.maxDistance ? "\n Out of range" : "") +
       (Math.max(Math.abs(StarChart.selectedStar.x - gameModel.currentSystem.x),Math.abs(StarChart.selectedStar.y - gameModel.currentSystem.y)) === 0 ? "\n You are currently in this system" : "") +
       "\n Coordinates: ( " + StarChart.selectedStar.x + " , " + StarChart.selectedStar.y + " )" +
-      (gameModel.bossPosition && gameModel.bossPosition.x == StarChart.selectedStar.x && gameModel.bossPosition.y == StarChart.selectedStar.y ? "\n WARNING dangerous enemy detected": "");
+      (!history && StarChart.selectedStarDistance() <= StarChart.maxDistance && StarChart.selectedStarDistance() > 0 ? "\n Route value: " + formatMoney(valueForRoute(displayLevel)) + " Credits per second" : "") +
+      (history ? "\n Route earning : " + formatMoney(valueForRoute(history.completedLevel)) + " Credits per second" : "")
+      ;
   };
 
 	StarChart.calculateTint = function(star) {

@@ -39,36 +39,59 @@ var gameModel = {
 	weaponIdCounter:1
 };
 
-var calculateShipLevel = function() {
+function calculateShipLevel() {
 	return Math.floor(((gameModel.p1.frontWeapon ? gameModel.p1.frontWeapon.level : 0) +
 		(gameModel.p1.turretWeapon ? gameModel.p1.turretWeapon.level : 0) +
 		(gameModel.p1.rearWeapon ? gameModel.p1.rearWeapon.level : 0) +
 		(gameModel.p1.shield ? gameModel.p1.shield.level : 0)) / 4);
-};
+}
 
-var calculateIncome = function() {
+function calculateAdjustedStarLevel(starLevel) {
+  var shipLevel = Math.max(calculateShipLevel(),1);
+	return Math.max(Math.floor(shipLevel * 0.9), starLevel);
+}
+
+function valueForRoute(route) {
+	return 0.4 * Math.pow(1.4, route);
+}
+
+function calculateIncome() {
 	var amount = 0;
 	for (var i=0; i<gameModel.history.length; i++) {
-		amount += 10 * Math.pow(1.4,Math.max(
-			Math.abs(gameModel.history[i].start.x),
-			Math.abs(gameModel.history[i].start.y),
-			Math.abs(gameModel.history[i].end.x),
-			Math.abs(gameModel.history[i].end.y)
-		));
+		amount += valueForRoute(gameModel.history[i].completedLevel);
 	}
-	return amount * 100;
-};
+	return amount;
+}
 
-var calculateIncomeSinceLastCheck = function() {
-	if (gameModel.lastTradeUpdate < new Date().getTime() - 120000) {
-		var timeDifference = (new Date().getTime() - gameModel.lastTradeUpdate) / 3600000;
+function calculateIncomeSinceLastCheck(time) {
+	if (gameModel.lastTradeUpdate < new Date().getTime() - time) {
+		var timeDifference = (new Date().getTime() - gameModel.lastTradeUpdate) / 1000;
 		var amountEarned = timeDifference * calculateIncome();
-		addCredits(amountEarned);
+		addCredits(amountEarned, true);
 		gameModel.lastTradeUpdate = new Date().getTime();
 		return amountEarned;
 	}
 	return 0;
-};
+}
+
+function findInHistory(systemA, systemB) {
+
+	var foundOne = false;
+
+	gameModel.history.forEach(function(history){
+		if ((systemsEqual(history.start, systemA) && systemsEqual(history.end, systemB)) ||
+			 (systemsEqual(history.start, systemB) && systemsEqual(history.end, systemA))) {
+			foundOne = history;
+		}
+	});
+	return foundOne;
+}
+
+function addToHistory(systemA, systemB) {
+	if (!findInHistory(systemA, systemB)) {
+		gameModel.history.push({start:systemA,end:systemB,completedLevel:calculateAdjustedStarLevel(Math.max(Math.abs(systemB.x), Math.abs(systemB.y)))});
+	}
+}
 
 function save() {
 	if (typeof (Storage) === "undefined")
@@ -134,6 +157,7 @@ function load() {
 			currentSystem: {x:0,y:0},
 			targetSystem: {x:0,y:0},
 			history: [],
+			tradeRoutes : [],
 			weaponIdCounter: gameModel.weaponIdCounter,
 			resolutionFactor:1,
 			lastTradeUpdate: new Date().getTime()
@@ -149,8 +173,8 @@ function resetSaveGame() {
     location.reload(true);
 }
 
-function addCredits (value) {
-	if (currentState == states.running) {
+function addCredits (value, fromTrade) {
+	if (currentState == states.running && !fromTrade) {
 		gameModel.p1.temporaryCredits += value;
 	} else {
 		gameModel.p1.credits += value;

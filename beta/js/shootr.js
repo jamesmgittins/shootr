@@ -62,9 +62,7 @@ var inSpace = true;
 
 function changeLevel(level) {
 
-	var shipLevel = calculateShipLevel();
-
-	gameModel.currentLevel = Math.max(parseInt(level), Math.floor(shipLevel * 0.9));
+	gameModel.currentLevel = calculateAdjustedStarLevel(level);
 
 	var levelDifficultyModifier = Math.pow(Constants.difficultyLevelScaling, gameModel.currentLevel - 1);
 
@@ -114,21 +112,6 @@ function changeLevel(level) {
 
 function systemsEqual(systemA, systemB) {
 	return systemA.x == systemB.x && systemA.y == systemB.y;
-}
-
-function addToHistory(systemA, systemB) {
-	var alreadyInHistory = false;
-
-	gameModel.history.forEach(function(history){
-		if ((systemsEqual(history.start, systemA) && systemsEqual(history.end, systemB)) ||
-			 (systemsEqual(history.start, systemB) && systemsEqual(history.end, systemA))) {
-			alreadyInHistory = true;
-		}
-	});
-
-	if (!alreadyInHistory) {
-		gameModel.history.push({start:systemA,end:systemB});
-	}
 }
 
 function changeState(state) {
@@ -306,6 +289,9 @@ function update() {
 				stageSprite.position.x = (canvas.width - canvas.height) / 2;
 				stageSprite.position.y = 0;
 			}
+			ShootrUI.updateFps(updateTime);
+		} else {
+			MainMenu.updateAll(timeDiff);
 		}
 
 		GameText.update(timeDiff);
@@ -317,16 +303,8 @@ function update() {
 		Ships.explosionBits.update(timeDiff);
 		Ships.fragments.update(timeDiff);
 
-		ShootrUI.updateFps(updateTime);
-
 		renderer.render(stage, stageTexture);
-
-		StarChart.update(timeDiff);
-		Shipyard.update(timeDiff);
-		Loadout.update(timeDiff);
-
 		renderer.render(gameContainer);
-
 }
 
 var coords;

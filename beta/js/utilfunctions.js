@@ -106,21 +106,21 @@ function drawline(shipctx, strokeStyle, startX, startY, endX, endY) {
 function formatMoney(input) {
 	if (!input) input = 0;
 	if (input >= 1000000000000000000000000)
-		return (Math.round(input / 10000000000000000000000) / 100).toString() + 'Sp';
+		return (Math.round(input / 10000000000000000000000) / 100).toFixed(2) + 'Sp';
 	if (input >= 1000000000000000000000)
-		return (Math.round(input / 10000000000000000000) / 100).toString() + 'Sx';
+		return (Math.round(input / 10000000000000000000) / 100).toFixed(2) + 'Sx';
 	if (input >= 1000000000000000000)
-		return (Math.round(input / 10000000000000000) / 100).toString() + 'Qi';
+		return (Math.round(input / 10000000000000000) / 100).toFixed(2) + 'Qi';
 	if (input >= 1000000000000000)
-		return (Math.round(input / 10000000000000) / 100).toString() + 'Q';
+		return (Math.round(input / 10000000000000) / 100).toFixed(2) + 'Q';
 	if (input >= 1000000000000)
-		return (Math.round(input / 10000000000) / 100).toString() + 'T';
+		return (Math.round(input / 10000000000) / 100).toFixed(2) + 'T';
 	if (input >= 1000000000)
-		return (Math.round(input / 10000000)/100).toString() + 'B';
+		return (Math.round(input / 10000000)/100).toFixed(2) + 'B';
 	if (input >= 1000000)
-		return (Math.round(input / 10000)/100).toString() + 'M';
+		return (Math.round(input / 10000)/100).toFixed(2) + 'M';
 	if (input >= 1000)
-		return (Math.round(input / 10)/100).toString() + 'K';
+		return (Math.round(input / 10)/100).toFixed(2) + 'K';
 
 	return (input).toFixed(2);
 }

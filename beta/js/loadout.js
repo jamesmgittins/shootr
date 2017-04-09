@@ -30,7 +30,8 @@ Loadout = {
   weaponSelection:0,
   currentSelection:0,
   bButton : function(){},
-  levelAllowed : 1
+  levelAllowed : 1,
+  showCurrentCredits:true
 };
 
 Loadout.selectPosition = function(index) {
@@ -389,6 +390,13 @@ Loadout.initialize = function () {
   Loadout.shipName.anchor = {x:0.5,y:0};
   Loadout.shipName.position = {x:renderer.width / 2,y: renderer.height * 0.05 + 25 };
   Loadout.menuContainer.addChild(Loadout.shipName);
+
+  Loadout.currentCredits = new PIXI.Text(formatMoney(gameModel.p1.credits) + " Credits", {font: fontSize + 'px Dosis',fill: '#FFF',	stroke: "#000",	strokeThickness: 0,	align: 'center'});
+	Loadout.currentCredits.tint = MainMenu.titleTint;
+	Loadout.currentCredits.anchor = {x: 1,y: 0};
+	Loadout.currentCredits.position = {x: renderer.width * 0.95 - 25,y: renderer.height * 0.05 + 25};
+	Loadout.menuContainer.addChild(Loadout.currentCredits);
+
 
   Loadout.updateTotalDPS();
 

@@ -22,6 +22,7 @@ MainMenu = {
 };
 
 StationMenu = {
+  showCurrentCredits: true,
   menuTitle:"Station Menu",
   menuOptions:[
     {title:"Star Chart",click:function(){
@@ -62,7 +63,7 @@ StationMenu = {
     StationMenu.menuContainer.addChild(StationMenu.tradeMoneyText);
   },
   onShow : function() {
-    var amountEarned = calculateIncomeSinceLastCheck();
+    var amountEarned = calculateIncomeSinceLastCheck(120000);
     if (amountEarned > 0) {
       StationMenu.tradeMoneyText.text = "You have earned " + formatMoney(amountEarned) + " from your\ncleared trade routes while you were away";
       StationMenu.tradeMoneyText.visible=true;
@@ -374,6 +375,13 @@ InitializeMenu = function (menu) {
       menu.backButton.text.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.95 - 25};
       menu.menuContainer.addChild(menu.backButton.text);
     }
+    if (menu.showCurrentCredits) {
+      menu.currentCredits = new PIXI.Text(formatMoney(gameModel.p1.credits) + " Credits", {font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center'});
+      menu.currentCredits.tint = MainMenu.titleTint;
+      menu.currentCredits.anchor = {x: 1, y: 0};
+      menu.currentCredits.position = {x: renderer.width * 0.95 - 25, y: renderer.height * 0.05 + 25};
+      menu.menuContainer.addChild(menu.currentCredits);
+    }
 
     for (var i=0; i< menu.menuOptions.length;i++) {
       menu.menuOptions[i].text = new PIXI.Text(menu.menuOptions[i].title, { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
@@ -510,9 +518,10 @@ MainMenu.checkButton = function(button) {
 MainMenu.controllerStatus = {up:false,down:false,left:false,right:false,a:false,b:false};
 
 MainMenu.updateGamepad = function() {
+  var clickedAlready = false;
   if (playerOneAxes[0] < -0.5 || playerOneButtonsPressed[14] || a) {
     if (!MainMenu.controllerStatus.left) {
-      var clickedAlready = false;
+      clickedAlready = false;
       clickedAlready = Shipyard.left();
       if (!clickedAlready)
           clickedAlready = Loadout.left();
@@ -526,7 +535,7 @@ MainMenu.updateGamepad = function() {
 
   if (playerOneAxes[0] > 0.5 || playerOneButtonsPressed[15] || d) {
     if (!MainMenu.controllerStatus.right) {
-      var clickedAlready = false;
+      clickedAlready = false;
       clickedAlready = Shipyard.right();
       if (!clickedAlready)
           clickedAlready = Loadout.right();
@@ -540,7 +549,7 @@ MainMenu.updateGamepad = function() {
 
   if (playerOneAxes[1] < -0.5 || playerOneButtonsPressed[12] || w) {
     if (!MainMenu.controllerStatus.up) {
-      var clickedAlready = false;
+      clickedAlready = false;
       clickedAlready = Loadout.up();
       if (!clickedAlready)
           clickedAlready = ArmsDealer.up();
@@ -556,13 +565,13 @@ MainMenu.updateGamepad = function() {
 
   if (playerOneAxes[1] > 0.5 || playerOneButtonsPressed[13] || s) {
     if (!MainMenu.controllerStatus.down) {
-      var clickedAlready = false;
+      clickedAlready = false;
       clickedAlready = Shipyard.down();
       if (!clickedAlready)
         clickedAlready = Loadout.down();
       if (!clickedAlready)
         clickedAlready = ArmsDealer.down();
-      for (var i=0; i<Menus.length;i++) {
+      for (var i=0; i< Menus.length;i++) {
         if (!clickedAlready)
           clickedAlready = Menus[i].down();
       }
@@ -574,7 +583,7 @@ MainMenu.updateGamepad = function() {
 
   if (playerOneButtonsPressed[0] || spaceBar || enter) {
     if (!MainMenu.controllerStatus.a) {
-      var clickedAlready = false;
+      clickedAlready = false;
       clickedAlready = Shipyard.aButton();
 
       if (!clickedAlready)
@@ -595,7 +604,7 @@ MainMenu.updateGamepad = function() {
 
   if (playerOneButtonsPressed[1] || esc) {
     if (!MainMenu.controllerStatus.b) {
-      var clickedAlready = false;
+      clickedAlready = false;
       clickedAlready = Shipyard.bButtonPress();
 
       if (!clickedAlready)
@@ -625,12 +634,46 @@ MainMenu.updateGamepad = function() {
   }
   if (playerOneButtonsPressed[5] || ekey) {
     if (!MainMenu.controllerStatus.r1) {
-      var clickedAlready = false;
+      clickedAlready = false;
       clickedAlready = ArmsDealer.r1ButtonPress();
     }
     MainMenu.controllerStatus.r1 = true;
   } else {
     MainMenu.controllerStatus.r1 = false;
+  }
+};
+
+var OtherMenus = [StarChart, Shipyard, Loadout, ArmsDealer];
+
+MainMenu.updateAll = function(timeDiff) {
+
+  var creditChange = 0;
+
+  if (!MainMenu.menuContainer.visible)
+    creditChange = calculateIncomeSinceLastCheck(500);
+
+  for (var i = 0; i < Menus.length; i ++) {
+    if (Menus[i].menuContainer.visible) {
+      if (Menus[i].update) {
+        Menus[i].update(timeDiff);
+      }
+      MainMenu.updateCredits(Menus[i], creditChange);
+    }
+  }
+
+  for (var k = 0; k < OtherMenus.length; k++) {
+    if (OtherMenus[k].menuContainer.visible) {
+      if (OtherMenus[k].update) {
+        OtherMenus[k].update(timeDiff);
+      }
+      MainMenu.updateCredits(OtherMenus[k], creditChange);
+    }
+  }
+};
+
+MainMenu.updateCredits = function(menu, creditChange) {
+  if (menu.showCurrentCredits && menu.currentCredits && creditChange > 0) {
+    menu.currentCredits.text = formatMoney(gameModel.p1.credits) + " Credits";
   }
 };
 

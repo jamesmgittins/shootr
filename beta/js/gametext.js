@@ -230,10 +230,13 @@ GameText.status = {
 		GameText.status.fps.text = fps + " fps";
 
 		GameText.status.credits.timer += timeDiff;
-		if (GameText.status.credits.lastCredits != gameModel.p1.temporaryCredits) {
+		var creditChange = calculateIncomeSinceLastCheck(500);
+		if (GameText.status.credits.lastCredits != gameModel.p1.temporaryCredits || creditChange > 0) {
 			GameText.status.credits.text = formatMoney(gameModel.p1.credits) + " credits\n+ " + formatMoney(gameModel.p1.temporaryCredits);
-			GameText.status.credits.lastCredits = gameModel.p1.temporaryCredits;
-			GameText.status.credits.timer = 0;
+			if (GameText.status.credits.lastCredits != gameModel.p1.temporaryCredits) {
+				GameText.status.credits.lastCredits = gameModel.p1.temporaryCredits;
+				GameText.status.credits.timer = 0;
+			}
 		}
 		GameText.status.credits.tint = GameText.status.credits.timer < 0.1 ? MainMenu.selectedButtonTint : MainMenu.buttonTint;
 
