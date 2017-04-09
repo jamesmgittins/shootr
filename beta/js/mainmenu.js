@@ -445,6 +445,10 @@ InitializeMenu = function (menu) {
         menu.menuOptions[i].click();
         return true;
       }
+      if (menu.backButton && MainMenu.checkButton(menu.backButton)) {
+        menu.backButton.click();
+        return false;
+      }
     }
 
     return false;
