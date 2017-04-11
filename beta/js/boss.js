@@ -44,7 +44,7 @@ Boss.randomLocation = function() {
   if (!gameModel.bossesDefeated)
     gameModel.bossesDefeated = 0;
 
-    Math.seedrandom(new Date().getTime());
+  Math.seedrandom(new Date().getTime());
 
   var currentLevel = Boss.currentLevel();
   var xLocation = 0;
@@ -160,7 +160,7 @@ Boss.update = function(timeDiff) {
 
   if (Boss.collisionAllowed) {
     Enemies.activeShips.push(Boss);
-    EnemyShips.checkForPlayerCollision(Boss);
+    EnemyShips.checkForPlayerCollision(Boss, timeDiff);
     Boss.shield.update();
 
     if (Boss.lastBullet >= 1.5 && Math.random() > 0.9 || Boss.bulletsLeft > 0) {

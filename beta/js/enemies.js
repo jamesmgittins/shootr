@@ -19,11 +19,11 @@ Enemies = {
     Enemies.activeShips = [];
 
   	if (timeLeft > 0) {
-  		Enemies.allDeadTimer = 0;
+  		Enemies.allDeadTimer = 2000;
   	}
 
     // test for end of the level
-  	if (timeLeft < 0) {
+  	if (timeLeft < 0 && Enemies.waves.length === 0) {
   		Enemies.allDeadTimer += (timeDiff * 1000);
   		if (Enemies.allDeadTimer > PlayerShip.allDeadTime && !Powerups.inPlay() && !MoneyPickup.inPlay()) {
   			if (Boss.bossActive()) {
@@ -97,14 +97,11 @@ Enemies = {
 
   getEnemyWave:function() {
 
-    if ((startStar.asteroids && timeLeft / levelTime > 0.8) || (endStar.asteroids && timeLeft / levelTime < 0.2)) {
+    if ((startStar.asteroids && timeLeft / levelTime > 0.8) || (endStar.asteroids && timeLeft / levelTime < 0.30)) {
       return new Asteroids.wave();
     }
 
-    if (Math.random() > 0.1)
-      return new EnemyShips.wave();
-
-    return new Asteroids.wave();
+    return new EnemyShips.wave();
   }
 
 

@@ -105,6 +105,12 @@ function drawline(shipctx, strokeStyle, startX, startY, endX, endY) {
 
 function formatMoney(input) {
 	if (!input) input = 0;
+	if (input >= 1000000000000000000000000000000000)
+		return (Math.round(input / 10000000000000000000000000000000) / 100).toFixed(2) + 'De';
+	if (input >= 1000000000000000000000000000000)
+		return (Math.round(input / 10000000000000000000000000000) / 100).toFixed(2) + 'No';
+	if (input >= 1000000000000000000000000000)
+		return (Math.round(input / 10000000000000000000000000) / 100).toFixed(2) + ' Oc';
 	if (input >= 1000000000000000000000000)
 		return (Math.round(input / 10000000000000000000000) / 100).toFixed(2) + 'Sp';
 	if (input >= 1000000000000000000000)
@@ -135,11 +141,20 @@ SpritePool = {
       discardedSprites : [],
       container : spriteContainer,
       texture: texture,
+			textureCount : 0,
       nextSprite : function() {
         if (this.discardedSprites.length > 0) {
           return this.discardedSprites.pop();
         } else {
-          var sprite = new PIXI.Sprite(this.texture);
+					var sprite;
+					if (Array.isArray(this.texture)) {
+						sprite = new PIXI.Sprite(this.texture[this.textureCount]);
+						this.textureCount++;
+						if (this.textureCount > this.texture.length)
+							this.textureCount = 0;
+					} else {
+						sprite = new PIXI.Sprite(this.texture);
+					}
           sprite.anchor = {x:0.5,y:0.5};
           this.sprites.push(sprite);
           this.container.addChild(sprite);
@@ -173,16 +188,10 @@ SpritePool = {
   }
 };
 
-// var blurFilters;
-
 function glowTexture(texture, options) {
 
-	// if (!blurFilters) {
-		blurFilters = [new PIXI.filters.BlurFilter()];
-		blurFilters[0].blur = Math.round(scalingFactor *  2);
-	// }
 
-	// defaultSize = true;
+
 	var resize = options && options.resize ? options.resize : 1;
 	var width = texture.width * resize;
 	var height = texture.height * resize;
@@ -196,15 +205,17 @@ function glowTexture(texture, options) {
 	normalSprite.position = blurredSprite.position = {x:width, y:height};
 
 	var container = new PIXI.Container();
-
+	var blurContainer = new PIXI.Container();
 	// only add blur effect for higher resolutions
 	if (renderer.height > 900 && gameModel.detailLevel >= 1) {
-		blurredSprite.filters = blurFilters;
+		blurFilters = [new PIXI.filters.BlurFilter()];
+		blurFilters[0].blur = Math.round(scalingFactor *  2);
+		blurContainer.filters = blurFilters;
 		blurredSprite.alpha = options && options.blurAmount ? options.blurAmount : 1;
-		container.addChild(blurredSprite);
+		blurContainer.addChild(blurredSprite);
 	}
 
-
+	container.addChild(blurContainer);
 	container.addChild(normalSprite);
 	renderer.render(container, glowTexture);
 

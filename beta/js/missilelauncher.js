@@ -49,7 +49,7 @@ MissileLauncher = {
 					var predictedTargetY = sprite.target.yLoc + sprite.target.ySpeed * timeToTarget;
 					var accelX = predictedTargetX - sprite.xLoc;
 					var accelY = predictedTargetY - sprite.yLoc;
-					var factor = timeToTarget < 0.5 ? MissileLauncher.acceleration * 4 / magnitude(accelX, accelY) : MissileLauncher.acceleration / magnitude(accelX, accelY);
+					var factor = timeToTarget < 1 ? MissileLauncher.acceleration * 2 / magnitude(accelX, accelY) : timeToTarget < 0.5 ? MissileLauncher.acceleration * 4 / magnitude(accelX, accelY) : MissileLauncher.acceleration / magnitude(accelX, accelY);
 					sprite.speed.x += accelX * factor * timeDiff;
 					sprite.speed.y += accelY * factor * timeDiff;
 

@@ -213,7 +213,7 @@ Weapons.weaponLogic = {};
 
 Weapons.update = function(timeDiff) {
 
-  var shouldPlayerShoot = PlayerShip.playerShip.inPlay && PlayerShip.playerShip.rolling > 1 && (timeLeft > 0 || Boss.bossActive());
+  var shouldPlayerShoot = PlayerShip.playerShip.inPlay && PlayerShip.playerShip.rolling > 1 && (timeLeft > 0 || Boss.bossActive() || Enemies.waves.length > 0);
 
   if (gameModel.p1.frontWeapon && !Weapons.weaponLogic.frontWeapon)
     Weapons.weaponLogic.frontWeapon = Weapons.createWeaponLogic(gameModel.p1.frontWeapon, playerBulletContainer);

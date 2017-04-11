@@ -72,64 +72,85 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
         return;
     }
 
+		PlayerShip.playerShip.rolling += timeDiff;
+
     PlayerShip.playerShip.powerupTime += timeDiff;
     if (PlayerShip.playerShip.powerupTime >= Powerups.powerupLength) {
         PlayerShip.playerShip.spreadShot = 0;
         PlayerShip.playerShip.crossShot = 0;
     }
 
-		PlayerShip.playerShip.rolling += timeDiff;
-		if (PlayerShip.playerShip.rolling < 0.3) {
-			if (PlayerShip.playerShip.rollingLeft) {
-				Ships.updateShipSpeed(PlayerShip.playerShip, -1, 0, timeDiff * 2.5);
-			} else {
-				Ships.updateShipSpeed(PlayerShip.playerShip, 1, 0, timeDiff * 2.5);
-			}
-			// Ships.updateRotation(PlayerShip.playerShip, timeDiff);
-			PlayerShip.playerShip.sprite.scale.x = (1 - (PlayerShip.playerShip.rolling > 0.15 ? PlayerShip.playerShip.rolling - 0.15 : PlayerShip.playerShip.rolling) * 13.333);
+		// Player has been bumped by collision
+		if (PlayerShip.playerShip.bumpMagnitude) {
 
-			if (PlayerShip.playerShip.rolling < 0.15) {
-				PlayerShip.playerShip.sprite.scale.y = 1 + (PlayerShip.playerShip.rolling / 0.15) * 0.2;
-			} else {
-				PlayerShip.playerShip.sprite.scale.y = 1 + ((0.3 / PlayerShip.playerShip.rolling) - 1) * 0.2;
+			var bumpAmountX = PlayerShip.playerShip.bumpSpeedX * PlayerShip.playerShip.bumpMagnitude /  PlayerShip.playerShip.bumpMagMulti * timeDiff;
+			var bumpAmountY = PlayerShip.playerShip.bumpSpeedY * PlayerShip.playerShip.bumpMagnitude /  PlayerShip.playerShip.bumpMagMulti * timeDiff;
+
+			if (PlayerShip.playerShip.xLoc + bumpAmountX > boundry && PlayerShip.playerShip.xLoc + bumpAmountX < canvasWidth - boundry)
+	        PlayerShip.playerShip.xLoc += bumpAmountX;
+	    if (PlayerShip.playerShip.yLoc + bumpAmountY > boundry && PlayerShip.playerShip.yLoc + bumpAmountY < canvasHeight - boundry)
+	        PlayerShip.playerShip.yLoc += bumpAmountY;
+
+			PlayerShip.playerShip.bumpMagnitude -= 1000 * timeDiff;
+
+			PlayerShip.playerShip.xSpeed = 0;
+			PlayerShip.playerShip.ySpeed = 0;
+
+			if (PlayerShip.playerShip.bumpMagnitude < 0) {
+				PlayerShip.playerShip.bumpMagnitude = 0;
 			}
 		} else {
-			if (playerOneAxes[0] > 0.25 || playerOneAxes[0] < -0.25 || playerOneAxes[1] > 0.25 || playerOneAxes[1] < -0.25) {
-					Ships.updateShipSpeedFromController(PlayerShip.playerShip, playerOneAxes[0], playerOneAxes[1], timeDiff);
-					clickLocX = 0;
-					clickLocY = 0;
-			} else if (w || a || s || d) {
-					var xDiff = 0;
-					var yDiff = 0;
-					if (w) yDiff--;
-					if (a) xDiff--;
-					if (s) yDiff++;
-					if (d) xDiff++;
-					Ships.updateShipSpeed(PlayerShip.playerShip, xDiff, yDiff, timeDiff);
-					clickLocX = 0;
-					clickLocY = 0;
-			} else if (clickLocX && clickLocY && Math.sqrt(Math.pow(PlayerShip.playerShip.xLoc - clickLocX, 2) + Math.pow(PlayerShip.playerShip.yLoc - clickLocY, 2)) > 5) {
-					Ships.updateShipSpeed(PlayerShip.playerShip,
-									clickLocX - PlayerShip.playerShip.xLoc,
-									clickLocY - PlayerShip.playerShip.yLoc,
-									timeDiff);
+			if (PlayerShip.playerShip.rolling < 0.3) {
+				if (PlayerShip.playerShip.rollingLeft) {
+					Ships.updateShipSpeed(PlayerShip.playerShip, -1, 0, timeDiff * 2.5);
+				} else {
+					Ships.updateShipSpeed(PlayerShip.playerShip, 1, 0, timeDiff * 2.5);
+				}
+				// Ships.updateRotation(PlayerShip.playerShip, timeDiff);
+				PlayerShip.playerShip.sprite.scale.x = (1 - (PlayerShip.playerShip.rolling > 0.15 ? PlayerShip.playerShip.rolling - 0.15 : PlayerShip.playerShip.rolling) * 13.333);
+
+				if (PlayerShip.playerShip.rolling < 0.15) {
+					PlayerShip.playerShip.sprite.scale.y = 1 + (PlayerShip.playerShip.rolling / 0.15) * 0.2;
+				} else {
+					PlayerShip.playerShip.sprite.scale.y = 1 + ((0.3 / PlayerShip.playerShip.rolling) - 1) * 0.2;
+				}
 			} else {
-					clickLocX = 0;
-					clickLocY = 0;
-					PlayerShip.playerShip.xSpeed = 0;
-					PlayerShip.playerShip.ySpeed = 0;
-			}
-			var maxRot = PlayerShip.playerShip.xSpeed / 500;
-			var timeMult = timeDiff;
+				if (playerOneAxes[0] > 0.25 || playerOneAxes[0] < -0.25 || playerOneAxes[1] > 0.25 || playerOneAxes[1] < -0.25) {
+						Ships.updateShipSpeedFromController(PlayerShip.playerShip, playerOneAxes[0], playerOneAxes[1], timeDiff);
+						clickLocX = 0;
+						clickLocY = 0;
+				} else if (w || a || s || d) {
+						var xDiff = 0;
+						var yDiff = 0;
+						if (w) yDiff--;
+						if (a) xDiff--;
+						if (s) yDiff++;
+						if (d) xDiff++;
+						Ships.updateShipSpeed(PlayerShip.playerShip, xDiff, yDiff, timeDiff);
+						clickLocX = 0;
+						clickLocY = 0;
+				} else if (clickLocX && clickLocY && Math.sqrt(Math.pow(PlayerShip.playerShip.xLoc - clickLocX, 2) + Math.pow(PlayerShip.playerShip.yLoc - clickLocY, 2)) > 5) {
+						Ships.updateShipSpeed(PlayerShip.playerShip,
+										clickLocX - PlayerShip.playerShip.xLoc,
+										clickLocY - PlayerShip.playerShip.yLoc,
+										timeDiff);
+				} else {
+						clickLocX = 0;
+						clickLocY = 0;
+						Ships.updateShipSpeed(PlayerShip.playerShip, 0, 0, timeDiff);
+				}
+				var maxRot = PlayerShip.playerShip.xSpeed / 500;
+				var timeMult = timeDiff;
 
-			Ships.updateRotation(PlayerShip.playerShip, timeDiff);
-			PlayerShip.playerShip.sprite.scale.x = 1;
+				Ships.updateRotation(PlayerShip.playerShip, timeDiff);
+				PlayerShip.playerShip.sprite.scale.x = 1;
 
-			if (PlayerShip.playerShip.rolling > 1) {
-				if (q || ekey || playerOneButtonsPressed[4] || playerOneButtonsPressed[5]) {
-					PlayerShip.playerShip.rolling = 0;
-					PlayerShip.playerShip.rollingLeft = q || playerOneButtonsPressed[4];
-					Sounds.dodge.play();
+				if (PlayerShip.playerShip.rolling > 1) {
+					if (q || ekey || playerOneButtonsPressed[4] || playerOneButtonsPressed[5]) {
+						PlayerShip.playerShip.rolling = 0;
+						PlayerShip.playerShip.rollingLeft = q || playerOneButtonsPressed[4];
+						Sounds.dodge.play();
+					}
 				}
 			}
 		}
@@ -234,4 +255,9 @@ PlayerShip.reset = function() {
 	PlayerShip.playerShip.lastDmg = 10000;
 	PlayerShip.allPlayersDead = 0;
 	PlayerShip.allDeadTimer = 0;
+	PlayerShip.playerShip.bumpSpeedX = 0;
+	PlayerShip.playerShip.bumpSpeedY = 0;
+	PlayerShip.playerShip.bumpMagnitude = 0;
+	PlayerShip.playerShip.bumpMagMulti = 0;
+	PlayerShip.playerShip.xSpeed = PlayerShip.playerShip.ySpeed = 0;
 };

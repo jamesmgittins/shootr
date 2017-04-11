@@ -100,7 +100,7 @@ DeathMenu = {
     DeathMenu.menuContainer.addChild(DeathMenu.moneyLostText);
   },
   onShow:function(){
-    DeathMenu.select(0);
+    DeathMenu.selectIndex(0);
     DeathMenu.moneyLostText.text = "You have lost " + formatMoney(gameModel.p1.temporaryCredits) + " credits\nand " + gameModel.lootCollected.length + " cargo crate" + (gameModel.lootCollected.length > 1 ? "s" : "");
   }
 };
@@ -351,6 +351,8 @@ InitializeMenu = function (menu) {
 
   menu.initialize = function() {
 
+    var i;
+
     if (menu.preInit) {
       menu.preInit();
     }
@@ -359,7 +361,7 @@ InitializeMenu = function (menu) {
       menu.menuContainer = new PIXI.Container();
       gameContainer.addChild(menu.menuContainer);
     } else {
-      for (var i=menu.menuContainer.children.length - 1; i >= 0; i--){
+      for (i=menu.menuContainer.children.length - 1; i >= 0; i--){
         var item = menu.menuContainer.children[i];
         menu.menuContainer.removeChild(item);
         item.destroy();
@@ -397,7 +399,7 @@ InitializeMenu = function (menu) {
       menu.menuContainer.addChild(menu.currentCredits);
     }
 
-    for (var i=0; i< menu.menuOptions.length;i++) {
+    for (i=0; i< menu.menuOptions.length;i++) {
       menu.menuOptions[i].text = new PIXI.Text(menu.menuOptions[i].title, { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
       if (menu.menuOptions[i].buttonDesc)
         menu.menuOptions[i].text.text = menu.menuOptions[i].title + " (" + ShootrUI.getInputButtonDescription(menu.menuOptions[i].buttonDesc) + ")";
@@ -427,7 +429,7 @@ InitializeMenu = function (menu) {
     }
   };
 
-  menu.select = function(index) {
+  menu.selectIndex = function(index) {
     menu.currentSelection = index;
     for (var i=0; i< menu.menuOptions.length;i++) {
       if (index == i) {
@@ -438,14 +440,26 @@ InitializeMenu = function (menu) {
     }
   };
 
+  menu.select = function(button) {
+
+    for (var i=0; i< menu.menuOptions.length;i++) {
+      menu.menuOptions[i].text.tint = MainMenu.buttonTint;
+    }
+    menu.currentSelection = menu.menuOptions.indexOf(button);
+    button.text.tint = MainMenu.selectedButtonTint;
+  };
+
   menu.checkMouseOver = function () {
     if (!menu.menuContainer || !menu.menuContainer.visible)
       return;
 
     for (var i=0; i< menu.menuOptions.length;i++) {
       if (MainMenu.checkButton(menu.menuOptions[i])) {
-        menu.select(i);
+        menu.select(menu.menuOptions[i]);
       }
+    }
+    if (menu.backButton && MainMenu.checkButton(menu.backButton)) {
+      menu.select(menu.backButton);
     }
 
   };
@@ -476,7 +490,7 @@ InitializeMenu = function (menu) {
     if (selection < 0)
       selection = menu.menuOptions.length - 1;
 
-    menu.select(selection);
+    menu.selectIndex(selection);
     return true;
   };
 
@@ -488,7 +502,7 @@ InitializeMenu = function (menu) {
     if (selection >= menu.menuOptions.length)
       selection = 0;
 
-    menu.select(selection);
+    menu.selectIndex(selection);
     return true;
   };
 
@@ -536,6 +550,7 @@ MainMenu.checkButton = function(button) {
 MainMenu.controllerStatus = {up:false,down:false,left:false,right:false,a:false,b:false};
 
 MainMenu.updateGamepad = function() {
+  var i;
   var clickedAlready = false;
   if (playerOneAxes[0] < -0.5 || playerOneButtonsPressed[14] || a) {
     if (!MainMenu.controllerStatus.left) {
@@ -571,7 +586,7 @@ MainMenu.updateGamepad = function() {
       clickedAlready = Loadout.up();
       if (!clickedAlready)
           clickedAlready = ArmsDealer.up();
-      for (var i=0; i<Menus.length;i++) {
+      for (i=0; i<Menus.length;i++) {
         if (!clickedAlready)
           clickedAlready = Menus[i].up();
       }
@@ -589,7 +604,7 @@ MainMenu.updateGamepad = function() {
         clickedAlready = Loadout.down();
       if (!clickedAlready)
         clickedAlready = ArmsDealer.down();
-      for (var i=0; i< Menus.length;i++) {
+      for (i=0; i< Menus.length;i++) {
         if (!clickedAlready)
           clickedAlready = Menus[i].down();
       }
@@ -610,7 +625,7 @@ MainMenu.updateGamepad = function() {
       if (!clickedAlready)
         ArmsDealer.aButtonPress();
 
-      for (var i=0; i<Menus.length;i++) {
+      for (i=0; i<Menus.length;i++) {
         if (!clickedAlready)
           clickedAlready = Menus[i].aButton();
       }
@@ -631,7 +646,7 @@ MainMenu.updateGamepad = function() {
       if (!clickedAlready)
         clickedAlready = ArmsDealer.bButtonPress();
 
-      for (var i=0; i<Menus.length;i++) {
+      for (i=0; i<Menus.length;i++) {
         if (!clickedAlready)
           clickedAlready = Menus[i].bButtonPress();
       }
@@ -643,7 +658,7 @@ MainMenu.updateGamepad = function() {
 
   if (playerOneButtonsPressed[4] || q) {
     if (!MainMenu.controllerStatus.l1) {
-      var clickedAlready = false;
+      clickedAlready = false;
       clickedAlready = ArmsDealer.l1ButtonPress();
     }
     MainMenu.controllerStatus.l1 = true;

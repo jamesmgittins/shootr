@@ -1,10 +1,11 @@
 var Constants = {
 	localStorageVariable: "shootrGameModel",
+	starJumpScaling : 1.4,
 	difficultyLevelScaling : 1.4,
-	shieldLevelScaling : 1.38,
+	shieldLevelScaling : 1.39,
 	weaponLevelScaling : 1.38,
 	shipLevelPriceScaling : 1.43,
-	levelsPerBoss:5,
+	levelsPerBoss:8,
 	maxScreenShake:2,
 	itemColors : {
 		normal:0x2E7D32,
@@ -40,11 +41,15 @@ var gameModel = {
 	weaponIdCounter:1
 };
 
+function starLevelModify(level) {
+	return Math.ceil(level / 2.5);
+}
+
 function calculateShipLevel() {
-	return Math.max(Math.round(((gameModel.p1.frontWeapon ? gameModel.p1.frontWeapon.level : 0) +
+	return Math.max(Math.floor(((gameModel.p1.frontWeapon ? gameModel.p1.frontWeapon.level : 0) +
 		(gameModel.p1.turretWeapon ? gameModel.p1.turretWeapon.level : 0) +
 		(gameModel.p1.rearWeapon ? gameModel.p1.rearWeapon.level : 0) +
-		(gameModel.p1.shield ? gameModel.p1.shield.level : 0)) / 4),1);
+		(gameModel.p1.shield ? gameModel.p1.shield.level : 0)) / 4.1), 1);
 }
 
 function calculateAdjustedStarLevel(starLevel) {

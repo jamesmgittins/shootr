@@ -175,38 +175,34 @@ Bullets.enemyBullets = {
 
 			if (bullet.visible) {
 
-				if (timeLeft < 0 && !Boss.bossActive()) {
-					Bullets.generateExplosion(bullet.xLoc, bullet.yLoc);
+				bullet.xLoc += bullet.xSpeed * timeDiff;
+				bullet.yLoc -= bullet.ySpeed * timeDiff;
+
+				if (bullet.yLoc < 0 || bullet.yLoc > canvasHeight ||
+					bullet.xLoc < 0 || bullet.xLoc > canvasWidth) {
 					Bullets.enemyBullets.spritePool.discardSprite(bullet);
 				} else {
-					bullet.xLoc += bullet.xSpeed * timeDiff;
-					bullet.yLoc -= bullet.ySpeed * timeDiff;
-
-					if (bullet.yLoc < 0 || bullet.yLoc > canvasHeight ||
-						bullet.xLoc < 0 || bullet.xLoc > canvasWidth) {
+					if (Ships.detectCollision(PlayerShip.playerShip, bullet.xLoc, bullet.yLoc)) {
 						Bullets.enemyBullets.spritePool.discardSprite(bullet);
+						Bullets.generateExplosion(bullet.xLoc, bullet.yLoc);
+						PlayerShip.damagePlayerShip(PlayerShip.playerShip, Bullets.enemyBullets.enemyShotStrength);
 					} else {
-						if (Ships.detectCollision(PlayerShip.playerShip, bullet.xLoc, bullet.yLoc)) {
-							Bullets.enemyBullets.spritePool.discardSprite(bullet);
-							Bullets.generateExplosion(bullet.xLoc, bullet.yLoc);
-							PlayerShip.damagePlayerShip(PlayerShip.playerShip, Bullets.enemyBullets.enemyShotStrength);
-						} else {
 
-							bullet.lastTrail += timeDiff * 1000;
-							if (gameModel.detailLevel > 0.5 && bullet.lastTrail > 65) {
-								bullet.lastTrail = 0;
-								Stars.powerupParts.newPowerupPart(
-									bullet.position.x - (4 * scalingFactor) + (8 * scalingFactor * Math.random()),
-									bullet.position.y - (4 * scalingFactor) + (8 * scalingFactor * Math.random())
-								);
-							}
-
-							bullet.position.x = bullet.xLoc * scalingFactor;
-							bullet.position.y = bullet.yLoc * scalingFactor;
-							bullet.tint = calculateTint(0);
+						bullet.lastTrail += timeDiff * 1000;
+						if (gameModel.detailLevel > 0.5 && bullet.lastTrail > 65) {
+							bullet.lastTrail = 0;
+							Stars.powerupParts.newPowerupPart(
+								bullet.position.x - (4 * scalingFactor) + (8 * scalingFactor * Math.random()),
+								bullet.position.y - (4 * scalingFactor) + (8 * scalingFactor * Math.random())
+							);
 						}
+
+						bullet.position.x = bullet.xLoc * scalingFactor;
+						bullet.position.y = bullet.yLoc * scalingFactor;
+						bullet.tint = calculateTint(0);
 					}
 				}
+
 			}
 		}
 	}

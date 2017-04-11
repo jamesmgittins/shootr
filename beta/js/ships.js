@@ -199,25 +199,31 @@ var boundry = 24;
 
 Ships.updateShipSpeed = function (ship, xDiff, yDiff, timeDiff) {
     var multi = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
+		Ships.updateShipSpeedMulti(ship, xDiff, yDiff, timeDiff, multi);
+};
 
-    ship.xSpeed = xDiff / multi * ship.maxSpeed;
-    ship.ySpeed = yDiff / multi * ship.maxSpeed;
+Ships.updateShipSpeedMulti = function (ship, xDiff, yDiff, timeDiff, multi) {
 
-    if (ship.enemyShip || (ship.xLoc + ship.xSpeed * timeDiff > boundry && ship.xLoc + ship.xSpeed * timeDiff < canvasWidth - boundry))
-        ship.xLoc += ship.xSpeed * timeDiff;
-    if (ship.enemyShip || (ship.yLoc + ship.ySpeed * timeDiff > boundry && ship.yLoc + ship.ySpeed * timeDiff < canvasHeight - boundry))
-        ship.yLoc += ship.ySpeed * timeDiff;
+		if (xDiff === 0 && Math.abs(ship.xSpeed) > 10) {
+			ship.xSpeed -= ship.xSpeed * timeDiff * 8;
+		} else {
+			ship.xSpeed = xDiff / (multi || 1) * ship.maxSpeed;
+		}
+
+		if (yDiff === 0 && Math.abs(ship.ySpeed) > 10) {
+			ship.ySpeed -= ship.ySpeed * timeDiff * 8;
+		} else {
+			ship.ySpeed = yDiff / (multi || 1) * ship.maxSpeed;
+		}
+
+		if (ship.enemyShip || (ship.xLoc + ship.xSpeed * timeDiff > boundry && ship.xLoc + ship.xSpeed * timeDiff < canvasWidth - boundry))
+				ship.xLoc += ship.xSpeed * timeDiff;
+		if (ship.enemyShip || (ship.yLoc + ship.ySpeed * timeDiff > boundry && ship.yLoc + ship.ySpeed * timeDiff < canvasHeight - boundry))
+		    ship.yLoc += ship.ySpeed * timeDiff;
 };
 
 Ships.updateShipSpeedFromController = function (ship, xDiff, yDiff, timeDiff) {
-
-    ship.xSpeed = xDiff * ship.maxSpeed;
-    ship.ySpeed = yDiff * ship.maxSpeed;
-
-    if (ship.enemyShip || (ship.xLoc + ship.xSpeed * timeDiff > boundry && ship.xLoc + ship.xSpeed * timeDiff < canvasWidth - boundry))
-        ship.xLoc += ship.xSpeed * timeDiff;
-    if (ship.enemyShip || (ship.yLoc + ship.ySpeed * timeDiff > boundry && ship.yLoc + ship.ySpeed * timeDiff < canvasHeight - boundry))
-        ship.yLoc += ship.ySpeed * timeDiff;
+    Ships.updateShipSpeedMulti(ship, xDiff, yDiff, timeDiff, 1);
 };
 
 var maximumRotation = 0.12;

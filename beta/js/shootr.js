@@ -59,7 +59,7 @@ var endStar;
 
 function changeLevel(level) {
 
-	gameModel.currentLevel = Boss.isInTargetSystem() ? Math.max(Boss.currentLevel(), calculateAdjustedStarLevel(level)) : calculateAdjustedStarLevel(level);
+	gameModel.currentLevel = Boss.isInTargetSystem() ? Math.max(starLevelModify(Boss.currentLevel()), calculateAdjustedStarLevel(level)) : calculateAdjustedStarLevel(level);
 
 	var levelDifficultyModifier = Math.pow(Constants.difficultyLevelScaling, gameModel.currentLevel - 1);
 
@@ -319,6 +319,7 @@ var playerBulletContainer;
 var enemyShipContainer;
 var backgroundEnemyContainer;
 var frontEnemyContainer;
+var powerupContainer;
 var playerShipContainer;
 var explosionContainer;
 var uiContainer;
@@ -485,7 +486,7 @@ function startGame() {
 	enemyShipContainer.addChild(backgroundEnemyContainer);
 	enemyShipContainer.addChild(bulletContainer);
 	enemyShipContainer.addChild(frontEnemyContainer);
-
+	powerupContainer = new PIXI.Container();
 	playerShipContainer = new PIXI.Container();
 	playerShipContainer.visible=false;
 	explosionContainer = new PIXI.Container();
@@ -493,6 +494,7 @@ function startGame() {
 
 	stage.addChild(starContainer);
 	stage.addChild(enemyShipContainer);
+	stage.addChild(powerupContainer);
 	stage.addChild(playerBulletContainer);
 	stage.addChild(playerShipContainer);
 	stage.addChild(explosionContainer);
@@ -539,6 +541,7 @@ window.onload = function() {
 		.add("fonts/dosis-v6-latin-300.svg")
 		.add("img/perspective-dice-random.svg")
 		.add("img/sapphire.svg")
+		.add("img/diamond.svg")
 		// .add("img/level-one.svg")
 		// .add("img/level-two.svg")
 		// .add("img/level-three.svg")

@@ -4,17 +4,26 @@ var MoneyPickup = {
 	speed:50,
 	getSpritePool : function() {
 		if (!this.spritePool) {
+			this.diamondTexture =  glowTexture(PIXI.Texture.fromImage("img/diamond.svg", undefined,undefined,0.04 * scalingFactor), {resize:0.04 * scalingFactor, blurAmount : 0.5});
+			this.sapphireTexture = glowTexture(PIXI.Texture.fromImage("img/sapphire.svg",undefined,undefined,0.04 * scalingFactor), {resize:0.04 * scalingFactor, blurAmount : 0.5});
 			this.spritePool = SpritePool.create(
-				glowTexture(PIXI.Texture.fromImage("img/sapphire.svg",undefined,undefined,0.04 * scalingFactor), {resize:0.04 * scalingFactor, blurAmount : 0.5}),
-				starContainer);
+				[this.sapphireTexture,this.diamondTexture],
+				powerupContainer);
 		}
 		return this.spritePool;
 	},
 	inPlay:function() {
 		return this.spritePool && this.spritePool.discardedSprites.length < this.spritePool.sprites.length;
 	},
-	newMoneyPickup:function(x, y, value){
+	newMoneyPickup:function(x, y, value, alternate){
 		var pickup = this.getSpritePool().nextSprite();
+		if (alternate) {
+			pickup.texture = this.diamondTexture;
+			pickup.alternate = true;
+		} else {
+			pickup.texture = this.sapphireTexture;
+			pickup.alternate = false;
+		}
 		pickup.visible = true;
 		pickup.moneyValue = value;
 		pickup.xLoc = x;
@@ -61,7 +70,9 @@ var MoneyPickup = {
 						}
 
 					pickup.tintNumber += pickup.tintMod * timeDiff;
-					pickup.tint = rgbToHex(Math.min(255,Math.max(pickup.tintNumber,0)),255,Math.min(255,Math.max(pickup.tintNumber,0)));
+					pickup.tint = pickup.alternate ?
+						rgbToHex(Math.min(255,Math.max(pickup.tintNumber,150)),Math.min(255,Math.max(pickup.tintNumber,150)),255) :
+						rgbToHex(Math.min(255,Math.max(pickup.tintNumber,0)),255,Math.min(255,Math.max(pickup.tintNumber,0)));
 
 					pickup.lastTrail += timeDiff;
 					if (pickup.lastTrail > 0.5) {
@@ -155,7 +166,7 @@ var Powerups = {
 			Powerups.sprite[i].anchor = { x: 0.5, y: 0.5 };
 			Powerups.sprites.addChild(Powerups.sprite[i]);
 		}
-		starContainer.addChild(Powerups.sprites);
+		powerupContainer.addChild(Powerups.sprites);
 	},
 	update : function(timeDiff) {
 		MoneyPickup.update(timeDiff);
