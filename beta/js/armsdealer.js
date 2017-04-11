@@ -250,6 +250,10 @@ ArmsDealer.createItemIcon = function(item, options) {
 	itemContainer.addChild(priceText);
 
 	priceText.tint = priceText.defaultTint = levelText.tint = levelText.defaultTint = pic.tint = pic.defaultTint = border.tint = border.defaultTint = 0xAAAAAA;
+
+	// if (options.cache) 
+	// 	itemContainer.cacheAsBitmap = true;
+
 	return itemContainer;
 };
 
@@ -505,12 +509,8 @@ ArmsDealer.initialize = function() {
 
 	var currentStar = StarChart.generateStar(gameModel.currentSystem.x, gameModel.currentSystem.y);
 	var seed = currentStar.seed * gameModel.timeStep;
-	var shipLevel = ((gameModel.p1.frontWeapon ? gameModel.p1.frontWeapon.level : 0) +
-		(gameModel.p1.turretWeapon ? gameModel.p1.turretWeapon.level : 0) +
-		(gameModel.p1.rearWeapon ? gameModel.p1.rearWeapon.level : 0) +
-		(gameModel.p1.shield ? gameModel.p1.shield.level : 0)) / 5;
 
-	var level = Math.max(currentStar.level, Math.floor(shipLevel));
+	var level = calculateAdjustedStarLevel(currentStar.level);
 
 	Math.seedrandom(seed);
 	ArmsDealer.buyOptions = [];

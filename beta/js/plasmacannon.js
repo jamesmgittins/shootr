@@ -42,10 +42,10 @@ PlasmaCannon = {
 						spritePool.discardSprite(sprite);
 					}
 				} else {
-					for (var j = 0; j < EnemyShips.activeShips.length; j++) {
-						var enemyShip = EnemyShips.activeShips[j];
-						if (Ships.detectCollision(enemyShip, sprite.xLoc, sprite.yLoc)) {
-							EnemyShips.damageEnemyShip(enemyShip, sprite.xLoc, sprite.yLoc, sprite.bulletStrength);
+					for (var j = 0; j < Enemies.activeShips.length; j++) {
+						var enemyShip = Enemies.activeShips[j];
+						if (enemyShip.detectCollision(enemyShip, sprite.xLoc, sprite.yLoc)) {
+							Enemies.damageEnemy(enemyShip, sprite.xLoc, sprite.yLoc, sprite.bulletStrength);
 							spritePool.discardSprite(sprite);
 						}
 					}

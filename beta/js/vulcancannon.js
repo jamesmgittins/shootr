@@ -44,10 +44,10 @@ VulcanCannon = {
 						spritePool.discardSprite(sprite);
 					}
 				} else {
-					for (var j = 0; j < EnemyShips.activeShips.length; j++) {
-						var enemyShip = EnemyShips.activeShips[j];
-						if (sprite.lastEnemyDamaged != enemyShip.id && Ships.detectCollision(enemyShip, sprite.xLoc, sprite.yLoc)) {
-							EnemyShips.damageEnemyShip(enemyShip, sprite.xLoc, sprite.yLoc, sprite.bulletStrength);
+					for (var j = 0; j < Enemies.activeShips.length; j++) {
+						var enemyShip = Enemies.activeShips[j];
+						if (sprite.lastEnemyDamaged != enemyShip.id && enemyShip.detectCollision(enemyShip, sprite.xLoc, sprite.yLoc)) {
+							Enemies.damageEnemy(enemyShip, sprite.xLoc, sprite.yLoc, sprite.bulletStrength);
 							if (sprite.passThrough) {
 								sprite.lastEnemyDamaged = enemyShip.id;
 							} else {
@@ -110,10 +110,14 @@ VulcanCannon = {
 			fireShot : function(position, damageModifier) {
 				this.weapon.lastShot = 0;
 				var wobble = (1 - this.weapon.accuracy) * 0.2;
-				var speed = RotateVector2d(0, this.weapon.bulletSpeed, -position.angle - wobble + Math.random() * wobble * 2);
+				var speed;
+				if (position.rear) {
+					speed = RotateVector2d(0, this.weapon.bulletSpeed, (-position.angle * this.rearAngleMod) - wobble + Math.random() * wobble * 2);
+				} else {
+					speed = RotateVector2d(0, this.weapon.bulletSpeed, -position.angle - wobble + Math.random() * wobble * 2);
+				}
 
 				Sounds.playerBullets.play();
-
 				VulcanCannon.individualBullet(this.spritePool, speed, position, weapon.damagePerShot * damageModifier, 1, this.weapon);
 			}
 		};
@@ -142,7 +146,7 @@ VulcanCannon.vulcanCannon = function(level,seed,rarity) {
 		dps: dps,
 		shotsPerSecond: shotsPerSecond,
 		damagePerShot: damagePerShot,
-		accuracy: 0.7 + Math.random() * 0.3,
+		accuracy: 0.7 + Math.random() * 0.25,
 		bulletSpeed: 700,
 		price: Math.round(dps * 30),
 		id: gameModel.weaponIdCounter++,

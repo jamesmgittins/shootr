@@ -63,9 +63,9 @@ MissileLauncher = {
 
 					// look for target
 					if (sprite.lowHealthSeek) {
-						for (var enemyShipCount=0; enemyShipCount < EnemyShips.activeShips.length; enemyShipCount++) {
-							if (!sprite.target || sprite.target.health > EnemyShips.activeShips[enemyShipCount].health)
-								sprite.target = EnemyShips.activeShips[enemyShipCount];
+						for (var enemyShipCount=0; enemyShipCount < Enemies.activeShips.length; enemyShipCount++) {
+							if (!sprite.target || sprite.target.health > Enemies.activeShips[enemyShipCount].health)
+								sprite.target = Enemies.activeShips[enemyShipCount];
 						}
 					} else {
 						var vector = RotateVector2d(0, -5, Math.atan2(sprite.speed.x, -sprite.speed.y));
@@ -82,10 +82,10 @@ MissileLauncher = {
 							if (location.x < -20 || location.x > canvasWidth + 20 || location.y < -20 || location.y > canvasHeight + 20)
 								i = 128;
 
-							for (var j = 0; j < EnemyShips.activeShips.length; j++) {
-								if (!sprite.target && distanceBetweenPoints(location.x, location.y, EnemyShips.activeShips[j].xLoc, EnemyShips.activeShips[j].yLoc) <= shipDistance) {
-									closestShip = EnemyShips.activeShips[j];
-									shipDistance = distanceBetweenPoints(location.x, location.y, EnemyShips.activeShips[j].xLoc, EnemyShips.activeShips[j].yLoc);
+							for (var j = 0; j < Enemies.activeShips.length; j++) {
+								if (!sprite.target && distanceBetweenPoints(location.x, location.y, Enemies.activeShips[j].xLoc, Enemies.activeShips[j].yLoc) <= shipDistance) {
+									closestShip = Enemies.activeShips[j];
+									shipDistance = distanceBetweenPoints(location.x, location.y, Enemies.activeShips[j].xLoc, Enemies.activeShips[j].yLoc);
 								}
 							}
 							sprite.target = closestShip;
@@ -105,7 +105,7 @@ MissileLauncher = {
         sprite.position.y = sprite.yLoc * scalingFactor;
 
         sprite.lastTrail += timeDiff;
-        if (sprite.lastTrail > MissileLauncher.trailFrequency) {
+        if (sprite.lastTrail > MissileLauncher.trailFrequency / gameModel.detailLevel) {
           var posAdjust = RotateVector2d(0, 12 * scalingFactor, sprite.rotation);
           missileTrails.newPart(sprite.position.x + posAdjust.x, sprite.position.y + posAdjust.y);
           sprite.lastTrail = 0;
@@ -115,10 +115,10 @@ MissileLauncher = {
           spritePool.discardSprite(sprite);
         }
 
-        for (var k = 0; k < EnemyShips.activeShips.length; k++) {
-          if (sprite.visible && Ships.detectCollision(EnemyShips.activeShips[k], sprite.xLoc, sprite.yLoc)) {
+        for (var k = 0; k < Enemies.activeShips.length; k++) {
+          if (sprite.visible && Enemies.activeShips[k].detectCollision(Enemies.activeShips[k], sprite.xLoc, sprite.yLoc)) {
             spritePool.discardSprite(sprite);
-            EnemyShips.damageEnemyShip(EnemyShips.activeShips[k], sprite.xLoc, sprite.yLoc, sprite.damage);
+            Enemies.damageEnemy(Enemies.activeShips[k], sprite.xLoc, sprite.yLoc, sprite.damage);
             MissileLauncher.generateExplosion(sprite.xLoc, sprite.yLoc);
           }
         }
@@ -177,6 +177,10 @@ MissileLauncher = {
 			fireShot : function(position, damageModifier) {
 				this.weapon.lastShot = 0;
 				var wobble = (1.03 - this.weapon.accuracy) * 0.15;
+
+        if (position.rear)
+          position.angle = position.angle * this.rearAngleMod;
+
 				var speed = RotateVector2d(0, this.weapon.bulletSpeed, -position.angle - wobble + Math.random() * wobble * 2);
 
 				Sounds.playerMissile.play();

@@ -5,6 +5,7 @@ var Constants = {
 	weaponLevelScaling : 1.38,
 	shipLevelPriceScaling : 1.43,
 	levelsPerBoss:5,
+	maxScreenShake:2,
 	itemColors : {
 		normal:0x2E7D32,
 		super:0x1565C0,
@@ -40,15 +41,14 @@ var gameModel = {
 };
 
 function calculateShipLevel() {
-	return Math.floor(((gameModel.p1.frontWeapon ? gameModel.p1.frontWeapon.level : 0) +
+	return Math.max(Math.round(((gameModel.p1.frontWeapon ? gameModel.p1.frontWeapon.level : 0) +
 		(gameModel.p1.turretWeapon ? gameModel.p1.turretWeapon.level : 0) +
 		(gameModel.p1.rearWeapon ? gameModel.p1.rearWeapon.level : 0) +
-		(gameModel.p1.shield ? gameModel.p1.shield.level : 0)) / 4);
+		(gameModel.p1.shield ? gameModel.p1.shield.level : 0)) / 4),1);
 }
 
 function calculateAdjustedStarLevel(starLevel) {
-  var shipLevel = Math.max(calculateShipLevel(),1);
-	return Math.max(Math.floor(shipLevel * 0.9), starLevel);
+	return Math.max(calculateShipLevel(), starLevel);
 }
 
 function valueForRoute(route) {
@@ -142,11 +142,12 @@ function load() {
 			timeStep : 1,
 			purchaseHistory : [],
 			masterVolume : 0.5,
-			maxScreenShake : 5,
-			dmgNumbers : false,
-			antialiasing : true,
+			maxScreenShake : Constants.maxScreenShake,
+			detailLevel : 1,
+			dmgNumbers : true,
+			antialiasing : false,
 			p1 : {
-				ship: Shipyard.generateShip(1, 3, false),
+				ship: Shipyard.generateShip(1, 7, false),
 				weapons: [Weapons.plasmaCannon(1,123,Weapons.rarity[0])],
 				shields: [ArmsDealer.generateShield(1, 234, false)],
 				credits: 0,
@@ -157,7 +158,7 @@ function load() {
 			currentSystem: {x:0,y:0},
 			targetSystem: {x:0,y:0},
 			history: [],
-			tradeRoutes : [],
+			bossesDefeated : 0,
 			weaponIdCounter: gameModel.weaponIdCounter,
 			resolutionFactor:1,
 			lastTradeUpdate: new Date().getTime()

@@ -28,7 +28,7 @@ BioGelGun = {
 	updateBullets : function(timeDiff, spritePool) {
 		for (var i = 0; i < spritePool.sprites.length; i++) {
 			var sprite = spritePool.sprites[i];
-
+			var vector;
 			if (sprite.visible) {
 
 				if (sprite.ship) {
@@ -38,8 +38,8 @@ BioGelGun = {
 						if (sprite.scale.x < 0) {
 							spritePool.discardSprite(sprite);
 						} else {
-							EnemyShips.damageEnemyShip(sprite.ship, sprite.ship.xLoc + sprite.xLoc, sprite.ship.yLoc + sprite.yLoc, sprite.bulletStrength * timeDiff * (1 / BioGelGun.damageOverTimeSec), true);
-							var vector = RotateVector2d(sprite.xLoc, sprite.yLoc, sprite.ship.sprite.rotation);
+							Enemies.damageEnemy(sprite.ship, sprite.ship.xLoc + sprite.xLoc, sprite.ship.yLoc + sprite.yLoc, sprite.bulletStrength * timeDiff * (1 / BioGelGun.damageOverTimeSec), true);
+							vector = RotateVector2d(sprite.xLoc, sprite.yLoc, sprite.ship.sprite.rotation - sprite.shipRotation);
 							sprite.position.x = (sprite.ship.xLoc + vector.x) * scalingFactor;
 							sprite.position.y = (sprite.ship.yLoc + vector.y) * scalingFactor;
 						}
@@ -57,7 +57,7 @@ BioGelGun = {
 
 					if (magnitude(sprite.xSpeed, sprite.ySpeed) > BioGelGun.minSpeed) {
 						var newSpeed = magnitude(sprite.xSpeed, sprite.ySpeed) - BioGelGun.decelleration * timeDiff;
-						var vector = RotateVector2d(0, newSpeed, -sprite.rotation);
+						vector = RotateVector2d(0, newSpeed, -sprite.rotation);
 						sprite.xSpeed = vector.x;
 						sprite.ySpeed = vector.y;
 					}
@@ -76,14 +76,15 @@ BioGelGun = {
 							sprite.xLoc < -8 || sprite.xLoc > canvasWidth + 8) {
 						spritePool.discardSprite(sprite);
 					} else {
-						for (var j = 0; j < EnemyShips.activeShips.length; j++) {
-							var enemyShip = EnemyShips.activeShips[j];
-							if (Ships.detectCollision(enemyShip, sprite.xLoc, sprite.yLoc)) {
-								EnemyShips.damageEnemyShip(enemyShip, sprite.xLoc, sprite.yLoc, sprite.bulletStrength * BioGelGun.initialDamage);
+						for (var j = 0; j < Enemies.activeShips.length; j++) {
+							var enemyShip = Enemies.activeShips[j];
+							if (enemyShip.detectCollision(enemyShip, sprite.xLoc, sprite.yLoc)) {
+								Enemies.damageEnemy(enemyShip, sprite.xLoc, sprite.yLoc, sprite.bulletStrength * BioGelGun.initialDamage);
 								sprite.ship = enemyShip;
 								sprite.scale.x = sprite.scale.y = 1;
 								sprite.xLoc -= enemyShip.xLoc;
 								sprite.yLoc -= enemyShip.yLoc;
+								sprite.shipRotation = sprite.ship.sprite.rotation;
 							}
 						}
 					}

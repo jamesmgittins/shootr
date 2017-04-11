@@ -9,7 +9,10 @@ Boss = {
   lastBullet:0,
   bulletsLeft:0,
   maxBulletsPerShot:20,
-  enemyShip : true
+  enemyShip : true,
+  damage : EnemyShips.damageEnemyShip,
+	destroy : EnemyShips.destroy,
+	detectCollision : Ships.detectCollision
 };
 
 Boss.flightPatterns = [
@@ -29,6 +32,10 @@ Boss.isInTargetSystem = function() {
   return gameModel.bossPosition && gameModel.bossPosition.x == gameModel.targetSystem.x && gameModel.targetSystem.y == gameModel.bossPosition.y;
 };
 
+Boss.currentLevel = function() {
+  return Constants.levelsPerBoss * (gameModel.bossesDefeated + 1);
+};
+
 Boss.bossActive = function() {
   return Boss.isInTargetSystem() && Boss.health > 0;
 };
@@ -39,7 +46,7 @@ Boss.randomLocation = function() {
 
     Math.seedrandom(new Date().getTime());
 
-  var currentLevel = Constants.levelsPerBoss * (gameModel.bossesDefeated + 1);
+  var currentLevel = Boss.currentLevel();
   var xLocation = 0;
   var yLocation = 0;
 
@@ -85,23 +92,22 @@ Boss.update = function(timeDiff) {
     Boss.maxHealth = Boss.health;
     Boss.maxSpeed = 75;
     Boss.patternChanged = false;
+    Boss.damage = EnemyShips.damageEnemyShip;
     var seed = Date.now();
 
     Boss.texture = glowTexture(PIXI.Texture.fromCanvas(Ships.shipArt(size, seed, this.colors)));
     Boss.damageTexture = glowTexture(PIXI.Texture.fromCanvas(Ships.shipArt(size, seed, this.colors, true)));
 
-    if (EnemyShips.discardedSprites.length > 0) {
-      Boss.sprite = EnemyShips.discardedSprites.pop();
-      Boss.sprite.texture = Boss.texture;
-      Boss.sprite.tint = 0xFFFFFF;
-    } else {
-      Boss.sprite = new PIXI.Sprite(Boss.texture);
-      enemyShipContainer.addChild(Boss.sprite);
-      EnemyShips.sprites.push(Boss.sprite);
-      Boss.sprite.scale.y = -1;
+    if (!Boss.spritePool){
+      Boss.spritePool = SpritePool.create(Boss.texture, enemyShipContainer);
     }
 
+    Boss.sprite = Boss.spritePool.nextSprite();
 
+    Boss.sprite.visible = true;
+    Boss.sprite.texture = Boss.texture;
+    Boss.sprite.tint = 0xFFFFFF;
+    Boss.sprite.scale.y = -1;
 
     Boss.xLoc = canvasWidth * 0.5;
     Boss.xTar = canvasWidth * 0.5;
@@ -153,7 +159,7 @@ Boss.update = function(timeDiff) {
   }
 
   if (Boss.collisionAllowed) {
-    EnemyShips.activeShips.push(Boss);
+    Enemies.activeShips.push(Boss);
     EnemyShips.checkForPlayerCollision(Boss);
     Boss.shield.update();
 
@@ -186,10 +192,13 @@ Boss.update = function(timeDiff) {
     }
 
   }
-
-
 };
 
+Boss.reset = function() {
+  if (Boss.spritePool){
+    Boss.spritePool.discardAll();
+  }
+};
 
 Boss.shield = {
   init:function() {
@@ -216,7 +225,7 @@ Boss.shield = {
     Boss.shield.shieldOutline.tint = 0x005500;
 
     Boss.shield.shieldOutline.visible = true;
-    Boss.shield.shieldBar.visible = true;
+    Boss.shield.shieldBar.visible = false;
   },
   update:function() {
     var barWidth = Math.round(Boss.health / Boss.maxHealth * canvasWidth * 0.9);
@@ -228,6 +237,7 @@ Boss.shield = {
       canvasHeight * 0.02 * scalingFactor,
       barWidth * scalingFactor,
       canvasHeight * 0.02 * scalingFactor);
+      Boss.shield.shieldBar.visible = true;
   },
   hide:function() {
     if (Boss.shield.shieldOutline) {

@@ -154,6 +154,7 @@ StarChart.generateStar = function(x, y) {
     name:StarNames.createName(),
 		scale:scale,
 		exists:true,
+    asteroids:Math.random() > 0.9,
 		level:Math.max(1,Math.abs(x),Math.abs(y))
   };
 };
@@ -197,11 +198,13 @@ StarChart.locator = {
         x:bounds.width / 2 + bounds.x,
         y:bounds.height / 2 + bounds.y
       };
+      var xDiff;
+      var yDiff;
 
       if (distanceBetweenPoints(StarChart.currentStar.x,StarChart.currentStar.y,StarChart.currentPosition.x * -1,StarChart.currentPosition.y * -1) > 2.5 / StarChart.zoom) {
 
-					var xDiff = StarChart.currentStar.x + StarChart.currentStar.xWobble + StarChart.currentPosition.x;
-	        var yDiff = -1 * StarChart.currentPosition.y - (StarChart.currentStar.y + StarChart.currentStar.yWobble);
+					xDiff = StarChart.currentStar.x + StarChart.currentStar.xWobble + StarChart.currentPosition.x;
+	        yDiff = -1 * StarChart.currentPosition.y - (StarChart.currentStar.y + StarChart.currentStar.yWobble);
 
 					StarChart.locator.sprite.scale = { x: scalingFactor, y: scalingFactor };
           StarChart.locator.sprite.position.x = centerPixels.x;
@@ -213,8 +216,8 @@ StarChart.locator = {
       }
       if (gameModel.bossPosition && distanceBetweenPoints(StarChart.bossStar.x,StarChart.bossStar.y,StarChart.currentPosition.x * -1,StarChart.currentPosition.y * -1) > 2.5 / StarChart.zoom) {
 
-          var xDiff = StarChart.bossStar.x + StarChart.bossStar.xWobble + StarChart.currentPosition.x;
-          var yDiff = -1 * StarChart.currentPosition.y - (StarChart.bossStar.y + StarChart.bossStar.yWobble);
+          xDiff = StarChart.bossStar.x + StarChart.bossStar.xWobble + StarChart.currentPosition.x;
+          yDiff = -1 * StarChart.currentPosition.y - (StarChart.bossStar.y + StarChart.bossStar.yWobble);
 
           StarChart.locator.bossSprite.scale = { x: scalingFactor, y: scalingFactor };
           StarChart.locator.bossSprite.position.x = centerPixels.x;
@@ -464,6 +467,7 @@ StarChart.initialize = function () {
 	StarChart.cursorSprite.visible = false;
 	StarChart.cursorSprite.position.x = renderer.width * 0.5;
 	StarChart.cursorSprite.position.y = renderer.height * 0.5;
+  StarChart.cursorSprite.scale.x = StarChart.cursorSprite.scale.y = gameModel.resolutionFactor;
 	StarChart.menuContainer.addChild(StarChart.cursorSprite);
 
 };
@@ -538,8 +542,8 @@ StarChart.initialize = function () {
 		StarChart.centerStar = StarChart.chart[Math.round(-1 * StarChart.currentPosition.x)][Math.round(-1 * StarChart.currentPosition.y)];
 
 		StarChart.Stars.discardedStars = [];
-
-		for (var i=0;i<StarChart.Stars.starsArray.length;i++) {
+    var i;
+		for (i=0;i<StarChart.Stars.starsArray.length;i++) {
 			StarChart.Stars.starsArray[i].visible=false;
 			StarChart.Stars.discardedStars.push(StarChart.Stars.starsArray[i]);
 		}
@@ -548,7 +552,7 @@ StarChart.initialize = function () {
 
 		StarChart.chart = [];
 
-		for (var i = StarChart.centerStar.x - StarChart.distanceToPlot; i <= StarChart.centerStar.x + StarChart.distanceToPlot; i++) {
+		for (i = StarChart.centerStar.x - StarChart.distanceToPlot; i <= StarChart.centerStar.x + StarChart.distanceToPlot; i++) {
       StarChart.chart[i] = [];
       for (var j = StarChart.centerStar.y - StarChart.distanceToPlot; j <= StarChart.centerStar.y + StarChart.distanceToPlot; j++) {
 
@@ -794,13 +798,14 @@ StarChart.initialize = function () {
 
     var history = findInHistory(gameModel.currentSystem, StarChart.selectedStar);
 
-    return (gameModel.bossPosition && gameModel.bossPosition.x == StarChart.selectedStar.x && gameModel.bossPosition.y == StarChart.selectedStar.y ? "WARNING dangerous enemy detected\n": "") +
+    return (gameModel.bossPosition && gameModel.bossPosition.x == StarChart.selectedStar.x && gameModel.bossPosition.y == StarChart.selectedStar.y ? "WARNING dangerous enemy detected\n ": "") +
       StarChart.selectedStar.name +
       "\n Level: " + displayLevel + (displayLevel > level + 3 ? " (Very Hard)" : (displayLevel > level + 1 ? " (Hard)" : " (Normal)")) +
 			(StarChart.selectedStarDistance() > 0 ? "\n Distance: " + StarChart.selectedStarDistance().toFixed(2)+ " light years" : "") +
       (StarChart.selectedStarDistance() > StarChart.maxDistance ? "\n Out of range" : "") +
       (Math.max(Math.abs(StarChart.selectedStar.x - gameModel.currentSystem.x),Math.abs(StarChart.selectedStar.y - gameModel.currentSystem.y)) === 0 ? "\n You are currently in this system" : "") +
-      "\n Coordinates: ( " + StarChart.selectedStar.x + " , " + StarChart.selectedStar.y + " )" +
+      // "\n Coordinates: ( " + StarChart.selectedStar.x + " , " + StarChart.selectedStar.y + " )" +
+      (StarChart.selectedStar.asteroids ? "\n Asteroid belt present" : "") +
       (!history && StarChart.selectedStarDistance() <= StarChart.maxDistance && StarChart.selectedStarDistance() > 0 ? "\n Route value: " + formatMoney(valueForRoute(displayLevel)) + " Credits per second" : "") +
       (history ? "\n Route earning : " + formatMoney(valueForRoute(history.completedLevel)) + " Credits per second" : "")
       ;
@@ -968,6 +973,11 @@ StarChart.initialize = function () {
 
     StarChart.plan.clear();
 
+    var startX;
+    var startY;
+    var endX;
+    var endY;
+
     if (StarChart.selectedStar) {
 			if (!StarChart.selectedStar.sprite || !StarChart.selectedStar.sprite.visible) {
         StarChart.deselectStar();
@@ -986,10 +996,10 @@ StarChart.initialize = function () {
 
 					StarChart.plan.lineStyle(Math.max(1,gameModel.resolutionFactor), 0xFFFFFF);
 
-					var startX = centerPixels.x + ((StarChart.currentPosition.x + StarChart.currentStar.x + StarChart.currentStar.xWobble) * starSpacing);
-					var startY = centerPixels.y + ((StarChart.currentPosition.y + StarChart.currentStar.y + StarChart.currentStar.yWobble) * starSpacing);
-					var endX = centerPixels.x + ((StarChart.currentPosition.x + StarChart.selectedStar.x + StarChart.selectedStar.xWobble) * starSpacing);
-					var endY = centerPixels.y + ((StarChart.currentPosition.y + StarChart.selectedStar.y + StarChart.selectedStar.yWobble) * starSpacing);
+					startX = centerPixels.x + ((StarChart.currentPosition.x + StarChart.currentStar.x + StarChart.currentStar.xWobble) * starSpacing);
+					startY = centerPixels.y + ((StarChart.currentPosition.y + StarChart.currentStar.y + StarChart.currentStar.yWobble) * starSpacing);
+					endX = centerPixels.x + ((StarChart.currentPosition.x + StarChart.selectedStar.x + StarChart.selectedStar.xWobble) * starSpacing);
+					endY = centerPixels.y + ((StarChart.currentPosition.y + StarChart.selectedStar.y + StarChart.selectedStar.yWobble) * starSpacing);
 
 					StarChart.plan.moveTo(startX,startY);
 					StarChart.plan.lineTo(endX,endY);
@@ -1025,10 +1035,10 @@ StarChart.initialize = function () {
 
 				StarChart.history[k].line.lineStyle(Math.max(1,gameModel.resolutionFactor), 0xFFFFFF);
 
-				var startX = centerPixels.x + ((StarChart.currentPosition.x + firstStar.x + firstStar.xWobble) * starSpacing);
-				var startY = centerPixels.y + ((StarChart.currentPosition.y + firstStar.y + firstStar.yWobble) * starSpacing);
-				var endX = centerPixels.x + ((StarChart.currentPosition.x + secondStar.x + secondStar.xWobble) * starSpacing);
-				var endY = centerPixels.y + ((StarChart.currentPosition.y + secondStar.y + secondStar.yWobble) * starSpacing);
+				startX = centerPixels.x + ((StarChart.currentPosition.x + firstStar.x + firstStar.xWobble) * starSpacing);
+				startY = centerPixels.y + ((StarChart.currentPosition.y + firstStar.y + firstStar.yWobble) * starSpacing);
+				endX = centerPixels.x + ((StarChart.currentPosition.x + secondStar.x + secondStar.xWobble) * starSpacing);
+				endY = centerPixels.y + ((StarChart.currentPosition.y + secondStar.y + secondStar.yWobble) * starSpacing);
 
 				StarChart.history[k].line.moveTo(startX,startY);
 				StarChart.history[k].line.lineTo(endX,endY);

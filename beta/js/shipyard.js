@@ -51,11 +51,12 @@ Shipyard.levelReqText = function(value, currentShipValue) {
 };
 
 Shipyard.initialize = function () {
+  var i;
   if (!Shipyard.menuContainer) {
     Shipyard.menuContainer = new PIXI.Container();
     gameContainer.addChild(Shipyard.menuContainer);
   } else {
-    for (var i=Shipyard.menuContainer.children.length - 1; i >= 0; i--){
+    for (i = Shipyard.menuContainer.children.length - 1; i >= 0; i--){
       var item = Shipyard.menuContainer.children[i];
       Shipyard.menuContainer.removeChild(item);
       item.destroy();
@@ -92,12 +93,10 @@ Shipyard.initialize = function () {
   var star = StarChart.generateStar(gameModel.currentSystem.x, gameModel.currentSystem.y);
   var shipLayoutWidth = renderer.width * 0.9 / 3;
 
-  var shipLevel = calculateShipLevel();
+  var level = calculateAdjustedStarLevel(star.level);
 
-  var level = Math.max(star.level, Math.floor(shipLevel * 0.9));
-
-  for (var i=0; i < 3; i++) {
-    var ship = Shipyard.generateShip(level,star.seed + i,false);
+  for (i = 0; i < 3; i++) {
+    var ship = Shipyard.generateShip(Math.random() > 0.9 ? level + 1 : level, star.seed + i, false);
 
     Shipyard.ships[i] = ship;
     Shipyard.ships[i].background = new PIXI.Graphics();
@@ -313,10 +312,18 @@ Shipyard.update = function(timeDiff) {
       Shipyard.ships[i].sprite.rotation += 0.5 * timeDiff;
     } else {
       if (Shipyard.ships[i].sprite.rotation !== 0) {
-        if (Shipyard.ships[i].sprite.rotation > 0 && Shipyard.ships[i].sprite.rotation < Math.PI)
-          Shipyard.ships[i].sprite.rotation - 2 * timeDiff < 0 ? Shipyard.ships[i].sprite.rotation = 0: Shipyard.ships[i].sprite.rotation -= 2 * timeDiff;
-        else
-          Shipyard.ships[i].sprite.rotation + 2 * timeDiff > 2 * Math.PI ? Shipyard.ships[i].sprite.rotation = 0: Shipyard.ships[i].sprite.rotation += 2 * timeDiff;
+        if (Shipyard.ships[i].sprite.rotation > 0 && Shipyard.ships[i].sprite.rotation < Math.PI) {
+          if (Shipyard.ships[i].sprite.rotation - 2 * timeDiff < 0 )
+            Shipyard.ships[i].sprite.rotation = 0;
+          else
+            Shipyard.ships[i].sprite.rotation -= 2 * timeDiff;
+        }
+        else {
+          if (Shipyard.ships[i].sprite.rotation + 2 * timeDiff > 2 * Math.PI )
+            Shipyard.ships[i].sprite.rotation = 0;
+          else
+            Shipyard.ships[i].sprite.rotation += 2 * timeDiff;
+        }
       }
     }
   }

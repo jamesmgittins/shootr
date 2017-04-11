@@ -175,7 +175,7 @@ SettingsMenu = {
     }},
     {title:"Screen Shake: ON", click:function(){
       if (!gameModel.maxScreenShake) {
-        gameModel.maxScreenShake = 5;
+        gameModel.maxScreenShake = Constants.maxScreenShake;
         SettingsMenu.menuOptions[5].text.text = "Screen Shake: ON";
       } else {
         gameModel.maxScreenShake = 0;
@@ -193,6 +193,15 @@ SettingsMenu = {
       save();
       location.reload(true);
     }},
+    {title:"Detail: HIGH", click:function(){
+      if (gameModel.detailLevel < 1) {
+        gameModel.detailLevel = 1;
+        SettingsMenu.menuOptions[7].text.text = "Detail: HIGH";
+      } else {
+        gameModel.detailLevel = 0.5;
+        SettingsMenu.menuOptions[7].text.text = "Detail: LOW";
+      }
+    }},
     {title:"Delete Save Data", click:function(){
       resetSaveGame();
     }},
@@ -205,7 +214,7 @@ SettingsMenu = {
         SettingsMenu.onHide = settingsOnHide;
       };
       SettingsMenu.hide();
-    }},
+    }}
   ],
   backButton : {title:"Back", buttonDesc:buttonTypes.back, click:function(){
     SettingsMenu.hide();
@@ -243,6 +252,11 @@ SettingsMenu = {
       SettingsMenu.menuOptions[6].text.text = "Antialiasing: ON";
     } else {
       SettingsMenu.menuOptions[6].text.text = "Antialiasing: OFF";
+    }
+    if (gameModel.detailLevel < 1) {
+      SettingsMenu.menuOptions[7].text.text = "Detail: LOW";
+    } else {
+      SettingsMenu.menuOptions[7].text.text = "Detail: HIGH";
     }
   },
   onShow : function() {

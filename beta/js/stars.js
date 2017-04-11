@@ -46,12 +46,11 @@ Stars.StartEndStars = {
 				}
 			} else {
 				if (timeLeft / levelTime > 0.95) {
-					var star = StarChart.generateStar(gameModel.currentSystem.x, gameModel.currentSystem.y);
-					Stars.StartEndStars.sprite.texture = Stars.StartEndStars.texture(star.scale * 5);
-					Stars.StartEndStars.sprite.star = star;
+					Stars.StartEndStars.sprite.texture = Stars.StartEndStars.texture(startStar.scale * 5);
+					Stars.StartEndStars.sprite.star = startStar;
 					Stars.StartEndStars.sprite.visible = true;
 					Stars.StartEndStars.sprite.scale.x = Stars.StartEndStars.sprite.scale.y = 1;
-					Stars.StartEndStars.sprite.tint = rgbToHex(star.tint.r,star.tint.g,star.tint.b);
+					Stars.StartEndStars.sprite.tint = rgbToHex(startStar.tint.r,startStar.tint.g,startStar.tint.b);
 					Stars.StartEndStars.sprite.xLoc = canvasWidth * 0.15 + (Math.random() * canvasWidth * 0.7);
 					Stars.StartEndStars.sprite.yLoc = canvasWidth * 0.8;
 					Stars.StartEndStars.sprite.ySpeed = 0;
@@ -60,11 +59,10 @@ Stars.StartEndStars = {
 					Stars.StartEndStars.sprite.acceleration = Stars.StartEndStars.acceleration;
 				}
 				else if (timeLeft / levelTime < 0.01) {
-					var star = StarChart.generateStar(gameModel.targetSystem.x, gameModel.targetSystem.y);
-					Stars.StartEndStars.sprite.texture = Stars.StartEndStars.texture(star.scale * 5);
-					Stars.StartEndStars.sprite.star = star;
+					Stars.StartEndStars.sprite.texture = Stars.StartEndStars.texture(endStar.scale * 5);
+					Stars.StartEndStars.sprite.star = endStar;
 					Stars.StartEndStars.sprite.visible = true;
-					Stars.StartEndStars.sprite.tint = rgbToHex(star.tint.r,star.tint.g,star.tint.b);
+					Stars.StartEndStars.sprite.tint = rgbToHex(endStar.tint.r,endStar.tint.g,endStar.tint.b);
 					Stars.StartEndStars.sprite.xLoc = canvasWidth * 0.15 + (Math.random() * canvasWidth * 0.7);
 					Stars.StartEndStars.sprite.yLoc = 0 - canvasWidth * 0.1;
 					Stars.StartEndStars.sprite.ySpeed = Stars.StartEndStars.maxSpeed;
@@ -145,15 +143,15 @@ Stars.stars = {
 	speedFactor : 1,
 	show:function() {
 		Math.seedrandom(Date.now());
-		for (var i = 0; i < Stars.NUM_STARS; i++) {
+		for (var i = 0; i < Stars.stars.sprite.length; i++) {
 			Stars.stars.speed[i] = 10 + Math.random() * 10;
-			Stars.stars.xLoc[i] = canvasWidth / Stars.NUM_STARS * i;
+			Stars.stars.xLoc[i] = canvasWidth * Math.random();
 			Stars.stars.yLoc[i] = -10 + (canvasWidth + 10) * Math.random();
 
 			if (Math.random() > 0.8)
 				Stars.stars.sprite[i].tint = 0x808080 + Math.random() * 0x808080;
 
-			Stars.stars.sprite[i].scale.x = Stars.stars.sprite[i].scale.y = (Stars.stars.speed[i] / 10);
+			Stars.stars.sprite[i].scale.x = Stars.stars.sprite[i].scale.y = (Stars.stars.speed[i] / 10) * gameModel.resolutionFactor;
 		}
 		Stars.stars.sprites.visible = true;
 	},
@@ -167,16 +165,16 @@ Stars.stars = {
 		Stars.stars.sprites = new PIXI.Container();
 		starContainer.addChild(Stars.stars.sprites);
 
-		for (var i = 0; i < Stars.NUM_STARS; i++) {
+		for (var i = 0; i < Stars.NUM_STARS * gameModel.detailLevel; i++) {
 			Stars.stars.speed[i] = 10 + Math.random() * 10;
 			Stars.stars.sprite[i] = new PIXI.Sprite(Stars.stars.texture);
-			Stars.stars.xLoc[i] = canvasWidth / Stars.NUM_STARS * i;
+			Stars.stars.xLoc[i] = canvasWidth * Math.random();
 			Stars.stars.yLoc[i] = canvasWidth * Math.random();
 
 			if (Math.random() > 0.8)
 				Stars.stars.sprite[i].tint = 0x808080 + Math.random() * 0x808080;
 
-			Stars.stars.sprite[i].scale.x = Stars.stars.sprite[i].scale.y = (Stars.stars.speed[i] / 10);
+			Stars.stars.sprite[i].scale.x = Stars.stars.sprite[i].scale.y = (Stars.stars.speed[i] / 10) * gameModel.resolutionFactor;
 
 			Stars.stars.sprites.addChild(Stars.stars.sprite[i]);
 		}
@@ -188,7 +186,7 @@ Stars.stars = {
 			return;
 
 		// Math.seedrandom(Date.now());
-		for (var i = 0; i < Stars.NUM_STARS; i++) {
+		for (var i = 0; i < Stars.stars.sprite.length; i++) {
 
 			Stars.stars.yLoc[i] += Stars.stars.speed[i] * timeDiff * Stars.stars.speedFactor;
 			Stars.stars.sprite[i].position.x = Stars.stars.xLoc[i] * scalingFactor;
@@ -209,24 +207,16 @@ Stars.stars = {
 	}
 };
 
-Stars.shipTrails = {
-	spriteArray : [],
-	discardedSprites: [],
-	trailFrequency : 30,
-	newPowerupPart:function(x,y,tint,scale) {
-
-		var part;
-
-		if (Stars.shipTrails.discardedSprites.length > 0) {
-			part = Stars.shipTrails.discardedSprites.pop();
-			part.visible = true;
-		} else {
-			part = new PIXI.Sprite(Stars.stars.texture);
-			part.anchor = {x: 0.5, y: 0};
-			Stars.shipTrails.sprites.addChild(part);
-			Stars.shipTrails.spriteArray.push(part);
+Stars.powerupParts = {
+	getSpritePool : function() {
+		if (!this.spritePool) {
+			this.spritePool = SpritePool.create(Stars.stars.texture, uiContainer);
 		}
-
+		return this.spritePool;
+	},
+	newPowerupPart:function(x,y,tint,scale) {
+		var part = this.getSpritePool().nextSprite();
+		part.visible = true;
 		part.fadeSpeed= 2 * scalingFactor;
 		part.tint = tint || (Math.random() > 0.4 ? 0xffff00 : 0xff5600);
 		part.visible = true;
@@ -239,26 +229,41 @@ Stars.shipTrails = {
 		part.scale.y = (2 + Math.random() * 2) * scalingFactor * (scale || 1);
 		part.xSpeed = (-40 + Math.random() * 80) * scalingFactor * (scale || 1);
 		part.ySpeed = (-40 + Math.random() * 80) * scalingFactor * (scale || 1);
-
 	},
+	update: function(timeDiff) {
+		this.getSpritePool();
+		var sprite;
+		for (var i = 0; i < this.spritePool.sprites.length; i++) {
+			sprite = this.spritePool.sprites[i];
+			if (sprite.visible) {
+				sprite.scale.x -= sprite.fadeSpeed * timeDiff;
+				sprite.scale.y -= sprite.fadeSpeed * timeDiff;
+
+				if (sprite.scale.x <= 0) {
+					this.spritePool.discardSprite(sprite);
+				} else {
+					sprite.position.y += sprite.ySpeed * timeDiff;
+					sprite.position.x += sprite.xSpeed * timeDiff;
+				}
+			}
+		}
+	}
+};
+
+Stars.shipTrails = {
+	getSpritePool : function() {
+		if (!this.spritePool) {
+			this.spritePool = SpritePool.create(Stars.stars.texture, starContainer);
+		}
+		return this.spritePool;
+	},
+	trailFrequency : 30,
 	newPart: function(ship) {
 
 		if (ship.trailX < 0 || ship.trailX > canvasWidth)
 			return;
 
-		var part;
-
-		if (Stars.shipTrails.discardedSprites.length > 0) {
-			part = Stars.shipTrails.discardedSprites.pop();
-			part.visible = true;
-		} else {
-			part = new PIXI.Sprite(Stars.stars.texture);
-
-			part.anchor = {x: 0.5, y: 0};
-			Stars.shipTrails.sprites.addChild(part);
-			Stars.shipTrails.spriteArray.push(part);
-		}
-
+		var part = this.getSpritePool().nextSprite();
 		part.visible = true;
 		part.tint = Math.random() > 0.4 ? 0xffff00 : 0xff5600;
 		part.alpha = 1;
@@ -272,11 +277,6 @@ Stars.shipTrails = {
 		part.ySpeed = ((ship.enemyShip ? -1 : 1) * (150 + Math.random() * 100)) * scalingFactor;
 		part.xSpeed = (-10 + Math.random() * 20) * scalingFactor;
 	},
-	initialize: function() {
-		Stars.shipTrails.sprites = new PIXI.Container();
-		gameContainer.addChild(Stars.shipTrails.sprites);
-		// blurContainer.addChild(Stars.shipTrails.sprites);
-	},
 	updateShip: function(ship, timeDiff) {
 		ship.lastTrail += timeDiff * 1000;
 		if ((!ship.enemyShip && ship.lastTrail > Stars.shipTrails.trailFrequency + (ship.ySpeed / 2)) || (ship.enemyShip && ship.lastTrail > Stars.shipTrails.trailFrequency)) {
@@ -285,21 +285,22 @@ Stars.shipTrails = {
 		}
 	},
 	update: function(timeDiff) {
-		Stars.shipTrails.sprites.position.x = stageSprite.position.x;
-		for (var i = 0; i < Stars.shipTrails.spriteArray.length; i++) {
-			if (Stars.shipTrails.spriteArray[i].visible) {
+		this.getSpritePool();
+		for (var i = 0; i < this.spritePool.sprites.length; i++) {
 
-				Stars.shipTrails.spriteArray[i].scale.x -= Stars.shipTrails.spriteArray[i].fadeSpeed * timeDiff;
-				Stars.shipTrails.spriteArray[i].scale.y -= Stars.shipTrails.spriteArray[i].fadeSpeed * timeDiff;
+			var sprite = this.spritePool.sprites[i];
 
-				if (Stars.shipTrails.spriteArray[i].scale.x <= 0) {
-					Stars.shipTrails.spriteArray[i].visible = false;
-					Stars.shipTrails.discardedSprites.push(Stars.shipTrails.spriteArray[i]);
+			if (sprite.visible) {
+
+				sprite.scale.x -= sprite.fadeSpeed * timeDiff;
+				sprite.scale.y -= sprite.fadeSpeed * timeDiff;
+
+				if (sprite.scale.x <= 0) {
+					this.spritePool.discardSprite(sprite);
 				} else {
-					Stars.shipTrails.spriteArray[i].position.y += Stars.shipTrails.spriteArray[i].ySpeed * timeDiff;
-					Stars.shipTrails.spriteArray[i].position.x += Stars.shipTrails.spriteArray[i].xSpeed * timeDiff;
+					sprite.position.y += sprite.ySpeed * timeDiff;
+					sprite.position.x += sprite.xSpeed * timeDiff;
 				}
-
 			}
 		}
 	}

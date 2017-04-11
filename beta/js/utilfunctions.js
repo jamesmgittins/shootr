@@ -162,19 +162,25 @@ SpritePool = {
 					this.sprites[i].texture = texture;
 					sprite.anchor = {x:0.5,y:0.5};
 				}
+			},
+			destroy : function() {
+				if (!this.destroyed) {
+					container.removeChild(this.container);
+				}
+				this.destroyed = true;
 			}
     };
   }
 };
 
-var blurFilters;
+// var blurFilters;
 
 function glowTexture(texture, options) {
 
-	if (!blurFilters) {
+	// if (!blurFilters) {
 		blurFilters = [new PIXI.filters.BlurFilter()];
 		blurFilters[0].blur = Math.round(scalingFactor *  2);
-	}
+	// }
 
 	// defaultSize = true;
 	var resize = options && options.resize ? options.resize : 1;
@@ -192,7 +198,7 @@ function glowTexture(texture, options) {
 	var container = new PIXI.Container();
 
 	// only add blur effect for higher resolutions
-	if (renderer.height > 900) {
+	if (renderer.height > 900 && gameModel.detailLevel >= 1) {
 		blurredSprite.filters = blurFilters;
 		blurredSprite.alpha = options && options.blurAmount ? options.blurAmount : 1;
 		container.addChild(blurredSprite);
@@ -219,4 +225,21 @@ function removeAllFromContainer(container) {
 		container.removeChild(container.children[i]);
 		//item.destroy();
 	}
+}
+
+function skewImage(image) {
+	var canvas = document.createElement('canvas');
+	var width = image.width,
+  height = image.height;
+
+	canvas.width = width * 1;
+	canvas.height = height * 1.5;
+  var context = canvas.getContext("2d");
+  for (var i = 0; i <= height / 2; ++i) {
+    context.setTransform(1, -0.4 * i / height, 0, 1, 0, 60);
+    context.drawImage(image, 0, height / 2 - i, width, 2, 0, height / 2 - i, width, 2);
+    context.setTransform(1, 0.4 * i / height, 0, 1, 0, 60);
+		context.drawImage(image, 0, height / 2 + i, width, 2, 0, height / 2 + i, width, 2);
+  }
+	return canvas;
 }

@@ -461,6 +461,7 @@ GameText.bigText = {
 
 GameText.levelComplete = {
 	secondsPerLoot:3,
+	lastButtonPress : 0,
 	lootTimer:0,
 	lastParticle:0,
 	lootLayouts:[],
@@ -469,15 +470,17 @@ GameText.levelComplete = {
 			return;
 
 		this.lastParticle += timeDiff;
+		this.lastButtonPress += timeDiff;
+
 		if (this.lastParticle > 0.5) {
 			this.lastParticle = 0;
 			var sideSpace = (renderer.width - renderer.height) / 2;
-			Stars.shipTrails.newPowerupPart(renderer.width * Math.random() - sideSpace, renderer.height * Math.random());
+			Stars.powerupParts.newPowerupPart(renderer.width * Math.random() - sideSpace, renderer.height * Math.random());
 		}
-
+		var currentIndex;
 		if (this.lootOpening) {
 			this.lootTimer += timeDiff;
-			var currentIndex = Math.floor(this.lootTimer / this.secondsPerLoot);
+			currentIndex = Math.floor(this.lootTimer / this.secondsPerLoot);
 
 			if (this.lootLayouts[currentIndex - 1]) {
 				this.lootLayouts[currentIndex - 1].visible = false;
@@ -497,8 +500,15 @@ GameText.levelComplete = {
 			}
 		}
 
-		if (playerOneButtonsPressed[0] || spaceBar || this.clicked) {
+		if ((playerOneButtonsPressed[0] || spaceBar || this.clicked) && this.lastButtonPress > 0.4) {
+
 			this.clicked = false;
+			this.lastButtonPress = 0;
+
+			if (this.lootOpening) {
+				currentIndex = Math.floor(this.lootTimer / this.secondsPerLoot);
+				this.lootTimer = (currentIndex + 1) * this.secondsPerLoot;
+			}
 			if (gameModel.lootCollected.length > 0 && this.lootTimer === 0) {
 				this.lootOpening = true;
 				this.textMessage.visible = false;

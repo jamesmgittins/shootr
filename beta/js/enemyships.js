@@ -1,6 +1,5 @@
 var EnemyShips = {};
 
-EnemyShips.allDeadTimer = 0;
 EnemyShips.maxShipsPerWave = 16;
 EnemyShips.minShipsPerWave = 4;
 EnemyShips.shipHealth = 2;
@@ -9,9 +8,6 @@ EnemyShips.maxBulletsPerShot=1;
 EnemyShips.currShipId = 1;
 
 EnemyShips.waveBulletFrequency = 3000;
-
-EnemyShips.lastWave = 6000;
-EnemyShips.waveFrequency = 5000;
 
 EnemyShips.wavePatterns = [
 	{
@@ -44,13 +40,13 @@ EnemyShips.wavePatterns = [
     }
 ];
 EnemyShips.patternCounter = Math.floor(Math.random() * EnemyShips.wavePatterns.length);
-EnemyShips.discardedSprites = [];
-EnemyShips.sprites = [];
 EnemyShips.waves = [];
 
 EnemyShips.wave = function () {
 
-	this.shipFrequency = 1000 + (Math.random() * 1000);
+	this.update = EnemyShips.update;
+
+	this.shipFrequency = (1000 + (Math.random() * 1000));
 	this.lastShipSpawned = 0;
 
 	while (typeof this.wavePattern === 'undefined') {
@@ -64,7 +60,7 @@ EnemyShips.wave = function () {
 		}
 	}
 
-	this.shipsInWave = EnemyShips.minShipsPerWave + Math.round(Math.random() * (EnemyShips.maxShipsPerWave - EnemyShips.minShipsPerWave));
+	this.shipsInWave = EnemyShips.minShipsPerWave + Math.round(Math.random() * (EnemyShips.maxShipsPerWave - EnemyShips.minShipsPerWave) * Enemies.difficultyFactor);
 	this.shipsDestroyed = 0;
 	var size = Math.round(42 + Math.random() * 22);
 	this.colors = Ships.enemyColors[Math.floor(Math.random() * Ships.enemyColors.length)];
@@ -76,6 +72,7 @@ EnemyShips.wave = function () {
 
 	this.texture = glowTexture(PIXI.Texture.fromCanvas(Ships.shipArt(size, seed, this.colors)));
 	this.damageTexture = glowTexture(PIXI.Texture.fromCanvas(Ships.shipArt(size, seed, this.colors, true)));
+	this.spritePool = SpritePool.create(this.texture, frontEnemyContainer);
 
 	this.maxSpeed = 60 + Math.random() * 30;
 
@@ -86,6 +83,10 @@ EnemyShips.wave = function () {
 
 EnemyShips.enemyShip = function (wave) {
 
+	this.damage = EnemyShips.damageEnemyShip;
+	this.destroy = EnemyShips.destroy;
+	this.detectCollision = Ships.detectCollision;
+
 	this.wave = wave;
 	this.xLoc = canvasWidth * wave.wavePattern.xCoords[0];
 	this.xTar = canvasWidth * wave.wavePattern.xCoords[1];
@@ -93,7 +94,7 @@ EnemyShips.enemyShip = function (wave) {
 	this.yTar = canvasHeight * wave.wavePattern.yCoords[1];
 	this.nextCoord = 1;
 	this.maxSpeed = wave.maxSpeed;
-	this.health = wave.shipHealth;
+	this.health = wave.shipHealth * Enemies.difficultyFactor;
 	this.inPlay = 1;
 	this.enemyShip = true;
 	this.rotation=0;
@@ -105,33 +106,28 @@ EnemyShips.enemyShip = function (wave) {
 	this.allDeadSurvivalTime = Math.random() * 1000;
 	this.id = EnemyShips.currShipId++;
 
-	if (EnemyShips.discardedSprites.length > 0) {
-		this.sprite = EnemyShips.discardedSprites.pop();
-		this.sprite.texture = wave.texture;
-		this.sprite.visible = true;
-		this.sprite.tint = 0xFFFFFF;
-	} else {
-		this.sprite = new PIXI.Sprite(wave.texture);
-		this.sprite.scale.y = -1;
-		enemyShipContainer.addChild(this.sprite);
-		EnemyShips.sprites.push(this.sprite);
-	}
-
+	this.sprite = wave.spritePool.nextSprite();
+	this.sprite.texture = wave.texture;
+	this.sprite.visible = true;
+	this.sprite.tint = 0xFFFFFF;
+	this.sprite.scale.y = -1;
 	this.sprite.position.x = this.xLoc * scalingFactor;
 	this.sprite.position.y = this.yLoc * scalingFactor;
 	this.sprite.anchor = {x:0.5,y:0.5};
 
+	Enemies.enemiesSpawned++;
+
 };
 
 EnemyShips.destroy = function (ship) {
-  ship.sprite.visible = false;
-	EnemyShips.discardedSprites.push(ship.sprite);
+
 	stageSprite.screenShake += gameModel.maxScreenShake;
 	ship.inPlay = 0;
 
-	enemiesKilled++;
+	Enemies.enemiesKilled++;
 
 	if (ship.wave) {
+		ship.wave.spritePool.discardSprite(ship.sprite);
 		ship.wave.shipsDestroyed++;
 		if (ship.wave.shipsDestroyed >= ship.wave.shipsInWave) {
 			addCredits(ship.wave.shipHealth * ship.wave.shipsInWave * 0.3);
@@ -143,11 +139,12 @@ EnemyShips.destroy = function (ship) {
 
 		Powerups.newPowerup(ship.xLoc,ship.yLoc);
 	} else {
+		ship.spritePool.discardSprite(ship.sprite);
 		for (var i=0; i<5; i++) {
 			Ships.generateExplosion(ship, -50 + Math.random() * 100, -50 + Math.random() * 100, Math.random() * 2000);
 		}
 
-		EnemyShips.allDeadTimer = 0;
+		Enemies.allDeadTimer = 0;
 	}
 
 	Sounds.shipExplosion.play();
@@ -157,7 +154,7 @@ EnemyShips.destroy = function (ship) {
 EnemyShips.checkForPlayerCollision = function (ship) {
     if (Ships.detectShipCollision(ship, PlayerShip.playerShip)) {
 			PlayerShip.damagePlayerShip(PlayerShip.playerShip, ship.health);
-			EnemyShips.destroy(ship);
+			ship.destroy(ship);
     }
 };
 
@@ -167,57 +164,56 @@ EnemyShips.checkForSplashDamage = function (ship){
       if (distanceBetweenPoints(ship.xLoc, ship.yLoc, Bullets.splashDamage.splashes[i].xLoc, Bullets.splashDamage.splashes[i].yLoc) < Bullets.splashDamage.splashes[i].spread &&
         !Bullets.splashDamage.splashes[i].shipsDamaged[ship.id]) {
           Bullets.splashDamage.splashes[i].shipsDamaged[ship.id] = 1;
-          EnemyShips.damageEnemyShip(ship, ship.xLoc, ship.yLoc, Bullets.splashDamage.splashes[i].damage);
+          Enemies.damageEnemy(ship, ship.xLoc, ship.yLoc, Bullets.splashDamage.splashes[i].damage);
       }
     }
   }
 };
 
-EnemyShips.damageEnemyShip = function(ship, xLoc, yLoc, damage, noEffect) {
-	if (ship.health > 0) {
+EnemyShips.damageEnemyShip = function(xLoc, yLoc, damage, noEffect) {
+	if (this.health > 0) {
 
 		if (!noEffect) {
 			Bullets.generateExplosion(xLoc, yLoc);
 			Sounds.enemyDamage.play();
-			ship.sprite.rotation = -ship.rotation - 0.1 + (Math.random() * 0.2);
-			ship.sprite.texture = ship.damageTexture || ship.wave.damageTexture;
-			ship.lastDamaged = 0;
+			this.sprite.rotation = -this.rotation - 0.1 + (Math.random() * 0.2);
+			this.sprite.texture = this.damageTexture || this.wave.damageTexture;
+			this.lastDamaged = 0;
 		}
 
-		ship.health -= damage;
+		this.health -= damage;
 
-		GameText.damage.newText(damage, ship);
+		GameText.damage.newText(damage, this);
 
-		if (ship.wave) {
-			var percentOfShipDamaged = damage / ship.wave.shipHealth;
+		if (this.wave) {
+			var percentOfShipDamaged = damage / this.wave.shipHealth;
 
 			stageSprite.screenShake += gameModel.maxScreenShake * percentOfShipDamaged;
 
-			if (ship.health + damage > ship.wave.shipHealth / 2 && ship.health < ship.wave.shipHealth / 2) {
-				ship.maxSpeed *= 0.90;
+			if (this.health + damage > this.wave.shipHealth / 2 && this.health < this.wave.shipHealth / 2) {
+				this.maxSpeed *= 0.90;
 			}
 		}
 
-		if (ship.health <= 0) {
-			EnemyShips.destroy(ship);
+		if (this.health <= 0) {
+			this.destroy(this);
 		}
 	}
 };
 
 EnemyShips.updateShip = function (eShip, timeDiff) {
 	if (eShip.inPlay) {
-		if (timeLeft < 0 && EnemyShips.allDeadTimer >= eShip.allDeadSurvivalTime) {
+		if (timeLeft < 0 && Enemies.allDeadTimer >= eShip.allDeadSurvivalTime) {
 			eShip.inPlay = 0;
-			eShip.sprite.visible = false;
-			EnemyShips.discardedSprites.push(eShip.sprite);
+			eShip.wave.spritePool.discardSprite(eShip.sprite);
 
-			if (eShip.xLoc > 0 && eShip.yLoc > 0) {
+			if (eShip.xLoc > 0 && eShip.yLoc > 0 && eShip.xLoc < canvasWidth && eShip.yLoc < canvasHeight) {
 				Ships.generateExplosion(eShip);
 				stageSprite.screenShake += gameModel.maxScreenShake;
 				Sounds.shipExplosion.play();
 			}
 		} else {
-			EnemyShips.activeShips.push(eShip);
+			Enemies.activeShips.push(eShip);
 		}
 		if (Math.sqrt(Math.pow(eShip.xLoc - eShip.xTar, 2) +
 						Math.pow(eShip.yLoc - eShip.yTar, 2)) > 5) {
@@ -240,7 +236,7 @@ EnemyShips.updateShip = function (eShip, timeDiff) {
 
 				eShip.lastParticle += timeDiff;
 				if (eShip.lastParticle > 0.1) {
-					Stars.shipTrails.newPowerupPart(eShip.sprite.position.x - (20 * scalingFactor) + (Math.random() * 40 * scalingFactor),
+					Stars.powerupParts.newPowerupPart(eShip.sprite.position.x - (20 * scalingFactor) + (Math.random() * 40 * scalingFactor),
 																				eShip.sprite.position.y - (20 * scalingFactor) + (Math.random() * 40 * scalingFactor),
 																				calculateTintFromString(eShip.wave.colors[Math.floor(Math.random() * eShip.wave.colors.length)]));
 					eShip.lastParticle = 0;
@@ -253,8 +249,7 @@ EnemyShips.updateShip = function (eShip, timeDiff) {
 
 			if (eShip.nextCoord >= eShip.wave.wavePattern.xCoords.length) {
 				eShip.inPlay = 0;
-				eShip.sprite.visible = false;
-				EnemyShips.discardedSprites.push(eShip.sprite);
+				eShip.wave.spritePool.discardSprite(eShip.sprite);
 				eShip.wave.shipsExited++;
 			} else {
 				eShip.xTar = canvasWidth * eShip.wave.wavePattern.xCoords[eShip.nextCoord];
@@ -284,55 +279,26 @@ EnemyShips.updateShip = function (eShip, timeDiff) {
 	}
 };
 
-EnemyShips.activeShips = [];
+Enemies.activeShips = [];
 
 EnemyShips.update = function (timeDiff) {
 
-	EnemyShips.lastWave += timeDiff * 1000;
+	this.lastShipSpawned += timeDiff * 1000;
+	this.lastBullet += timeDiff * 1000;
 
-	EnemyShips.activeShips = [];
-
-	if (timeLeft > 0) {
-		EnemyShips.allDeadTimer = 0;
-	}
-
-	if (timeLeft < 0) {
-		EnemyShips.allDeadTimer += (timeDiff * 1000);
-		if (EnemyShips.allDeadTimer > PlayerShip.allDeadTime && !Powerups.inPLay() && !MoneyPickup.inPlay()) {
-			if (Boss.bossActive()) {
-				Boss.update(timeDiff);
-			} else {
-				Boss.shield.hide();
-				changeState(states.levelComplete);
-				Weapons.reset();
-			}
-		}
-	}
-
-	for (var i = 0; i < EnemyShips.maxWaves; i++) {
-
-		if (!EnemyShips.waves[i] || EnemyShips.waves[i].finished) {
-			if (EnemyShips.lastWave >= EnemyShips.waveFrequency && Math.random() > 0.9) {
-				EnemyShips.waves[i] = new EnemyShips.wave();
-				EnemyShips.lastWave = 0;
+	for (var j = 0; j < this.shipsInWave; j++) {
+		if (!this.ships[j]) {
+			if (this.lastShipSpawned >= this.shipFrequency && timeLeft > 0) {
+				this.ships[j] = new EnemyShips.enemyShip(this);
+				this.lastShipSpawned = 0;
 			}
 		} else {
-			EnemyShips.waves[i].lastShipSpawned += timeDiff * 1000;
-			EnemyShips.waves[i].lastBullet += timeDiff * 1000;
-			for (var j = 0; j < EnemyShips.waves[i].shipsInWave; j++) {
-				if (!EnemyShips.waves[i].ships[j]) {
-					if (EnemyShips.waves[i].lastShipSpawned >= EnemyShips.waves[i].shipFrequency && timeLeft > 0) {
-						EnemyShips.waves[i].ships[j] = new EnemyShips.enemyShip(EnemyShips.waves[i]);
-						EnemyShips.waves[i].lastShipSpawned = 0;
-					}
-				} else {
-					EnemyShips.updateShip(EnemyShips.waves[i].ships[j],timeDiff);
-				}
-			}
-			if (EnemyShips.waves[i].shipsExited + EnemyShips.waves[i].shipsDestroyed >= EnemyShips.waves[i].shipsInWave) {
-				EnemyShips.waves[i].finished = true;
-				EnemyShips.waves[i].wavePattern.inUse = false;
-			}
+			EnemyShips.updateShip(this.ships[j],timeDiff);
 		}
+	}
+	if (this.shipsExited + this.shipsDestroyed >= this.shipsInWave) {
+		this.finished = true;
+		this.wavePattern.inUse = false;
+		this.spritePool.destroy();
 	}
 };

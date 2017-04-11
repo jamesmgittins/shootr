@@ -77,23 +77,23 @@ RailGun = {
           if (Math.random() > 0.9)
             this.beamTrails.newPart(location.x * scalingFactor, location.y * scalingFactor);
 
-          for (var j = 0; j < EnemyShips.activeShips.length; j ++) {
-            if (!EnemyShips.activeShips[j].damagedByRailgun &&
-								distanceBetweenPoints(location.x, location.y, EnemyShips.activeShips[j].xLoc, EnemyShips.activeShips[j].yLoc) <= 100 &&
-								Ships.detectCollision(EnemyShips.activeShips[j], location.x, location.y)) {
+          for (var j = 0; j < Enemies.activeShips.length; j ++) {
+            if (!Enemies.activeShips[j].damagedByRailgun &&
+								distanceBetweenPoints(location.x, location.y, Enemies.activeShips[j].xLoc, Enemies.activeShips[j].yLoc) <= 100 &&
+								Enemies.activeShips[j].detectCollision(Enemies.activeShips[j], location.x, location.y)) {
 
-              EnemyShips.damageEnemyShip(EnemyShips.activeShips[j], location.x, location.y, damage);
-              EnemyShips.activeShips[j].damagedByRailgun = true;
+              Enemies.damageEnemy(Enemies.activeShips[j], location.x, location.y, damage);
+              Enemies.activeShips[j].damagedByRailgun = true;
 
-							if (!EnemyShips.activeShips[j].inPlay && this.weapon.splitBeamOnKill) {
+							if (!Enemies.activeShips[j].inPlay && this.weapon.splitBeamOnKill) {
 								this.fireShot({x:location.x, y:location.y, angle:Math.random() * 2 * Math.PI}, 0.5);
 							}
               damage *= 0.5;
             }
           }
         }
-        for (var k = 0; k < EnemyShips.activeShips.length; k ++) {
-          EnemyShips.activeShips[k].damagedByRailgun = false;
+        for (var k = 0; k < Enemies.activeShips.length; k ++) {
+          Enemies.activeShips[k].damagedByRailgun = false;
         }
 			},
 			beamTrails : {

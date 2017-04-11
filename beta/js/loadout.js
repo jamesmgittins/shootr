@@ -139,7 +139,7 @@ Loadout.showWeapons = function() {
     return b.dps - a.dps;
   });
 
-  for (var i=0; i<gameModel.p1.weapons.length; i++) {
+  for (i=0; i<gameModel.p1.weapons.length; i++) {
     if (!Loadout.equippedWeapon || gameModel.p1.weapons[i].id != Loadout.equippedWeapon.id) {
       var equippedText = "";
       if (gameModel.p1.frontWeapon && gameModel.p1.frontWeapon.id == gameModel.p1.weapons[i].id)
@@ -218,14 +218,14 @@ Loadout.selectWeapon = function(index) {
     Loadout.menuOptions[2].text.removeChild(Loadout.menuOptions[2].equippedIcon);
     Loadout.menuOptions[2].equippedText.tint = Loadout.menuOptions[2].equippedText.defaultTint = MainMenu.unselectableTint;
   }
-
+  var iconPosition;
   switch(Loadout.currentPosition) {
     case Loadout.positions.frontWeapon:
       gameModel.p1.frontWeapon = Loadout.weapons[index].weapon;
       Loadout.menuOptions[0].equippedText.text = "";
       Loadout.menuOptions[0].equippedText.tint = Loadout.menuOptions[0].equippedText.defaultTint = MainMenu.buttonTint;
 
-      var iconPosition = Loadout.menuOptions[0].equippedIcon.position;
+      iconPosition = Loadout.menuOptions[0].equippedIcon.position;
       Loadout.menuOptions[0].text.removeChild(Loadout.menuOptions[0].equippedIcon);
       Loadout.menuOptions[0].equippedIcon = ArmsDealer.createItemIcon(Loadout.weapons[index].weapon, {buy:false, loadout:true, scale:0.7});
       Loadout.menuOptions[0].equippedIcon.position = iconPosition;
@@ -238,7 +238,7 @@ Loadout.selectWeapon = function(index) {
       Loadout.menuOptions[1].equippedText.text = "";
       Loadout.menuOptions[1].equippedText.tint = Loadout.menuOptions[1].equippedText.defaultTint = MainMenu.buttonTint;
 
-      var iconPosition = Loadout.menuOptions[1].equippedIcon.position;
+      iconPosition = Loadout.menuOptions[1].equippedIcon.position;
       Loadout.menuOptions[1].text.removeChild(Loadout.menuOptions[1].equippedIcon);
       Loadout.menuOptions[1].equippedIcon = ArmsDealer.createItemIcon(Loadout.weapons[index].weapon, {buy:false, loadout:true, scale:0.7});
       Loadout.menuOptions[1].equippedIcon.position = iconPosition;
@@ -251,7 +251,7 @@ Loadout.selectWeapon = function(index) {
       Loadout.menuOptions[2].equippedText.text = "";
       Loadout.menuOptions[2].equippedText.tint = Loadout.menuOptions[2].equippedText.defaultTint = MainMenu.buttonTint;
 
-      var iconPosition = Loadout.menuOptions[2].equippedIcon.position;
+      iconPosition = Loadout.menuOptions[2].equippedIcon.position;
       Loadout.menuOptions[2].text.removeChild(Loadout.menuOptions[2].equippedIcon);
       Loadout.menuOptions[2].equippedIcon = ArmsDealer.createItemIcon(Loadout.weapons[index].weapon, {buy:false, loadout:true, scale:0.7});
       Loadout.menuOptions[2].equippedIcon.position = iconPosition;
@@ -293,7 +293,7 @@ Loadout.showShields = function() {
     return b.capacity - a.capacity;
   });
 
-  for (var i=0; i<gameModel.p1.shields.length; i++) {
+  for (i=0; i<gameModel.p1.shields.length; i++) {
     if (!equippedShield || gameModel.p1.shields[i].id != equippedShield.id) {
       Loadout.shields[index] = {
         index : index,
@@ -338,11 +338,12 @@ Loadout.show = function() {
 };
 
 Loadout.initialize = function () {
+  var i;
   if (!Loadout.menuContainer) {
     Loadout.menuContainer = new PIXI.Container();
     gameContainer.addChild(Loadout.menuContainer);
   } else {
-    for (var i=Loadout.menuContainer.children.length - 1; i >= 0; i--){
+    for (i = Loadout.menuContainer.children.length - 1; i >= 0; i--){
       var item = Loadout.menuContainer.children[i];
       Loadout.menuContainer.removeChild(item);
       item.destroy();
@@ -427,7 +428,7 @@ Loadout.initialize = function () {
 
   var positionSpacing = 110;
 
-  for (var i=0; i< Loadout.menuOptions.length;i++) {
+  for (i = 0; i < Loadout.menuOptions.length; i++) {
     var level = 1;
     var weapon = undefined;
     switch (i) {
@@ -662,11 +663,9 @@ Loadout.left = function() {
     return false;
 
   if (Loadout.weaponMenuOpen) {
-    var selection = gridSelection(-1, 0, Loadout.weaponSelection, Loadout.weapons.length, Loadout.gridWidth);
-    Loadout.select(Loadout.weapons[selection]);
+    Loadout.select(Loadout.weapons[gridSelection(-1, 0, Loadout.weaponSelection, Loadout.weapons.length, Loadout.gridWidth)]);
   } else if (Loadout.shieldMenuOpen) {
-    var selection = gridSelection(-1, 0, Loadout.weaponSelection, Loadout.shields.length, Loadout.gridWidth);
-    Loadout.select(Loadout.shields[selection]);
+    Loadout.select(Loadout.shields[gridSelection(-1, 0, Loadout.weaponSelection, Loadout.shields.length, Loadout.gridWidth)]);
   }
 };
 
@@ -675,11 +674,9 @@ Loadout.right = function() {
     return false;
 
     if (Loadout.weaponMenuOpen) {
-      var selection = gridSelection(1, 0, Loadout.weaponSelection, Loadout.weapons.length, Loadout.gridWidth);
-      Loadout.select(Loadout.weapons[selection]);
+      Loadout.select(Loadout.weapons[gridSelection(1, 0, Loadout.weaponSelection, Loadout.weapons.length, Loadout.gridWidth)]);
     } else if (Loadout.shieldMenuOpen) {
-      var selection = gridSelection(1, 0, Loadout.weaponSelection, Loadout.shields.length, Loadout.gridWidth);
-      Loadout.select(Loadout.shields[selection]);
+      Loadout.select(Loadout.shields[gridSelection(1, 0, Loadout.weaponSelection, Loadout.shields.length, Loadout.gridWidth)]);
     }
 };
 
@@ -760,8 +757,8 @@ Loadout.update = function(timeDiff) {
         if (Loadout.currentPosition === Loadout.positions.rearWeapon) {
           // rear
           if (Loadout.firingWeapon.readyToFire(true, timeDiff)) {
-            Loadout.firingWeapon.fireShot({x: Loadout.shipSprite.position.x / scalingFactor + 16, y: (Loadout.shipSprite.position.y / scalingFactor) + 16, angle: (Math.PI / 8) * (Loadout.firingWeapon.rearAngleMod || 1)}, 0.5);
-            Loadout.firingWeapon.fireShot({x: Loadout.shipSprite.position.x / scalingFactor - 16, y: (Loadout.shipSprite.position.y / scalingFactor) + 16, angle:(-Math.PI / 8) * (Loadout.firingWeapon.rearAngleMod || 1)}, 0.5);
+            Loadout.firingWeapon.fireShot({x: Loadout.shipSprite.position.x / scalingFactor + 16, y: (Loadout.shipSprite.position.y / scalingFactor) + 16, angle: (Math.PI / 8), rear:true}, 0.5);
+            Loadout.firingWeapon.fireShot({x: Loadout.shipSprite.position.x / scalingFactor - 16, y: (Loadout.shipSprite.position.y / scalingFactor) + 16, angle:(-Math.PI / 8), rear:true}, 0.5);
           }
         }
       } else {

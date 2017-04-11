@@ -6,14 +6,10 @@ var debug = false;
 
 var playerTwo = false;
 
-var enemiesToKillConstant = 50;
-var enemiesKilled = 0;
-var enemiesToKill = 0;
-
 var loader;
 
 var levelTime = 118;
-// var levelTime = 10;
+// var levelTime = 20;
 var timeLeft = levelTime;
 var distance = 5;
 
@@ -56,13 +52,14 @@ var playerOneButtonsPressed = [];
 var playerTwoSelectedUpgrade = -1;
 var playerTwoAxes = [];
 var playerTwoButtonsPressed = [];
-var startTint = {r:0,g:0,b:0};
-var endTint = {r:0,g:0,b:0};
 var inSpace = true;
+
+var startStar;
+var endStar;
 
 function changeLevel(level) {
 
-	gameModel.currentLevel = calculateAdjustedStarLevel(level);
+	gameModel.currentLevel = Boss.isInTargetSystem() ? Math.max(Boss.currentLevel(), calculateAdjustedStarLevel(level)) : calculateAdjustedStarLevel(level);
 
 	var levelDifficultyModifier = Math.pow(Constants.difficultyLevelScaling, gameModel.currentLevel - 1);
 
@@ -92,16 +89,14 @@ function changeLevel(level) {
 		Terrain.show();
 	}
 
-	startTint = StarChart.generateStar(gameModel.currentSystem.x, gameModel.currentSystem.y).tint;
-	endTint = StarChart.generateStar(gameModel.targetSystem.x, gameModel.targetSystem.y).tint;
+	startStar = StarChart.generateStar(gameModel.currentSystem.x, gameModel.currentSystem.y);
+	endStar = StarChart.generateStar(gameModel.targetSystem.x, gameModel.targetSystem.y);
 
 	Stars.nebulaBackground.initTexture(StarChart.generateStar(gameModel.targetSystem.x, gameModel.targetSystem.y).seed);
 
 	EnemyShips.waveBulletFrequency = Math.max(2500 - gameModel.currentLevel, 500);
 	EnemyShips.shipHealth = (10 * gameModel.currentLevel * levelDifficultyModifier) - 5 + gameModel.currentLevel;
 	EnemyShips.maxBulletsPerShot = Math.min(8, gameModel.currentLevel / 7);
-	enemiesKilled = 0;
-	enemiesToKill = enemiesToKillConstant + Math.floor(gameModel.currentLevel / 5);
 	Boss.health = EnemyShips.shipHealth * 100;
 	Boss.initialized = false;
 
@@ -121,7 +116,7 @@ function changeState(state) {
 
 		Sounds.music.pause();
 
-		EnemyShips.activeShips = [];
+		Enemies.activeShips = [];
 
 		if (state == states.running) {
 		  stageSprite.visible=true;
@@ -198,17 +193,10 @@ function changeState(state) {
 function resetGame() {
 	Weapons.reset();
 	Powerups.reset();
+	Boss.reset();
+	Enemies.reset();
 
-	EnemyShips.waves = [];
-	enemiesKilled = 0;
-	enemiesToKill = enemiesToKillConstant + Math.floor(gameModel.currentLevel / 2);
-	EnemyShips.allDeadTimer = 0;
 
-	EnemyShips.discardedSprites = [];
-	EnemyShips.sprites.forEach(function(sprite){
-		sprite.visible = false;
-		EnemyShips.discardedSprites.push(sprite);
-	});
 
 	timeLeft = levelTime;
 	PlayerShip.reset();
@@ -234,6 +222,7 @@ var vSyncOff = false;
 var startTintPercentOnBackground = 1.50;
 
 var animationFrameId;
+
 
 function update() {
 
@@ -266,36 +255,29 @@ function update() {
 			var percentageOfEndTint = Math.min(0.1,Math.max(0.1 - timeLeft / levelTime,0)) * startTintPercentOnBackground;
 
 			stageBackground.tint = rgbToHex(
-				Math.round(startTint.r * percentageOfStartTint) + Math.round(endTint.r * percentageOfEndTint),
-				Math.round(startTint.g * percentageOfStartTint) + Math.round(endTint.g * percentageOfEndTint),
-				Math.round(startTint.b * percentageOfStartTint) + Math.round(endTint.b * percentageOfEndTint));
+				Math.round(startStar.tint.r * percentageOfStartTint) + Math.round(endStar.tint.r * percentageOfEndTint),
+				Math.round(startStar.tint.g * percentageOfStartTint) + Math.round(endStar.tint.g * percentageOfEndTint),
+				Math.round(startStar.tint.b * percentageOfStartTint) + Math.round(endStar.tint.b * percentageOfEndTint));
 
 			// update game state
 	// 		Terrain.update(timeDiff);
 			PlayerShip.updatePlayerShip(timeDiff);
-			EnemyShips.update(timeDiff);
+			Enemies.update(timeDiff);
 			Weapons.update(timeDiff);
 			Bullets.enemyBullets.update(timeDiff);
 			PlayerShip.controllerPointer.update();
 			Powerups.update(timeDiff);
 
 			stageSprite.screenShake = Math.min(stageSprite.screenShake, gameModel.maxScreenShake);
+			updateScreenShake(timeDiff);
 
-			if (stageSprite.screenShake > 0) {
-				stageSprite.position.x = ((canvas.width - canvas.height) / 2) - (scalingFactor * stageSprite.screenShake ) + (Math.random() * scalingFactor * stageSprite.screenShake  * 2);
-				stageSprite.position.y = 0 - (scalingFactor * stageSprite.screenShake ) + (Math.random() * scalingFactor * stageSprite.screenShake  * 2);
-				stageSprite.screenShake -= timeDiff * 30;
-			} else {
-				stageSprite.position.x = (canvas.width - canvas.height) / 2;
-				stageSprite.position.y = 0;
-			}
 			ShootrUI.updateFps(updateTime);
 		} else {
 			MainMenu.updateAll(timeDiff);
 		}
 
 		GameText.update(timeDiff);
-
+		Stars.powerupParts.update(timeDiff);
 		Bullets.blasts.updateBlasts(timeDiff);
 		Bullets.splashDamage.update(timeDiff);
 		Ships.blasts.update(timeDiff);
@@ -307,6 +289,27 @@ function update() {
 		renderer.render(gameContainer);
 }
 
+var screenShakeXrate = 40;
+var screenShakeYrate = 30;
+
+var updateScreenShake =  function(timeDiff) {
+	if (stageSprite.screenShake > 0) {
+		if (!stageSprite.screenShakeSins) {
+			stageSprite.screenShakeSins = {x:0, y:0.5};
+		}
+
+		stageSprite.screenShakeSins.x += timeDiff * screenShakeXrate;
+		stageSprite.screenShakeSins.y += timeDiff * screenShakeYrate;
+
+		stageSprite.position.x = ((canvas.width - canvas.height) / 2) + (Math.sin(stageSprite.screenShakeSins.x) * scalingFactor * stageSprite.screenShake);
+		stageSprite.position.y = Math.sin(stageSprite.screenShakeSins.y) * scalingFactor * stageSprite.screenShake;
+		stageSprite.screenShake -= timeDiff * 30;
+	} else {
+		stageSprite.position.x = (canvas.width - canvas.height) / 2;
+		stageSprite.position.y = 0;
+	}
+};
+
 var coords;
 var stage;
 
@@ -314,6 +317,8 @@ var starContainer;
 var bulletContainer;
 var playerBulletContainer;
 var enemyShipContainer;
+var backgroundEnemyContainer;
+var frontEnemyContainer;
 var playerShipContainer;
 var explosionContainer;
 var uiContainer;
@@ -474,14 +479,19 @@ function startGame() {
 	bulletContainer = new PIXI.Container();
 	playerBulletContainer = new PIXI.Container();
 	enemyShipContainer = new PIXI.Container();
+	backgroundEnemyContainer = new PIXI.Container();
+	frontEnemyContainer = new PIXI.Container();
+
+	enemyShipContainer.addChild(backgroundEnemyContainer);
+	enemyShipContainer.addChild(bulletContainer);
+	enemyShipContainer.addChild(frontEnemyContainer);
+
 	playerShipContainer = new PIXI.Container();
 	playerShipContainer.visible=false;
 	explosionContainer = new PIXI.Container();
 	uiContainer = new PIXI.Container();
 
 	stage.addChild(starContainer);
-
-	stage.addChild(bulletContainer);
 	stage.addChild(enemyShipContainer);
 	stage.addChild(playerBulletContainer);
 	stage.addChild(playerShipContainer);
@@ -492,16 +502,11 @@ function startGame() {
 
 	Stars.nebulaBackground.initTexture(1);
 	Stars.stars.initialize();
-	Stars.shipTrails.initialize();
   PlayerShip.initialize();
 // 	Terrain.initialize();
 
   PlayerShip.controllerPointer.initialize();
-	Bullets.enemyBullets.initialize();
-	Bullets.blasts.initialize();
 	Ships.blasts.initialize();
-	Bullets.explosionBits.initialize();
-	Ships.fragments.initialize();
 	Ships.explosionBits.initialize();
 	Powerups.initialize();
 

@@ -252,17 +252,14 @@ Weapons.update = function(timeDiff) {
   if (Weapons.weaponLogic.rearWeapon) {
     Weapons.weaponLogic.rearWeapon.update(timeDiff);
     if (Weapons.weaponLogic.rearWeapon.readyToFire(shouldPlayerShoot, timeDiff)) {
-      Weapons.weaponLogic.rearWeapon.fireShot({x: PlayerShip.playerShip.xLoc + 16, y: PlayerShip.playerShip.yLoc + 16, angle: (Math.PI / 8) * (Weapons.weaponLogic.rearWeapon.rearAngleMod || 1)}, 0.5);
-      Weapons.weaponLogic.rearWeapon.fireShot({x: PlayerShip.playerShip.xLoc - 16, y: PlayerShip.playerShip.yLoc + 16, angle:(-Math.PI / 8) * (Weapons.weaponLogic.rearWeapon.rearAngleMod || 1)}, 0.5);
+      Weapons.weaponLogic.rearWeapon.fireShot({x: PlayerShip.playerShip.xLoc + 16, y: PlayerShip.playerShip.yLoc + 16, angle: (Math.PI / 8), rear:true}, 0.5);
+      Weapons.weaponLogic.rearWeapon.fireShot({x: PlayerShip.playerShip.xLoc - 16, y: PlayerShip.playerShip.yLoc + 16, angle:(-Math.PI / 8), rear:true}, 0.5);
     }
   }
 };
 
 Weapons.reset = function() {
-
-  removeAllFromContainer(bulletContainer);
+  Bullets.enemyBullets.getSpritePool().discardAll();
   removeAllFromContainer(playerBulletContainer);
-
-  Bullets.enemyBullets.initialize();
   Weapons.weaponLogic = {};
 };

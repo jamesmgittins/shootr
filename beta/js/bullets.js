@@ -64,22 +64,15 @@ Bullets.blasts = {
 
 		return PIXI.Texture.fromCanvas(blast);
 	}()),
-	sprite: [],
-	discardedSprites: [],
+	getSpritePool : function() {
+		if (!this.spritePool) {
+			this.spritePool = SpritePool.create(this.texture, explosionContainer);
+		}
+		return this.spritePool;
+	},
 	newBlast: function(x, y) {
 
-		var sprite;
-		if (Bullets.blasts.discardedSprites.length > 0) {
-			sprite = Bullets.blasts.discardedSprites.pop();
-		} else {
-			sprite = new PIXI.Sprite(Bullets.blasts.texture);
-			sprite.anchor = {
-				x: 0.5,
-				y: 0.5
-			};
-			Bullets.blasts.sprites.addChild(sprite);
-			Bullets.blasts.sprite.push(sprite);
-		}
+		var sprite = this.getSpritePool().nextSprite();
 		sprite.visible = true;
 		sprite.scale = {
 			x: scalingFactor,
@@ -88,18 +81,15 @@ Bullets.blasts = {
 		sprite.position.x = x * scalingFactor;
 		sprite.position.y = y * scalingFactor;
 	},
-	initialize: function() {
-		Bullets.blasts.sprites = new PIXI.Container();
-		explosionContainer.addChild(Bullets.blasts.sprites);
-	},
 	updateBlasts: function(timeDiff) {
-		for (var i = 0; i < Bullets.blasts.sprite.length; i++) {
-			if (Bullets.blasts.sprite[i].visible) {
-				Bullets.blasts.sprite[i].scale.y -= (5 * timeDiff) * scalingFactor;
-				Bullets.blasts.sprite[i].scale.x = Bullets.blasts.sprite[i].scale.y;
-				if (Bullets.blasts.sprite[i].scale.x <= 0) {
-					Bullets.blasts.sprite[i].visible = false;
-					Bullets.blasts.discardedSprites.push(Bullets.blasts.sprite[i]);
+		this.getSpritePool();
+		for (var i = 0; i < this.spritePool.sprites.length; i++) {
+			var sprite = this.spritePool.sprites[i];
+			if (sprite.visible) {
+				sprite.scale.y -= (5 * timeDiff) * scalingFactor;
+				sprite.scale.x = sprite.scale.y;
+				if (sprite.scale.x <= 0) {
+					this.spritePool.discardSprite(sprite);
 				}
 			}
 		}
@@ -107,6 +97,33 @@ Bullets.blasts = {
 };
 
 Bullets.enemyBullets = {
+	texture: function() {
+		var blast = document.createElement('canvas');
+		var size = 12 * scalingFactor;
+		blast.width = size + 4;
+		blast.height = size + 4;
+		var blastCtx = blast.getContext('2d');
+
+		blastCtx.shadowBlur = 5;
+		blastCtx.shadowColor = "red";
+
+		var radgrad = blastCtx.createRadialGradient(size / 2 + 2, size / 2 + 2, 0, size / 2, size / 2, size / 2);
+		radgrad.addColorStop(0, 'rgba(255,255,128,1)');
+		radgrad.addColorStop(0.8, 'rgba(255,0,0,0.4)');
+		radgrad.addColorStop(1, 'rgba(255,180,0,0)');
+
+		// draw shape
+		blastCtx.fillStyle = radgrad;
+		blastCtx.fillRect(0, 0, size, size);
+
+		return glowTexture(PIXI.Texture.fromCanvas(blast), {blurAmount: 0.7});
+	},
+	getSpritePool:function() {
+		if (!this.spritePool) {
+			this.spritePool = SpritePool.create(Bullets.enemyBullets.texture(), bulletContainer);
+		}
+		return this.spritePool;
+	},
 	enemyShotSpeed: 100,
 	enemyShotStrength: 1,
 	newEnemyBullet: function(ship, rotation) {
@@ -114,7 +131,7 @@ Bullets.enemyBullets = {
 		if (ship.xLoc < 0 || ship.xLoc > canvasWidth || ship.yLoc < 0 || ship.yLoc > canvasHeight)
 			return;
 
-		var bullet = Bullets.enemyBullets.spritePool.nextSprite();
+		var bullet = this.spritePool.nextSprite();
 
 		bullet.xLoc = ship.xLoc;
 		bullet.yLoc = ship.yLoc + 16;
@@ -150,36 +167,11 @@ Bullets.enemyBullets = {
 		bullet.position.x = bullet.xLoc * scalingFactor;
 		bullet.position.y = bullet.yLoc * scalingFactor;
 	},
-	initialize: function() {
-		Bullets.enemyBullets.texture = (function() {
-			var blast = document.createElement('canvas');
-			var size = 12 * scalingFactor;
-			blast.width = size + 4;
-			blast.height = size + 4;
-			var blastCtx = blast.getContext('2d');
-
-			blastCtx.shadowBlur = 5;
-			blastCtx.shadowColor = "red";
-
-			var radgrad = blastCtx.createRadialGradient(size / 2 + 2, size / 2 + 2, 0, size / 2, size / 2, size / 2);
-			radgrad.addColorStop(0, 'rgba(255,255,128,1)');
-			radgrad.addColorStop(0.8, 'rgba(255,0,0,0.4)');
-			radgrad.addColorStop(1, 'rgba(255,180,0,0)');
-
-			// draw shape
-			blastCtx.fillStyle = radgrad;
-			blastCtx.fillRect(0, 0, size, size);
-
-			return glowTexture(PIXI.Texture.fromCanvas(blast), {blurAmount: 0.7});
-		})();
-
-		Bullets.enemyBullets.spritePool = SpritePool.create(Bullets.enemyBullets.texture, bulletContainer);
-
-	},
 	update : function(timeDiff) {
-		for (var i = 0; i < Bullets.enemyBullets.spritePool.sprites.length; i++) {
+		this.getSpritePool();
+		for (var i = 0; i < this.spritePool.sprites.length; i++) {
 
-			var bullet = Bullets.enemyBullets.spritePool.sprites[i];
+			var bullet = this.spritePool.sprites[i];
 
 			if (bullet.visible) {
 
@@ -201,9 +193,9 @@ Bullets.enemyBullets = {
 						} else {
 
 							bullet.lastTrail += timeDiff * 1000;
-							if (bullet.lastTrail > 65) {
+							if (gameModel.detailLevel > 0.5 && bullet.lastTrail > 65) {
 								bullet.lastTrail = 0;
-								Stars.shipTrails.newPowerupPart(
+								Stars.powerupParts.newPowerupPart(
 									bullet.position.x - (4 * scalingFactor) + (8 * scalingFactor * Math.random()),
 									bullet.position.y - (4 * scalingFactor) + (8 * scalingFactor * Math.random())
 								);
@@ -242,38 +234,31 @@ Bullets.getTurretAngle = function() {
 
 Bullets.explosionBits = {
 	bitsPerExplosion: 10,
-	sprite: [],
-	discardedSprites: [],
+	getSpritePool : function() {
+		if (!this.spritePool) {
+			this.spritePool = SpritePool.create(Stars.stars.texture, explosionContainer);
+		}
+		return this.spritePool;
+	},
 	update: function(timeDiff) {
-		for (var i = 0; i < Bullets.explosionBits.sprite.length; i++) {
-			if (Bullets.explosionBits.sprite[i].visible) {
-				Bullets.explosionBits.sprite[i].scale.x -= 4 * timeDiff;
-				Bullets.explosionBits.sprite[i].scale.y -= 4 * timeDiff;
-				if (Bullets.explosionBits.sprite[i].scale.x <= 0) {
-					Bullets.explosionBits.sprite[i].visible = false;
-					Bullets.explosionBits.discardedSprites.push(Bullets.explosionBits.sprite[i]);
+		this.getSpritePool();
+		for (var i = 0; i < this.spritePool.sprites.length; i++) {
+			var sprite = this.spritePool.sprites[i];
+			if (sprite.visible) {
+				sprite.scale.x -= 4 * timeDiff;
+				sprite.scale.y -= 4 * timeDiff;
+				if (sprite.scale.x <= 0) {
+					this.spritePool.discardSprite(sprite);
 				} else {
-					Bullets.explosionBits.sprite[i].position.x += Bullets.explosionBits.sprite[i].xSpeed * timeDiff;
-					Bullets.explosionBits.sprite[i].position.y += Bullets.explosionBits.sprite[i].ySpeed * timeDiff;
+					sprite.position.x += sprite.xSpeed * timeDiff;
+					sprite.position.y += sprite.ySpeed * timeDiff;
 				}
 			}
 		}
 	},
-	initialize: function() {
-		Bullets.explosionBits.sprites = new PIXI.Container();
-		starContainer.addChild(Bullets.explosionBits.sprites);
-	},
 	newExplosionBit: function(x, y) {
 
-		var sprite;
-
-		if (Bullets.explosionBits.discardedSprites.length > 0) {
-			sprite = Bullets.explosionBits.discardedSprites.pop();
-		} else {
-			sprite = new PIXI.Sprite(Stars.stars.texture);
-			Bullets.explosionBits.sprite.push(sprite);
-			Bullets.explosionBits.sprites.addChild(sprite);
-		}
+		var sprite = this.getSpritePool().nextSprite();
 
 		sprite.visible = true;
 		sprite.position.x = x;
@@ -289,7 +274,7 @@ Bullets.explosionBits = {
 };
 
 Bullets.generateExplosion = function(x, y) {
-	for (var i = 0; i < Bullets.explosionBits.bitsPerExplosion; i++) {
+	for (var i = 0; i < Bullets.explosionBits.bitsPerExplosion * gameModel.detailLevel; i++) {
 		Bullets.explosionBits.newExplosionBit(x * scalingFactor, y * scalingFactor);
 	}
 	Bullets.blasts.newBlast(x, y);
