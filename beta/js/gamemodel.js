@@ -1,4 +1,4 @@
-var Constants = {
+const Constants = {
 	localStorageVariable: "shootrGameModel",
 	starJumpScaling : 1.4,
 	difficultyLevelScaling : 1.4,

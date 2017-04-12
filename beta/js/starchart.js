@@ -16,12 +16,12 @@ StarChart = {
       StarChart.fastTravelButton.text.visible = false;
       gameModel.currentSystem = {x:StarChart.selectedStar.x,y:StarChart.selectedStar.y};
       var level = Math.max(1,Math.abs(StarChart.selectedStar.x),Math.abs(StarChart.selectedStar.y));
+      gameModel.p1.credits -= StarChart.fastTravelCost;
       changeLevel(level);
   		StarChart.currentPosition = {x:gameModel.currentSystem.x*-1,y:gameModel.currentSystem.y*-1};
       StarChart.currentStar = StarChart.generateStar(gameModel.currentSystem.x, gameModel.currentSystem.y);
       StarChart.deselectStar();
       StarChart.selectStar(StarChart.currentStar);
-      gameModel.p1.credits -= StarChart.fastTravelCost;
     }
   }},
   tradeRouteText : {
