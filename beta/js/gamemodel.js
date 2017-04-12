@@ -94,7 +94,11 @@ function findInHistory(systemA, systemB) {
 
 function addToHistory(systemA, systemB) {
 	if (!findInHistory(systemA, systemB)) {
-		gameModel.history.push({start:systemA,end:systemB,completedLevel:calculateAdjustedStarLevel(Math.max(Math.abs(systemB.x), Math.abs(systemB.y)))});
+		gameModel.history.push({
+			start:systemA,
+			end:systemB,
+			completedLevel:calculateAdjustedStarLevel(starLevelModify(Math.max(Math.abs(systemB.x), Math.abs(systemB.y))))
+		});
 	}
 }
 
