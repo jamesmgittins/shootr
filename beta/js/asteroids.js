@@ -130,7 +130,7 @@ Asteroids = {
 
     this.asteroidWave = true;
 
-    this.shipHealth = EnemyShips.shipHealth * 4;
+    this.shipHealth = EnemyShips.shipHealth * 3;
 
     var seed = Date.now();
 
