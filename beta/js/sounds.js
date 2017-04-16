@@ -67,16 +67,18 @@ var createRandomSoundBank = function(audioFiles, maxSamples, volume) {
     play : function () {
       this.internalBanks[Math.floor(Math.random() * this.internalBanks.length)].play();
     }
-  }
+  };
 
   audioFiles.forEach(function(audioFile) {
     soundBank.internalBanks.push(createSoundBank(audioFile, maxSamples, volume));
-  })
+  });
 
   return soundBank;
-}
+};
 
 Sounds.powerup = createSoundBank("sounds/18_ITEM.wav",3,1);
+Sounds.blip1 = createSoundBank("sounds/Blip_Select9.wav", 3, 0.3, 85);
+Sounds.blip2 = createSoundBank("sounds/Blip_Select8.wav",3,0.5);
 Sounds.pickupCoin = createRandomSoundBank(["sounds/Pickup_Coin1.wav","sounds/Pickup_Coin2.wav","sounds/Pickup_Coin3.wav"],3,0.5);
 Sounds.shipExplosion = createSoundBank("sounds/11_EXPRETAP.wav",5,0.5);
 Sounds.enemyShot = createSoundBank("sounds/03_TEMP10.wav",5,0.7);
@@ -87,4 +89,5 @@ Sounds.playerLaser = createSoundBank("sounds/15_LAZGUN2.wav",10,0.3, 350);
 Sounds.playerMissile = createSoundBank("sounds/07_BYPASS1.wav",10,0.3, 500);
 Sounds.dodge = createSoundBank("sounds/05_PASS3.wav",2,0.7);
 Sounds.winChimes = createSoundBank("sounds/winchimes.wav",1,0.3);
-Sounds.music = createMusicBank(["music/GameMusic1.mp3"],0.7);
+Sounds.music = createMusicBank(["music/gamemusic3.mp3","music/GameMusic2.mp3"],0.7);
+Sounds.mapMusic = createMusicBank(["music/gamemapmusic.mp3"],0.5);

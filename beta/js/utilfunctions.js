@@ -175,7 +175,7 @@ SpritePool = {
 				this.texture = texture;
 				for (var i = 0; i < this.sprites.length; i++) {
 					this.sprites[i].texture = texture;
-					sprite.anchor = {x:0.5,y:0.5};
+					this.sprites[i].anchor = {x:0.5,y:0.5};
 				}
 			},
 			destroy : function() {
@@ -196,30 +196,52 @@ function glowTexture(texture, options) {
 	var width = texture.width * resize;
 	var height = texture.height * resize;
 
+
 	var glowTexture = PIXI.RenderTexture.create(width * 2, height * 2);
 
-	var blurredSprite = new PIXI.Sprite(texture);
+
 	var normalSprite = new PIXI.Sprite(texture);
-	normalSprite.scale = blurredSprite.scale = {x:resize, y:resize};
-	normalSprite.anchor = blurredSprite.anchor = {x:0.5, y:0.5};
-	normalSprite.position = blurredSprite.position = {x:width, y:height};
+	normalSprite.scale = {x:resize, y:resize};
+	normalSprite.anchor = {x:0.5, y:0.5};
+	normalSprite.position = {x:width, y:height};
+
 
 	var container = new PIXI.Container();
-	var blurContainer = new PIXI.Container();
+
 	// only add blur effect for higher resolutions
 	if (renderer.height > 900 && gameModel.detailLevel >= 1) {
+
+		var blurContainer = new PIXI.Container();
+		var blurTexture = PIXI.RenderTexture.create(width * 2, height * 2);
+
+		var blurredSprite = new PIXI.Sprite(texture);
+		blurredSprite.scale = {x:resize, y:resize};
+		blurredSprite.anchor = {x:0.5, y:0.5};
+		blurredSprite.position = {x:width, y:height};
+
+		renderer.render(blurredSprite, blurTexture);
+
+		var bigBlurSprite = new PIXI.Sprite(blurTexture);
+
 		blurFilters = [new PIXI.filters.BlurFilter()];
-		blurFilters[0].blur = Math.round(scalingFactor *  2);
-		blurContainer.filters = blurFilters;
-		blurredSprite.alpha = options && options.blurAmount ? options.blurAmount : 1;
-		blurContainer.addChild(blurredSprite);
+		blurFilters[0].blur = Math.round(gameModel.resolutionFactor * 5);
+		bigBlurSprite.filters = blurFilters;
+		bigBlurSprite.alpha = options && options.blurAmount ? options.blurAmount : 1;
+		container.addChild(bigBlurSprite);
+
+		// container.addChild(blurContainer);
+
+		// console.log("creating a glow texture, bigBlurSprite = " + bigBlurSprite.width + " x " + bigBlurSprite.height + ", normalsprite = " + normalSprite.width + " x " + normalSprite.height);
 	}
 
-	container.addChild(blurContainer);
+
 	container.addChild(normalSprite);
+	// container.cacheAsBitmap = true;
 	renderer.render(container, glowTexture);
 
-	return glowTexture;
+	// return new PIXI.Texture(glowTexture, new PIXI.Rectangle(width / 2 - 2, height / 2 - 2, width + 4, height + 4));
+	return new PIXI.Texture(glowTexture);
+	// return glowTexture;
 }
 
 function recursiveApplyToChildren(container, apply) {

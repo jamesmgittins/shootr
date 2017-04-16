@@ -1,5 +1,12 @@
 PlasmaCannon = {
 
+
+	hotDogTexture : function() {
+		return glowTexture(PIXI.Texture.fromImage("img/hot-dog-icon.svg"), {resize:0.12 * scalingFactor, blurAmount : 0.1});
+		// return PIXI.Texture.fromImage("img/hot-dog-icon.svg");
+	},
+
+
 	generateTexture : function() {
     var size = 8 * scalingFactor;
     var blast = document.createElement('canvas');
@@ -66,6 +73,7 @@ PlasmaCannon = {
 		sprite.ySpeed = speed.y;
 
 		sprite.ricochet = weapon.ricochet;
+		sprite.rotation = Math.atan2(speed.x, speed.y);
 
 		sprite.visible = true;
 		sprite.scale.x = sprite.scale.y = scale;
@@ -79,9 +87,9 @@ PlasmaCannon = {
 
 		return {
 			weapon : weapon,
-			spritePool : SpritePool.create(PlasmaCannon.generateTexture(), container),
+			spritePool : SpritePool.create(weapon.alternateTexture == "hotdog" ? PlasmaCannon.hotDogTexture() : PlasmaCannon.generateTexture(), container),
 			resize : function(){
-				this.spritePool.changeTexture(PlasmaCannon.generateTexture());
+				this.spritePool.changeTexture(weapon.alternateTexture == "hotdog" ? PlasmaCannon.hotDogTexture() : PlasmaCannon.generateTexture());
 			},
 			update : function(timeDiff) {
 				PlasmaCannon.updateBullets(timeDiff, this.spritePool);
@@ -138,4 +146,60 @@ PlasmaCannon = {
 			}
 		};
   }
+};
+
+PlasmaCannon.plasmaCannon = function(level,seed,rarity) {
+
+	var levelMod = Math.pow(Constants.weaponLevelScaling, level - 1);
+	Math.seedrandom(seed);
+	var dps = (level * 9 + (Math.random() * level * 2)) * levelMod * rarity.factor;
+	var shotsPerSecond = 6 + Math.random() * 5;
+	var damagePerShot = dps / shotsPerSecond;
+  var bulletsPerShot = 1;
+
+  if (level >= 5 && Math.random() > 0.7)
+	  bulletsPerShot++;
+
+  if (level >= 10 && Math.random() > 0.7)
+	  bulletsPerShot++;
+
+	var plasmaCannon =  {
+		ultra:rarity.ultra,
+    hyper:rarity.hyper,
+    super:rarity.super,
+		type: Constants.itemTypes.weapon,
+		name: (bulletsPerShot == 3 ? "Triple " : (bulletsPerShot == 2 ? "Double " : "")) + rarity.prefix + "Plasma Cannon",
+		bullets : bulletsPerShot,
+		seed: seed,
+		level: level,
+		dps: dps,
+		shotsPerSecond: shotsPerSecond,
+		damagePerShot: damagePerShot,
+		accuracy: 0.5 + Math.random() * 0.5,
+		bulletSpeed: 400,
+		price: Math.round(dps * 30),
+		id: gameModel.weaponIdCounter++,
+		weaponType : Weapons.types.plasmaCannon
+	};
+
+	if (rarity.ultra || rarity.hyper) {
+		if (Math.random() > 0.7 ) {
+			plasmaCannon.ricochet = 0.1 + (Math.random() * 0.2);
+			plasmaCannon.ultraName = "Second Chances";
+			plasmaCannon.ultraText = "Bullets have a " + Math.round(plasmaCannon.ricochet * 100) + "% chance to ricochet off the edge of the screen";
+		} else {
+			plasmaCannon.passThrough = 0.1 + (Math.random() * 0.2);
+			plasmaCannon.ultraName = "Deep Thunder";
+			plasmaCannon.ultraText = "Bullets have a " + Math.round(plasmaCannon.passThrough * 100) + "% chance to not be destroyed";
+		}
+	}
+
+	if (rarity.ultra) {
+		if (Math.random() > 0.9 && bulletsPerShot == 1) {
+			plasmaCannon.name = "Ultra Hot Dog Blaster";
+			plasmaCannon.alternateTexture = "hotdog";
+		}
+	}
+
+	return plasmaCannon;
 };

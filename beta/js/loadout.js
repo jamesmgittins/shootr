@@ -37,7 +37,7 @@ Loadout = {
 Loadout.selectPosition = function(index) {
 
   Loadout.positionSelector.clear();
-  Loadout.positionSelector.lineStyle(2, 0xFFFFFF);
+  Loadout.positionSelector.lineStyle(2 * gameModel.resolutionFactor, 0xFFFFFF);
   Loadout.positionSelector.tint = MainMenu.buttonTint;
   var bounds = Loadout.menuOptions[index].text.getBounds();
   Loadout.positionSelector.drawRect(bounds.x - 20 * scalingFactor,bounds.y - 5 * scalingFactor,bounds.width + 40 * scalingFactor,bounds.height + 10 * scalingFactor);
@@ -48,7 +48,7 @@ Loadout.selectPosition = function(index) {
 
   Loadout.locationSelector.clear();
   // Loadout.locationSelector.filters = [new PIXI.filters.BlurFilter()];
-  Loadout.locationSelector.lineStyle(2 * scalingFactor, 0xFFFFFF);
+  Loadout.locationSelector.lineStyle(2 * gameModel.resolutionFactor, 0xFFFFFF);
   Loadout.locationSelector.drawCircle(0,0,Loadout.shipSprite.width / 16);
 
   // Loadout.locationSelector.moveTo(0,0);
@@ -73,7 +73,7 @@ Loadout.selectPosition = function(index) {
       Loadout.locationSelector.position.x = Loadout.shipSprite.position.x + Loadout.renderSprite.position.x;
       Loadout.locationSelector.position.y = Loadout.shipSprite.position.y + Loadout.renderSprite.position.y + Loadout.shipSprite.height / 8;
       Loadout.locationSelector.clear();
-      Loadout.locationSelector.lineStyle(2 * scalingFactor, 0xFFFFFF);
+      Loadout.locationSelector.lineStyle(2 * gameModel.resolutionFactor, 0xFFFFFF);
       Loadout.locationSelector.drawCircle(0,0,Loadout.shipSprite.width / 8);
       Loadout.showWeapons();
       break;
@@ -81,13 +81,13 @@ Loadout.selectPosition = function(index) {
       Loadout.locationSelector.position.x = Loadout.shipSprite.position.x + Loadout.renderSprite.position.x;
       Loadout.locationSelector.position.y = Loadout.shipSprite.position.y + Loadout.renderSprite.position.y;
       Loadout.locationSelector.clear();
-      Loadout.locationSelector.lineStyle(2 * scalingFactor, 0xFFFFFF);
+      Loadout.locationSelector.lineStyle(2 * gameModel.resolutionFactor, 0xFFFFFF);
       Loadout.locationSelector.drawCircle(0,0,Loadout.shipSprite.width / 3);
       Loadout.showShields();
       break;
   }
 
-  Loadout.locationSelector.lineStyle(1 * scalingFactor, 0xFFFFFF);
+  Loadout.locationSelector.lineStyle(2 * gameModel.resolutionFactor, 0xFFFFFF);
   Loadout.locationSelector.moveTo((bounds.x - 20 * scalingFactor) + (bounds.width + 40 * scalingFactor) - (Loadout.locationSelector.position.x), (bounds.y - 5 * scalingFactor) + (bounds.height / 2) - (Loadout.locationSelector.position.y));
   Loadout.locationSelector.lineTo(0, 0);
 
@@ -188,9 +188,11 @@ Loadout.selectShield = function(index) {
   Loadout.menuOptions[3].equippedIcon.position = iconPosition;
   // Loadout.menuOptions[3].equippedIcon.scale = {x:0.7, y:0.7};
   Loadout.menuOptions[3].text.addChild(Loadout.menuOptions[3].equippedIcon);
+  Loadout.menuOptions[3].weapon = Loadout.shields[index].weapon;
 
   Loadout.showShields();
   Loadout.selectPosition(Loadout.currentPosition);
+  Loadout.hideItemHover();
 };
 
 Loadout.selectWeapon = function(index) {
@@ -200,68 +202,56 @@ Loadout.selectWeapon = function(index) {
     return;
   }
 
+  var deselectMenuOption = function(menuOption){
+    menuOption.equippedText.text = "Empty Slot";
+    menuOption.text.removeChild(menuOption.equippedIcon);
+    menuOption.equippedText.tint = menuOption.equippedText.defaultTint = MainMenu.unselectableTint;
+    menuOption.weapon = false;
+  };
+
   if (gameModel.p1.frontWeapon && gameModel.p1.frontWeapon.id == Loadout.weapons[index].weapon.id) {
     gameModel.p1.frontWeapon = undefined;
-    Loadout.menuOptions[0].equippedText.text = "Empty Slot";
-    Loadout.menuOptions[0].text.removeChild(Loadout.menuOptions[0].equippedIcon);
-    Loadout.menuOptions[0].equippedText.tint = Loadout.menuOptions[0].equippedText.defaultTint = MainMenu.unselectableTint;
+    deselectMenuOption(Loadout.menuOptions[0]);
   }
   if (gameModel.p1.turretWeapon && gameModel.p1.turretWeapon.id == Loadout.weapons[index].weapon.id) {
     gameModel.p1.turretWeapon = undefined;
-    Loadout.menuOptions[1].equippedText.text = "Empty Slot";
-    Loadout.menuOptions[1].text.removeChild(Loadout.menuOptions[1].equippedIcon);
-    Loadout.menuOptions[1].equippedText.tint = Loadout.menuOptions[1].equippedText.defaultTint = MainMenu.unselectableTint;
+    deselectMenuOption(Loadout.menuOptions[1]);
   }
   if (gameModel.p1.rearWeapon && gameModel.p1.rearWeapon.id == Loadout.weapons[index].weapon.id) {
     gameModel.p1.rearWeapon = undefined;
-    Loadout.menuOptions[2].equippedText.text = "Empty Slot";
-    Loadout.menuOptions[2].text.removeChild(Loadout.menuOptions[2].equippedIcon);
-    Loadout.menuOptions[2].equippedText.tint = Loadout.menuOptions[2].equippedText.defaultTint = MainMenu.unselectableTint;
+    deselectMenuOption(Loadout.menuOptions[2]);
   }
+
+  var selectMenuOption = function(menuOption) {
+    menuOption.equippedText.text = "";
+    menuOption.equippedText.tint = menuOption.equippedText.defaultTint = MainMenu.buttonTint;
+    iconPosition = menuOption.equippedIcon.position;
+    menuOption.text.removeChild(menuOption.equippedIcon);
+    menuOption.equippedIcon = ArmsDealer.createItemIcon(Loadout.weapons[index].weapon, {buy:false, loadout:true, scale:0.7});
+    menuOption.equippedIcon.position = iconPosition;
+    menuOption.text.addChild(menuOption.equippedIcon);
+    menuOption.weapon = Loadout.weapons[index].weapon;
+  };
+
   var iconPosition;
   switch(Loadout.currentPosition) {
     case Loadout.positions.frontWeapon:
       gameModel.p1.frontWeapon = Loadout.weapons[index].weapon;
-      Loadout.menuOptions[0].equippedText.text = "";
-      Loadout.menuOptions[0].equippedText.tint = Loadout.menuOptions[0].equippedText.defaultTint = MainMenu.buttonTint;
-
-      iconPosition = Loadout.menuOptions[0].equippedIcon.position;
-      Loadout.menuOptions[0].text.removeChild(Loadout.menuOptions[0].equippedIcon);
-      Loadout.menuOptions[0].equippedIcon = ArmsDealer.createItemIcon(Loadout.weapons[index].weapon, {buy:false, loadout:true, scale:0.7});
-      Loadout.menuOptions[0].equippedIcon.position = iconPosition;
-      // Loadout.menuOptions[0].equippedIcon.scale = {x:0.7, y:0.7};
-      Loadout.menuOptions[0].text.addChild(Loadout.menuOptions[0].equippedIcon);
-      Loadout.showWeapons();
+      selectMenuOption(Loadout.menuOptions[0]);
       break;
     case Loadout.positions.turretWeapon:
       gameModel.p1.turretWeapon = Loadout.weapons[index].weapon;
-      Loadout.menuOptions[1].equippedText.text = "";
-      Loadout.menuOptions[1].equippedText.tint = Loadout.menuOptions[1].equippedText.defaultTint = MainMenu.buttonTint;
-
-      iconPosition = Loadout.menuOptions[1].equippedIcon.position;
-      Loadout.menuOptions[1].text.removeChild(Loadout.menuOptions[1].equippedIcon);
-      Loadout.menuOptions[1].equippedIcon = ArmsDealer.createItemIcon(Loadout.weapons[index].weapon, {buy:false, loadout:true, scale:0.7});
-      Loadout.menuOptions[1].equippedIcon.position = iconPosition;
-      // Loadout.menuOptions[1].equippedIcon.scale = {x:0.7, y:0.7};
-      Loadout.menuOptions[1].text.addChild(Loadout.menuOptions[1].equippedIcon);
-      Loadout.showWeapons();
+      selectMenuOption(Loadout.menuOptions[1]);
       break;
     case Loadout.positions.rearWeapon:
       gameModel.p1.rearWeapon = Loadout.weapons[index].weapon;
-      Loadout.menuOptions[2].equippedText.text = "";
-      Loadout.menuOptions[2].equippedText.tint = Loadout.menuOptions[2].equippedText.defaultTint = MainMenu.buttonTint;
-
-      iconPosition = Loadout.menuOptions[2].equippedIcon.position;
-      Loadout.menuOptions[2].text.removeChild(Loadout.menuOptions[2].equippedIcon);
-      Loadout.menuOptions[2].equippedIcon = ArmsDealer.createItemIcon(Loadout.weapons[index].weapon, {buy:false, loadout:true, scale:0.7});
-      Loadout.menuOptions[2].equippedIcon.position = iconPosition;
-      // Loadout.menuOptions[2].equippedIcon.scale = {x:0.7, y:0.7};
-      Loadout.menuOptions[2].text.addChild(Loadout.menuOptions[2].equippedIcon);
-      Loadout.showWeapons();
+      selectMenuOption(Loadout.menuOptions[2]);
       break;
   }
+  Loadout.showWeapons();
   Loadout.updateTotalDPS();
   Loadout.selectPosition(Loadout.currentPosition);
+  Loadout.hideItemHover();
 };
 
 Loadout.showShields = function() {
@@ -453,21 +443,17 @@ Loadout.initialize = function () {
     Loadout.menuOptions[i].positionText = new PIXI.Text("Level " + level + "\n" + Loadout.menuOptions[i].title,
                                                 { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'left' });
 
-    // Loadout.menuOptions[i].equippedText = new PIXI.Text((typeof weapon !== "undefined" ? "Level " + weapon.level + " " + weapon.name + " equipped" : "Empty Slot"),
-    //                                             { font: Math.round(12 * scalingFactor) + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'left' });
-
     Loadout.menuOptions[i].equippedText = new PIXI.Text((typeof weapon === "undefined" ? "Empty Slot " : ""),
                                                 { font: Math.round(12 * scalingFactor) + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'left' });
 
     if (weapon) {
       Loadout.menuOptions[i].equippedIcon = ArmsDealer.createItemIcon(weapon, {buy:false, loadout:true, scale:0.7});
       Loadout.menuOptions[i].text.addChild(Loadout.menuOptions[i].equippedIcon);
+      Loadout.menuOptions[i].weapon = weapon;
     } else {
       Loadout.menuOptions[i].equippedIcon = new PIXI.Container();
     }
     Loadout.menuOptions[i].equippedIcon.position = {x:renderer.width * 0.2 + (25 * scalingFactor), y:renderer.height * 0.18 + (i * positionSpacing * scalingFactor) - (20 * scalingFactor)};
-    // Loadout.menuOptions[i].equippedIcon.scale = {x:0.7, y:0.7};
-
 
     Loadout.menuOptions[i].positionText.tint = Loadout.menuOptions[i].positionText.defaultTint = MainMenu.buttonTint;
     Loadout.menuOptions[i].equippedText.tint = Loadout.menuOptions[i].equippedText.defaultTint = typeof weapon !== "undefined" ? MainMenu.buttonTint : MainMenu.unselectableTint;
@@ -484,7 +470,7 @@ Loadout.initialize = function () {
   }
 
   Loadout.positionSelector = new PIXI.Graphics();
-  Loadout.positionSelector.lineStyle(2, 0xFFFFFF);
+  Loadout.positionSelector.lineStyle(2 * gameModel.resolutionFactor, 0xFFFFFF);
   Loadout.positionSelector.drawRect(0,0,110 * scalingFactor,26 * scalingFactor);
   Loadout.positionSelector.visible=false;
   Loadout.menuContainer.addChild(Loadout.positionSelector);
@@ -496,7 +482,9 @@ Loadout.initialize = function () {
   Loadout.weaponsContainer = new PIXI.Container();
   Loadout.menuContainer.addChild(Loadout.weaponsContainer);
 
-  Loadout.select(Loadout.menuOptions[0]);
+  setTimeout(function(){
+    Loadout.select(Loadout.menuOptions[0]);
+  },100);
 
 };
 
@@ -518,20 +506,25 @@ Loadout.checkMouseOver = function () {
   for (var i=0; i< Loadout.menuOptions.length;i++) {
     if (MainMenu.checkButton(Loadout.menuOptions[i])) {
       Loadout.select(Loadout.menuOptions[i]);
+      return true;
     }
   }
 
-  Loadout.weapons.forEach(function(currentValue) {
-    if (MainMenu.checkButton(currentValue)) {
-      Loadout.select(currentValue);
+  for (i = 0; i < Loadout.weapons.length; i++) {
+    if (MainMenu.checkButton(Loadout.weapons[i])) {
+      Loadout.select(Loadout.weapons[i]);
+      return true;
     }
-  });
+  }
 
-  Loadout.shields.forEach(function(currentValue) {
-    if (MainMenu.checkButton(currentValue)) {
-      Loadout.select(currentValue);
+  for (i = 0; i < Loadout.shields.length; i++) {
+    if (MainMenu.checkButton(Loadout.shields[i])) {
+      Loadout.select(Loadout.shields[i]);
+      return true;
     }
-  });
+  }
+
+  Loadout.hideItemHover();
 
   return false;
 };
@@ -616,6 +609,55 @@ Loadout.select = function(button) {
     });
   }  else {
     button.text.tint = MainMenu.selectedButtonTint;
+  }
+
+  if (button.weapon) {
+    Loadout.showItemHover(button.weapon, button);
+  }
+};
+
+Loadout.showItemHover = function(item, button) {
+  if (lastUsedInput == inputTypes.controller)
+    return;
+
+  if (Loadout.itemHover && Loadout.itemHover.item.id != item.id) {
+    Loadout.menuContainer.removeChild(Loadout.itemHover);
+    Loadout.itemHover = false;
+  }
+  if (!Loadout.itemHover) {
+    Loadout.itemHover = new PIXI.Container();
+    var itemDetails = ArmsDealer.createItemLayout(item, false, true, true);
+    var bg = new PIXI.Graphics();
+    bg.beginFill(MainMenu.modalBackgroundTint);
+    bg.drawRect(0,0,itemDetails.getBounds().width + itemDetails.getBounds().x * 2,itemDetails.getBounds().height + itemDetails.getBounds().y * 2);
+    bg.alpha = 0.95;
+    Loadout.itemHover.addChild(bg);
+    Loadout.itemHover.addChild(itemDetails);
+    Loadout.itemHover.item = item;
+    Loadout.menuContainer.addChild(Loadout.itemHover);
+  }
+  if (Loadout.itemHover) {
+    var hoverPositionX = cursorPosition.x;
+    var hoverPositionY = cursorPosition.y;
+
+    if (lastUsedInput == inputTypes.controller) {
+      var buttonBounds = button.text.getBounds();
+      hoverPositionX = buttonBounds.x < renderer.width / 2 ? buttonBounds.x + buttonBounds.width : buttonBounds.x;
+      hoverPositionY = buttonBounds.y;
+    }
+    var bounds = Loadout.itemHover.getBounds();
+    if (renderer.width / 2 > hoverPositionX) {
+      Loadout.itemHover.position = {x:hoverPositionX, y:Math.min(hoverPositionY, renderer.height - bounds.height - 50 * scalingFactor)};
+    } else {
+      Loadout.itemHover.position = {x:hoverPositionX - bounds.width,y:Math.min(hoverPositionY, renderer.height - bounds.height - 50 * scalingFactor)};
+    }
+  }
+};
+
+Loadout.hideItemHover = function() {
+  if (Loadout.itemHover) {
+    Loadout.menuContainer.removeChild(Loadout.itemHover);
+    Loadout.itemHover = false;
   }
 };
 

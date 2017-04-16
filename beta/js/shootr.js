@@ -9,7 +9,7 @@ var playerTwo = false;
 var loader;
 
 var levelTime = 118;
-// var levelTime = 20;
+// var levelTime = 10;
 var timeLeft = levelTime;
 var distance = 5;
 
@@ -67,7 +67,7 @@ function changeLevel(level) {
 
 	Bullets.enemyBullets.enemyShotStrength = 2 * gameModel.currentLevel * levelDifficultyModifier;
 	Bullets.enemyBullets.enemyShotSpeed = Math.min(200 + (gameModel.currentLevel * 2), 400);
-	PlayerShip.playerShip.maxSpeed = 100 * gameModel.p1.ship.speed;
+	PlayerShip.playerShip.maxSpeed = getUpgradedSpeed() * gameModel.p1.ship.speed;
 
 	if (gameModel.p1.shield) {
 		PlayerShip.playerShip.maxShield = gameModel.p1.shield.capacity;
@@ -542,6 +542,7 @@ window.onload = function() {
 		.add("img/perspective-dice-random.svg")
 		.add("img/sapphire.svg")
 		.add("img/diamond.svg")
+		.add("img/hot-dog-icon.svg")
 		// .add("img/level-one.svg")
 		// .add("img/level-two.svg")
 		// .add("img/level-three.svg")

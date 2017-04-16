@@ -176,9 +176,9 @@ function setLastUsedInput(type) {
   if (lastUsedInput != type) {
     lastUsedInput = type;
     if (lastUsedInput == inputTypes.controller) {
-      document.getElementById("the-body").className = "controller";
+      document.getElementById("the-body").classList.add("controller");
     } else {
-      document.getElementById("the-body").className = "";
+      document.getElementById("the-body").classList.remove("controller");
     }
   }
 }

@@ -143,9 +143,9 @@ Shipyard.initialize = function () {
     shipName.position = {x:bounds.x + 15, y:bounds.y + (20 * scalingFactor)};
     Shipyard.menuContainer.addChild(shipName);
 
-    var shipPrice = new PIXI.Text(formatMoney(Shipyard.ships[i].price)+ " Credits", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'left' });
+    var shipPrice = new PIXI.Text(formatMoney(Shipyard.ships[i].price * getBuyPriceModifier())+ " Credits", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'left' });
     shipPrice.anchor = anchor = {x:1,y:0.5};
-    shipPrice.tint = Shipyard.ships[i].price > gameModel.p1.credits ? MainMenu.unselectableTint : MainMenu.titleTint;
+    shipPrice.tint = Shipyard.ships[i].price * getBuyPriceModifier()> gameModel.p1.credits ? MainMenu.unselectableTint : MainMenu.titleTint;
     shipPrice.position = {x:bounds.x + bounds.width - 15, y:bounds.y + (20 * scalingFactor)};
     Shipyard.menuContainer.addChild(shipPrice);
 
@@ -177,8 +177,8 @@ Shipyard.resize = function () {
 };
 
 Shipyard.buyShip = function(ship) {
-  if (ship.price <= gameModel.p1.credits && !ship.buyButton.owned) {
-    gameModel.p1.credits -= ship.price;
+  if (ship.price * getBuyPriceModifier() <= gameModel.p1.credits && !ship.buyButton.owned) {
+    gameModel.p1.credits -= ship.price * getBuyPriceModifier();
     gameModel.p1.ship = Shipyard.generateShip(ship.level, ship.seed, ship.ultra);
     PlayerShip.updateSize();
     save();

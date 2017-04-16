@@ -512,6 +512,7 @@ GameText.levelComplete = {
 			if (gameModel.lootCollected.length > 0 && this.lootTimer === 0) {
 				this.lootOpening = true;
 				this.textMessage.visible = false;
+				this.scoreBoard.visible = false;
 			}
 			if (gameModel.lootCollected.length === 0 || this.lootTimer > gameModel.lootCollected.length * this.secondsPerLoot) {
 				changeState(states.station);
@@ -538,8 +539,13 @@ GameText.levelComplete = {
 		this.textMessage.tint = MainMenu.buttonTint;
 		this.textMessage.anchor = {x:0.5,y:0.5};
 		this.textMessage.position = {x:renderer.width / 2, y:renderer.height / 2};
+		this.textMessage.visible = false;
+
+		this.scoreBoard = this.getScoreBoard();
+		this.scoreBoard.position = {x:renderer.width / 2 - this.scoreBoard.getBounds().width / 2, y:renderer.height / 2 - this.scoreBoard.getBounds().height / 2};
 
 		this.container.addChild(this.textMessage);
+		this.container.addChild(this.scoreBoard);
 
 		if (gameModel.lootCollected.length > 0) {
 			this.textMessage.text = "Level Complete\nYou have collected "  + formatMoney(gameModel.p1.temporaryCredits) + " credits\nand " + gameModel.lootCollected.length + " crate" + (gameModel.lootCollected.length>1?"s":"") + "\nPress " + ShootrUI.getInputButtonDescription(buttonTypes.select) + " to inspect the contents";
@@ -562,5 +568,165 @@ GameText.levelComplete = {
 	checkForClick:function() {
 		if (this.container.visible)
 			this.clicked = true;
+	},
+	getScoreBoard : function() {
+		var container = new PIXI.Container();
+
+
+		var backgroundCol = Constants.itemColors.normal;
+		var borderCol = Constants.itemBorders.normal;
+
+		console.log("level complete, killed " + Enemies.enemiesKilled + " of " + Enemies.enemiesSpawned + " spawned");
+
+		var rating = Enemies.enemiesKilled / Enemies.enemiesSpawned;
+		var ratingDesc = "NORMAL";
+
+		if (rating >= 0.85) {
+			backgroundCol = Constants.itemColors.super;
+			borderCol = Constants.itemBorders.super;
+			ratingDesc = "SUPER";
+		}
+
+		if (rating >= 0.95) {
+			backgroundCol = Constants.itemColors.ultra;
+			borderCol = Constants.itemBorders.ultra;
+			ratingDesc = "ULTRA";
+		}
+
+		if (rating >= 1) {
+			backgroundCol = Constants.itemColors.hyper;
+			borderCol = Constants.itemBorders.hyper;
+			ratingDesc = "HYPER";
+		}
+
+		var border = new PIXI.Graphics();
+		border.beginFill(backgroundCol);
+		border.lineStyle(2 * gameModel.resolutionFactor, borderCol);
+		border.drawRect(0, 0, 512 * scalingFactor, 212 * scalingFactor);
+		border.beginFill(borderCol);
+		border.drawRect(0, 0, 512 * scalingFactor, 38 * scalingFactor);
+		container.addChild(border);
+
+		var levelText = new PIXI.Text("Level Complete", {
+			font: (30 * scalingFactor) + 'px Dosis',
+			fill: backgroundCol,
+			stroke: borderCol,
+			strokeThickness: 0,
+			align: 'left'
+		});
+		levelText.position = {
+			x: 5 * scalingFactor,
+			y: 1 * scalingFactor
+		};
+
+		var ratingText = new PIXI.Text("Rating: " + ratingDesc, {
+			font: (30 * scalingFactor) + 'px Dosis',
+			fill: backgroundCol,
+			stroke: borderCol,
+			strokeThickness: 0,
+			align: 'right'
+		});
+		ratingText.anchor = {x:1,y:0};
+		ratingText.position = {
+			x: 512 * scalingFactor - 5 * scalingFactor,
+			y: 1 * scalingFactor
+		};
+
+		container.addChild(levelText);
+		container.addChild(ratingText);
+
+		var spacing = 42;
+		var startPos = 52;
+
+		var killedText = new PIXI.Text("Enemies Destroyed: " + Math.round(rating * 100) + "%", {
+			font: (22 * scalingFactor) + 'px Dosis',
+			fill: borderCol,
+			stroke: backgroundCol,
+			strokeThickness: 0,
+			align: 'left'
+		});
+		killedText.position = {
+			x: 5 * scalingFactor,
+			y: startPos * scalingFactor
+		};
+
+		var collectedText = new PIXI.Text("Credits Collected: " + formatMoney(gameModel.p1.temporaryCredits), {
+			font: (22 * scalingFactor) + 'px Dosis',
+			fill: borderCol,
+			stroke: backgroundCol,
+			strokeThickness: 0,
+			align: 'left'
+		});
+		collectedText.position = {
+			x: 5 * scalingFactor,
+			y: (startPos + spacing) * scalingFactor
+		};
+
+		var cratesText = new PIXI.Text("Cargo Crates Collected: " + gameModel.lootCollected.length, {
+			font: (22 * scalingFactor) + 'px Dosis',
+			fill: borderCol,
+			stroke: backgroundCol,
+			strokeThickness: 0,
+			align: 'left'
+		});
+		cratesText.position = {
+			x: 5 * scalingFactor,
+			y: (startPos + spacing * 2) * scalingFactor
+		};
+
+		container.addChild(killedText);
+		container.addChild(collectedText);
+		container.addChild(cratesText);
+
+		if (Boss.isInTargetSystem()) {
+			var bossText = new PIXI.Text("Boss Defeated\nPerk Point Granted", {
+				font: (22 * scalingFactor) + 'px Dosis',
+				fill: borderCol,
+				stroke: backgroundCol,
+				strokeThickness: 0,
+				align: 'right'
+			});
+			bossText.anchor = {x:1, y:0};
+			bossText.position = {
+				x: (512 - 5) * scalingFactor,
+				y: (startPos + spacing * 1.5) * scalingFactor
+			};
+			container.addChild(bossText);
+		}
+
+		if (!findInHistory(gameModel.currentSystem, gameModel.targetSystem)) {
+			var value = formatMoney(valueForRoute(calculateAdjustedStarLevel(StarChart.selectedStar.level)));
+
+			var valueText = new PIXI.Text("New Trade Route Cleared\n +" + value + " Credits per second", {
+				font: (22 * scalingFactor) + 'px Dosis',
+				fill: borderCol,
+				stroke: backgroundCol,
+				strokeThickness: 0,
+				align: 'right'
+			});
+			valueText.anchor = {x:1, y:0};
+			valueText.position = {
+				x: (512 - 5) * scalingFactor,
+				y: (startPos) * scalingFactor
+			};
+			container.addChild(valueText);
+		}
+
+		var continueText = new PIXI.Text("Press " + ShootrUI.getInputButtonDescription(buttonTypes.select) + (gameModel.lootCollected.length === 0 ? " to Continue" : " to inspect the contents"), {
+			font: (22 * scalingFactor) + 'px Dosis',
+			fill: borderCol,
+			stroke: backgroundCol,
+			strokeThickness: 0,
+			align: 'left'
+		});
+		continueText.anchor = {x:0.5,y:1};
+		continueText.position = {
+			x: 512 * scalingFactor / 2,
+			y: (212 - 5) * scalingFactor
+		};
+
+		container.addChild(continueText);
+
+		return container;
 	}
 };

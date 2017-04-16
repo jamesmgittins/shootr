@@ -18,7 +18,8 @@ MainMenu = {
   selectedButtonTint : 0xFFFFFF,
   unselectableTint : 0xF44336,
   backgroundAlpha : 0.5,
-  backgroundColor : 0x0288D1
+  backgroundColor : 0x0288D1,
+  modalBackgroundTint : 0x003030
 };
 
 StationMenu = {
@@ -26,51 +27,41 @@ StationMenu = {
   menuTitle:"Station Menu",
   menuOptions:[
     {title:"Star Chart",click:function(){
-      //changeState(states.running);
       StationMenu.hide();
       StarChart.show();
-    }},
+    }, description:"Scout nearby systems, plot a course and launch your ship"},
+    {title:"Pilot School",click:function(){
+      StationMenu.hide();
+      PilotSchool.show();
+    }, description:"Purchase permanent performance upgrades for your pilot"},
     {title:"Shipyard", click:function(){
       Shipyard.show();
       StationMenu.hide();
-    }},
+    }, description:"Purchase a new ship"},
     {title:"Arms Dealer", click:function(){
       ArmsDealer.show();
       StationMenu.hide();
-    }},
+    }, description:"Buy and sell weapons and shields"},
     {title:"Weapons Loadout", click:function(){
       Loadout.show();
       StationMenu.hide();
-    }},
+    }, description:"Change your equipped weapons and shield"},
     {title:"Settings", click:function(){
       SettingsMenu.show();
       SettingsMenu.onHide = StationMenu.show;
       StationMenu.hide();
-    }}
+    }, description:"Configure the game"}
   ],
   backButton : {title:"Main Menu", buttonDesc:buttonTypes.back, click:function(){
     StationMenu.hide();
     MainMenu.show();
   }},
   currentSelection:0,
-  onInit:function() {
-    var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
-    StationMenu.tradeMoneyText = new PIXI.Text("You have lost", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
-    StationMenu.tradeMoneyText.tint = MainMenu.titleTint;
-    StationMenu.tradeMoneyText.anchor = {x:1,y:0};
-    StationMenu.tradeMoneyText.position = {x:renderer.width * 0.95 - 25,y: renderer.height * 0.05 + 25};
-    StationMenu.tradeMoneyText.visible = false;
-    StationMenu.menuContainer.addChild(StationMenu.tradeMoneyText);
-  },
   onShow : function() {
-    var amountEarned = calculateIncomeSinceLastCheck(120000);
+    var amountEarned = calculateIncomeSinceLastCheck(30000);
     if (amountEarned > 0) {
-      StationMenu.tradeMoneyText.text = "You have earned " + formatMoney(amountEarned) + " from your\ncleared trade routes while you were away";
-      StationMenu.tradeMoneyText.visible=true;
+      Modal.show({text:"You have earned " + formatMoney(amountEarned) + " Credits from your\ncleared trade routes while you were away"});
     }
-  },
-  onHide : function() {
-    StationMenu.tradeMoneyText.visible = false;
   },
   bButton : function(){StationMenu.backButton.click();}
 };
@@ -111,18 +102,18 @@ PauseMenu = {
     {title:"Continue", buttonDesc:buttonTypes.back, click:function(){
       changeState(states.running);
       PauseMenu.hide();
-    }},
+    }, description:"Unpause and continue the flight"},
     {title:"Settings", click:function(){
       SettingsMenu.show();
       PauseMenu.hide();
       SettingsMenu.onHide = PauseMenu.show;
-    }},
+    }, description:"Adjust game configuration"},
     {title:"Return to Station", click:function(){
       changeState(states.station);
       StationMenu.show();
       SettingsMenu.hide();
       PauseMenu.hide();
-    }}],
+    }, description:"Abandon this flight and go back to the station menu"}],
   currentSelection:0,
   bButton : function(){PauseMenu.menuOptions[0].click();},
   onInit : function() {
@@ -142,10 +133,10 @@ SettingsMenu = {
         SettingsMenu.onHide = settingsOnHide;
       };
       SettingsMenu.hide();
-    }},
+    }, description:"Change the audio volume level"},
     {title:"Full Screen", click:function(){
       ShootrUI.toggleFullscreen();
-    }},
+    }, description:"Switch to full screen. Due to browser security this option must be clicked"},
     {title:"Music: OFF", click:function(){
       if (!gameModel.music) {
         gameModel.music = true;
@@ -154,7 +145,7 @@ SettingsMenu = {
         gameModel.music = false;
         SettingsMenu.menuOptions[2].text.text = "Music: OFF";
       }
-    }},
+    }, description:"Toggle music"},
     {title:"V-Sync: ON", click:function(){
       if (vSyncOff) {
         vSyncOff = false;
@@ -163,7 +154,7 @@ SettingsMenu = {
         vSyncOff = true;
         SettingsMenu.menuOptions[3].text.text = "V-Sync: OFF";
       }
-    }},
+    }, description:"Toggle limit frame rate to display refresh"},
     {title:"Damage Numbers: ON", click:function(){
       if (!gameModel.dmgNumbers) {
         gameModel.dmgNumbers = true;
@@ -172,7 +163,7 @@ SettingsMenu = {
         gameModel.dmgNumbers = false;
         SettingsMenu.menuOptions[4].text.text = "Show Damage Numbers: OFF";
       }
-    }},
+    }, description:"Toggle display of damage values"},
     {title:"Screen Shake: ON", click:function(){
       if (!gameModel.maxScreenShake) {
         gameModel.maxScreenShake = Constants.maxScreenShake;
@@ -181,7 +172,7 @@ SettingsMenu = {
         gameModel.maxScreenShake = 0;
         SettingsMenu.menuOptions[5].text.text = "Screen Shake: OFF";
       }
-    }},
+    }, description:"Toggle screen shake effect"},
     {title:"Antialiasing: ON", click:function(){
       if (!gameModel.antialiasing) {
         gameModel.antialiasing = true;
@@ -192,7 +183,7 @@ SettingsMenu = {
       }
       save();
       location.reload(true);
-    }},
+    }, description:"Toggle antialiasing. This will restart the game"},
     {title:"Detail: HIGH", click:function(){
       if (gameModel.detailLevel < 1) {
         gameModel.detailLevel = 1;
@@ -201,10 +192,10 @@ SettingsMenu = {
         gameModel.detailLevel = 0.5;
         SettingsMenu.menuOptions[7].text.text = "Detail: LOW";
       }
-    }},
+    }, description:"Toggle particle effect detail"},
     {title:"Delete Save Data", click:function(){
       resetSaveGame();
-    }},
+    }, description:"Delete all save data. This will restart the game"},
     {title:"Resolution Options", click:function(){
       ResolutionMenu.show();
       var settingsOnHide = SettingsMenu.onHide;
@@ -214,7 +205,7 @@ SettingsMenu = {
         SettingsMenu.onHide = settingsOnHide;
       };
       SettingsMenu.hide();
-    }}
+    }, description:"Change internal rendering resolution"}
   ],
   backButton : {title:"Back", buttonDesc:buttonTypes.back, click:function(){
     SettingsMenu.hide();
@@ -384,6 +375,7 @@ InitializeMenu = function (menu) {
     menu.titleText.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.05 + 25};
     menu.menuContainer.addChild(menu.titleText);
 
+
     if (menu.backButton) {
       menu.backButton.text = new PIXI.Text(menu.backButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.back) + ")", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
       menu.backButton.text.tint = MainMenu.buttonTint;
@@ -399,6 +391,9 @@ InitializeMenu = function (menu) {
       menu.menuContainer.addChild(menu.currentCredits);
     }
 
+
+    menu.menuOptionsContainer = new PIXI.Container();
+
     for (i=0; i< menu.menuOptions.length;i++) {
       menu.menuOptions[i].text = new PIXI.Text(menu.menuOptions[i].title, { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
       if (menu.menuOptions[i].buttonDesc)
@@ -409,9 +404,12 @@ InitializeMenu = function (menu) {
       }
 
       menu.menuOptions[i].text.anchor = {x:0.5,y:0.5};
-      menu.menuOptions[i].text.position = {x:0.5 * renderer.width, y:renderer.height / 5 + (i * MainMenu.fontSize * 2.5 * scalingFactor)};
-      menu.menuContainer.addChild(menu.menuOptions[i].text);
+      menu.menuOptions[i].text.position = {x:0.5 * renderer.width, y:(i * MainMenu.fontSize * 2.5 * scalingFactor)};
+      menu.menuOptionsContainer.addChild(menu.menuOptions[i].text);
     }
+
+    menu.menuOptionsContainer.position.y = Math.min(renderer.height / 2 - menu.menuOptionsContainer.getBounds().height / 2, renderer.height * 0.25);
+    menu.menuContainer.addChild(menu.menuOptionsContainer);
 
     if (menu.onInit) {
       menu.onInit();
@@ -434,6 +432,7 @@ InitializeMenu = function (menu) {
     for (var i=0; i< menu.menuOptions.length;i++) {
       if (index == i) {
         menu.menuOptions[i].text.tint = MainMenu.selectedButtonTint;
+        menu.drawButtonDescription(menu.menuOptions[i]);
       } else {
         menu.menuOptions[i].text.tint = MainMenu.buttonTint;
       }
@@ -447,21 +446,55 @@ InitializeMenu = function (menu) {
     }
     menu.currentSelection = menu.menuOptions.indexOf(button);
     button.text.tint = MainMenu.selectedButtonTint;
+    menu.drawButtonDescription(button);
+  };
+
+  menu.drawButtonDescription = function(button) {
+    if (button.description) {
+      if (menu.descriptionContainer) {
+        menu.menuContainer.removeChild(menu.descriptionContainer);
+      }
+      menu.descriptionContainer = new PIXI.Container();
+      menu.menuContainer.addChild(menu.descriptionContainer);
+
+      var text = new PIXI.Text(button.description, { font: Math.round(MainMenu.fontSize * scalingFactor) + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+      text.tint = MainMenu.buttonTint;
+      text.anchor = {x:0.5, y:1};
+      var descBG = new PIXI.Graphics();
+      descBG.beginFill(MainMenu.modalBackgroundTint);
+      descBG.drawRect(
+        text.getBounds().x - 50 * scalingFactor,
+        text.getBounds().y - 2 * scalingFactor,
+        text.getBounds().width + 100 * scalingFactor,
+        text.getBounds().height + 4 * scalingFactor
+      );
+      descBG.alpha = 0.95;
+      menu.descriptionContainer.addChild(descBG);
+      menu.descriptionContainer.addChild(text);
+      menu.descriptionContainer.anchor = {x:0.5, y:1};
+      menu.descriptionContainer.position = {x:renderer.width / 2, y: renderer.height * 0.95 - 25};
+    } else {
+      if (menu.descriptionContainer) {
+        menu.menuContainer.removeChild(menu.descriptionContainer);
+      }
+    }
   };
 
   menu.checkMouseOver = function () {
     if (!menu.menuContainer || !menu.menuContainer.visible)
-      return;
+      return false;
 
     for (var i=0; i< menu.menuOptions.length;i++) {
       if (MainMenu.checkButton(menu.menuOptions[i])) {
         menu.select(menu.menuOptions[i]);
+        return true;
       }
     }
     if (menu.backButton && MainMenu.checkButton(menu.backButton)) {
       menu.select(menu.backButton);
+      return true;
     }
-
+    return false;
   };
 
   menu.checkClicks = function() {
@@ -475,7 +508,7 @@ InitializeMenu = function (menu) {
       }
       if (menu.backButton && MainMenu.checkButton(menu.backButton)) {
         menu.backButton.click();
-        return false;
+        return true;
       }
     }
 
@@ -554,12 +587,13 @@ MainMenu.updateGamepad = function() {
   var clickedAlready = false;
   if (playerOneAxes[0] < -0.5 || playerOneButtonsPressed[14] || a) {
     if (!MainMenu.controllerStatus.left) {
-      clickedAlready = false;
-      clickedAlready = Shipyard.left();
+      clickedAlready = Modal.leftOrRight();
       if (!clickedAlready)
-          clickedAlready = Loadout.left();
+        clickedAlready = Shipyard.left();
       if (!clickedAlready)
-          clickedAlready = ArmsDealer.left();
+        clickedAlready = Loadout.left();
+      if (!clickedAlready)
+        clickedAlready = ArmsDealer.left();
     }
     MainMenu.controllerStatus.left = true;
   } else {
@@ -568,8 +602,9 @@ MainMenu.updateGamepad = function() {
 
   if (playerOneAxes[0] > 0.5 || playerOneButtonsPressed[15] || d) {
     if (!MainMenu.controllerStatus.right) {
-      clickedAlready = false;
-      clickedAlready = Shipyard.right();
+      clickedAlready = Modal.leftOrRight();
+      if (!clickedAlready)
+        clickedAlready = Shipyard.right();
       if (!clickedAlready)
           clickedAlready = Loadout.right();
       if (!clickedAlready)
@@ -616,8 +651,10 @@ MainMenu.updateGamepad = function() {
 
   if (playerOneButtonsPressed[0] || spaceBar || enter) {
     if (!MainMenu.controllerStatus.a) {
-      clickedAlready = false;
-      clickedAlready = Shipyard.aButton();
+      clickedAlready = Modal.aButtonPress();
+
+      if (!clickedAlready)
+        clickedAlready = Shipyard.aButton();
 
       if (!clickedAlready)
         Loadout.aButton();
@@ -637,14 +674,22 @@ MainMenu.updateGamepad = function() {
 
   if (playerOneButtonsPressed[1] || esc) {
     if (!MainMenu.controllerStatus.b) {
-      clickedAlready = false;
-      clickedAlready = Shipyard.bButtonPress();
+      clickedAlready = Modal.bButtonPress();
+
+      if (!clickedAlready)
+        clickedAlready = StarChart.bButtonPress();
+
+      if (!clickedAlready)
+        clickedAlready = Shipyard.bButtonPress();
 
       if (!clickedAlready)
         clickedAlready = Loadout.bButtonPress();
 
       if (!clickedAlready)
         clickedAlready = ArmsDealer.bButtonPress();
+
+      if (!clickedAlready)
+        clickedAlready = PilotSchool.bButtonPress();
 
       for (i=0; i<Menus.length;i++) {
         if (!clickedAlready)
@@ -676,7 +721,7 @@ MainMenu.updateGamepad = function() {
   }
 };
 
-var OtherMenus = [StarChart, Shipyard, Loadout, ArmsDealer];
+var OtherMenus = [StarChart, Shipyard, Loadout, ArmsDealer, PilotSchool];
 
 MainMenu.updateAll = function(timeDiff) {
 
@@ -715,6 +760,7 @@ ResizeMenus = function() {
   Shipyard.resize();
   Loadout.resize();
   ArmsDealer.resize();
+  PilotSchool.resize();
   for (var i=Menus.length-1; i>=0;i--) {
     Menus[i].resize();
   }
@@ -728,36 +774,248 @@ InitializeMenus = function() {
   Shipyard.initialize();
   Loadout.initialize();
   ArmsDealer.initialize();
+  PilotSchool.initialize();
+  Modal.initialize();
 };
 
 CheckForMenuMouseOver = function() {
-  StarChart.checkMouseOver();
-  Shipyard.checkMouseOver();
-  Loadout.checkMouseOver();
-  ArmsDealer.checkMouseOver();
 
-  for (var i=0; i<Menus.length;i++) {
-    Menus[i].checkMouseOver();
+  var mouseOver = Modal.checkMouseOver();
+
+  if (Modal.isHidden()) {
+    if (!mouseOver)
+      mouseOver = StarChart.checkMouseOver();
+
+    if (!mouseOver)
+      mouseOver = Shipyard.checkMouseOver();
+
+    if (!mouseOver)
+      mouseOver = Loadout.checkMouseOver();
+
+    if (!mouseOver)
+      mouseOver = ArmsDealer.checkMouseOver();
+
+    if (!mouseOver)
+      mouseOver = PilotSchool.checkMouseOver();
+
+
+    for (var i=0; i<Menus.length;i++) {
+      if (!mouseOver)
+        mouseOver = Menus[i].checkMouseOver();
+    }
+  }
+
+  if (mouseOver) {
+    document.getElementById("the-body").classList.add("mouse-over");
+  } else {
+    document.getElementById("the-body").classList.remove("mouse-over");
   }
 };
 
 CheckForMenuClick = function() {
-  var clickedAlready = false;
+  var clickedAlready = Modal.checkClicks();
 
-  if (StarChart.checkClicks())
-      clickedAlready = true;
 
-  if (Shipyard.checkClicks())
-      clickedAlready = true;
+  if (Modal.isHidden()) {
+    if (!clickedAlready && StarChart.checkClicks())
+        clickedAlready = true;
 
-  if (Loadout.checkClicks())
-      clickedAlready = true;
+    if (!clickedAlready && Shipyard.checkClicks())
+        clickedAlready = true;
 
-  if (ArmsDealer.checkClicks())
-      clickedAlready = true;
+    if (!clickedAlready && Loadout.checkClicks())
+        clickedAlready = true;
 
-  for (var i=0; i<Menus.length;i++) {
-    if (!clickedAlready)
-      clickedAlready = Menus[i].checkClicks();
+    if (!clickedAlready && ArmsDealer.checkClicks())
+        clickedAlready = true;
+
+    if (!clickedAlready && PilotSchool.checkClicks())
+        clickedAlready = true;
+
+    for (var i=0; i<Menus.length;i++) {
+      if (!clickedAlready)
+        clickedAlready = Menus[i].checkClicks();
+    }
   }
+
+};
+
+Modal = {
+
+
+  initialize : function() {
+    this.dialogContainer = new PIXI.Container();
+
+  	var background = new PIXI.Graphics();
+  	background.beginFill(0x003030);
+  	background.drawRect(renderer.width * 0.25, renderer.height * 0.2, renderer.width * 0.5, renderer.height * 0.6);
+  	background.alpha = 0.99;
+  	this.dialogContainer.addChild(background);
+
+    this.dialogContents = new PIXI.Container();
+    this.dialogContainer.addChild(this.dialogContents);
+
+    this.dialogContainer.visible = false;
+
+    this.okButton = {text:new PIXI.Text("Okay", {font: (22 * scalingFactor) + 'px Dosis',	fill: '#FFF',	stroke: "#000",	strokeThickness: 0,	align: 'left'}),value:"ok"};
+    this.okButton.text.position = {x:renderer.width * 0.4 - this.okButton.text.width / 2, y:renderer.height * 0.7 - this.okButton.text.height / 2};
+    this.okButton.text.tint = MainMenu.buttonTint;
+
+    this.okButton.click = function() {
+      if (Modal.okButton.onOk) {
+        Modal.okButton.onOk();
+      }
+  		Modal.hide();
+  	};
+
+
+    this.buttonSelection = "ok";
+
+    this.dialogContainer.addChild(this.okButton.text);
+
+    this.cancelButton = {text:new PIXI.Text("Cancel", {font: (22 * scalingFactor) + 'px Dosis',	fill: '#FFF',	stroke: "#000",	strokeThickness: 0,	align: 'left'}),value:"cancel"};
+    this.cancelButton.text.position = {x:renderer.width * 0.6 - this.okButton.text.width / 2, y:renderer.height * 0.7 - this.okButton.text.height / 2};
+    this.cancelButton.text.tint = MainMenu.buttonTint;
+
+    this.cancelButton.click = function() {
+      if (Modal.cancelButton.onCancel) {
+        Modal.cancelButton.onCancel();
+      }
+  		Modal.hide();
+  	};
+
+    this.dialogContainer.addChild(this.cancelButton.text);
+
+    gameContainer.addChild(this.dialogContainer);
+  },
+
+
+  show : function(options) {
+    if (options) {
+      if (options.text) {
+        var textMessage = new PIXI.Text(options.text, {font: (22 * scalingFactor) + 'px Dosis',	fill: '#FFF',	stroke: "#000",	strokeThickness: 0,	align: 'left'});
+        textMessage.position = {x:renderer.width * 0.5 - textMessage.width / 2, y:renderer.height * 0.4 - textMessage.height / 2};
+        textMessage.tint = MainMenu.buttonTint;
+        this.dialogContents.addChild(textMessage);
+      }
+      if (options.container) {
+
+        this.dialogContents.addChild(options.container);
+      }
+      if (options.ok) {
+        this.okButton.onOk = options.ok;
+      }
+      if (options.cancel) {
+        this.okButton.text.position = {x:renderer.width * 0.4 - this.okButton.text.width / 2, y:renderer.height * 0.7 - this.okButton.text.height / 2};
+        this.cancelButton.text.position = {x:renderer.width * 0.6 - this.okButton.text.width / 2, y:renderer.height * 0.7 - this.okButton.text.height / 2};
+        this.cancelButton.text.visible = true;
+        this.cancelButton.onCancel = options.cancel;
+        this.select(this.cancelButton);
+      } else {
+        this.okButton.text.position = {x:renderer.width * 0.5 - this.okButton.text.width / 2, y:renderer.height * 0.7 - this.okButton.text.height / 2};
+        this.cancelButton.text.visible = false;
+        this.select(this.okButton);
+      }
+    }
+    this.dialogContainer.visible = true;
+  },
+
+
+  hide : function() {
+    Modal.okButton.onOk = false;
+    Modal.cancelButton.onCancel = false;
+    Modal.dialogContainer.visible = false;
+    Modal.dialogContents.children.forEach(function(child){
+      Modal.dialogContents.removeChild(child);
+    });
+  },
+
+
+
+  isHidden : function() {
+    return !Modal.dialogContainer.visible;
+  },
+
+
+  isShown : function() {
+    return !Modal.dialogContainer.visible;
+  },
+
+
+  select : function(button) {
+    Modal.cancelButton.text.tint = Modal.okButton.text.tint = MainMenu.buttonTint;
+    Modal.selectedButton = button;
+    button.text.tint = MainMenu.selectedButtonTint;
+  },
+
+
+  checkMouseOver : function() {
+    if (!this.dialogContainer || !this.dialogContainer.visible)
+      return false;
+
+    if (MainMenu.checkButton(Modal.okButton)) {
+      Modal.select(Modal.okButton);
+      return true;
+    }
+
+    if (MainMenu.checkButton(Modal.cancelButton)) {
+      Modal.select(Modal.cancelButton);
+      return true;
+    }
+    return false;
+  },
+
+
+  checkClicks : function() {
+    if (!this.dialogContainer || !this.dialogContainer.visible)
+      return false;
+
+    if (MainMenu.checkButton(Modal.okButton)) {
+      Modal.okButton.click();
+      return true;
+    }
+
+    if (MainMenu.checkButton(Modal.cancelButton)) {
+      Modal.cancelButton.click();
+      return true;
+    }
+
+    return false;
+  },
+
+
+  bButtonPress : function() {
+    if (!this.dialogContainer.visible)
+      return false;
+
+    if (Modal.cancelButton.text.visible) {
+      Modal.cancelButton.click();
+    } else {
+      Modal.okButton.click();
+    }
+    return true;
+  },
+
+
+  aButtonPress : function() {
+    if (!this.dialogContainer.visible)
+      return false;
+
+    Modal.selectedButton.click();
+    return true;
+  },
+
+
+  leftOrRight : function() {
+    if (!this.dialogContainer.visible)
+      return false;
+
+    if (Modal.selectedButton.value == "cancel") {
+      Modal.select(Modal.okButton);
+    } else {
+      Modal.select(Modal.cancelButton);
+    }
+    return false;
+  }
+
 };

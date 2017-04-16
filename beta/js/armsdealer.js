@@ -140,7 +140,7 @@ ArmsDealer.createItemIcon = function(item, options) {
 
 	var border = new PIXI.Graphics();
 	border.beginFill(backgroundCol);
-	border.lineStyle(2, borderCol);
+	border.lineStyle(2 * gameModel.resolutionFactor, borderCol);
 	border.drawRect(0, 0, 128 * scale, 128 * scale);
 	border.beginFill(borderCol);
 	border.drawRect(0, 0, 128 * scale, 24 * scale);
@@ -251,13 +251,13 @@ ArmsDealer.createItemIcon = function(item, options) {
 
 	priceText.tint = priceText.defaultTint = levelText.tint = levelText.defaultTint = pic.tint = pic.defaultTint = border.tint = border.defaultTint = 0xAAAAAA;
 
-	// if (options.cache) 
+	// if (options.cache)
 	// 	itemContainer.cacheAsBitmap = true;
 
 	return itemContainer;
 };
 
-ArmsDealer.createItemLayout = function(item, buy, full) {
+ArmsDealer.createItemLayout = function(item, buy, full, noIcon) {
 
 	if (!full)
 		return ArmsDealer.createItemIcon(item, {buy:buy});
@@ -265,6 +265,9 @@ ArmsDealer.createItemLayout = function(item, buy, full) {
 	var itemContainer = new PIXI.Container();
 
 	var iconWidth = 128;
+
+	if (noIcon)
+		iconWidth = 0;
 
 	var name = new PIXI.Text((item.ultra ||  item.hyper ? item.ultraName + "\n": "") + item.name, {
 		font: (22 * scalingFactor) + 'px Dosis',
@@ -343,16 +346,20 @@ ArmsDealer.createItemLayout = function(item, buy, full) {
 	itemContainer.addChild(level);
 	itemContainer.addChild(price);
 
-	var icon = ArmsDealer.createItemIcon(item, {buy:buy});
-	// icon.anchor = {x:1,y:0};
-	icon.position = {x:0, y:10 * scalingFactor};
-	icon.children.forEach(function(child) {
-		child.tint = 0xFFFFFF;
-	});
-	itemContainer.addChild(icon);
+	if (!noIcon) {
+		var icon = ArmsDealer.createItemIcon(item, {buy:buy});
+		// icon.anchor = {x:1,y:0};
+		icon.position = {x:0, y:10 * scalingFactor};
+		icon.children.forEach(function(child) {
+			child.tint = 0xFFFFFF;
+		});
+		itemContainer.addChild(icon);
+	}
 
 	return itemContainer;
 };
+
+
 
 ArmsDealer.initialize = function() {
 	if (!ArmsDealer.menuContainer) {
@@ -548,7 +555,9 @@ ArmsDealer.initialize = function() {
 
 			ArmsDealer.buyButtons.push({
 				text: text,
-				index: index
+				index: index,
+				weapon : item,
+				buy : true
 			});
 		}
 
@@ -596,7 +605,9 @@ ArmsDealer.initialize = function() {
 		}
 		ArmsDealer.sellButtons.push({
 			text: text,
-			index: index
+			index: index,
+			weapon : item,
+			buy : false
 		});
 	});
 
@@ -640,19 +651,21 @@ ArmsDealer.checkMouseOver = function() {
 		return true;
 	}
 
-	ArmsDealer.buyButtons.forEach(function(button) {
-		if (MainMenu.checkButton(button)) {
-			ArmsDealer.select(button);
+	for (var i = 0; i < ArmsDealer.buyButtons.length; i++) {
+		if (MainMenu.checkButton(ArmsDealer.buyButtons[i])) {
+			ArmsDealer.select(ArmsDealer.buyButtons[i]);
 			return true;
 		}
-	});
+	}
 
-	ArmsDealer.sellButtons.forEach(function(button) {
-		if (MainMenu.checkButton(button)) {
-			ArmsDealer.select(button);
+	for (i = 0; i < ArmsDealer.sellButtons.length; i++) {
+		if (MainMenu.checkButton(ArmsDealer.sellButtons[i])) {
+			ArmsDealer.select(ArmsDealer.sellButtons[i]);
 			return true;
 		}
-	});
+	}
+
+	ArmsDealer.hideItemHover();
 
 	return false;
 };
@@ -664,7 +677,7 @@ ArmsDealer.showDialog = function(index, buy) {
 	ArmsDealer.dialogContainer = new PIXI.Container();
 
 	var background = new PIXI.Graphics();
-	background.beginFill(0x003030);
+	background.beginFill(MainMenu.modalBackgroundTint);
 	background.drawRect(renderer.width * 0.25, renderer.height * 0.2, renderer.width * 0.5, renderer.height * 0.6);
 	background.alpha = 0.99;
 	ArmsDealer.dialogContainer.addChild(background);
@@ -674,7 +687,7 @@ ArmsDealer.showDialog = function(index, buy) {
 
 	ArmsDealer.dialogContainer.addChild(itemLayout);
 
-	var text = new PIXI.Text(buy ? "Buy for " + formatMoney(item.price) + " credits" : "Sell for " + formatMoney(item.price / 2) + " credits", {
+	var text = new PIXI.Text(buy ? "Buy for " + formatMoney(item.price * getBuyPriceModifier()) + " credits" : "Sell for " + formatMoney(item.price / 2) + " credits", {
 		font: (22 * scalingFactor) + 'px Dosis',
 		fill: '#FFF',
 		stroke: "#000",
@@ -721,8 +734,8 @@ ArmsDealer.cancelItem = function() {
 
 ArmsDealer.buyItem = function(index) {
 	var item = ArmsDealer.buyOptions[index];
-	if (item.price <= gameModel.p1.credits) {
-		gameModel.p1.credits -= item.price;
+	if (item.price * getBuyPriceModifier() <= gameModel.p1.credits) {
+		gameModel.p1.credits -= item.price * getBuyPriceModifier();
 		gameModel.purchaseHistory.push(item.seed);
 
 		if (item.type == "weapon") {
@@ -873,6 +886,9 @@ ArmsDealer.select = function(button) {
 		});
 	else
 		button.text.tint = MainMenu.selectedButtonTint;
+
+	if (button.weapon)
+		ArmsDealer.showItemHover(button);
 };
 
 ArmsDealer.moveSelection = function(colDelta, rowDelta) {
@@ -1013,4 +1029,50 @@ ArmsDealer.r1ButtonPress = function() {
 
 	ArmsDealer.sellTab.click();
 	return true;
+};
+
+
+ArmsDealer.showItemHover = function(button) {
+  if (lastUsedInput == inputTypes.controller)
+    return;
+
+  if (ArmsDealer.itemHover && ArmsDealer.itemHover.item.id != button.weapon.id) {
+    ArmsDealer.menuContainer.removeChild(ArmsDealer.itemHover);
+    ArmsDealer.itemHover = false;
+  }
+  if (!ArmsDealer.itemHover) {
+    ArmsDealer.itemHover = new PIXI.Container();
+    var itemDetails = ArmsDealer.createItemLayout(button.weapon, button.buy, true, true);
+    var bg = new PIXI.Graphics();
+    bg.beginFill(MainMenu.modalBackgroundTint);
+    bg.drawRect(0,0,itemDetails.getBounds().width + itemDetails.getBounds().x * 2,itemDetails.getBounds().height + itemDetails.getBounds().y * 2);
+    bg.alpha = 0.95;
+    ArmsDealer.itemHover.addChild(bg);
+    ArmsDealer.itemHover.addChild(itemDetails);
+    ArmsDealer.itemHover.item = button.weapon;
+    ArmsDealer.menuContainer.addChild(ArmsDealer.itemHover);
+  }
+  if (ArmsDealer.itemHover) {
+    var hoverPositionX = cursorPosition.x;
+    var hoverPositionY = cursorPosition.y;
+
+    if (lastUsedInput == inputTypes.controller) {
+      var buttonBounds = button.text.getBounds();
+      hoverPositionX = buttonBounds.x < renderer.width / 2 ? buttonBounds.x + buttonBounds.width : buttonBounds.x;
+      hoverPositionY = buttonBounds.y;
+    }
+    var bounds = ArmsDealer.itemHover.getBounds();
+    if (renderer.width / 2 > hoverPositionX) {
+      ArmsDealer.itemHover.position = {x:hoverPositionX, y:Math.min(hoverPositionY, renderer.height - bounds.height - 50 * scalingFactor)};
+    } else {
+      ArmsDealer.itemHover.position = {x:hoverPositionX - bounds.width,y:Math.min(hoverPositionY, renderer.height - bounds.height - 50 * scalingFactor)};
+    }
+  }
+};
+
+ArmsDealer.hideItemHover = function() {
+  if (ArmsDealer.itemHover) {
+    ArmsDealer.menuContainer.removeChild(ArmsDealer.itemHover);
+    ArmsDealer.itemHover = false;
+  }
 };

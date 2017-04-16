@@ -73,7 +73,7 @@ Enemies = {
 
 
   damageEnemy:function(enemy, xLoc, yLoc, damage, noEffect) {
-    enemy.damage(xLoc, yLoc, damage, noEffect);
+    enemy.damage(xLoc, yLoc, damage * getDamageModifier(), noEffect);
   },
 
 

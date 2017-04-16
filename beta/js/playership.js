@@ -194,12 +194,12 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
 };
 
 PlayerShip.damagePlayerShip = function (playerShip, damage) {
-	playerShip.currShield -= damage;
+	playerShip.currShield -= damage * getDamageReduction();
 	playerShip.lastDmg = 0;
 	Sounds.damage.play();
 	stageSprite.screenShake = gameModel.maxScreenShake;
 	playerShip.sprite.texture=playerShip.sprite.damageTexture;
-	GameText.damage.newText(damage, playerShip);
+	GameText.damage.newText((damage * getDamageReduction()), playerShip);
 	if (playerShip.currShield <= 0 && playerShip.inPlay === 1) {
 		playerShip.sprite.visible=false;
 		playerShip.inPlay = 0;

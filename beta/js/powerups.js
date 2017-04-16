@@ -4,8 +4,8 @@ var MoneyPickup = {
 	speed:50,
 	getSpritePool : function() {
 		if (!this.spritePool) {
-			this.diamondTexture =  glowTexture(PIXI.Texture.fromImage("img/diamond.svg", undefined,undefined,0.04 * scalingFactor), {resize:0.04 * scalingFactor, blurAmount : 0.5});
-			this.sapphireTexture = glowTexture(PIXI.Texture.fromImage("img/sapphire.svg",undefined,undefined,0.04 * scalingFactor), {resize:0.04 * scalingFactor, blurAmount : 0.5});
+			this.diamondTexture =  glowTexture(PIXI.Texture.fromImage("img/diamond.svg"), {resize:0.04 * scalingFactor, blurAmount : 0.5});
+			this.sapphireTexture = glowTexture(PIXI.Texture.fromImage("img/sapphire.svg"), {resize:0.04 * scalingFactor, blurAmount : 0.5});
 			this.spritePool = SpritePool.create(
 				[this.sapphireTexture,this.diamondTexture],
 				powerupContainer);

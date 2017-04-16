@@ -33,55 +33,7 @@ Weapons = {
   ]
 };
 
-Weapons.plasmaCannon = function(level,seed,rarity) {
 
-	var levelMod = Math.pow(Constants.weaponLevelScaling, level - 1);
-	Math.seedrandom(seed);
-	var dps = (level * 9 + (Math.random() * level * 2)) * levelMod * rarity.factor;
-	var shotsPerSecond = 6 + Math.random() * 5;
-	var damagePerShot = dps / shotsPerSecond;
-  var bulletsPerShot = 1;
-
-  if (level >= 5 && Math.random() > 0.7)
-	  bulletsPerShot++;
-
-  if (level >= 10 && Math.random() > 0.7)
-	  bulletsPerShot++;
-
-	var plasmaCannon =  {
-		ultra:rarity.ultra,
-    hyper:rarity.hyper,
-    super:rarity.super,
-		type: Constants.itemTypes.weapon,
-		name: (bulletsPerShot == 3 ? "Triple " : (bulletsPerShot == 2 ? "Double " : "")) + rarity.prefix + "Plasma Cannon",
-		bullets : bulletsPerShot,
-		seed: seed,
-		level: level,
-		dps: dps,
-		shotsPerSecond: shotsPerSecond,
-		damagePerShot: damagePerShot,
-		accuracy: 0.5 + Math.random() * 0.5,
-		bulletSpeed: 400,
-		price: Math.round(dps * 30),
-		id: gameModel.weaponIdCounter++,
-		weaponType : Weapons.types.plasmaCannon
-	};
-
-	if (rarity.ultra || rarity.hyper) {
-		if (Math.random() > 0.7 ) {
-			plasmaCannon.ricochet = 0.1 + (Math.random() * 0.2);
-			plasmaCannon.ultraName = "Second Chances";
-			plasmaCannon.ultraText = "Bullets have a " + Math.round(plasmaCannon.ricochet * 100) + "% chance to ricochet off the edge of the screen";
-		} else {
-			plasmaCannon.passThrough = 0.1 + (Math.random() * 0.2);
-			plasmaCannon.ultraName = "Deep Thunder";
-			plasmaCannon.ultraText = "Bullets have a " + Math.round(plasmaCannon.passThrough * 100) + "% chance to not be destroyed";
-		}
-
-	}
-
-	return plasmaCannon;
-};
 
 Weapons.laserCannon = function(level,seed,rarity) {
 
@@ -151,6 +103,8 @@ Weapons.missileLauncher = function(level, seed, rarity) {
 
 Weapons.getIconSvg =  function(item) {
   if (item.weaponType == Weapons.types.plasmaCannon) {
+    if (item.alternateTexture == "hotdog")
+      return "img/hot-dog-icon.svg";
     if (item.bullets == 3)
       return "img/level-three.svg";
     if (item.bullets == 2)
@@ -182,7 +136,7 @@ Weapons.generateWeapon = function(level, seed, ultra) {
     Weapons.missileLauncher,
     VulcanCannon.vulcanCannon,
     BioGelGun.bioGelGun,
-    Weapons.plasmaCannon
+    PlasmaCannon.plasmaCannon
   ];
 
   return weaponGenFunctions[Math.floor(Math.random() * weaponGenFunctions.length)](level,seed,weaponRarity);

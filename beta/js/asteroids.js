@@ -3,7 +3,7 @@ Asteroids = {
 
 
   minShipsPerWave : 3,
-  maxShipsPerWave : 6,
+  maxShipsPerWave : 5,
   startSize : 128,
 
 
@@ -92,7 +92,7 @@ Asteroids = {
     shadowCtx.fill();
     shadowCtx.restore();
     shadowCtx.drawImage(shipCanvas,1,1,size,size);
-    return glowTexture(PIXI.Texture.fromCanvas(shadowCanvas), {blurAmount: 0.7});
+    return glowTexture(PIXI.Texture.fromCanvas(shadowCanvas), {blurAmount: 1});
   },
 
 
@@ -100,23 +100,43 @@ Asteroids = {
   textureCounter : 0,
   getATexture : function() {
     if (!Asteroids.textures) {
-      var seed = Date.now();
+      // var seed = Date.now();
       Asteroids.textures = [];
-      for (var i =0; i < Asteroids.numTextures * gameModel.detailLevel; i++) {
-        seed++;
-        Asteroids.textures.push(
-          {
-            texture:Asteroids.createTexture(seed, false, 128),
-            damageTexture:Asteroids.createTexture(seed, true, 128)
-          }
-        );
-      }
+      // for (var i =0; i < Asteroids.numTextures * gameModel.detailLevel; i++) {
+      //   seed++;
+      //   Asteroids.textures.push(
+      //     {
+      //       texture:Asteroids.createTexture(seed, false, 128),
+      //       damageTexture:Asteroids.createTexture(seed, true, 128)
+      //     }
+      //   );
+      // }
     }
     Asteroids.textureCounter++;
     if (Asteroids.textureCounter >= Asteroids.textures.length)
       Asteroids.textureCounter = 0;
 
+    if (!Asteroids.textures[Asteroids.textureCounter]) {
+      var seed = Date.now();
+      Asteroids.textures[Asteroids.textureCounter] = {texture:Asteroids.createTexture(seed, false, 128), damageTexture:Asteroids.createTexture(seed, true, 128)};
+    }
+
+
     return Asteroids.textures[Asteroids.textureCounter];
+  },
+
+
+  sizeTextures : [],
+  sizeGranularity : 8,
+  seed : Date.now(),
+  getASizedTexture : function(size) {
+
+    if (!this.sizeTextures[Math.round(size / this.sizeGranularity)]) {
+      this.seed++;
+      this.sizeTextures[Math.round(size / this.sizeGranularity)] = {texture:Asteroids.createTexture(this.seed, false, size), damageTexture:Asteroids.createTexture(this.seed, true, size)};
+    }
+
+    return this.sizeTextures[Math.round(size / this.sizeGranularity)];
   },
 
 
@@ -130,9 +150,9 @@ Asteroids = {
 
     this.asteroidWave = true;
 
-    this.shipHealth = EnemyShips.shipHealth * 3;
+    this.shipHealth = EnemyShips.shipHealth * 2.5;
 
-    var seed = Date.now();
+    // var seed = Date.now();
 
     this.texture = Asteroids.getATexture().texture;
     this.spritePool = SpritePool.create(this.texture, backgroundEnemyContainer);
@@ -164,8 +184,8 @@ Asteroids = {
     this.xLoc = x;
     this.yLoc = y;
 
-    this.xSpeed = (-20 + Math.random() * 40) * (1 / factor);
-    this.ySpeed = (40 + Math.random() * 20) * (1 / factor);
+    this.xSpeed = (-20 + Math.random() * 40) * Math.min(1 / factor, 2);
+    this.ySpeed = (40 + Math.random() * 20) * Math.min(1 / factor, 1.6);
     this.maxSpeed = 0;
 
     this.health = wave.shipHealth * Enemies.difficultyFactor * factor;
@@ -177,7 +197,7 @@ Asteroids = {
     this.allDeadSurvivalTime = Math.random() * 1000;
     this.id = EnemyShips.currShipId++;
 
-    var textures = Asteroids.getATexture();
+    var textures = Asteroids.getASizedTexture(size);
     this.normalTexture = textures.texture;
     this.damageTexture = textures.damageTexture;
 
@@ -185,7 +205,8 @@ Asteroids = {
     this.sprite.texture = this.normalTexture;
     this.sprite.visible = true;
     this.sprite.tint = 0xFFFFFF;
-    this.sprite.scale.x = this.sprite.scale.y = factor;
+    // this.sprite.scale.x = this.sprite.scale.y = factor;
+    this.sprite.scale.x = this.sprite.scale.y = 1;
     this.sprite.position.x = this.xLoc * scalingFactor;
     this.sprite.position.y = this.yLoc * scalingFactor;
     this.sprite.anchor = {x:0.5,y:0.5};
@@ -224,7 +245,7 @@ Asteroids = {
 			Enemies.activeShips.push(asteroid);
 
       if (asteroid.yLoc + asteroid.offset > PlayerShip.playerShip.yLoc && asteroid.ySpeed < 100) {
-        asteroid.ySpeed += 20 * timeDiff;
+        asteroid.ySpeed += 10 * timeDiff;
       }
       asteroid.xLoc += asteroid.xSpeed * timeDiff;
       asteroid.yLoc += asteroid.ySpeed * timeDiff;

@@ -36,13 +36,12 @@ const Constants = {
 		darkText : 0x80D8FF
 	}
 };
-
 var gameModel = {
 	weaponIdCounter:1
 };
 
 function starLevelModify(level) {
-	return Math.ceil(level / 2.5);
+	return Math.ceil(level / 2);
 }
 
 function calculateShipLevel() {
@@ -57,7 +56,7 @@ function calculateAdjustedStarLevel(starLevel) {
 }
 
 function valueForRoute(route) {
-	return 0.4 * Math.pow(1.4, route);
+	return 0.3 * Math.pow(1.43, route);
 }
 
 function calculateIncome() {
@@ -65,7 +64,7 @@ function calculateIncome() {
 	for (var i=0; i<gameModel.history.length; i++) {
 		amount += valueForRoute(gameModel.history[i].completedLevel);
 	}
-	return amount;
+	return amount * getTradeModifier();
 }
 
 function calculateIncomeSinceLastCheck(time) {
@@ -157,12 +156,13 @@ function load() {
 			antialiasing : false,
 			p1 : {
 				ship: Shipyard.generateShip(1, 7, false),
-				weapons: [Weapons.plasmaCannon(1,123,Weapons.rarity[0])],
+				weapons: [PlasmaCannon.plasmaCannon(1,123,Weapons.rarity[0])],
 				shields: [ArmsDealer.generateShield(1, 234, false)],
 				credits: 0,
 				totalCredits: 0,
 				temporaryCredits : 0,
-				perkPoints:0
+				perkPoints:0,
+				upgrades : {speed:0,defence:0,damage:0,buying:0,trading:0,range:0}
 			},
 			currentSystem: {x:0,y:0},
 			targetSystem: {x:0,y:0},
@@ -193,3 +193,72 @@ function addCredits (value, fromTrade) {
 
 	save();
 }
+
+function getUpgradedRange() {
+	return (100 + gameModel.p1.upgrades.range) / 100;
+}
+
+function getUpgradedSpeed() {
+	return 100 + gameModel.p1.upgrades.speed;
+}
+
+function getDamageReduction() {
+	return 100 / (100 + gameModel.p1.upgrades.defence);
+}
+
+function getDamageModifier() {
+	return (100 + gameModel.p1.upgrades.damage) / 100;
+}
+
+function getBuyPriceModifier() {
+	return 100 / (100 + gameModel.p1.upgrades.buying);
+}
+
+function getTradeModifier() {
+	return (100 + gameModel.p1.upgrades.trading) / 100;
+}
+
+var pilotUpgrades = [
+	{
+		id : "speed",
+		name : "Reaction Training",
+		description : "Increase ship movement speed by 1%",
+		basePrice : 1000,
+		levelFactor : 2.5
+	},
+	{
+		id : "range",
+		name : "Endurance Training",
+		description : "Increase ship flight range by 1%",
+		basePrice : 2000,
+		levelFactor : 2.4
+	},
+	{
+		id : "defence",
+		name : "Evasion Training",
+		description : "Increase damage reduction by 1%",
+		basePrice : 5000,
+		levelFactor : 2
+	},
+	{
+		id : "damage",
+		name : "Targeting Training",
+		description : "Increase all damge dealt by 1%",
+		basePrice : 10000,
+		levelFactor : 1.9
+	},
+	{
+		id : "buying",
+		name : "Barter Training",
+		description : "Reduce all costs by 1%",
+		basePrice : 25000,
+		levelFactor : 1.9
+	},
+	{
+		id : "trading",
+		name : "Business Training",
+		description : "Increase trade route value by 1%",
+		basePrice : 50000,
+		levelFactor : 2.8
+	}
+];

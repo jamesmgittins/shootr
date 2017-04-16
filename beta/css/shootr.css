@@ -24,7 +24,11 @@ body, html {
 }
 
 body.controller {
-  cursor:none;
+  cursor:none !important;
+}
+
+body.mouse-over {
+  cursor:pointer;
 }
 
 canvas {
