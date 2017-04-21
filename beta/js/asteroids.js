@@ -195,7 +195,7 @@ Asteroids = {
     this.rotationSpeed = -0.3 + Math.random() * 0.6;
 
     this.allDeadSurvivalTime = Math.random() * 1000;
-    this.id = EnemyShips.currShipId++;
+    this.id = Enemies.currShipId++;
 
     var textures = Asteroids.getASizedTexture(size);
     this.normalTexture = textures.texture;
@@ -331,7 +331,7 @@ Asteroids = {
 
 		MoneyPickup.newMoneyPickup(asteroid.xLoc, asteroid.yLoc, (asteroid.wave.shipHealth + Math.random() * asteroid.wave.shipHealth * 2), true);
 
-  	Sounds.shipExplosion.play();
+//  	Sounds.shipExplosion.play();
   	Asteroids.generateExplosion(asteroid);
   },
 

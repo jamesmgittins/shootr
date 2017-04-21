@@ -117,6 +117,18 @@ Ships.shipArt = function (size, seed, colors, white) {
     for (var i = 0; i < shipLines; i++) {
         nextYLoc = (Math.random() * size);
         nextXLoc = (((Math.random() * size / 2) * (nextYLoc / size)) + size / 2);
+
+				if (i == shipLines - 2){
+					nextYLoc = size;
+					nextXLoc = size;
+				}
+
+				// if (i == shipLines - 1){
+				// 	nextYLoc = size * (0.5 + Math.random() * 0.5);
+				// 	// nextYLoc = size * 0.5;
+				// 	nextXLoc = size / 2;
+				// }
+
         drawline(shipctx, white ? "#FFFFFF" : colors[colorindex], lastX, lastY, nextXLoc, nextYLoc);
 
 				shadowCtx.lineTo(1 + nextXLoc, 1 + nextYLoc);
@@ -142,6 +154,7 @@ Ships.shipArt = function (size, seed, colors, white) {
     shipctx.scale(-1, 1);
     shipctx.drawImage(shipCanvas, -size / 2, 0);
     shipctx.restore();
+
 		shadowCtx.drawImage(shipCanvas,1,1,size,size);
 	return shadowCanvas;
 };
@@ -389,7 +402,9 @@ Ships.generateExplosion = function (ship, xDiff, yDiff, delay) {
 		}
 		Ships.blasts.newBlast(ship.xLoc + (xDiff || 0),ship.yLoc + (yDiff || 0));
 
-		Sounds.shipExplosion.play();
+		// Sounds.shipExplosion.play(ship.xLoc);
+
+		Sounds.shipExplosion.play(ship.xLoc);
 
 	}, delay || 0);
 

@@ -10,6 +10,7 @@ Enemies = {
   enemiesSpawned:0,
   difficultyFactor:1,
   difficultyCheck : 0,
+  currShipId : 1,
 
 
 
@@ -93,6 +94,16 @@ Enemies = {
 
   },
 
+  enemySpawners : [],
+  getEnemySpawners : function() {
+    if (this.enemySpawners.length === 0) {
+      this.enemySpawners = [
+        function(){return new UFOs.wave();},
+        function(){return new EnemyShips.wave();},
+      ];
+    }
+    return this.enemySpawners;
+  },
 
 
   getEnemyWave:function() {
@@ -101,7 +112,11 @@ Enemies = {
       return new Asteroids.wave();
     }
 
-    return new EnemyShips.wave();
+
+    return this.getEnemySpawners()[Math.floor(Math.random() * this.getEnemySpawners().length)]();
+
+    // return new EnemyShips.wave();
+    // return new UFOs.wave();
   }
 
 

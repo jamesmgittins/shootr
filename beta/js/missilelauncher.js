@@ -130,7 +130,7 @@ MissileLauncher = {
 
     var sprite = spritePool.nextSprite();
 
-		Sounds.playerMissile.play();
+		Sounds.playerMissile.play(position.x);
 		sprite.visible = true;
 		sprite.xLoc = position.x;
 		sprite.yLoc = position.y;
@@ -183,7 +183,6 @@ MissileLauncher = {
 
 				var speed = RotateVector2d(0, this.weapon.bulletSpeed, -position.angle - wobble + Math.random() * wobble * 2);
 
-				Sounds.playerMissile.play();
 				MissileLauncher.individualBullet(this.spritePool, speed, position, weapon.damagePerShot * damageModifier, 1, this.weapon);
 			},
       missileTrails : {

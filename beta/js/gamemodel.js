@@ -176,6 +176,7 @@ function load() {
 		gameModel.p1.shield = gameModel.p1.shields[0];
 	}
 	purgeDupes();
+	Howler.volume(gameModel.masterVolume);
 }
 
 function resetSaveGame() {
@@ -199,7 +200,7 @@ function getUpgradedRange() {
 }
 
 function getUpgradedSpeed() {
-	return 100 + gameModel.p1.upgrades.speed;
+	return (100 * gameModel.p1.ship.speed) + gameModel.p1.upgrades.speed;
 }
 
 function getDamageReduction() {
@@ -223,42 +224,42 @@ var pilotUpgrades = [
 		id : "speed",
 		name : "Reaction Training",
 		description : "Increase ship movement speed by 1%",
-		basePrice : 1000,
+		basePrice : 5000,
 		levelFactor : 2.5
 	},
 	{
 		id : "range",
 		name : "Endurance Training",
 		description : "Increase ship flight range by 1%",
-		basePrice : 2000,
+		basePrice : 10000,
 		levelFactor : 2.4
 	},
 	{
 		id : "defence",
 		name : "Evasion Training",
 		description : "Increase damage reduction by 1%",
-		basePrice : 5000,
+		basePrice : 50000,
 		levelFactor : 2
 	},
 	{
 		id : "damage",
 		name : "Targeting Training",
 		description : "Increase all damge dealt by 1%",
-		basePrice : 10000,
+		basePrice : 100000,
 		levelFactor : 1.9
 	},
 	{
 		id : "buying",
 		name : "Barter Training",
 		description : "Reduce all costs by 1%",
-		basePrice : 25000,
+		basePrice : 250000,
 		levelFactor : 1.9
 	},
 	{
 		id : "trading",
 		name : "Business Training",
 		description : "Increase trade route value by 1%",
-		basePrice : 50000,
+		basePrice : 500000,
 		levelFactor : 2.8
 	}
 ];

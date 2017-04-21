@@ -3,9 +3,7 @@ var EnemyShips = {};
 EnemyShips.maxShipsPerWave = 16;
 EnemyShips.minShipsPerWave = 4;
 EnemyShips.shipHealth = 2;
-EnemyShips.maxWaves = 3;
 EnemyShips.maxBulletsPerShot=1;
-EnemyShips.currShipId = 1;
 
 EnemyShips.waveBulletFrequency = 3000;
 
@@ -40,7 +38,6 @@ EnemyShips.wavePatterns = [
     }
 ];
 EnemyShips.patternCounter = Math.floor(Math.random() * EnemyShips.wavePatterns.length);
-EnemyShips.waves = [];
 
 EnemyShips.wave = function () {
 
@@ -105,7 +102,7 @@ EnemyShips.enemyShip = function (wave) {
 	this.bulletsLeft=0;
 	this.lastBullet = 0;
 	this.allDeadSurvivalTime = Math.random() * 1000;
-	this.id = EnemyShips.currShipId++;
+	this.id = Enemies.currShipId++;
 
 	this.sprite = wave.spritePool.nextSprite();
 	this.sprite.texture = wave.texture;
@@ -148,7 +145,6 @@ EnemyShips.destroy = function (ship) {
 		Enemies.allDeadTimer = 0;
 	}
 
-	Sounds.shipExplosion.play();
 	Ships.generateExplosion(ship);
 };
 
@@ -191,7 +187,7 @@ EnemyShips.damageEnemyShip = function(xLoc, yLoc, damage, noEffect) {
 
 		if (!noEffect) {
 			Bullets.generateExplosion(xLoc, yLoc);
-			Sounds.enemyDamage.play();
+			Sounds.enemyDamage.play(this.xLoc);
 			this.sprite.rotation = -this.rotation - 0.1 + (Math.random() * 0.2);
 			this.sprite.texture = this.damageTexture || this.wave.damageTexture;
 			this.lastDamaged = 0;

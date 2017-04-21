@@ -96,6 +96,51 @@ Bullets.blasts = {
 	}
 };
 
+Bullets.enemyRails = {
+	getSpritePool:function() {
+		if (!this.spritePool) {
+			this.spritePool = SpritePool.create(Stars.stars.texture, bulletContainer);
+		}
+		return this.spritePool;
+	},
+	newRail : function(ship) {
+		Sounds.playerLaser.play(ship.xLoc);
+		var angle = Math.atan2(PlayerShip.playerShip.xLoc - ship.xLoc,  ship.yLoc - PlayerShip.playerShip.yLoc);
+		var sprite = this.getSpritePool().nextSprite();
+		sprite.anchor = {
+			x: 0.5,
+			y: 1
+		};
+		sprite.tint = 0xE030E0;
+		sprite.scale.y = 640 * scalingFactor;
+		sprite.xLoc = ship.xLoc;
+		sprite.yLoc = ship.yLoc;
+		sprite.position.x = ship.xLoc * scalingFactor;
+		sprite.position.y = ship.yLoc * scalingFactor;
+		sprite.visible = true;
+		sprite.alpha = 1;
+		sprite.speed = RotateVector2d(0, -200, angle);
+		sprite.scale.x = 7 * scalingFactor;
+		sprite.rotation = angle;
+		Bullets.generateExplosion(PlayerShip.playerShip.xLoc, PlayerShip.playerShip.yLoc);
+		PlayerShip.damagePlayerShip(PlayerShip.playerShip, Bullets.enemyBullets.enemyShotStrength);
+	},
+	update:function(timeDiff) {
+		for (var i = 0; i < this.getSpritePool().sprites.length; i++) {
+			var sprite = this.getSpritePool().sprites[i];
+			if (sprite.visible) {
+				sprite.position.x += sprite.speed.x * timeDiff * scalingFactor;
+				sprite.position.y += sprite.speed.y * timeDiff * scalingFactor;
+				sprite.scale.x = Math.max(sprite.scale.x - 16 * scalingFactor * timeDiff, 0);
+				sprite.alpha -= 0.5 * timeDiff;
+				if (sprite.scale.x <= 0) {
+					this.spritePool.discardSprite(sprite);
+				}
+			}
+		}
+	}
+};
+
 Bullets.enemyBullets = {
 	texture: function() {
 		var blast = document.createElement('canvas');
@@ -161,13 +206,20 @@ Bullets.enemyBullets = {
 			bullet.xSpeed = rotated.x;
 			bullet.ySpeed = rotated.y;
 		}
-		Sounds.enemyShot.play();
+		Sounds.enemyShot.play(
+			ship.xLoc
+		);
+		bullet.travelSoundId = Sounds.enemyShotTravel.play(
+			(ship.xLoc - PlayerShip.playerShip.xLoc) / 3,
+			(ship.yLoc - PlayerShip.playerShip.yLoc) / 3
+		);
 		bullet.visible = true;
 		bullet.lastTrail = 0;
 		bullet.position.x = bullet.xLoc * scalingFactor;
 		bullet.position.y = bullet.yLoc * scalingFactor;
 	},
 	update : function(timeDiff) {
+		Bullets.enemyRails.update(timeDiff);
 		this.getSpritePool();
 		for (var i = 0; i < this.spritePool.sprites.length; i++) {
 
@@ -181,11 +233,13 @@ Bullets.enemyBullets = {
 				if (bullet.yLoc < 0 || bullet.yLoc > canvasHeight ||
 					bullet.xLoc < 0 || bullet.xLoc > canvasWidth) {
 					Bullets.enemyBullets.spritePool.discardSprite(bullet);
+					Sounds.enemyShotTravel.stop(bullet.travelSoundId);
 				} else {
 					if (Ships.detectCollision(PlayerShip.playerShip, bullet.xLoc, bullet.yLoc)) {
 						Bullets.enemyBullets.spritePool.discardSprite(bullet);
 						Bullets.generateExplosion(bullet.xLoc, bullet.yLoc);
 						PlayerShip.damagePlayerShip(PlayerShip.playerShip, Bullets.enemyBullets.enemyShotStrength);
+						Sounds.enemyShotTravel.stop(bullet.travelSoundId);
 					} else {
 
 						bullet.lastTrail += timeDiff * 1000;
@@ -200,6 +254,12 @@ Bullets.enemyBullets = {
 						bullet.position.x = bullet.xLoc * scalingFactor;
 						bullet.position.y = bullet.yLoc * scalingFactor;
 						bullet.tint = calculateTint(0);
+
+						Sounds.enemyShotTravel.updatePosition(
+							(bullet.xLoc - PlayerShip.playerShip.xLoc) / 3,
+							(bullet.yLoc - PlayerShip.playerShip.yLoc) / 3,
+							bullet.travelSoundId
+						);
 					}
 				}
 

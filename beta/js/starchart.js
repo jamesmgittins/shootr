@@ -837,7 +837,7 @@ StarChart.initialize = function () {
 
   StarChart.hide = function() {
     StarChart.menuContainer.visible = false;
-    Sounds.mapMusic.pause();
+    Sounds.mapMusic.fadeOut();
   };
 
   StarChart.calcFade = function (x,y,bounds) {

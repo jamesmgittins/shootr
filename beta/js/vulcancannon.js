@@ -117,7 +117,7 @@ VulcanCannon = {
 					speed = RotateVector2d(0, this.weapon.bulletSpeed, -position.angle - wobble + Math.random() * wobble * 2);
 				}
 
-				Sounds.playerBullets.play();
+				Sounds.playerBullets.play(position.x);
 				VulcanCannon.individualBullet(this.spritePool, speed, position, weapon.damagePerShot * damageModifier, 1, this.weapon);
 			}
 		};

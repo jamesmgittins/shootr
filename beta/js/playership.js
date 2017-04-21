@@ -149,7 +149,7 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
 					if (q || ekey || playerOneButtonsPressed[4] || playerOneButtonsPressed[5]) {
 						PlayerShip.playerShip.rolling = 0;
 						PlayerShip.playerShip.rollingLeft = q || playerOneButtonsPressed[4];
-						Sounds.dodge.play();
+						Sounds.dodge.play(PlayerShip.playerShip.xLoc);
 					}
 				}
 			}
@@ -196,7 +196,7 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
 PlayerShip.damagePlayerShip = function (playerShip, damage) {
 	playerShip.currShield -= damage * getDamageReduction();
 	playerShip.lastDmg = 0;
-	Sounds.damage.play();
+	Sounds.damage.play(PlayerShip.playerShip.xLoc);
 	stageSprite.screenShake = gameModel.maxScreenShake;
 	playerShip.sprite.texture=playerShip.sprite.damageTexture;
 	GameText.damage.newText((damage * getDamageReduction()), playerShip);
@@ -206,7 +206,7 @@ PlayerShip.damagePlayerShip = function (playerShip, damage) {
 		PlayerShip.allPlayersDead = 1;
 		PlayerShip.allDeadTimer = 0;
 		Ships.generateExplosion(playerShip);
-		Sounds.shipExplosion.play();
+		Sounds.shipExplosion.play(PlayerShip.playerShip.xLoc);
 	}
 };
 

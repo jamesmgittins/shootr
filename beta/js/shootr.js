@@ -67,7 +67,7 @@ function changeLevel(level) {
 
 	Bullets.enemyBullets.enemyShotStrength = 2 * gameModel.currentLevel * levelDifficultyModifier;
 	Bullets.enemyBullets.enemyShotSpeed = Math.min(200 + (gameModel.currentLevel * 2), 400);
-	PlayerShip.playerShip.maxSpeed = getUpgradedSpeed() * gameModel.p1.ship.speed;
+	PlayerShip.playerShip.maxSpeed = getUpgradedSpeed();
 
 	if (gameModel.p1.shield) {
 		PlayerShip.playerShip.maxShield = gameModel.p1.shield.capacity;
@@ -114,7 +114,7 @@ function changeState(state) {
 	setTimeout(function(){
 		currentState = state;
 
-		Sounds.music.pause();
+
 
 		Enemies.activeShips = [];
 
@@ -129,6 +129,8 @@ function changeState(state) {
 
 		if (state == states.paused) {
 			PauseMenu.show();
+			Sounds.music.pause();
+			Sounds.enemyShotTravel.pause();
 		}
 
 		if (state == states.levelComplete) {
@@ -136,7 +138,7 @@ function changeState(state) {
 			playerShipContainer.visible = false;
 			bulletContainer.visible = false;
 			GameText.levelComplete.show();
-			Sounds.winChimes.play();
+			Sounds.music.fadeOut();
 			Boss.shield.hide();
 
 			if (Boss.isInTargetSystem()) {
@@ -158,11 +160,11 @@ function changeState(state) {
 			addCredits(gameModel.p1.temporaryCredits);
 			gameModel.p1.temporaryCredits = 0;
 			save();
-			Sounds.music.reset();
+
 		}
 
 		if (state == states.station) {
-
+			Sounds.music.reset();
 			stageSprite.visible=false;
 			GameText.status.hide();
 			GameText.levelComplete.hide();
@@ -257,7 +259,8 @@ function update() {
 			stageBackground.tint = rgbToHex(
 				Math.round(startStar.tint.r * percentageOfStartTint) + Math.round(endStar.tint.r * percentageOfEndTint),
 				Math.round(startStar.tint.g * percentageOfStartTint) + Math.round(endStar.tint.g * percentageOfEndTint),
-				Math.round(startStar.tint.b * percentageOfStartTint) + Math.round(endStar.tint.b * percentageOfEndTint));
+				Math.round(startStar.tint.b * percentageOfStartTint) + Math.round(endStar.tint.b * percentageOfEndTint)
+			);
 
 			// update game state
 	// 		Terrain.update(timeDiff);

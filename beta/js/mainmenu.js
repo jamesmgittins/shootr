@@ -268,19 +268,23 @@ VolumeMenu = {
   menuOptions:[
     {title:"Up",click:function(){
       gameModel.masterVolume += 0.05;
+      Howler.volume(gameModel.masterVolume);
       VolumeMenu.volumeText.text = (gameModel.masterVolume * 100).toFixed() + "%";
     }},
     {title:"Down",click:function(){
       if (gameModel.masterVolume - 0.05 > 0) {
         gameModel.masterVolume -= 0.05;
+        Howler.volume(gameModel.masterVolume);
         VolumeMenu.volumeText.text = (gameModel.masterVolume * 100).toFixed() + "%";
       } else {
         gameModel.masterVolume = 0;
+        Howler.mute(true);
         VolumeMenu.volumeText.text = "Muted";
       }
     }},
     {title:"Mute",click:function(){
       gameModel.masterVolume = 0;
+      Howler.mute(true);
       VolumeMenu.volumeText.text = "Muted";
     }}
   ],

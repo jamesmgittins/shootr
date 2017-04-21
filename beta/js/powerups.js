@@ -61,7 +61,7 @@ var MoneyPickup = {
 
 						if (distanceBetweenPoints(PlayerShip.playerShip.xLoc, PlayerShip.playerShip.yLoc, pickup.xLoc, pickup.yLoc) < 30) {
 
-							Sounds.powerup.play();
+							Sounds.powerup.play(pickup.xLoc);
 
 							addCredits(pickup.moneyValue);
 							GameText.credits.newCreditText(pickup.xLoc,pickup.yLoc - 15,"+" + formatMoney(pickup.moneyValue));
@@ -204,7 +204,7 @@ var Powerups = {
 
 				if (distanceBetweenPoints(PlayerShip.playerShip.xLoc, PlayerShip.playerShip.yLoc, Powerups.xLoc[i], Powerups.yLoc[i]) < 35) {
 
-					Sounds.powerup.play();
+					Sounds.powerup.play(Powerups.xLoc[i]);
 
 					var number = Math.random();
 

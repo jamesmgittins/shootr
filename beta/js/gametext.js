@@ -472,7 +472,7 @@ GameText.levelComplete = {
 		this.lastParticle += timeDiff;
 		this.lastButtonPress += timeDiff;
 
-		if (this.lastParticle > 0.5) {
+		if (this.lastParticle > 0.1) {
 			this.lastParticle = 0;
 			var sideSpace = (renderer.width - renderer.height) / 2;
 			Stars.powerupParts.newPowerupPart(renderer.width * Math.random() - sideSpace, renderer.height * Math.random());
@@ -498,6 +498,15 @@ GameText.levelComplete = {
 				this.textMessage.text = "Level Complete\nPress " + ShootrUI.getInputButtonDescription(buttonTypes.select) + " to Continue";
 				this.textMessage.visible = true;
 			}
+		}
+
+		if (this.scoreBoard.alpha < 1) {
+			this.scoreBoard.alpha += 1 * timeDiff;
+		}
+
+		if (this.scoreBoard.alpha > 1) {
+			this.scoreBoard.alpha = 1;
+			Sounds.winChimes.play();
 		}
 
 		if ((playerOneButtonsPressed[0] || spaceBar || this.clicked) && this.lastButtonPress > 0.4) {
@@ -543,6 +552,7 @@ GameText.levelComplete = {
 
 		this.scoreBoard = this.getScoreBoard();
 		this.scoreBoard.position = {x:renderer.width / 2 - this.scoreBoard.getBounds().width / 2, y:renderer.height / 2 - this.scoreBoard.getBounds().height / 2};
+		this.scoreBoard.alpha = 0;
 
 		this.container.addChild(this.textMessage);
 		this.container.addChild(this.scoreBoard);
@@ -575,8 +585,6 @@ GameText.levelComplete = {
 
 		var backgroundCol = Constants.itemColors.normal;
 		var borderCol = Constants.itemBorders.normal;
-
-		console.log("level complete, killed " + Enemies.enemiesKilled + " of " + Enemies.enemiesSpawned + " spawned");
 
 		var rating = Enemies.enemiesKilled / Enemies.enemiesSpawned;
 		var ratingDesc = "NORMAL";
@@ -695,7 +703,7 @@ GameText.levelComplete = {
 		}
 
 		if (!findInHistory(gameModel.currentSystem, gameModel.targetSystem)) {
-			var value = formatMoney(valueForRoute(calculateAdjustedStarLevel(StarChart.selectedStar.level)));
+			var value = formatMoney(valueForRoute(calculateAdjustedStarLevel(endStar.level)));
 
 			var valueText = new PIXI.Text("New Trade Route Cleared\n +" + value + " Credits per second", {
 				font: (22 * scalingFactor) + 'px Dosis',

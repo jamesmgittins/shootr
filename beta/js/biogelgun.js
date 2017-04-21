@@ -146,7 +146,7 @@ BioGelGun = {
 				var wobble = (1 - this.weapon.accuracy) * 0.2;
 				var speed = RotateVector2d(0, BioGelGun.startSpeed, -position.angle - wobble + Math.random() * wobble * 2);
 
-				Sounds.playerBullets.play();
+				Sounds.playerBullets.play(position.x);
 
 				// var angle = Math.atan2(speed.x, speed.y);
 

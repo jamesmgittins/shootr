@@ -105,7 +105,7 @@ PlasmaCannon = {
 				var wobble = (1 - this.weapon.accuracy) * 0.2;
 				var speed = RotateVector2d(0, this.weapon.bulletSpeed, -position.angle - wobble + Math.random() * wobble * 2);
 
-				Sounds.playerBullets.play();
+				Sounds.playerBullets.play(position.x);
 
 				var damagePerShot = weapon.damagePerShot * damageModifier;
 				switch (this.weapon.bullets) {

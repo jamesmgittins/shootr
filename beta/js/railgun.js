@@ -41,7 +41,7 @@ RailGun = {
 			},
 			fireShot : function(position, damageModifier) {
 				this.weapon.lastShot = 0;
-        Sounds.playerLaser.play();
+        Sounds.playerLaser.play(position.x);
         var sprite = this.spritePool.nextSprite();
         sprite.anchor = {
           x: 0.5,
