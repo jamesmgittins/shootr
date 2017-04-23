@@ -171,6 +171,11 @@ Bullets.enemyBullets = {
 	},
 	enemyShotSpeed: 100,
 	enemyShotStrength: 1,
+	newBulletFan : function(ship, qty) {
+		for (var i = -1 * qty / 2 * 0.15; i < qty / 2 * 0.15; i += 0.15) {
+			Bullets.enemyBullets.newEnemyBullet(ship, i);
+		}
+	},
 	newEnemyBullet: function(ship, rotation) {
 
 		if (ship.xLoc < 0 || ship.xLoc > canvasWidth || ship.yLoc < 0 || ship.yLoc > canvasHeight)

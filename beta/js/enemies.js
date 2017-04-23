@@ -98,8 +98,10 @@ Enemies = {
   getEnemySpawners : function() {
     if (this.enemySpawners.length === 0) {
       this.enemySpawners = [
-        function(){return new UFOs.wave();},
         function(){return new EnemyShips.wave();},
+        function(){return new UFOs.bulletWave();},
+        function(){return new UFOs.railWave();},
+        function(){return new EnemyShips.wave();}
       ];
     }
     return this.enemySpawners;
@@ -116,7 +118,7 @@ Enemies = {
     return this.getEnemySpawners()[Math.floor(Math.random() * this.getEnemySpawners().length)]();
 
     // return new EnemyShips.wave();
-    // return new UFOs.wave();
+    // return new UFOs.bulletWave();
   }
 
 

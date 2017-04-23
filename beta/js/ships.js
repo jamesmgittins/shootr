@@ -89,6 +89,7 @@ Ships.shipArt = function (size, seed, colors, white) {
     var shipctx = shipCanvas.getContext('2d');
 
 		shipctx.lineWidth = Math.min(Math.max(1,Math.floor(size / PlayerShip.SHIP_SIZE)), 5);
+		// shipctx.lineWidth = Math.min(Math.max(1,Math.floor(scalingFactor)), 5);
 
 		var shadowCanvas = document.createElement('canvas');
 		shadowCanvas.width = size + 2;

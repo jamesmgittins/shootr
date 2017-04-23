@@ -168,12 +168,10 @@ Boss.update = function(timeDiff) {
         Boss.bulletsLeft = Math.max(5,Math.round(Math.random() * Boss.maxBulletsPerShot));
       }
       if (Boss.lastBullet >= 0.15) {
-        Bullets.enemyBullets.newEnemyBullet(Boss);
         if (Math.random() > 0.9) {
-          Bullets.enemyBullets.newEnemyBullet(Boss, -0.15);
-          Bullets.enemyBullets.newEnemyBullet(Boss, -0.3);
-          Bullets.enemyBullets.newEnemyBullet(Boss, 0.15);
-          Bullets.enemyBullets.newEnemyBullet(Boss, 0.3);
+          Bullets.enemyBullets.newBulletFan(Boss, 5);
+        } else {
+          Bullets.enemyBullets.newEnemyBullet(Boss);
         }
         Boss.lastBullet = 0;
         Boss.bulletsLeft--;

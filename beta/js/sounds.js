@@ -107,7 +107,7 @@ Sounds.enemyShot = createHowlBank("sounds/03_TEMP10.wav", 0.7, 50, 0.2);
 Sounds.enemyShotTravel = createHowlBank("sounds/bullettravel.wav", 0.7, 20, 0.2);
 Sounds.enemyShotTravel.sound.loop(true);
 Sounds.damage = createHowlBank("sounds/08_EXP1RT.wav", 0.6, 75, 0.2);
-Sounds.enemyDamage = createHowlBank("sounds/08_EXP1RT.wav", 0.5, 75, 0.05);
+Sounds.enemyDamage = createHowlBank("sounds/08_EXP1RT.wav", 0.5, 90, 0.05);
 Sounds.playerBullets = createHowlBank("sounds/25_SCALEDN1.wav",0.3, 85, 0.02);
 Sounds.playerLaser = createHowlBank("sounds/15_LAZGUN2.wav",0.3, 100, 0);
 Sounds.playerMissile = createHowlBank("sounds/07_BYPASS1.wav", 0.3, 500, 0);

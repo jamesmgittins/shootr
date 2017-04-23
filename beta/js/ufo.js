@@ -2,20 +2,20 @@ var UFOs = {
 	minShipsPerWave : 1,
 	maxShipsPerWave : 3,
 	waveBulletFrequency : 3000,
-	maxBulletsPerShot : 1
+	maxBulletsPerShot : 1,
+	SHIP_SIZE : 64
 };
 
-
-UFOs.getTexture = function(size, seed, colors, white) {
+UFOs.getMirrorTexture = function(size, seed, colors, white) {
 	size = Math.round(size * scalingFactor) % 2 === 0 ? Math.round(size * scalingFactor) : Math.round(size * scalingFactor) + 1;
 	Math.seedrandom(seed);
-	var shipLines = 16;
+	var shipLines = 15;
 	var shipCanvas = document.createElement('canvas');
 	shipCanvas.width = size;
 	shipCanvas.height = size;
 	var shipctx = shipCanvas.getContext('2d');
 
-	shipctx.lineWidth = Math.min(Math.max(1,Math.floor(size / PlayerShip.SHIP_SIZE)), 5);
+	shipctx.lineWidth = Math.min(Math.max(1,Math.floor(scalingFactor)), 5);
 
 	var shadowCanvas = document.createElement('canvas');
 	shadowCanvas.width = size + 2;
@@ -23,7 +23,6 @@ UFOs.getTexture = function(size, seed, colors, white) {
 	var shadowCtx = shadowCanvas.getContext('2d');
 	shadowCtx.save();
 	shadowCtx.shadowBlur = 5 * scalingFactor;
-	// shadowCtx.shadowColor = "#000";
 
 	var shadowColor = hexToRgb(colors[colors.length-1]);
 	shadowColor = "rgb(" + Math.round(shadowColor.r * 0.5) + "," + Math.round(shadowColor.g * 0.5) + "," + Math.round(shadowColor.b * 0.5) + ")";
@@ -38,9 +37,6 @@ UFOs.getTexture = function(size, seed, colors, white) {
 	lastX = size / 2;
 	lastY = 0;
 
-	// radius of circle
-	// x2 + y2 = size / 2
-
 	shadowCtx.moveTo(1 + size / 2, 0);
 
 	var colorindex = 0;
@@ -51,17 +47,11 @@ UFOs.getTexture = function(size, seed, colors, white) {
 
 			nextYLoc = size / 2 - yVal;
 			nextXLoc = size / 2 + (Math.random() * xVal);
-			// nextXLoc = (Math.random() * size / 2) * (nextYLoc / (size / 2));
 
 			if (i == shipLines - 1){
 				nextYLoc = size / 2;
 				nextXLoc = size;
 			}
-
-			// if (i == shipLines - 2){
-			// 	nextYLoc = size / 2;
-			// 	nextXLoc = size / 2;
-			// }
 
 			drawline(shipctx, white ? "#FFFFFF" : colors[colorindex], lastX, lastY, nextXLoc, nextYLoc);
 
@@ -106,6 +96,111 @@ UFOs.getTexture = function(size, seed, colors, white) {
 };
 
 
+UFOs.getRotateTexture = function(size, seed, colors, white) {
+	size = Math.round(size * scalingFactor) % 2 === 0 ? Math.round(size * scalingFactor) : Math.round(size * scalingFactor) + 1;
+	Math.seedrandom(seed);
+	var rotations  = Math.round(5 + Math.random() * 4);
+	// var rotations = 4;
+	var shipLines = Math.round(60 / rotations);
+	var shipCanvas = document.createElement('canvas');
+	shipCanvas.width = size;
+	shipCanvas.height = size;
+	var shipctx = shipCanvas.getContext('2d');
+
+	shipctx.lineWidth = Math.min(Math.max(1,Math.floor(scalingFactor * 0.7)), 5);
+
+	var shadowCanvas = document.createElement('canvas');
+	shadowCanvas.width = size + 2;
+	shadowCanvas.height = size + 2;
+	var shadowCtx = shadowCanvas.getContext('2d');
+	shadowCtx.save();
+	shadowCtx.shadowBlur = 5 * scalingFactor;
+
+	var shadowColor = hexToRgb(colors[colors.length-1]);
+	shadowColor = "rgb(" + Math.round(shadowColor.r * 0.5) + "," + Math.round(shadowColor.g * 0.5) + "," + Math.round(shadowColor.b * 0.5) + ")";
+
+	shadowCtx.shadowColor = shadowColor;
+	shadowCtx.fillStyle = shadowColor;
+	shadowCtx.beginPath();
+
+	shipctx.shadowBlur = Math.max(0,shipctx.lineWidth - 1);
+	// shipctx.shadowBlur = shipctx.lineWidth;
+	shipctx.shadowColor = colors[Math.round(colors.length / 2)];
+
+	lastX = size / 2;
+	lastY = 0;
+
+	shadowCtx.moveTo(1 + size / 2, 0);
+
+	var colorindex = 0;
+	for (var i = 0; i < shipLines; i++) {
+
+			var yVal = Math.random() * size / 2;
+			var xVal = Math.sqrt(Math.abs(Math.pow(size / 2, 2) - Math.pow(yVal, 2)));
+
+			nextYLoc = size / 2 - yVal;
+			nextXLoc = size / 2 + (Math.random() * xVal);
+
+			if (i == shipLines - 1){
+				nextYLoc = size / 2;
+				nextXLoc = size;
+			}
+
+			drawline(shipctx, white ? "#FFFFFF" : colors[colorindex], lastX, lastY, nextXLoc, nextYLoc);
+
+			shadowCtx.lineTo(1 + nextXLoc, 1 + nextYLoc);
+
+			colorindex++;
+			if (colorindex >= colors.length - 1)
+					colorindex = 0;
+	}
+
+	shadowCtx.fill();
+	shadowCtx.fill();
+	shadowCtx.fill();
+	shadowCtx.restore();
+
+	var eachRotation = Math.PI * 2 / rotations;
+
+	for (i = 1; i < rotations; i ++) {
+		shadowCtx.save();
+		shadowCtx.translate(size / 2 + 1, size / 2 + 1);
+		shadowCtx.rotate(eachRotation * i);
+		shadowCtx.drawImage(shadowCanvas, -size / 2 - 1, -size / 2 - 1);
+		shadowCtx.restore();
+
+		shipctx.save();
+		shipctx.translate(size / 2, size / 2);
+		shipctx.rotate(eachRotation * i);
+		shipctx.drawImage(shipCanvas, -size / 2, -size / 2);
+		shipctx.restore();
+	}
+
+	shadowCtx.drawImage(shipCanvas,1,1,size,size);
+	return shadowCanvas;
+};
+
+UFOs.railWave = function() {
+	var wave = new UFOs.wave();
+	var seed = Date.now();
+	wave.texture = glowTexture(PIXI.Texture.fromCanvas(UFOs.getMirrorTexture(wave.size, seed, wave.colors)));
+	wave.damageTexture = glowTexture(PIXI.Texture.fromCanvas(UFOs.getMirrorTexture(wave.size, seed, wave.colors, true)));
+	wave.spritePool = SpritePool.create(this.texture, frontEnemyContainer);
+	wave.bulletType = false;
+	return wave;
+};
+
+UFOs.bulletWave = function() {
+	var wave = new UFOs.wave();
+	var seed = Date.now();
+	wave.texture = glowTexture(PIXI.Texture.fromCanvas(UFOs.getRotateTexture(wave.size, seed, wave.colors)));
+	wave.damageTexture = glowTexture(PIXI.Texture.fromCanvas(UFOs.getRotateTexture(wave.size, seed, wave.colors, true)));
+	wave.spritePool = SpritePool.create(this.texture, frontEnemyContainer);
+	wave.bulletType = true;
+	return wave;
+};
+
+
 UFOs.wave = function () {
 
 	this.update = UFOs.update;
@@ -127,22 +222,16 @@ UFOs.wave = function () {
 	this.shipsInWave = UFOs.minShipsPerWave + Math.round(Math.random() * (UFOs.maxShipsPerWave - UFOs.minShipsPerWave) * Enemies.difficultyFactor);
 	this.shipsSpawned = 0;
 	this.shipsDestroyed = 0;
-	var size = Math.round(64 + Math.random() * 16);
+	this.size = Math.round(64 + Math.random() * 16);
 	this.colors = Ships.enemyColors[Math.floor(Math.random() * Ships.enemyColors.length)];
 
 	this.shipHealth = EnemyShips.shipHealth * 2.5;
 	this.firing = false;
 	this.rotationDirection = Math.random() > 0.5 ? -1 : 1;
 
-	var seed = Date.now();
-
-	this.texture = glowTexture(PIXI.Texture.fromCanvas(UFOs.getTexture(size, seed, this.colors)));
-	this.damageTexture = glowTexture(PIXI.Texture.fromCanvas(UFOs.getTexture(size, seed, this.colors, true)));
-	this.spritePool = SpritePool.create(this.texture, frontEnemyContainer);
-
 	this.maxSpeed = 30 + Math.random() * 20;
 
-	this.offset = Math.round(size / 2.2);
+	this.offset = Math.round(this.size / 2.2);
 	this.ships = [];
 	this.shipsExited = 0;
 };
@@ -290,7 +379,11 @@ UFOs.updateShip = function (eShip, timeDiff) {
 			if (eShip.firingTime > 7) {
 				eShip.firing = false;
 				eShip.wave.firing = false;
-				Bullets.enemyRails.newRail(eShip);
+				if (eShip.wave.bulletType) {
+					Bullets.enemyBullets.newBulletFan(eShip, 7);
+				} else {
+					Bullets.enemyRails.newRail(eShip);
+				}
 			}
 		}
 	}

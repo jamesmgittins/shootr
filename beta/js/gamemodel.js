@@ -155,7 +155,7 @@ function load() {
 			dmgNumbers : true,
 			antialiasing : false,
 			p1 : {
-				ship: Shipyard.generateShip(1, 7, false),
+				ship: Shipyard.generateShip(1, 45, false),
 				weapons: [PlasmaCannon.plasmaCannon(1,123,Weapons.rarity[0])],
 				shields: [ArmsDealer.generateShield(1, 234, false)],
 				credits: 0,
