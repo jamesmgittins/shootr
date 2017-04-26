@@ -300,6 +300,12 @@ UFOs.wave = function () {
 	this.offset = Math.round(this.size / 2.2);
 	this.ships = [];
 	this.shipsExited = 0;
+
+	this.destroy = function() {
+		this.engineSpritePool.destroy();
+		this.spritePool.destroy();
+		this.finished = true;
+	};
 };
 
 
@@ -332,6 +338,7 @@ UFOs.enemyShip = function (wave) {
 
 	this.engineSprite = wave.engineSpritePool.nextSprite();
 	this.engineSprite.anchor = {x:0.5, y:0.5};
+	this.engineSprite.visible = true;
 
 	this.sprite = wave.spritePool.nextSprite();
 	this.sprite.texture = wave.texture;

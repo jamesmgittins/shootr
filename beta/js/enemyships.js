@@ -87,6 +87,11 @@ EnemyShips.wave = function () {
 	this.offset = Math.round(size / 2);
 	this.ships = [];
 	this.shipsExited = 0;
+
+	this.destroy = function() {
+		this.spritePool.destroy();
+		this.finished = true;
+	};
 };
 
 EnemyShips.enemyShip = function (wave) {

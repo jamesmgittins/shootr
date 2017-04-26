@@ -82,8 +82,7 @@ Enemies = {
   reset:function() {
 
     for (var c=0; c < Enemies.waves.length; c++) {
-      Enemies.waves[c].spritePool.destroy();
-      Enemies.waves[c].finished = true;
+      Enemies.waves[c].destroy();
     }
 
     Enemies.difficultyFactor = 1;

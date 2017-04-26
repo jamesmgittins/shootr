@@ -214,7 +214,7 @@ function resetGame() {
 		EnemyShips.wavePatterns[j].inUse = false;
 	}
 	destroyedWarning = false;
-	PlayerShip.playerShip.sprite.visible = true;
+	PlayerShip.playerShip.container.visible = true;
 }
 
 var tintPercent = 0;
