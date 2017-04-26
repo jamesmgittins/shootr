@@ -57,8 +57,8 @@ Asteroids = {
       return pos - 0.1 + Math.random() * 0.2;
     };
 
-    lastX = posMod(approxPositions[currentPos].x) * size;
-    lastY = posMod(approxPositions[currentPos].y) * size;
+    var lastX = posMod(approxPositions[currentPos].x) * size;
+    var lastY = posMod(approxPositions[currentPos].y) * size;
     currentPos++;
 
     var endX = lastX;
@@ -72,8 +72,10 @@ Asteroids = {
       nextYLoc = posMod(approxPositions[currentPos].y) * size;
 
       drawline(shipctx, damage ? "#FFFFFF" : colors[colorindex], lastX, lastY, nextXLoc, nextYLoc);
-
       shadowCtx.lineTo(1 + nextXLoc, 1 + nextYLoc);
+
+      lastX = nextXLoc;
+      lastY = nextYLoc;
 
       colorindex++;
       if (colorindex >= colors.length - 1)
@@ -186,7 +188,6 @@ Asteroids = {
 
     this.xSpeed = (-20 + Math.random() * 40) * Math.min(1 / factor, 2);
     this.ySpeed = (40 + Math.random() * 20) * Math.min(1 / factor, 1.6);
-    this.maxSpeed = 0;
 
     this.health = wave.shipHealth * Enemies.difficultyFactor * factor;
     this.inPlay = 1;
@@ -212,7 +213,7 @@ Asteroids = {
     this.sprite.anchor = {x:0.5,y:0.5};
     this.sprite.rotation = -this.rotation;
 
-    Enemies.enemiesSpawned++;
+    // Enemies.enemiesSpawned++;
   },
 
 
@@ -248,6 +249,9 @@ Asteroids = {
         asteroid.ySpeed += 10 * timeDiff;
       }
       asteroid.xLoc += asteroid.xSpeed * timeDiff;
+      if (asteroid.ySpeed < 40) {
+        asteroid.ySpeed += 20 * timeDiff;
+      }
       asteroid.yLoc += asteroid.ySpeed * timeDiff;
       asteroid.rotation += asteroid.rotationSpeed * timeDiff;
 
@@ -317,7 +321,7 @@ Asteroids = {
   	stageSprite.screenShake += gameModel.maxScreenShake;
   	asteroid.inPlay = 0;
 
-  	Enemies.enemiesKilled++;
+  	// Enemies.enemiesKilled++;
 
 		asteroid.wave.spritePool.discardSprite(asteroid.sprite);
 		asteroid.wave.shipsDestroyed++;
@@ -362,6 +366,12 @@ Asteroids = {
   			this.sprite.texture = this.damageTexture;
   			this.lastDamaged = 0;
         Ships.fragments.newFragment(xLoc, yLoc, this.wave.colors, 100 + Math.random() * 50);
+
+        var bumpSpeedX = this.xLoc - xLoc;
+				var bumpSpeedY = this.yLoc - yLoc;
+				var bumpMagMulti = ((damage / this.wave.shipHealth) * 50) / (magnitude(bumpSpeedX, bumpSpeedY) || 1);
+				this.xSpeed += bumpSpeedX * bumpMagMulti;
+				this.ySpeed += bumpSpeedY * bumpMagMulti;
   		}
 
   		this.health -= damage;
@@ -370,12 +380,7 @@ Asteroids = {
 
   		if (this.wave) {
   			var percentOfShipDamaged = damage / this.wave.shipHealth;
-
   			stageSprite.screenShake += gameModel.maxScreenShake * percentOfShipDamaged;
-
-  			if (this.health + damage > this.wave.shipHealth / 2 && this.health < this.wave.shipHealth / 2) {
-  				this.maxSpeed *= 0.90;
-  			}
   		}
 
   		if (this.health <= 0) {

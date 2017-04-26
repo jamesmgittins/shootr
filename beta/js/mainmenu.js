@@ -18,7 +18,7 @@ MainMenu = {
   selectedButtonTint : 0xFFFFFF,
   unselectableTint : 0xF44336,
   backgroundAlpha : 0.5,
-  backgroundColor : 0x0288D1,
+  backgroundColor : 0x0278D0,
   modalBackgroundTint : 0x003030
 };
 

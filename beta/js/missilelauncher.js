@@ -7,23 +7,6 @@ MissileLauncher = {
   trailFrequency : 0.02,
 
 	generateTexture : function() {
-    var blast = document.createElement('canvas');
-    blast.width = 3;
-    blast.height = 4;
-    var blastCtx = blast.getContext('2d');
-
-    // draw shape
-    blastCtx.fillStyle = "#ffffff";
-    blastCtx.fillRect(1, 0, 1, 1); // top point
-    blastCtx.fillRect(0, 1, 3, 2); // middle section
-    blastCtx.fillStyle = "#ffff00";
-    blastCtx.fillRect(0, 3, 1, 1); // bottom left point
-    blastCtx.fillRect(2, 3, 1, 1); // bottom right point
-    // 		blastCtx.fillStyle = "#ff0000";
-    // 		blastCtx.fillRect(1, 3, 1, 1); // bottom right point
-
-    // return PIXI.Texture.fromCanvas(blast);
-
     return PIXI.Texture.fromImage("img/missile.svg", undefined, undefined, 0.1);
   },
 
@@ -44,12 +27,12 @@ MissileLauncher = {
 			if (sprite.visible) {
 
 				if (sprite.target && sprite.target.inPlay === 1) {
-					var timeToTarget = distanceBetweenPoints(sprite.xLoc, sprite.yLoc, sprite.target.xLoc, sprite.target.yLoc) / magnitude(sprite.speed.x,sprite.speed.y);
+					var timeToTarget = 0.9 * distanceBetweenPoints(sprite.xLoc, sprite.yLoc, sprite.target.xLoc, sprite.target.yLoc) / magnitude(sprite.speed.x,sprite.speed.y);
 					var predictedTargetX = sprite.target.xLoc + sprite.target.xSpeed * timeToTarget;
 					var predictedTargetY = sprite.target.yLoc + sprite.target.ySpeed * timeToTarget;
 					var accelX = predictedTargetX - sprite.xLoc;
 					var accelY = predictedTargetY - sprite.yLoc;
-					var factor = timeToTarget < 1 ? MissileLauncher.acceleration * 2 / magnitude(accelX, accelY) : timeToTarget < 0.5 ? MissileLauncher.acceleration * 4 / magnitude(accelX, accelY) : MissileLauncher.acceleration / magnitude(accelX, accelY);
+					var factor = timeToTarget < 1 ? MissileLauncher.acceleration * 2.5 / magnitude(accelX, accelY) : timeToTarget < 0.5 ? MissileLauncher.acceleration * 5 / magnitude(accelX, accelY) : MissileLauncher.acceleration / magnitude(accelX, accelY);
 					sprite.speed.x += accelX * factor * timeDiff;
 					sprite.speed.y += accelY * factor * timeDiff;
 

@@ -24,10 +24,11 @@ Shipyard.generateShip = function(level, seed, ultra) {
     turretWeaponLevel:  Math.max(1,Math.round(level - 0.7 + Math.random() * 1.5)),
     rearWeaponLevel:    Math.max(1,Math.round(level - 0.7 + Math.random() * 1.5)),
     shieldLevel:        Math.max(1,Math.round(level - 0.7 + Math.random() * 1.5)),
-    speed : 1 + Math.random() * 0.5 + Math.min(0.5, level / 150) ,
+    speed : 1 + Math.random() * 0.5 + Math.min(0.5, level / 150),
     range : 12 + (level * 0.5) + Math.random() * 2,
 		colorIndex : prefix.index,
     name:(ultra? "Ultra " : "") + prefix.name + " " + Shipyard.suffixes[Math.floor(Math.random() * Shipyard.suffixes.length)],
+    dualEngines : Math.random() > 0.7
   };
 
   var priceMultiplier = (ship.frontWeaponLevel / level) * (ship.turretWeaponLevel / level) * (ship.rearWeaponLevel / level) * (ship.shieldLevel / level) * (ship.range / 15) * ship.speed;
@@ -180,6 +181,18 @@ Shipyard.buyShip = function(ship) {
   if (ship.price * getBuyPriceModifier() <= gameModel.p1.credits && !ship.buyButton.owned) {
     gameModel.p1.credits -= ship.price * getBuyPriceModifier();
     gameModel.p1.ship = Shipyard.generateShip(ship.level, ship.seed, ship.ultra);
+    if (gameModel.p1.frontWeapon && gameModel.p1.frontWeapon.level > gameModel.p1.ship.frontWeaponLevel) {
+      gameModel.p1.frontWeapon = undefined;
+    }
+    if (gameModel.p1.rearWeapon && gameModel.p1.rearWeapon.level > gameModel.p1.ship.rearWeaponLevel) {
+      gameModel.p1.rearWeapon = undefined;
+    }
+    if (gameModel.p1.turretWeapon && gameModel.p1.turretWeapon.level > gameModel.p1.ship.turretWeaponLevel) {
+      gameModel.p1.turretWeapon = undefined;
+    }
+    if (gameModel.p1.shield && gameModel.p1.shield.level > gameModel.p1.ship.shieldLevel) {
+      gameModel.p1.shield = undefined;
+    }
     PlayerShip.updateSize();
     save();
     Shipyard.initialize();

@@ -1,5 +1,7 @@
 var Ships = {};
 
+
+
 Ships.blasts = {
 	texture : (function () {
 		var blast = document.createElement('canvas');
@@ -53,6 +55,8 @@ Ships.blasts = {
 	    }
 	}
 };
+
+
 
 // enemy colors
 // Taken from https://www.google.co.uk/design/spec/style/color.html
@@ -109,8 +113,8 @@ Ships.shipArt = function (size, seed, colors, white) {
 		shipctx.shadowBlur = shipctx.lineWidth;
 		shipctx.shadowColor = colors[Math.round(colors.length / 2)];
 
-    lastX = size / 2;
-    lastY = 0;
+    var lastX = size / 2;
+    var lastY = 0;
 
 		shadowCtx.moveTo(1 + size / 2, 0);
 
@@ -131,8 +135,9 @@ Ships.shipArt = function (size, seed, colors, white) {
 				// }
 
         drawline(shipctx, white ? "#FFFFFF" : colors[colorindex], lastX, lastY, nextXLoc, nextYLoc);
-
 				shadowCtx.lineTo(1 + nextXLoc, 1 + nextYLoc);
+				lastX = nextXLoc;
+				lastY = nextYLoc;
 
         colorindex++;
         if (colorindex >= colors.length - 1)
@@ -160,6 +165,8 @@ Ships.shipArt = function (size, seed, colors, white) {
 	return shadowCanvas;
 };
 var collisionCushion = 3; // num pixels to reduce collision area by
+
+
 
 Ships.detectShipCollision = function(enemyShip, playerShip) {
     if (playerShip.inPlay === 1 && playerShip.rolling > 0.3 &&
@@ -190,6 +197,8 @@ Ships.detectShipCollision = function(enemyShip, playerShip) {
 	return false;
 };
 
+
+
 Ships.detectCollision = function (ship, xLoc, yLoc) {
 	if (!ship.enemyShip && ship.rolling < 0.3)
 		return false;
@@ -216,6 +225,8 @@ Ships.updateShipSpeed = function (ship, xDiff, yDiff, timeDiff) {
 		Ships.updateShipSpeedMulti(ship, xDiff, yDiff, timeDiff, multi);
 };
 
+
+
 Ships.updateShipSpeedMulti = function (ship, xDiff, yDiff, timeDiff, multi) {
 
 		if (xDiff === 0 && Math.abs(ship.xSpeed) > 10) {
@@ -236,12 +247,16 @@ Ships.updateShipSpeedMulti = function (ship, xDiff, yDiff, timeDiff, multi) {
 		    ship.yLoc += ship.ySpeed * timeDiff;
 };
 
+
+
 Ships.updateShipSpeedFromController = function (ship, xDiff, yDiff, timeDiff) {
     Ships.updateShipSpeedMulti(ship, xDiff, yDiff, timeDiff, 1);
 };
 
 var maximumRotation = 0.12;
 var rotationSpeed = 1.2;
+
+
 
 Ships.updateRotation = function (ship, timeDiff) {
 
@@ -267,6 +282,8 @@ Ships.updateRotation = function (ship, timeDiff) {
 	ship.trailX = Math.cos(tempRotation) * tempX - Math.sin(tempRotation) * tempY + ship.xLoc;
 	ship.trailY = Math.sin(tempRotation) * tempX + Math.cos(tempRotation) * tempY + ship.yLoc;
 };
+
+
 
 Ships.fragments = {
 	getTexture: function() {
@@ -326,6 +343,8 @@ Ships.fragments = {
 	}
 };
 
+
+
 Ships.explosionBits = {
   bitsPerExplosion: 64,
 	discardedSprites: [],
@@ -382,6 +401,8 @@ Ships.explosionBits = {
 		sprite.ySpeed = speed.y;
 	}
 };
+
+
 
 Ships.generateExplosion = function (ship, xDiff, yDiff, delay) {
 

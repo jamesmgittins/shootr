@@ -213,7 +213,8 @@ Weapons.update = function(timeDiff) {
 };
 
 Weapons.reset = function() {
-  Bullets.enemyBullets.getSpritePool().discardAll();
+  Bullets.enemyBullets.destroy();
+
   removeAllFromContainer(playerBulletContainer);
   Weapons.weaponLogic = {};
 };

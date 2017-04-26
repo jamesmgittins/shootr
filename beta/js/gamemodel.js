@@ -1,12 +1,12 @@
-const Constants = {
+var Constants = {
 	localStorageVariable: "shootrGameModel",
 	starJumpScaling : 1.4,
 	difficultyLevelScaling : 1.4,
 	shieldLevelScaling : 1.39,
 	weaponLevelScaling : 1.38,
 	shipLevelPriceScaling : 1.43,
-	levelsPerBoss:8,
-	maxScreenShake:2,
+	levelsPerBoss:6,
+	maxScreenShake:2.7,
 	itemColors : {
 		normal:0x2E7D32,
 		super:0x1565C0,
@@ -56,7 +56,7 @@ function calculateAdjustedStarLevel(starLevel) {
 }
 
 function valueForRoute(route) {
-	return 0.3 * Math.pow(1.43, route);
+	return 0.5 * Math.pow(1.43, route);
 }
 
 function calculateIncome() {

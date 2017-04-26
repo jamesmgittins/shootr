@@ -104,8 +104,6 @@ Sounds.blip1 = createHowlBank("sounds/Blip_Select9.wav", 0.3, 85, 0.01);
 Sounds.blip2 = createHowlBank("sounds/Blip_Select8.wav", 0.5, 50, 0.01);
 Sounds.shipExplosion = createHowlBank('sounds/11_EXPRETAP.wav', 0.5, 70, 0.3);
 Sounds.enemyShot = createHowlBank("sounds/03_TEMP10.wav", 0.7, 50, 0.2);
-Sounds.enemyShotTravel = createHowlBank("sounds/bullettravel.wav", 0.7, 20, 0.2);
-Sounds.enemyShotTravel.sound.loop(true);
 Sounds.damage = createHowlBank("sounds/08_EXP1RT.wav", 0.6, 75, 0.2);
 Sounds.enemyDamage = createHowlBank("sounds/08_EXP1RT.wav", 0.5, 90, 0.05);
 Sounds.playerBullets = createHowlBank("sounds/25_SCALEDN1.wav",0.3, 85, 0.02);

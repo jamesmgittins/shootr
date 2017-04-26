@@ -482,9 +482,7 @@ Loadout.initialize = function () {
   Loadout.weaponsContainer = new PIXI.Container();
   Loadout.menuContainer.addChild(Loadout.weaponsContainer);
 
-  setTimeout(function(){
-    Loadout.select(Loadout.menuOptions[0]);
-  },100);
+  Loadout.select(Loadout.menuOptions[0]);
 
 };
 
@@ -617,7 +615,7 @@ Loadout.select = function(button) {
 };
 
 Loadout.showItemHover = function(item, button) {
-  if (lastUsedInput == inputTypes.controller)
+  if (lastUsedInput == inputTypes.controller || Loadout.menuContainer.visible === false)
     return;
 
   if (Loadout.itemHover && Loadout.itemHover.item.id != item.id) {

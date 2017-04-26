@@ -41,6 +41,8 @@ PlayerShip.controllerPointer = {
 	}
 };
 
+
+
 PlayerShip.playerShip = {
   seed: 1,
   xLoc: 320,
@@ -60,6 +62,7 @@ PlayerShip.playerShip = {
 	crossShot: 0,
   powerupTime:0
 };
+
 
 
 PlayerShip.updatePlayerShip = function (timeDiff) {
@@ -101,18 +104,19 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
 			}
 		} else {
 			if (PlayerShip.playerShip.rolling < 0.3) {
+				PlayerShip.playerShip.engine1.alpha = PlayerShip.playerShip.engine2.alpha = 0;
 				if (PlayerShip.playerShip.rollingLeft) {
 					Ships.updateShipSpeed(PlayerShip.playerShip, -1, 0, timeDiff * 2.5);
 				} else {
 					Ships.updateShipSpeed(PlayerShip.playerShip, 1, 0, timeDiff * 2.5);
 				}
 				// Ships.updateRotation(PlayerShip.playerShip, timeDiff);
-				PlayerShip.playerShip.sprite.scale.x = (1 - (PlayerShip.playerShip.rolling > 0.15 ? PlayerShip.playerShip.rolling - 0.15 : PlayerShip.playerShip.rolling) * 13.333);
+				PlayerShip.playerShip.container.scale.x = (1 - (PlayerShip.playerShip.rolling > 0.15 ? PlayerShip.playerShip.rolling - 0.15 : PlayerShip.playerShip.rolling) * 13.333);
 
 				if (PlayerShip.playerShip.rolling < 0.15) {
-					PlayerShip.playerShip.sprite.scale.y = 1 + (PlayerShip.playerShip.rolling / 0.15) * 0.2;
+					PlayerShip.playerShip.container.scale.y = 1 + (PlayerShip.playerShip.rolling / 0.15) * 0.2;
 				} else {
-					PlayerShip.playerShip.sprite.scale.y = 1 + ((0.3 / PlayerShip.playerShip.rolling) - 1) * 0.2;
+					PlayerShip.playerShip.container.scale.y = 1 + ((0.3 / PlayerShip.playerShip.rolling) - 1) * 0.2;
 				}
 			} else {
 				if (playerOneAxes[0] > 0.25 || playerOneAxes[0] < -0.25 || playerOneAxes[1] > 0.25 || playerOneAxes[1] < -0.25) {
@@ -143,7 +147,7 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
 				var timeMult = timeDiff;
 
 				Ships.updateRotation(PlayerShip.playerShip, timeDiff);
-				PlayerShip.playerShip.sprite.scale.x = 1;
+				PlayerShip.playerShip.container.scale.x = 1;
 
 				if (PlayerShip.playerShip.rolling > 1) {
 					if (q || ekey || playerOneButtonsPressed[4] || playerOneButtonsPressed[5]) {
@@ -165,33 +169,24 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
 		if(PlayerShip.playerShip.lastDmg >= 60) {
 			PlayerShip.playerShip.sprite.texture = PlayerShip.playerShip.sprite.nonDamageTexture;
 		}
-    PlayerShip.playerShip.sprite.position.x = PlayerShip.playerShip.xLoc * scalingFactor;
-    PlayerShip.playerShip.sprite.position.y = PlayerShip.playerShip.yLoc * scalingFactor;
+    PlayerShip.playerShip.container.position.x = PlayerShip.playerShip.xLoc * scalingFactor;
+    PlayerShip.playerShip.container.position.y = PlayerShip.playerShip.yLoc * scalingFactor;
 
-    PlayerShip.playerShip.sprite.rotation = PlayerShip.playerShip.rotation;
-		// if (PlayerShip.playerShip.rolling > 0.3) {
-		// 	if (PlayerShip.playerShip.xSpeed > 10) {
-		// 		PlayerShip.playerShip.sprite.texture = PlayerShip.playerShip.sprite.turnTexture;
-		// 		PlayerShip.playerShip.sprite.scale.x = -0.9;
-		// 		PlayerShip.playerShip.sprite.scale.y = 0.8;
-		// 	} else if (PlayerShip.playerShip.xSpeed < -10) {
-		// 		PlayerShip.playerShip.sprite.texture = PlayerShip.playerShip.sprite.turnTexture;
-		// 		PlayerShip.playerShip.sprite.scale.x = 0.9;
-		// 		PlayerShip.playerShip.sprite.scale.y = 0.8;
-		// 	} else {
-		// 		PlayerShip.playerShip.sprite.texture = PlayerShip.playerShip.sprite.nonDamageTexture;
-		// 		PlayerShip.playerShip.sprite.scale.x=1;
-		// 		PlayerShip.playerShip.sprite.scale.y=1;
-		// 	}
-		// }
+    PlayerShip.playerShip.container.rotation = PlayerShip.playerShip.rotation;
 
-	if (PlayerShip.playerShip.rolling > 0.3)
-		Stars.shipTrails.updateShip(PlayerShip.playerShip,timeDiff);
+	if (PlayerShip.playerShip.rolling > 0.3) {
+		Stars.shipTrails.updatePlayerShip(PlayerShip.playerShip,timeDiff);
+		PlayerShip.playerShip.engine1.alpha = 0.5 + Math.random() * 0.5;
+		PlayerShip.playerShip.engine2.alpha = 0.5 + Math.random() * 0.5;
+	}
+
 	if (PlayerShip.playerShip.currShield <= PlayerShip.playerShip.maxShield * 0.7)
 		PlayerShip.playerShip.sprite.tint = calculateTint(PlayerShip.playerShip.currShield/PlayerShip.playerShip.maxShield);
 	else
 		PlayerShip.playerShip.sprite.tint = 0xFFFFFF;
 };
+
+
 
 PlayerShip.damagePlayerShip = function (playerShip, damage) {
 	playerShip.currShield -= damage * getDamageReduction();
@@ -201,7 +196,7 @@ PlayerShip.damagePlayerShip = function (playerShip, damage) {
 	playerShip.sprite.texture=playerShip.sprite.damageTexture;
 	GameText.damage.newText((damage * getDamageReduction()), playerShip);
 	if (playerShip.currShield <= 0 && playerShip.inPlay === 1) {
-		playerShip.sprite.visible=false;
+		playerShip.container.visible=false;
 		playerShip.inPlay = 0;
 		PlayerShip.allPlayersDead = 1;
 		PlayerShip.allDeadTimer = 0;
@@ -210,15 +205,47 @@ PlayerShip.damagePlayerShip = function (playerShip, damage) {
 	}
 };
 
+
+
+PlayerShip.engineTexture = function(){
+	var size = 16 * scalingFactor;
+	var blast = document.createElement('canvas');
+	blast.width = size + 4;
+	blast.height = size + 4;
+	var blastCtx = blast.getContext('2d');
+	blastCtx.shadowBlur = 5;
+	blastCtx.shadowColor = "white";
+	var radgrad = blastCtx.createRadialGradient(size / 2 + 2, size / 2 + 2, 0, size / 2 + 2, size / 2 + 2, size / 2);
+	radgrad.addColorStop(0, 'rgba(255,255,255,0.5)');
+	radgrad.addColorStop(0.5, 'rgba(255,255,255,0.2)');
+	radgrad.addColorStop(1, 'rgba(255,255,255,0)');
+	blastCtx.fillStyle = radgrad;
+	blastCtx.fillRect(0, 0, size + 4, size + 4);
+	return PIXI.Texture.fromCanvas(blast);
+};
+
+
+
 PlayerShip.setupTextures = function(){
 	PlayerShip.playerShip.art = Ships.shipArt(PlayerShip.SHIP_SIZE, gameModel.p1.ship.seed, Ships.enemyColors[gameModel.p1.ship.colorIndex]);
 	PlayerShip.playerShip.artWhite = Ships.shipArt(PlayerShip.SHIP_SIZE, gameModel.p1.ship.seed, Ships.enemyColors[gameModel.p1.ship.colorIndex], true);
 	// PlayerShip.playerShip.turnArt = skewImage(PlayerShip.playerShip.art);
 
-	if (!PlayerShip.playerShip.sprite)
+	if (!PlayerShip.playerShip.sprite) {
+		PlayerShip.playerShip.container = new PIXI.Container();
 		PlayerShip.playerShip.sprite = new PIXI.Sprite(glowTexture(PIXI.Texture.fromCanvas(PlayerShip.playerShip.art)));
-	else
+		PlayerShip.playerShip.engine1 = new PIXI.Sprite(PlayerShip.engineTexture());
+		PlayerShip.playerShip.engine2 = new PIXI.Sprite(PlayerShip.engineTexture());
+		PlayerShip.playerShip.container.addChild(PlayerShip.playerShip.engine1);
+		PlayerShip.playerShip.container.addChild(PlayerShip.playerShip.engine2);
+		PlayerShip.playerShip.container.addChild(PlayerShip.playerShip.sprite);
+
+		PlayerShip.playerShip.engine1.tint = PlayerShip.playerShip.engine2.tint = 0xFFCC00;
+		PlayerShip.playerShip.engine1.scale.y = PlayerShip.playerShip.engine2.scale.y = 1.5;
+	}	else {
 		PlayerShip.playerShip.sprite.texture = glowTexture(PIXI.Texture.fromCanvas(PlayerShip.playerShip.art));
+		PlayerShip.playerShip.engine1.texture = PlayerShip.playerShip.engine2.texture = PlayerShip.engineTexture();
+	}
 
 	PlayerShip.playerShip.sprite.nonDamageTexture = PlayerShip.playerShip.sprite.texture;
 	PlayerShip.playerShip.sprite.damageTexture = glowTexture(PIXI.Texture.fromCanvas(PlayerShip.playerShip.artWhite));
@@ -226,10 +253,14 @@ PlayerShip.setupTextures = function(){
 	// PlayerShip.playerShip.sprite.turnTexture = glowTexture(PIXI.Texture.fromCanvas(PlayerShip.playerShip.turnArt));
 };
 
+
+
 PlayerShip.updateSize = function() {
 	PlayerShip.playerShip.colors = Ships.enemyColors[gameModel.p1.ship.colorIndex];
 	PlayerShip.setupTextures();
 };
+
+
 
 PlayerShip.initialize = function () {
 	PlayerShip.setupTextures();
@@ -237,18 +268,31 @@ PlayerShip.initialize = function () {
 	PlayerShip.playerShip.xLoc = canvasWidth / 2;
 	PlayerShip.playerShip.yLoc = canvasHeight - (canvasHeight / 6);
 
-	PlayerShip.playerShip.sprite.anchor = { x: 0.5, y: 0.5 };
+	PlayerShip.playerShip.engine1.anchor = PlayerShip.playerShip.engine2.anchor =
+	PlayerShip.playerShip.sprite.anchor = PlayerShip.playerShip.container.anchor = { x: 0.5, y: 0.5 };
 
 	PlayerShip.playerShip.rolling = 100;
 
-	PlayerShip.playerShip.sprite.position.x = PlayerShip.playerShip.xLoc * scalingFactor;
-	PlayerShip.playerShip.sprite.position.y = PlayerShip.playerShip.yLoc * scalingFactor;
+	PlayerShip.playerShip.container.position.x = PlayerShip.playerShip.xLoc * scalingFactor;
+	PlayerShip.playerShip.container.position.y = PlayerShip.playerShip.yLoc * scalingFactor;
 
-	playerShipContainer.addChild(PlayerShip.playerShip.sprite);
+	playerShipContainer.addChild(PlayerShip.playerShip.container);
 };
+
+
 
 PlayerShip.reset = function() {
 	PlayerShip.playerShip.currShield = PlayerShip.playerShip.maxShield;
+	PlayerShip.playerShip.dualEngines = gameModel.p1.ship.dualEngines;
+
+	PlayerShip.playerShip.engine2.position.y = PlayerShip.playerShip.engine1.position.y = 24 * scalingFactor;
+	PlayerShip.playerShip.engine2.position.x = PlayerShip.playerShip.engine1.position.x = 0;
+	if (PlayerShip.playerShip.dualEngines) {
+		PlayerShip.playerShip.engine2.visible = true;
+		PlayerShip.playerShip.engine2.position.x = 12 * scalingFactor;
+		PlayerShip.playerShip.engine1.position.x = -12 * scalingFactor;
+	}
+
 	PlayerShip.playerShip.xLoc = canvasWidth / 2;
 	PlayerShip.playerShip.yLoc = canvasHeight - (canvasHeight / 6);
 	PlayerShip.playerShip.inPlay = 1;

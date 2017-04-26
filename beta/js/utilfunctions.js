@@ -64,16 +64,12 @@ function colorTransition(startColor, endColor, percentage) {
 	);
 }
 
-var lastX, lastY;
-
 function drawline(shipctx, strokeStyle, startX, startY, endX, endY) {
     shipctx.beginPath();
     shipctx.strokeStyle = strokeStyle;
     shipctx.moveTo(startX, startY);
     shipctx.lineTo(endX, endY);
     shipctx.stroke();
-    lastX = endX;
-    lastY = endY;
 }
 
 (function () {

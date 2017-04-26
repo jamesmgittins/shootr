@@ -258,30 +258,74 @@ Stars.shipTrails = {
 		return this.spritePool;
 	},
 	trailFrequency : 30,
-	newPart: function(ship) {
+	newPart: function(ship, sprite) {
 
-		if (ship.trailX < 0 || ship.trailX > canvasWidth)
-			return;
-
+		var position;
 		var part = this.getSpritePool().nextSprite();
+
+		if (sprite) {
+			var spriteLoc = sprite.toGlobal({x:0,y:0});
+			var xRandom = (-2 + Math.random() * 4) * scalingFactor;
+			position = {
+				x: spriteLoc.x + xRandom,
+				y: spriteLoc.y
+			};
+			part.texture = sprite.texture;
+			part.fadeSpeed = 3.2;
+			part.scale.x = (1 + Math.random() * 0.3);
+			part.scale.y = (1 + Math.random() * 0.3);
+
+			part.tint = Math.random() > 0.50 ? 0xffff00 : 0xff5600;
+
+			var engineSizeMod = Math.min(Math.max(ship.ySpeed * -1, -100), 100) / 200;
+			sprite.scale.y = 1 + engineSizeMod;
+		} else {
+			if (ship.trailX < 0 || ship.trailX > canvasWidth)
+				return;
+
+			position = {
+				x: (ship.trailX - 3 + (Math.random() * 6)) * scalingFactor,
+				y: ship.trailY * scalingFactor
+			};
+			part.texture = Stars.stars.texture;
+			part.fadeSpeed = 8 * scalingFactor;
+			part.scale.x = (1 + Math.random() * 2) * scalingFactor;
+			part.scale.y = (2 + Math.random() * 2) * scalingFactor;
+			part.tint = Math.random() > 0.45 ? 0xffff00 : 0xff5600;
+		}
+
+
 		part.visible = true;
-		part.tint = Math.random() > 0.4 ? 0xffff00 : 0xff5600;
+
 		part.alpha = 1;
-		part.position = {
-			x: (ship.trailX - 3 + (Math.random() * 6)) * scalingFactor,
-			y: ship.trailY * scalingFactor
-		};
-		part.fadeSpeed = 8 * scalingFactor;
-		part.scale.x = (1 + Math.random() * 2) * scalingFactor;
-		part.scale.y = (2 + Math.random() * 2) * scalingFactor;
-		part.ySpeed = ((ship.enemyShip ? -1 : 1) * (150 + Math.random() * 100)) * scalingFactor;
+		part.position = position;
+
+		part.ySpeed = ((ship.enemyShip ? -0.7 : 1) * (280 + Math.random() * 100)) * scalingFactor;
 		part.xSpeed = (-10 + Math.random() * 20) * scalingFactor;
+	},
+	updatePlayerShip:function(ship,timeDiff) {
+		ship.lastTrail += timeDiff * 1000;
+		if (!ship.enemyShip && ship.lastTrail > Stars.shipTrails.trailFrequency + (ship.ySpeed / 2)) {
+			ship.lastTrail = 0;
+			Stars.shipTrails.newPart(ship, ship.engine1);
+			if (ship.dualEngines) {
+				Stars.shipTrails.newPart(ship, ship.engine2);
+			}
+		}
 	},
 	updateShip: function(ship, timeDiff) {
 		ship.lastTrail += timeDiff * 1000;
 		if ((!ship.enemyShip && ship.lastTrail > Stars.shipTrails.trailFrequency + (ship.ySpeed / 2)) || (ship.enemyShip && ship.lastTrail > Stars.shipTrails.trailFrequency)) {
 			ship.lastTrail = 0;
-			Stars.shipTrails.newPart(ship);
+			if (ship.dualEngines) {
+				ship.trailX -= 12;
+				Stars.shipTrails.newPart(ship);
+				ship.trailX += 24;
+				Stars.shipTrails.newPart(ship);
+			} else {
+				Stars.shipTrails.newPart(ship);
+			}
+
 		}
 	},
 	update: function(timeDiff) {

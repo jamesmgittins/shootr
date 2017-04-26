@@ -49,7 +49,7 @@ var MoneyPickup = {
 					pickup.yLoc += pickup.speed * timeDiff;
 					pickup.xLoc += pickup.xSpeed * timeDiff;
 
-					if (pickup.yLoc < canvasHeight + 10) {
+					if (pickup.yLoc > -10 && pickup.yLoc < canvasHeight + 10 && pickup.xLoc > -10 && pickup.xLoc < canvasWidth + 10) {
 						pickup.position = {x:pickup.xLoc * scalingFactor, y: pickup.yLoc * scalingFactor};
 
 						if (pickup.xLoc > PlayerShip.playerShip.xLoc && pickup.xSpeed > -1 * MoneyPickup.xMaxSpeed) {
@@ -59,15 +59,35 @@ var MoneyPickup = {
 							pickup.xSpeed += MoneyPickup.xAcceleration * timeDiff;
 						}
 
-						if (distanceBetweenPoints(PlayerShip.playerShip.xLoc, PlayerShip.playerShip.yLoc, pickup.xLoc, pickup.yLoc) < 30) {
+						var distanceFromPlayer = distanceBetweenPoints(PlayerShip.playerShip.xLoc, PlayerShip.playerShip.yLoc, pickup.xLoc, pickup.yLoc);
 
-							Sounds.powerup.play(pickup.xLoc);
+						if (distanceFromPlayer < Powerups.attractRange) {
 
-							addCredits(pickup.moneyValue);
-							GameText.credits.newCreditText(pickup.xLoc,pickup.yLoc - 15,"+" + formatMoney(pickup.moneyValue));
+							if (distanceFromPlayer < 30) {
 
-							this.spritePool.discardSprite(pickup);
+								Sounds.powerup.play(pickup.xLoc);
+
+								addCredits(pickup.moneyValue);
+								GameText.credits.newCreditText(pickup.xLoc,pickup.yLoc - 15,"+" + formatMoney(pickup.moneyValue));
+
+								this.spritePool.discardSprite(pickup);
+							} else {
+								var accelX = PlayerShip.playerShip.xLoc - pickup.xLoc;
+								var accelY = PlayerShip.playerShip.yLoc - pickup.yLoc;
+								var factor = (Powerups.acceleration * Powerups.attractRange / distanceFromPlayer) / magnitude(accelX, accelY);
+								pickup.xSpeed += accelX * factor * timeDiff;
+								pickup.speed += accelY * factor * timeDiff;
+
+								if (magnitude(pickup.xSpeed, pickup.speed) > Powerups.attractMaxSpeed) {
+				          var speedFactor = Powerups.attractMaxSpeed / magnitude(pickup.xSpeed, pickup.speed);
+				          pickup.xSpeed *= speedFactor;
+				          pickup.speed *= speedFactor;
+				        }
+
+							}
+
 						}
+
 
 					pickup.tintNumber += pickup.tintMod * timeDiff;
 					pickup.tint = pickup.alternate ?
@@ -96,6 +116,9 @@ var MoneyPickup = {
 };
 
 var Powerups = {
+	acceleration : 1000,
+	attractRange : 75,
+	attractMaxSpeed : 300,
 	texture:{} ,
 	lastTrail:0,
 	tint:0,
@@ -202,39 +225,57 @@ var Powerups = {
 
 				Powerups.sprite[i].tint = rgbToHex(255,Math.min(255,Math.max(Powerups.tint,0)),0);
 
-				if (distanceBetweenPoints(PlayerShip.playerShip.xLoc, PlayerShip.playerShip.yLoc, Powerups.xLoc[i], Powerups.yLoc[i]) < 35) {
+				var distanceFromPlayer = distanceBetweenPoints(PlayerShip.playerShip.xLoc, PlayerShip.playerShip.yLoc, Powerups.xLoc[i], Powerups.yLoc[i]);
 
-					Sounds.powerup.play(Powerups.xLoc[i]);
+				if (distanceFromPlayer < Powerups.attractRange) {
 
-					var number = Math.random();
+					if (distanceFromPlayer < 35) {
 
-					if (number > 0.8) {
-							GameText.bigText.newBigText("Spread shot!");
-							Powerups.sprite[i].visible = false;
-							PlayerShip.playerShip.powerupTime = 0;
-							PlayerShip.playerShip.spreadShot = 1;
-					} else if (number > 0.6 ){
-							GameText.bigText.newBigText("Cross shot!");
-							Powerups.sprite[i].visible = false;
-							PlayerShip.playerShip.powerupTime = 0;
-							PlayerShip.playerShip.crossShot = 1;
-					} else {
-						GameText.bigText.newBigText("Cargo Crate Collected!");
-						Powerups.sprite[i].visible = false;
-						// gameModel.lootCollected++;
+						Sounds.powerup.play(Powerups.xLoc[i]);
 
-						var baseSeed = Date.now();
-						var level = gameModel.currentLevel > 1 ? Math.max(1,Math.round(gameModel.currentLevel + (Math.random() * 2.6) - 1)) : gameModel.currentLevel;
-						if (Math.random() > 0.75) {
-							var shield = ArmsDealer.generateShield(level, baseSeed + i, true);
-							gameModel.lootCollected.push(shield);
-							GameText.levelComplete.lootLayouts.push(ArmsDealer.createItemLayout(shield, false, true));
-							GameText.status.lootIcons.push(ArmsDealer.createItemIcon(shield, {buy:false, cache:true}));
+						var number = Math.random();
+
+						if (number > 0.8) {
+								GameText.bigText.newBigText("Spread shot!");
+								Powerups.sprite[i].visible = false;
+								PlayerShip.playerShip.powerupTime = 0;
+								PlayerShip.playerShip.spreadShot = 1;
+						} else if (number > 0.6 ){
+								GameText.bigText.newBigText("Cross shot!");
+								Powerups.sprite[i].visible = false;
+								PlayerShip.playerShip.powerupTime = 0;
+								PlayerShip.playerShip.crossShot = 1;
 						} else {
-							var weapon = Weapons.generateWeapon(level, baseSeed + i, true);
-							gameModel.lootCollected.push(weapon);
-							GameText.levelComplete.lootLayouts.push(ArmsDealer.createItemLayout(weapon, false, true));
-							GameText.status.lootIcons.push(ArmsDealer.createItemIcon(weapon, {buy:false, cache:true}));
+							GameText.bigText.newBigText("Cargo Crate Collected!");
+							Powerups.sprite[i].visible = false;
+							// gameModel.lootCollected++;
+
+							var baseSeed = Date.now();
+							var level = gameModel.currentLevel > 1 ? Math.max(1,Math.round(gameModel.currentLevel + (Math.random() * 2.6) - 1)) : gameModel.currentLevel;
+							if (Math.random() > 0.75) {
+								var shield = ArmsDealer.generateShield(level, baseSeed + i, true);
+								gameModel.lootCollected.push(shield);
+								GameText.levelComplete.lootLayouts.push(ArmsDealer.createItemLayout(shield, false, true));
+								GameText.status.lootIcons.push(ArmsDealer.createItemIcon(shield, {buy:false, cache:true}));
+							} else {
+								var weapon = Weapons.generateWeapon(level, baseSeed + i, true);
+								gameModel.lootCollected.push(weapon);
+								GameText.levelComplete.lootLayouts.push(ArmsDealer.createItemLayout(weapon, false, true));
+								GameText.status.lootIcons.push(ArmsDealer.createItemIcon(weapon, {buy:false, cache:true}));
+							}
+
+						}
+					} else {
+						var accelX = PlayerShip.playerShip.xLoc - Powerups.xLoc[i];
+						var accelY = PlayerShip.playerShip.yLoc - Powerups.yLoc[i];
+						var factor = (Powerups.acceleration * Powerups.attractRange / distanceFromPlayer) / magnitude(accelX, accelY);
+						Powerups.xSpeed[i] += accelX * factor * timeDiff;
+						Powerups.ySpeed[i] += accelY * factor * timeDiff;
+
+						if (magnitude(Powerups.xSpeed[i], Powerups.ySpeed[i]) > Powerups.attractMaxSpeed) {
+							var speedFactor = Powerups.attractMaxSpeed / magnitude(Powerups.xSpeed[i], Powerups.ySpeed[i]);
+							Powerups.xSpeed[i] *= speedFactor;
+							Powerups.ySpeed[i] *= speedFactor;
 						}
 
 					}

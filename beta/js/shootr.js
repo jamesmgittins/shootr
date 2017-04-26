@@ -130,7 +130,6 @@ function changeState(state) {
 		if (state == states.paused) {
 			PauseMenu.show();
 			Sounds.music.pause();
-			Sounds.enemyShotTravel.pause();
 		}
 
 		if (state == states.levelComplete) {
@@ -292,8 +291,8 @@ function update() {
 		renderer.render(gameContainer);
 }
 
-var screenShakeXrate = 40;
-var screenShakeYrate = 30;
+var screenShakeXrate = 20;
+var screenShakeYrate = 18;
 
 var updateScreenShake =  function(timeDiff) {
 	if (stageSprite.screenShake > 0) {
@@ -537,11 +536,13 @@ function startGame() {
 
 window.onload = function() {
 	loader = PIXI.loader
-		.add("fonts/dosis-v6-latin-300.woff2")
-		.add("fonts/dosis-v6-latin-300.woff")
+		// .add("fonts/dosis-v6-latin-300.woff2")
+		// .add("fonts/dosis-v6-latin-300.woff")
 		.add("fonts/dosis-v6-latin-300.ttf")
-		.add("fonts/dosis-v6-latin-300.eot")
-		.add("fonts/dosis-v6-latin-300.svg")
+		// .add("fonts/dosis-v6-latin-300.eot")
+		// .add("fonts/dosis-v6-latin-300.svg")
+		// .add("fonts/NotoSans-Regular.ttf")
+		// .add("fonts/NotoSans-Bold.ttf")
 		.add("img/perspective-dice-random.svg")
 		.add("img/sapphire.svg")
 		.add("img/diamond.svg")

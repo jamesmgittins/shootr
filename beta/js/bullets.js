@@ -46,6 +46,8 @@ Bullets.splashDamage = {
 	}
 };
 
+
+
 Bullets.blasts = {
 	texture: (function() {
 		var blast = document.createElement('canvas');
@@ -96,6 +98,8 @@ Bullets.blasts = {
 	}
 };
 
+
+
 Bullets.enemyRails = {
 	getSpritePool:function() {
 		if (!this.spritePool) {
@@ -122,8 +126,10 @@ Bullets.enemyRails = {
 		sprite.speed = RotateVector2d(0, -200, angle);
 		sprite.scale.x = 7 * scalingFactor;
 		sprite.rotation = angle;
-		Bullets.generateExplosion(PlayerShip.playerShip.xLoc, PlayerShip.playerShip.yLoc);
-		PlayerShip.damagePlayerShip(PlayerShip.playerShip, Bullets.enemyBullets.enemyShotStrength);
+		if (PlayerShip.playerShip.rolling > 0.3){
+			Bullets.generateExplosion(PlayerShip.playerShip.xLoc, PlayerShip.playerShip.yLoc);
+			PlayerShip.damagePlayerShip(PlayerShip.playerShip, Bullets.enemyBullets.enemyShotStrength);
+		}
 	},
 	update:function(timeDiff) {
 		for (var i = 0; i < this.getSpritePool().sprites.length; i++) {
@@ -141,10 +147,12 @@ Bullets.enemyRails = {
 	}
 };
 
+
+
 Bullets.enemyBullets = {
 	texture: function() {
 		var blast = document.createElement('canvas');
-		var size = 12 * scalingFactor;
+		var size = 18 * scalingFactor;
 		blast.width = size + 4;
 		blast.height = size + 4;
 		var blastCtx = blast.getContext('2d');
@@ -168,6 +176,10 @@ Bullets.enemyBullets = {
 			this.spritePool = SpritePool.create(Bullets.enemyBullets.texture(), bulletContainer);
 		}
 		return this.spritePool;
+	},
+	destroy : function() {
+		this.getSpritePool().destroy();
+		this.spritePool = undefined;
 	},
 	enemyShotSpeed: 100,
 	enemyShotStrength: 1,
@@ -214,10 +226,6 @@ Bullets.enemyBullets = {
 		Sounds.enemyShot.play(
 			ship.xLoc
 		);
-		bullet.travelSoundId = Sounds.enemyShotTravel.play(
-			(ship.xLoc - PlayerShip.playerShip.xLoc) / 3,
-			(ship.yLoc - PlayerShip.playerShip.yLoc) / 3
-		);
 		bullet.visible = true;
 		bullet.lastTrail = 0;
 		bullet.position.x = bullet.xLoc * scalingFactor;
@@ -238,13 +246,11 @@ Bullets.enemyBullets = {
 				if (bullet.yLoc < 0 || bullet.yLoc > canvasHeight ||
 					bullet.xLoc < 0 || bullet.xLoc > canvasWidth) {
 					Bullets.enemyBullets.spritePool.discardSprite(bullet);
-					Sounds.enemyShotTravel.stop(bullet.travelSoundId);
 				} else {
 					if (Ships.detectCollision(PlayerShip.playerShip, bullet.xLoc, bullet.yLoc)) {
 						Bullets.enemyBullets.spritePool.discardSprite(bullet);
 						Bullets.generateExplosion(bullet.xLoc, bullet.yLoc);
 						PlayerShip.damagePlayerShip(PlayerShip.playerShip, Bullets.enemyBullets.enemyShotStrength);
-						Sounds.enemyShotTravel.stop(bullet.travelSoundId);
 					} else {
 
 						bullet.lastTrail += timeDiff * 1000;
@@ -259,12 +265,6 @@ Bullets.enemyBullets = {
 						bullet.position.x = bullet.xLoc * scalingFactor;
 						bullet.position.y = bullet.yLoc * scalingFactor;
 						bullet.tint = calculateTint(0);
-
-						Sounds.enemyShotTravel.updatePosition(
-							(bullet.xLoc - PlayerShip.playerShip.xLoc) / 3,
-							(bullet.yLoc - PlayerShip.playerShip.yLoc) / 3,
-							bullet.travelSoundId
-						);
 					}
 				}
 
@@ -272,6 +272,8 @@ Bullets.enemyBullets = {
 		}
 	}
 };
+
+
 
 Bullets.getTurretAngle = function() {
 	if (playerOneAxes[2] > 0.25 || playerOneAxes[2] < -0.25 || playerOneAxes[3] > 0.25 || playerOneAxes[3] < -0.25) {
@@ -292,6 +294,8 @@ Bullets.getTurretAngle = function() {
 	}
 	return 0;
 };
+
+
 
 Bullets.explosionBits = {
 	bitsPerExplosion: 10,
@@ -333,6 +337,8 @@ Bullets.explosionBits = {
 		sprite.ySpeed = speed.y * scalingFactor;
 	}
 };
+
+
 
 Bullets.generateExplosion = function(x, y) {
 	for (var i = 0; i < Bullets.explosionBits.bitsPerExplosion * gameModel.detailLevel; i++) {

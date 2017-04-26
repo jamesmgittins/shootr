@@ -12,6 +12,15 @@
        url('../fonts/dosis-v6-latin-300.svg#Dosis') format('svg'); /* Legacy iOS */
 }
 
+/* dosis-300 - latin */
+/*
+@font-face {
+  font-family: 'NotoSans';
+  font-style: bold;
+  font-weight: 400;
+  src: url('../fonts/NotoSans-Bold.ttf') format('truetype');
+} */
+
 * { margin: 0; padding: 0;}
 
 body, html {
