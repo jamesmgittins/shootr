@@ -115,13 +115,7 @@ GameText.status = {
 		var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
 		var barWidth = Math.round(sideSpace / 8);
 
-		GameText.status.enemies = new PIXI.Text(distance.toFixed(1) + " Light Years to Target", {
-			font: fontSize + 'px Dosis',
-			fill: '#FFF',
-			stroke: "#000",
-			strokeThickness: 0,
-			align: 'center'
-		});
+		GameText.status.enemies = getText(distance.toFixed(1) + " Light Years to Target", fontSize, {	align: 'center'	});
 		GameText.status.enemies.tint = MainMenu.buttonTint;
 		GameText.status.enemies.anchor = {
 			x: 0.5,
@@ -134,13 +128,7 @@ GameText.status = {
 
 		GameText.status.container.addChild(GameText.status.enemies);
 
-		GameText.status.credits = new PIXI.Text(formatMoney(gameModel.p1.credits) + " credits", {
-			font: fontSize + 'px Dosis',
-			fill: '#FFF',
-			stroke: "#000",
-			strokeThickness: 0,
-			align: 'center'
-		});
+		GameText.status.credits = getText(formatMoney(gameModel.p1.credits) + " credits", fontSize, {	align: 'center'	});
 		GameText.status.credits.lastCredits = 0;
 		GameText.status.credits.timer = 1;
 		GameText.status.credits.tint = MainMenu.buttonTint;
@@ -156,13 +144,7 @@ GameText.status = {
 		GameText.status.container.addChild(GameText.status.credits);
 
 
-		GameText.status.fps = new PIXI.Text('60 fps', {
-			font: fontSize + 'px Dosis',
-			fill: '#FFF',
-			stroke: "#000",
-			strokeThickness: 0,
-			align: 'center'
-		});
+		GameText.status.fps = getText('60 fps', fontSize, { align: 'center'	});
 		GameText.status.fps.tint = MainMenu.buttonTint;
 		GameText.status.fps.anchor = {
 			x: 0.5,
@@ -323,13 +305,7 @@ GameText.damage = {
 				text = GameText.damage.discardedText.pop();
 			} else {
 				var textSize = (GameText.damage.fontSize * scalingFactor).toFixed();
-				text = new PIXI.Text('+10', {
-					font: textSize + 'px Dosis',
-					fill: '#FFF',
-					stroke: "#000",
-					strokeThickness: 0,
-					align: 'center'
-				});
+				text = getText('+10', textSize, {	align: 'center'	});
 				text.anchor.set(0.5);
 				text.visible = false;
 				GameText.damage.container.addChild(text);
@@ -356,13 +332,7 @@ GameText.credits = {
 
 		for (var i = 0; i < GameText.credits.maxTexts; i++) {
 			var textSize = (20 * scalingFactor).toFixed();
-			GameText.credits.texts[i] = new PIXI.Text('+10', {
-				font: textSize + 'px Dosis',
-				fill: '#FFF',
-				stroke: "#000",
-				strokeThickness: 0,
-				align: 'center'
-			});
+			GameText.credits.texts[i] = getText('+10', textSize, { align: 'center'	});
 			GameText.credits.texts[i].tint = MainMenu.buttonTint;
 			GameText.credits.texts[i].anchor.set(0.5);
 			GameText.credits.texts[i].visible = false;
@@ -419,13 +389,7 @@ GameText.bigText = {
 		var textSize = (32 * scalingFactor).toFixed();
 
 		for (var i = 0; i < GameText.bigText.maxTexts; i++) {
-			GameText.bigText.texts[i] = new PIXI.Text('+10', {
-				font: textSize + 'px Dosis',
-				fill: '#FFF',
-				stroke: "#000",
-				strokeThickness: 0,
-				align: 'center'
-			});
+			GameText.bigText.texts[i] = getText('+10', textSize, { align: 'center' });
 			GameText.bigText.texts[i].tint = MainMenu.buttonTint;
 			GameText.bigText.texts[i].anchor.set(0.5);
 			GameText.bigText.texts[i].visible = false;
@@ -538,13 +502,7 @@ GameText.levelComplete = {
 		this.lootOpening = false;
 		this.lootTimer = 0;
 
-		this.textMessage = new PIXI.Text("Level Complete\nYou have collected "  + formatMoney(gameModel.p1.temporaryCredits) + " credits\nPress " + ShootrUI.getInputButtonDescription(buttonTypes.select) + " to Continue", {
-			font: 32 * scalingFactor + 'px Dosis',
-			fill: '#FFF',
-			stroke: "#000",
-			strokeThickness: 0,
-			align: 'center'
-		});
+		this.textMessage = getText("Level Complete\nYou have collected "  + formatMoney(gameModel.p1.temporaryCredits) + " credits\nPress " + ShootrUI.getInputButtonDescription(buttonTypes.select) + " to Continue", 32 * scalingFactor, { align: 'center' });
 		this.textMessage.tint = MainMenu.buttonTint;
 		this.textMessage.anchor = {x:0.5,y:0.5};
 		this.textMessage.position = {x:renderer.width / 2, y:renderer.height / 2};
@@ -615,23 +573,18 @@ GameText.levelComplete = {
 		border.drawRect(0, 0, 512 * scalingFactor, 38 * scalingFactor);
 		container.addChild(border);
 
-		var levelText = new PIXI.Text("Level Complete", {
-			font: (30 * scalingFactor) + 'px Dosis',
+		var levelText = getText("Level Complete", 30 * scalingFactor, {
 			fill: backgroundCol,
-			stroke: borderCol,
-			strokeThickness: 0,
-			align: 'left'
+			stroke: borderCol
 		});
 		levelText.position = {
 			x: 5 * scalingFactor,
 			y: 1 * scalingFactor
 		};
 
-		var ratingText = new PIXI.Text("Rating: " + ratingDesc, {
-			font: (30 * scalingFactor) + 'px Dosis',
+		var ratingText = getText("Rating: " + ratingDesc, 30 * scalingFactor, {
 			fill: backgroundCol,
 			stroke: borderCol,
-			strokeThickness: 0,
 			align: 'right'
 		});
 		ratingText.anchor = {x:1,y:0};
@@ -646,36 +599,27 @@ GameText.levelComplete = {
 		var spacing = 42;
 		var startPos = 52;
 
-		var killedText = new PIXI.Text("Enemies Destroyed: " + Math.round(rating * 100) + "%", {
-			font: (22 * scalingFactor) + 'px Dosis',
+		var killedText = getText("Enemies Destroyed: " + Math.round(rating * 100) + "%", 22 * scalingFactor, {
 			fill: borderCol,
-			stroke: backgroundCol,
-			strokeThickness: 0,
-			align: 'left'
+			stroke: backgroundCol
 		});
 		killedText.position = {
 			x: 5 * scalingFactor,
 			y: startPos * scalingFactor
 		};
 
-		var collectedText = new PIXI.Text("Credits Collected: " + formatMoney(gameModel.p1.temporaryCredits), {
-			font: (22 * scalingFactor) + 'px Dosis',
+		var collectedText = getText("Credits Collected: " + formatMoney(gameModel.p1.temporaryCredits), 22 * scalingFactor, {
 			fill: borderCol,
-			stroke: backgroundCol,
-			strokeThickness: 0,
-			align: 'left'
+			stroke: backgroundCol
 		});
 		collectedText.position = {
 			x: 5 * scalingFactor,
 			y: (startPos + spacing) * scalingFactor
 		};
 
-		var cratesText = new PIXI.Text("Cargo Crates Collected: " + gameModel.lootCollected.length, {
-			font: (22 * scalingFactor) + 'px Dosis',
+		var cratesText = getText("Cargo Crates Collected: " + gameModel.lootCollected.length, 22 * scalingFactor, {
 			fill: borderCol,
 			stroke: backgroundCol,
-			strokeThickness: 0,
-			align: 'left'
 		});
 		cratesText.position = {
 			x: 5 * scalingFactor,
@@ -687,11 +631,9 @@ GameText.levelComplete = {
 		container.addChild(cratesText);
 
 		if (Boss.isInTargetSystem()) {
-			var bossText = new PIXI.Text("Boss Defeated\nPerk Point Granted", {
-				font: (22 * scalingFactor) + 'px Dosis',
+			var bossText = getText("Boss Defeated\nPerk Point Granted", 22 * scalingFactor, {
 				fill: borderCol,
 				stroke: backgroundCol,
-				strokeThickness: 0,
 				align: 'right'
 			});
 			bossText.anchor = {x:1, y:0};
@@ -705,11 +647,9 @@ GameText.levelComplete = {
 		if (!findInHistory(gameModel.currentSystem, gameModel.targetSystem)) {
 			var value = formatMoney(valueForRoute(calculateAdjustedStarLevel(endStar.level)));
 
-			var valueText = new PIXI.Text("New Trade Route Cleared\n +" + value + " Credits per second", {
-				font: (22 * scalingFactor) + 'px Dosis',
+			var valueText = getText("New Trade Route Cleared\n +" + value + " Credits per second", 22 * scalingFactor, {
 				fill: borderCol,
 				stroke: backgroundCol,
-				strokeThickness: 0,
 				align: 'right'
 			});
 			valueText.anchor = {x:1, y:0};
@@ -720,12 +660,9 @@ GameText.levelComplete = {
 			container.addChild(valueText);
 		}
 
-		var continueText = new PIXI.Text("Press " + ShootrUI.getInputButtonDescription(buttonTypes.select) + (gameModel.lootCollected.length === 0 ? " to Continue" : " to inspect the contents"), {
-			font: (22 * scalingFactor) + 'px Dosis',
+		var continueText = getText("Press " + ShootrUI.getInputButtonDescription(buttonTypes.select) + (gameModel.lootCollected.length === 0 ? " to Continue" : " to inspect the contents"), 22 * scalingFactor, {
 			fill: borderCol,
-			stroke: backgroundCol,
-			strokeThickness: 0,
-			align: 'left'
+			stroke: backgroundCol
 		});
 		continueText.anchor = {x:0.5,y:1};
 		continueText.position = {

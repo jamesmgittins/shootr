@@ -173,15 +173,12 @@ ArmsDealer.createItemIcon = function(item, options) {
 			levelTooHigh = true;
 	}
 
-
-
-	var levelText = new PIXI.Text(item.level, {
-		font: (20 * scale) + 'px Dosis',
+	var levelText = getText(item.level, 20 * scale, {
 		fill: levelTooHigh ? '#A00' : backgroundCol,
 		stroke: levelTooHigh? '#A00' : borderCol,
-		strokeThickness: levelTooHigh ? 3 : 0,
-		align: 'left'
+		strokeThickness: levelTooHigh ? 3 : 0
 	});
+
 	levelText.position = {
 		x: 3 * scale,
 		y: levelTooHigh ? -1 * scale : 1 * scale
@@ -196,13 +193,12 @@ ArmsDealer.createItemIcon = function(item, options) {
 		comparison = ArmsDealer.shieldComparison(item, options.compareItem);
 	}
 	if (comparison.equipped) {
-		var equippedText = new PIXI.Text("EQUIPPED", {
-			font: (20 * scale) + 'px Dosis',
+
+		var equippedText = getText("EQUIPPED", 20 * scale, {
 			fill: backgroundCol,
-			stroke: backgroundCol,
-			strokeThickness: 0,
-			align: 'left'
+			stroke: backgroundCol
 		});
+
 		equippedText.anchor = {x:1, y:0};
 		equippedText.position = {
 			x: (128 - 5) * scale,
@@ -225,13 +221,12 @@ ArmsDealer.createItemIcon = function(item, options) {
 
 	var price = options.buy ? item.price : item.price / 2;
 
-	var priceText = new PIXI.Text(formatMoney(price) + " Credits", {
-		font: (18 * scale) + 'px Dosis',
+	var priceText = getText(formatMoney(price) + " Credits", 18 * scale, {
 		fill: '#FFF',
 		stroke: "#000",
-		strokeThickness: 3,
-		align: 'left'
+		strokeThickness: 3
 	});
+
 	priceText.anchor = {x:0.5, y:1};
 	priceText.position = {
 		x: 64 * scale,
@@ -269,13 +264,8 @@ ArmsDealer.createItemLayout = function(item, buy, full, noIcon) {
 	if (noIcon)
 		iconWidth = 0;
 
-	var name = new PIXI.Text((item.ultra ||  item.hyper ? item.ultraName + "\n": "") + item.name, {
-		font: (22 * scalingFactor) + 'px Dosis',
-		fill: '#FFF',
-		stroke: "#000",
-		strokeThickness: 0,
-		align: 'left'
-	});
+	var name = getText((item.ultra ||  item.hyper ? item.ultraName + "\n": "") + item.name, 22 * scalingFactor, {});
+
 	name.position = {
 		x: (iconWidth + 10) * scalingFactor,
 		y: 5 * scalingFactor
@@ -283,26 +273,16 @@ ArmsDealer.createItemLayout = function(item, buy, full, noIcon) {
 	name.tint = name.defaultTint = MainMenu.buttonTint;
 
 
-	var details = new PIXI.Text("", {
-		font: (16 * scalingFactor) + 'px Dosis',
-		fill: '#FFF',
-		stroke: "#000",
-		strokeThickness: 0,
-		align: 'left'
-	});
+	var details = getText("", 16 * scalingFactor, {});
+
 	details.position = {
 		x: (iconWidth + 10) * scalingFactor,
 		y: name.position.y + name.height + 5 * scalingFactor
 	};
 	details.tint = details.defaultTint = MainMenu.buttonTint;
 
-	var level = new PIXI.Text("", {
-		font: (16 * scalingFactor) + 'px Dosis',
-		fill: '#FFF',
-		stroke: "#000",
-		strokeThickness: 0,
-		align: 'left'
-	});
+	var level = getText("", 16 * scalingFactor, {});
+
 	var comparison;
 	if (item.type == "weapon") {
 		comparison = ArmsDealer.weaponComparison(item);
@@ -327,13 +307,8 @@ ArmsDealer.createItemLayout = function(item, buy, full, noIcon) {
 			y: name.position.y + name.height + 5 * scalingFactor
 		};
 
-	var price = new PIXI.Text(buy ? formatMoney(item.price) + " credits" : formatMoney(item.price / 2) + " credits", {
-		font: (16 * scalingFactor) + 'px Dosis',
-		fill: '#FFF',
-		stroke: "#000",
-		strokeThickness: 0,
-		align: 'left'
-	});
+	var price = getText(buy ? formatMoney(item.price) + " credits" : formatMoney(item.price / 2) + " credits", 16 * scalingFactor, {});
+
 	price.position = {
 		x: (iconWidth + 10) * scalingFactor,
 		y: level.position.y + level.height + 5 * scalingFactor
@@ -386,13 +361,8 @@ ArmsDealer.initialize = function() {
 
 	var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
 
-	ArmsDealer.titleText = new PIXI.Text(ArmsDealer.menuTitle, {
-		font: fontSize + 'px Dosis',
-		fill: '#FFF',
-		stroke: "#000",
-		strokeThickness: 0,
-		align: 'center'
-	});
+	ArmsDealer.titleText = getText(ArmsDealer.menuTitle, fontSize, {align: 'center'});
+
 	ArmsDealer.titleText.tint = MainMenu.titleTint;
 	ArmsDealer.titleText.position = {
 		x: renderer.width * 0.05 + 25,
@@ -400,13 +370,8 @@ ArmsDealer.initialize = function() {
 	};
 	ArmsDealer.menuContainer.addChild(ArmsDealer.titleText);
 
-	ArmsDealer.currentCredits = new PIXI.Text(formatMoney(gameModel.p1.credits) + " Credits", {
-		font: fontSize + 'px Dosis',
-		fill: '#FFF',
-		stroke: "#000",
-		strokeThickness: 0,
-		align: 'center'
-	});
+	ArmsDealer.currentCredits = getText(formatMoney(gameModel.p1.credits) + " Credits", fontSize, {align: 'center'});
+
 	ArmsDealer.currentCredits.tint = MainMenu.titleTint;
 	ArmsDealer.currentCredits.anchor = {
 		x: 1,
@@ -418,13 +383,8 @@ ArmsDealer.initialize = function() {
 	};
 	ArmsDealer.menuContainer.addChild(ArmsDealer.currentCredits);
 
-	ArmsDealer.buyText = new PIXI.Text("Buy  ("+ShootrUI.getInputButtonDescription(buttonTypes.leftShoulder)+")", {
-		font: fontSize + 'px Dosis',
-		fill: '#FFF',
-		stroke: "#000",
-		strokeThickness: 0,
-		align: 'center'
-	});
+	ArmsDealer.buyText = getText("Buy  ("+ShootrUI.getInputButtonDescription(buttonTypes.leftShoulder)+")", fontSize, {align: 'center'});
+
 	ArmsDealer.buyText.position = {
 		x: renderer.width / 3,
 		y: renderer.height * 0.05 + 25
@@ -458,13 +418,8 @@ ArmsDealer.initialize = function() {
 
 	ArmsDealer.menuContainer.addChild(ArmsDealer.tabSelector);
 
-	ArmsDealer.sellText = new PIXI.Text("Sell  ("+ShootrUI.getInputButtonDescription(buttonTypes.rightShoulder)+")", {
-		font: fontSize + 'px Dosis',
-		fill: '#FFF',
-		stroke: "#000",
-		strokeThickness: 0,
-		align: 'center'
-	});
+	ArmsDealer.sellText = getText("Sell  ("+ShootrUI.getInputButtonDescription(buttonTypes.rightShoulder)+")", fontSize, {align: 'center'});
+
 	ArmsDealer.sellText.position = {
 		x: (renderer.width / 3) * 2,
 		y: renderer.height * 0.05 + 25
@@ -495,13 +450,8 @@ ArmsDealer.initialize = function() {
 		}
 	};
 
-	ArmsDealer.backButton.text = new PIXI.Text(ArmsDealer.backButton.title + " (" + ShootrUI.getInputButtonDescription(ArmsDealer.backButton.buttonDesc) + ")", {
-		font: fontSize + 'px Dosis',
-		fill: '#FFF',
-		stroke: "#000",
-		strokeThickness: 0,
-		align: 'center'
-	});
+	ArmsDealer.backButton.text = getText(ArmsDealer.backButton.title + " (" + ShootrUI.getInputButtonDescription(ArmsDealer.backButton.buttonDesc) + ")", fontSize, {align: 'center'});
+
 	ArmsDealer.backButton.text.tint = MainMenu.buttonTint;
 
 	ArmsDealer.backButton.text.anchor = {
@@ -687,18 +637,12 @@ ArmsDealer.showDialog = function(index, buy) {
 
 	ArmsDealer.dialogContainer.addChild(itemLayout);
 
-	var text = new PIXI.Text(buy ? "Buy for " + formatMoney(item.price * getBuyPriceModifier()) + " credits" : "Sell for " + formatMoney(item.price / 2) + " credits", {
-		font: (22 * scalingFactor) + 'px Dosis',
-		fill: '#FFF',
-		stroke: "#000",
-		strokeThickness: 1,
-		align: 'left'
-	});
+	var text = getText(buy ? "Buy for " + formatMoney(item.price * getBuyPriceModifier()) + " credits" : "Sell for " + formatMoney(item.price / 2) + " credits", 22 * scalingFactor, {});
 	text.position = {x:renderer.width / 2 - text.width / 2, y:renderer.height * 0.6 - text.height / 2};
 	text.tint = MainMenu.buttonTint;
 	ArmsDealer.dialogContainer.addChild(text);
 
-	ArmsDealer.dialogOk = {text:new PIXI.Text("Okay", {font: (22 * scalingFactor) + 'px Dosis',	fill: '#FFF',	stroke: "#000",	strokeThickness: 1,	align: 'left'})};
+	ArmsDealer.dialogOk = {text:getText("Okay", 22 * scalingFactor, {})};
 	ArmsDealer.dialogOk.text.position = {x:renderer.width * 0.4 - ArmsDealer.dialogOk.text.width / 2, y:renderer.height * 0.7 - ArmsDealer.dialogOk.text.height / 2};
 	ArmsDealer.dialogOk.text.tint = MainMenu.buttonTint;
 
@@ -712,7 +656,7 @@ ArmsDealer.showDialog = function(index, buy) {
 	};
 	ArmsDealer.dialogContainer.addChild(ArmsDealer.dialogOk.text);
 
-	ArmsDealer.dialogCancel = {text:new PIXI.Text("Cancel", {font: (22 * scalingFactor) + 'px Dosis',	fill: '#FFF',	stroke: "#000",	strokeThickness: 1,	align: 'left'})};
+	ArmsDealer.dialogCancel = {text:getText("Cancel", 22 * scalingFactor, {})};
 	ArmsDealer.dialogCancel.text.position = {x:renderer.width * 0.6 - ArmsDealer.dialogCancel.text.width / 2, y:renderer.height * 0.7 - ArmsDealer.dialogCancel.text.height / 2};
 	ArmsDealer.dialogCancel.text.tint = MainMenu.buttonTint;
 	ArmsDealer.dialogCancel.click = function() {

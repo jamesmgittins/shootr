@@ -152,10 +152,8 @@ Loadout.showWeapons = function() {
       Loadout.weapons[index] = {
         index : index,
         weapon : gameModel.p1.weapons[i],
-        // text : new PIXI.Text("Level " + gameModel.p1.weapons[i].level + " " + gameModel.p1.weapons[i].name + equippedText + "\n" + formatMoney(gameModel.p1.weapons[i].dps) + " DPS / " + gameModel.p1.weapons[i].shotsPerSecond.toFixed(2) + " shots per second", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'left' })
         text : ArmsDealer.createItemIcon(gameModel.p1.weapons[i], {buy:false, loadout:true, slotLevel : Loadout.levelAllowed, compareItem:Loadout.equippedWeapon, scale:0.8})
       };
-      // Loadout.weapons[index].text.scale = {x:0.8, y:0.8};
       Loadout.weapons[index].defaultTint = gameModel.p1.weapons[i].level <= Loadout.levelAllowed ? MainMenu.buttonTint : MainMenu.unselectableTint;
       Loadout.weapons[index].text.tint = Loadout.weapons[index].defaultTint;
       Loadout.weapons[index].text.position = {x:startingXPos + (currentCol * positionSpacing * scalingFactor), y:renderer.height * 0.18 + (currentRow * positionSpacing * scalingFactor) - (20 * scalingFactor)};
@@ -288,10 +286,8 @@ Loadout.showShields = function() {
       Loadout.shields[index] = {
         index : index,
         weapon : gameModel.p1.shields[i],
-        // text : new PIXI.Text("Level " + gameModel.p1.shields[i].level + " " + gameModel.p1.shields[i].name + "\n" + formatMoney(gameModel.p1.shields[i].capacity) + " Capacity / " + formatMoney(gameModel.p1.shields[i].chargePerSecond) + " charge per sec", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'left' })
         text : ArmsDealer.createItemIcon(gameModel.p1.shields[i], {buy:false, loadout:true, compareItem : gameModel.p1.shield, scale:0.8})
       };
-      // Loadout.shields[index].text.scale = {x:0.8, y:0.8};
       Loadout.shields[index].defaultTint = gameModel.p1.shields[i].level <= Loadout.levelAllowed ? MainMenu.buttonTint : MainMenu.unselectableTint;
       Loadout.shields[index].text.tint = Loadout.shields[index].defaultTint;
       Loadout.shields[index].text.position = {x:startingXPos + (currentCol * positionSpacing * scalingFactor), y:renderer.height * 0.18 + (currentRow * positionSpacing * scalingFactor) - (20 * scalingFactor)};
@@ -356,33 +352,33 @@ Loadout.initialize = function () {
 
   var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
 
-  Loadout.titleText = new PIXI.Text(Loadout.menuTitle, { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+  Loadout.titleText = getText(Loadout.menuTitle, fontSize, { align: 'center' });
   Loadout.titleText.tint = MainMenu.titleTint;
   Loadout.titleText.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.05 + 25};
   Loadout.menuContainer.addChild(Loadout.titleText);
 
-  Loadout.backButton.text = new PIXI.Text(Loadout.backButton.title + " (" + ShootrUI.getInputButtonDescription(Loadout.backButton.buttonDesc) + ")", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+  Loadout.backButton.text = getText(Loadout.backButton.title + " (" + ShootrUI.getInputButtonDescription(Loadout.backButton.buttonDesc) + ")", fontSize, { align: 'center' });
   Loadout.backButton.text.tint = MainMenu.buttonTint;
 
   Loadout.backButton.text.anchor = {x:0,y:1};
   Loadout.backButton.text.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.95 - 25};
   Loadout.menuContainer.addChild(Loadout.backButton.text);
 
-  Loadout.totalDPS = new PIXI.Text("Total Damage Per Second: ", { font: Math.round(26 * scalingFactor) + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+  Loadout.totalDPS = getText("Total Damage Per Second: ", 26 * scalingFactor, { align: 'center' });
   Loadout.totalDPS.tint = MainMenu.buttonTint;
 
   Loadout.totalDPS.anchor = {x:0.5,y:1};
   Loadout.totalDPS.position = {x:renderer.width / 2,y: renderer.height * 0.95 - 25};
   Loadout.menuContainer.addChild(Loadout.totalDPS);
 
-  Loadout.shipName = new PIXI.Text("Level " + gameModel.p1.ship.level + " " + gameModel.p1.ship.name, { font: Math.round(26 * scalingFactor) + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+  Loadout.shipName = getText("Level " + gameModel.p1.ship.level + " " + gameModel.p1.ship.name, 26 * scalingFactor, { align: 'center' });
   Loadout.shipName.tint = MainMenu.buttonTint;
 
   Loadout.shipName.anchor = {x:0.5,y:0};
   Loadout.shipName.position = {x:renderer.width / 2,y: renderer.height * 0.05 + 25 };
   Loadout.menuContainer.addChild(Loadout.shipName);
 
-  Loadout.currentCredits = new PIXI.Text(formatMoney(gameModel.p1.credits) + " Credits", {font: fontSize + 'px Dosis',fill: '#FFF',	stroke: "#000",	strokeThickness: 0,	align: 'center'});
+  Loadout.currentCredits = getText(formatMoney(gameModel.p1.credits) + " Credits", fontSize, { align: 'center' });
 	Loadout.currentCredits.tint = MainMenu.titleTint;
 	Loadout.currentCredits.anchor = {x: 1,y: 0};
 	Loadout.currentCredits.position = {x: renderer.width * 0.95 - 25,y: renderer.height * 0.05 + 25};
@@ -440,11 +436,9 @@ Loadout.initialize = function () {
         break;
     }
     Loadout.menuOptions[i].text = new PIXI.Container();
-    Loadout.menuOptions[i].positionText = new PIXI.Text("Level " + level + "\n" + Loadout.menuOptions[i].title,
-                                                { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'left' });
+    Loadout.menuOptions[i].positionText = getText("Level " + level + "\n" + Loadout.menuOptions[i].title, fontSize, { });
 
-    Loadout.menuOptions[i].equippedText = new PIXI.Text((typeof weapon === "undefined" ? "Empty Slot " : ""),
-                                                { font: Math.round(12 * scalingFactor) + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'left' });
+    Loadout.menuOptions[i].equippedText = getText((typeof weapon === "undefined" ? "Empty Slot " : ""), 12 * scalingFactor, { });
 
     if (weapon) {
       Loadout.menuOptions[i].equippedIcon = ArmsDealer.createItemIcon(weapon, {buy:false, loadout:true, scale:0.7});

@@ -98,7 +98,7 @@ Asteroids = {
   },
 
 
-  numTextures : 8,
+  numTextures : 1,
   textureCounter : 0,
   getATexture : function() {
     if (!Asteroids.textures) {
@@ -167,6 +167,11 @@ Asteroids = {
       this.ships.push(new Asteroids.asteroid(this, 128 + Math.random() * 64, offset + (canvasWidth - offset) * Math.random(), -offset - Math.random() * 200));
     }
     this.shipsExited = 0;
+
+    this.destroy = function() {
+  		this.spritePool.destroy();
+  		this.finished = true;
+  	};
   },
 
 

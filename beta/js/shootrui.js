@@ -183,6 +183,10 @@ function setLastUsedInput(type) {
   }
 }
 
+window.onblur = function() {
+  q = w = e = a = s = d = spaceBar = esc = enter = false;
+};
+
 window.onkeydown = function (e) {
 	setLastUsedInput(inputTypes.mouseKeyboard);
 	switch (e.keyCode) {

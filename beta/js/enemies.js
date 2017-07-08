@@ -82,7 +82,9 @@ Enemies = {
   reset:function() {
 
     for (var c=0; c < Enemies.waves.length; c++) {
-      Enemies.waves[c].destroy();
+      if (Enemies.waves[c].destroy) {
+        Enemies.waves[c].destroy();
+      }
     }
 
     Enemies.difficultyFactor = 1;

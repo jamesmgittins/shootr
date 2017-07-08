@@ -84,7 +84,7 @@ DeathMenu = {
   bButton : function(){DeathMenu.menuOptions[1].click();},
   onInit:function() {
     var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
-    DeathMenu.moneyLostText = new PIXI.Text("You have lost", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'center' });
+    DeathMenu.moneyLostText = getText("You have lost", fontSize, { align: 'center' });
     DeathMenu.moneyLostText.tint = MainMenu.titleTint;
     DeathMenu.moneyLostText.anchor = {x:0.5,y:0.5};
     DeathMenu.moneyLostText.position = {x:0.5 * renderer.width, y:renderer.height / 5 - (MainMenu.fontSize * 3 * scalingFactor)};
@@ -214,7 +214,7 @@ SettingsMenu = {
   bButton : function(){SettingsMenu.backButton.click();},
   onInit : function() {
     var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
-    SettingsMenu.controllerText = new PIXI.Text("No controller detected", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+    SettingsMenu.controllerText = new getText("No controller detected", fontSize, { align: 'center' });
     SettingsMenu.controllerText.tint = MainMenu.titleTint;
     SettingsMenu.controllerText.anchor = {x:1,y:0};
     SettingsMenu.controllerText.position = {x:renderer.width * 0.95 - 25,y: renderer.height * 0.05 + 25};
@@ -295,7 +295,7 @@ VolumeMenu = {
   bButton : function(){VolumeMenu.backButton.click();},
   onInit : function() {
     var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
-    VolumeMenu.volumeText = new PIXI.Text((gameModel.masterVolume * 100).toFixed() + "%", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'center' });
+    VolumeMenu.volumeText = getText((gameModel.masterVolume * 100).toFixed() + "%", fontSize, { align: 'center' });
     VolumeMenu.volumeText.tint = MainMenu.titleTint;
     VolumeMenu.volumeText.anchor = {x:0.5,y:0.5};
     VolumeMenu.volumeText.position = {x:0.5 * renderer.width, y:renderer.height / 5 - (MainMenu.fontSize * 2.5 * scalingFactor)};
@@ -374,21 +374,21 @@ InitializeMenu = function (menu) {
 
     var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
 
-    menu.titleText = new PIXI.Text(menu.menuTitle, { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+    menu.titleText = getText(menu.menuTitle, fontSize, { align: 'center' });
     menu.titleText.tint = MainMenu.titleTint;
     menu.titleText.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.05 + 25};
     menu.menuContainer.addChild(menu.titleText);
 
 
     if (menu.backButton) {
-      menu.backButton.text = new PIXI.Text(menu.backButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.back) + ")", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+      menu.backButton.text = getText(menu.backButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.back) + ")", fontSize, { align: 'center' });
       menu.backButton.text.tint = MainMenu.buttonTint;
       menu.backButton.text.anchor = {x:0,y:1};
       menu.backButton.text.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.95 - 25};
       menu.menuContainer.addChild(menu.backButton.text);
     }
     if (menu.showCurrentCredits) {
-      menu.currentCredits = new PIXI.Text(formatMoney(gameModel.p1.credits) + " Credits", {font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center'});
+      menu.currentCredits = getText(formatMoney(gameModel.p1.credits) + " Credits", fontSize, { align: 'center' });
       menu.currentCredits.tint = MainMenu.titleTint;
       menu.currentCredits.anchor = {x: 1, y: 0};
       menu.currentCredits.position = {x: renderer.width * 0.95 - 25, y: renderer.height * 0.05 + 25};
@@ -399,7 +399,7 @@ InitializeMenu = function (menu) {
     menu.menuOptionsContainer = new PIXI.Container();
 
     for (i=0; i< menu.menuOptions.length;i++) {
-      menu.menuOptions[i].text = new PIXI.Text(menu.menuOptions[i].title, { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+      menu.menuOptions[i].text = getText(menu.menuOptions[i].title, fontSize, { align: 'center' });
       if (menu.menuOptions[i].buttonDesc)
         menu.menuOptions[i].text.text = menu.menuOptions[i].title + " (" + ShootrUI.getInputButtonDescription(menu.menuOptions[i].buttonDesc) + ")";
       menu.menuOptions[i].text.tint = MainMenu.buttonTint;
@@ -445,6 +445,9 @@ InitializeMenu = function (menu) {
 
   menu.select = function(button) {
 
+    if (menu.backButton) {
+      menu.backButton.text.tint = MainMenu.buttonTint;
+    }
     for (var i=0; i< menu.menuOptions.length;i++) {
       menu.menuOptions[i].text.tint = MainMenu.buttonTint;
     }
@@ -461,7 +464,7 @@ InitializeMenu = function (menu) {
       menu.descriptionContainer = new PIXI.Container();
       menu.menuContainer.addChild(menu.descriptionContainer);
 
-      var text = new PIXI.Text(button.description, { font: Math.round(MainMenu.fontSize * scalingFactor) + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+      var text = getText(button.description, MainMenu.fontSize * scalingFactor, { align: 'center' });
       text.tint = MainMenu.buttonTint;
       text.anchor = {x:0.5, y:1};
       var descBG = new PIXI.Graphics();
@@ -861,7 +864,7 @@ Modal = {
 
     this.dialogContainer.visible = false;
 
-    this.okButton = {text:new PIXI.Text("Okay", {font: (22 * scalingFactor) + 'px Dosis',	fill: '#FFF',	stroke: "#000",	strokeThickness: 0,	align: 'left'}),value:"ok"};
+    this.okButton = {text:getText("Okay", 22 * scalingFactor, {}), value:"ok"};
     this.okButton.text.position = {x:renderer.width * 0.4 - this.okButton.text.width / 2, y:renderer.height * 0.7 - this.okButton.text.height / 2};
     this.okButton.text.tint = MainMenu.buttonTint;
 
@@ -877,7 +880,7 @@ Modal = {
 
     this.dialogContainer.addChild(this.okButton.text);
 
-    this.cancelButton = {text:new PIXI.Text("Cancel", {font: (22 * scalingFactor) + 'px Dosis',	fill: '#FFF',	stroke: "#000",	strokeThickness: 0,	align: 'left'}),value:"cancel"};
+    this.cancelButton = {text:getText("Cancel", 22 * scalingFactor, {}), value:"cancel"};
     this.cancelButton.text.position = {x:renderer.width * 0.6 - this.okButton.text.width / 2, y:renderer.height * 0.7 - this.okButton.text.height / 2};
     this.cancelButton.text.tint = MainMenu.buttonTint;
 
@@ -897,7 +900,7 @@ Modal = {
   show : function(options) {
     if (options) {
       if (options.text) {
-        var textMessage = new PIXI.Text(options.text, {font: (22 * scalingFactor) + 'px Dosis',	fill: '#FFF',	stroke: "#000",	strokeThickness: 0,	align: 'left'});
+        var textMessage = getText(options.text, 22 * scalingFactor, {});
         textMessage.position = {x:renderer.width * 0.5 - textMessage.width / 2, y:renderer.height * 0.4 - textMessage.height / 2};
         textMessage.tint = MainMenu.buttonTint;
         this.dialogContents.addChild(textMessage);

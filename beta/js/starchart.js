@@ -51,8 +51,7 @@ StarChart = {
       if (StarChart.tradeRouteText.text) {
         StarChart.menuContainer.removeChild(StarChart.tradeRouteText.text);
       }
-      StarChart.tradeRouteText.text = new PIXI.Text(gameModel.history.length + " trade routes cleared\nEarning " + formatMoney(calculateIncome()) + " credits per second" ,
-        { font: (MainMenu.fontSize * scalingFactor) + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+      StarChart.tradeRouteText.text = getText(gameModel.history.length + " trade routes cleared\nEarning " + formatMoney(calculateIncome()) + " credits per second", MainMenu.fontSize * scalingFactor, { align: 'center' });
     	StarChart.tradeRouteText.text.tint = MainMenu.buttonTint;
       StarChart.tradeRouteText.text.anchor = {x:0,y:0};
       StarChart.tradeRouteText.text.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.05};
@@ -62,7 +61,7 @@ StarChart = {
       if (StarChart.currentCredits) {
         StarChart.menuContainer.removeChild(StarChart.currentCredits);
       }
-      StarChart.currentCredits = new PIXI.Text(formatMoney(gameModel.p1.credits) + " Credits", {font: (MainMenu.fontSize * scalingFactor) + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center'});
+      StarChart.currentCredits = getText(formatMoney(gameModel.p1.credits) + " Credits", MainMenu.fontSize * scalingFactor, { align: 'center'});
       StarChart.currentCredits.tint = MainMenu.titleTint;
       StarChart.currentCredits.anchor = {x: 1, y: 0};
       StarChart.currentCredits.position = {x: renderer.width * 0.95 - 25, y: renderer.height * 0.05};
@@ -71,8 +70,7 @@ StarChart = {
       if (StarChart.rangeText) {
         StarChart.menuContainer.removeChild(StarChart.rangeText);
       }
-      StarChart.rangeText = new PIXI.Text("Maximum Range\n" + formatMoney(StarChart.maxDistance) + " light years",
-        { font: (MainMenu.fontSize * scalingFactor) + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+      StarChart.rangeText = getText("Maximum Range\n" + formatMoney(StarChart.maxDistance) + " light years", MainMenu.fontSize * scalingFactor, { align: 'center' });
       StarChart.rangeText.tint = MainMenu.buttonTint;
       StarChart.rangeText.anchor = {x:0.5,y:0};
       StarChart.rangeText.position = {x:renderer.width * 0.5,y: renderer.height * 0.05};
@@ -451,25 +449,25 @@ StarChart.initialize = function () {
 
 	var fontSize = MainMenu.fontSize * scalingFactor;
 
-  StarChart.backButton.text = new PIXI.Text(StarChart.backButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.back) + ")", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+  StarChart.backButton.text = getText(StarChart.backButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.back) + ")", fontSize, { align: 'center' });
 	StarChart.backButton.text.tint = MainMenu.buttonTint;
 
   StarChart.backButton.text.anchor = {x:0,y:1};
   StarChart.backButton.text.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.95 - 25};
 
-  StarChart.launchButton.text = new PIXI.Text(StarChart.launchButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.select) + ")", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+  StarChart.launchButton.text = getText(StarChart.launchButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.select) + ")", fontSize, { align: 'center' });
   StarChart.launchButton.tint = MainMenu.buttonTint;
   StarChart.launchButton.text.anchor = {x:0.5,y:1};
   StarChart.launchButton.text.position = {x:renderer.width * 0.5,y: renderer.height * 0.95 - 25};
 
-	StarChart.fastTravelButton.text = new PIXI.Text(StarChart.fastTravelButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.leftShoulder) + ")", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+	StarChart.fastTravelButton.text = getText(StarChart.fastTravelButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.leftShoulder) + ")", fontSize, { align: 'center' });
   StarChart.fastTravelButton.tint = MainMenu.buttonTint;
   StarChart.fastTravelButton.text.anchor = {x:0.5,y:1};
   StarChart.fastTravelButton.text.position = {x:renderer.width * 0.5,y: renderer.height * 0.95 - 25};
 
   StarChart.Stars.initialize();
 
-  StarChart.starInfo = new PIXI.Text("", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'left' });
+  StarChart.starInfo = getText("", fontSize, { });
 	StarChart.starInfo.tint = MainMenu.buttonTint;
   StarChart.starInfo.position = {x:0,y:0};
   StarChart.starInfo.visible = false;
@@ -516,26 +514,26 @@ StarChart.initialize = function () {
 
 		var fontSize = MainMenu.fontSize * scalingFactor;
 
-		StarChart.backButton.text = new PIXI.Text(StarChart.backButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.back) + ")", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+		StarChart.backButton.text = getText(StarChart.backButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.back) + ")", fontSize, { align: 'center' });
 		StarChart.backButton.text.tint = MainMenu.buttonTint;
 
 		StarChart.backButton.text.anchor = {x:0,y:1};
 		StarChart.backButton.text.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.95 - 25};
 		StarChart.menuContainer.addChild(StarChart.backButton.text);
 
-		StarChart.launchButton.text = new PIXI.Text(StarChart.launchButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.select) + ")", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+		StarChart.launchButton.text = getText(StarChart.launchButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.select) + ")", fontSize, { align: 'center' });
 		StarChart.launchButton.tint = MainMenu.buttonTint;
 		StarChart.launchButton.text.anchor = {x:0.5,y:1};
 		StarChart.launchButton.text.position = {x:renderer.width * 0.5,y: renderer.height * 0.95 - 25};
 		StarChart.menuContainer.addChild(StarChart.launchButton.text);
 
-    StarChart.fastTravelButton.text = new PIXI.Text(StarChart.fastTravelButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.leftShoulder) + ")", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+    StarChart.fastTravelButton.text = getText(StarChart.fastTravelButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.leftShoulder) + ")", fontSize, { align: 'center' });
     StarChart.fastTravelButton.tint = MainMenu.buttonTint;
     StarChart.fastTravelButton.text.anchor = {x:0.5,y:1};
     StarChart.fastTravelButton.text.position = {x:renderer.width * 0.5,y: renderer.height * 0.95 - 25};
     StarChart.menuContainer.addChild(StarChart.fastTravelButton.text);
 
-		StarChart.starInfo = new PIXI.Text("", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'left' });
+		StarChart.starInfo = getText("", fontSize, { });
 		StarChart.starInfo.tint = MainMenu.buttonTint;
 		StarChart.starInfo.position = {x:0,y:0};
 		StarChart.starInfo.visible = false;

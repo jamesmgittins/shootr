@@ -272,3 +272,15 @@ function skewImage(image) {
   }
 	return canvas;
 }
+
+function getText(text, size, options) {
+
+	return new PIXI.Text(text, {
+		font: Math.round(size) + 'px Dosis',
+		fill: options.fill || "#FFF",
+		stroke: options.stroke || "#000",
+		strokeThickness: options.strokeThickness || 0,
+		align: options.align || 'left'
+	});
+	
+}

@@ -74,18 +74,18 @@ Shipyard.initialize = function () {
 
   Shipyard.menuContainer.addChild(Shipyard.menuBackground);
 
-  Shipyard.titleText = new PIXI.Text(Shipyard.menuTitle, { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+  Shipyard.titleText = getText(Shipyard.menuTitle, fontSize, { align: 'center' });
   Shipyard.titleText.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.05 + 25};
   Shipyard.titleText.tint = MainMenu.titleTint;
   Shipyard.menuContainer.addChild(Shipyard.titleText);
 
-  Shipyard.currentCredits = new PIXI.Text(formatMoney(gameModel.p1.credits) + " Credits", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+  Shipyard.currentCredits = getText(formatMoney(gameModel.p1.credits) + " Credits", fontSize, { align: 'center' });
   Shipyard.currentCredits.tint = MainMenu.titleTint;
   Shipyard.currentCredits.anchor = {x:1,y:0};
   Shipyard.currentCredits.position = {x:renderer.width * 0.95 - 25,y: renderer.height * 0.05 + 25};
   Shipyard.menuContainer.addChild(Shipyard.currentCredits);
 
-  Shipyard.backButton.text = new PIXI.Text(Shipyard.backButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.back) + ")", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+  Shipyard.backButton.text = getText(Shipyard.backButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.back) + ")", fontSize, { align: 'center' });
   Shipyard.backButton.text.tint = MainMenu.buttonTint;
   Shipyard.backButton.text.anchor = {x:0,y:1};
   Shipyard.backButton.text.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.95 - 25};
@@ -131,20 +131,18 @@ Shipyard.initialize = function () {
     var fuelRangeString = "Fuel Range: " + ship.range.toFixed(2) + " light years   ( " + (ship.range > gameModel.p1.ship.range ? "+" : "") + (ship.range - gameModel.p1.ship.range).toFixed(2) +  " )";
     var speedString = "Movement Speed: " + Math.round(ship.speed * 100) + "%   ( " + (ship.speed > gameModel.p1.ship.speed ? "+" : "") + Math.round((ship.speed - gameModel.p1.ship.speed) * 100) +  "% )";
 
-    var shipDetails = new PIXI.Text(
-      frontWeaponString + "\n" + turretWeaponString + "\n" + rearWeaponString + "\n" + shieldString + "\n" + fuelRangeString + "\n" + speedString + "\n",
-      { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'left' });
+    var shipDetails = getText(frontWeaponString + "\n" + turretWeaponString + "\n" + rearWeaponString + "\n" + shieldString + "\n" + fuelRangeString + "\n" + speedString + "\n", fontSize, { });
     shipDetails.position = {x:shipBacking.getBounds().x + 5, y:shipBacking.getBounds().y + shipBacking.getBounds().height + 10};
     shipDetails.tint = MainMenu.buttonTint;
     Shipyard.menuContainer.addChild(shipDetails);
 
-    var shipName = new PIXI.Text("Level " + Shipyard.ships[i].level + " - " + Shipyard.ships[i].name, { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'left' });
+    var shipName = getText("Level " + Shipyard.ships[i].level + " - " + Shipyard.ships[i].name, fontSize, { });
     shipName.anchor = anchor = {x:0,y:0.5};
     shipName.tint = MainMenu.titleTint;
     shipName.position = {x:bounds.x + 15, y:bounds.y + (20 * scalingFactor)};
     Shipyard.menuContainer.addChild(shipName);
 
-    var shipPrice = new PIXI.Text(formatMoney(Shipyard.ships[i].price * getBuyPriceModifier())+ " Credits", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'left' });
+    var shipPrice = getText(formatMoney(Shipyard.ships[i].price * getBuyPriceModifier())+ " Credits", fontSize, { });
     shipPrice.anchor = anchor = {x:1,y:0.5};
     shipPrice.tint = Shipyard.ships[i].price * getBuyPriceModifier()> gameModel.p1.credits ? MainMenu.unselectableTint : MainMenu.titleTint;
     shipPrice.position = {x:bounds.x + bounds.width - 15, y:bounds.y + (20 * scalingFactor)};
@@ -154,14 +152,15 @@ Shipyard.initialize = function () {
       title: ship.seed == gameModel.p1.ship.seed && ship.level == gameModel.p1.ship.level ? "Already Owned" : "Buy",
       owned : ship.seed == gameModel.p1.ship.seed && ship.level == gameModel.p1.ship.level, index:i
     };
-    Shipyard.ships[i].buyButton.text = new PIXI.Text(Shipyard.ships[i].buyButton.title, { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 1, align: 'center' });
+    Shipyard.ships[i].buyButton.text = getText(Shipyard.ships[i].buyButton.title, fontSize, { align: 'center' });
     Shipyard.ships[i].buyButton.text.tint = MainMenu.buttonTint;
     Shipyard.ships[i].buyButton.text.anchor = {x:0.5,y:0.5};
     Shipyard.ships[i].buyButton.text.position = {x:bounds.x + bounds.width / 2, y:bounds.y + bounds.height - (20 * scalingFactor)};
     Shipyard.menuContainer.addChild(Shipyard.ships[i].buyButton.text);
 
     if (ship.seed == gameModel.p1.ship.seed && ship.level == gameModel.p1.ship.level) {
-      var soldText = new PIXI.Text("S O L D", { font: (fontSize * 2) + 'px Dosis', fill: '#0D0', stroke: "#000", strokeThickness: 1, align: 'center' });
+      var soldText = getText("S O L D", fontSize * 3, { stroke : "#000", strokeThickness : 5, align: 'center' });
+      soldText.tint = 0xFF0000;
       soldText.anchor = {x:0.5,y:0.5};
       soldText.rotation = -0.3;
       soldText.position = sprite.position;

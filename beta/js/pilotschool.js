@@ -42,29 +42,29 @@ PilotSchool.initialize = function () {
 
   PilotSchool.menuContainer.addChild(PilotSchool.menuBackground);
 
-  PilotSchool.titleText = new PIXI.Text(PilotSchool.menuTitle, { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+  PilotSchool.titleText = getText(PilotSchool.menuTitle, fontSize, { align: 'center' });
   PilotSchool.titleText.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.05 + 25};
   PilotSchool.titleText.tint = MainMenu.titleTint;
   PilotSchool.menuContainer.addChild(PilotSchool.titleText);
 
-  PilotSchool.currentCredits = new PIXI.Text(formatMoney(gameModel.p1.credits) + " Credits", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+  PilotSchool.currentCredits = getText(formatMoney(gameModel.p1.credits) + " Credits", fontSize, { align: 'center' });
   PilotSchool.currentCredits.tint = MainMenu.titleTint;
   PilotSchool.currentCredits.anchor = {x:1,y:0};
   PilotSchool.currentCredits.position = {x:renderer.width * 0.95 - 25,y: renderer.height * 0.05 + 25};
   PilotSchool.menuContainer.addChild(PilotSchool.currentCredits);
 
-  PilotSchool.backButton.text = new PIXI.Text(PilotSchool.backButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.back) + ")", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+  PilotSchool.backButton.text = getText(PilotSchool.backButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.back) + ")", fontSize, { align: 'center' });
   PilotSchool.backButton.text.tint = MainMenu.buttonTint;
   PilotSchool.backButton.text.anchor = {x:0,y:1};
   PilotSchool.backButton.text.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.95 - 25};
   PilotSchool.menuContainer.addChild(PilotSchool.backButton.text);
 
-  PilotSchool.perkTitle = new PIXI.Text("Perks", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+  PilotSchool.perkTitle = getText("Perks", fontSize, { align: 'center' });
   PilotSchool.perkTitle.position = {x:renderer.width * 0.3,y: renderer.height * 0.05 + 25};
   PilotSchool.perkTitle.tint = MainMenu.titleTint;
   PilotSchool.menuContainer.addChild(PilotSchool.perkTitle);
 
-  PilotSchool.trainingTitle = new PIXI.Text("Training", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'center' });
+  PilotSchool.trainingTitle = getText("Training", fontSize, { align: 'center' });
   PilotSchool.trainingTitle.position = {x:renderer.width * 0.7,y: renderer.height * 0.05 + 25};
   PilotSchool.trainingTitle.tint = MainMenu.titleTint;
   PilotSchool.menuContainer.addChild(PilotSchool.trainingTitle);
@@ -74,10 +74,10 @@ PilotSchool.initialize = function () {
   for (i = 0; i < pilotUpgrades.length; i++) {
     var upgrade = new PIXI.Container();
 
-    var titleText = new PIXI.Text(pilotUpgrades[i].name, { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'left' });
+    var titleText = getText(pilotUpgrades[i].name, fontSize, { });
     upgrade.addChild(titleText);
 
-    var descText = new PIXI.Text(pilotUpgrades[i].description, { font: Math.round((MainMenu.fontSize - 4) * scalingFactor) + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'left' });
+    var descText = getText(pilotUpgrades[i].description, (MainMenu.fontSize - 4) * scalingFactor, { });
     descText.position.y = titleText.getBounds().height;
     upgrade.addChild(descText);
 
@@ -85,7 +85,7 @@ PilotSchool.initialize = function () {
 
     var cost = pilotUpgrades[i].basePrice * Math.pow(pilotUpgrades[i].levelFactor, currentRank);
     var price = formatMoney(cost * getBuyPriceModifier());
-    var priceText = new PIXI.Text(price + " Credits", { font: fontSize + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'right' });
+    var priceText = getText(price + " Credits", fontSize, { align: 'right' });
     priceText.anchor = {x:1,y:0};
     priceText.position.x = renderer.width * 0.28;
     if (cost * getBuyPriceModifier() > gameModel.p1.credits) {
@@ -95,13 +95,13 @@ PilotSchool.initialize = function () {
     }
     upgrade.addChild(priceText);
 
-    var rankText = new PIXI.Text("Current Rank: " + currentRank, { font: Math.round((MainMenu.fontSize - 4) * scalingFactor) + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'right' });
+    var rankText = getText("Current Rank: " + currentRank, (MainMenu.fontSize - 4) * scalingFactor, { align: 'right' });
     rankText.anchor = {x:1,y:0};
     rankText.position.y = titleText.getBounds().height;
     rankText.position.x = renderer.width * 0.28;
     upgrade.addChild(rankText);
 
-    var valueText = new PIXI.Text("+" + currentRank + "%", { font: (fontSize * 2) + 'px Dosis', fill: '#FFF', stroke: "#000", strokeThickness: 0, align: 'right' });
+    var valueText = getText("+" + currentRank + "%", fontSize * 2, { align: 'right' });
     valueText.anchor = {x:0,y:0.5};
     valueText.position.y = upgrade.getBounds().height / 2;
     valueText.position.x = upgrade.getBounds().width + 15 * scalingFactor;
