@@ -21,6 +21,9 @@ MissileLauncher = {
 
 	updateBullets : function(timeDiff, spritePool, missileTrails) {
 
+    if (spritePool.destroyed)
+			return;
+
     for (var missileCount = 0; missileCount < spritePool.sprites.length; missileCount++) {
 			var sprite = spritePool.sprites[missileCount];
 
@@ -187,6 +190,10 @@ MissileLauncher = {
         })(), container),
 
         update:function(timeDiff) {
+
+          if (this.spritePool.destroyed)
+      			return;
+
           for (var i = 0; i < this.spritePool.sprites.length; i++) {
             var sprite = this.spritePool.sprites[i];
             if (sprite.visible) {
@@ -220,6 +227,10 @@ MissileLauncher = {
           part.xSpeed = (-40 + Math.random() * 80) * scalingFactor;
           part.ySpeed = (-40 + Math.random() * 80) * scalingFactor;
         }
+      },
+      destroy : function() {
+        this.missileTrails.spritePool.destroy();
+        this.spritePool.destroy(true);
       }
 		};
   }

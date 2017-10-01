@@ -8,7 +8,7 @@ Boss = {
   inPlay:1,
   lastBullet:0,
   bulletsLeft:0,
-  maxBulletsPerShot:20,
+  maxBulletsPerShot:15,
   enemyShip : true,
   damage : EnemyShips.damageEnemyShip,
 	destroy : EnemyShips.destroy,
@@ -44,37 +44,53 @@ Boss.randomLocation = function() {
   if (!gameModel.bossesDefeated)
     gameModel.bossesDefeated = 0;
 
-  Math.seedrandom(new Date().getTime());
+
 
   var currentLevel = Boss.currentLevel();
-  var xLocation = 0;
-  var yLocation = 0;
+  var maxDistanceToPlot = Math.round(Constants.starDistancePerLevel * currentLevel);
+  var acceptableStars = [];
+  var star;
 
-  if (Math.random() > 0.5) {
-    xLocation = Math.random() > 0.5 ? currentLevel : currentLevel * -1;
-    yLocation = Math.round(-currentLevel + Math.random() * currentLevel);
-  } else {
-    yLocation = Math.random() > 0.5 ? currentLevel : currentLevel * -1;
-    xLocation = Math.round(-currentLevel + Math.random() * currentLevel);
+  for (var i = -maxDistanceToPlot; i <= maxDistanceToPlot; i++) {
+    for (var j = -maxDistanceToPlot; j <= maxDistanceToPlot; j++) {
+      star = StarChart.generateStar(i,j);
+      if (star.exists && calculateAdjustedStarLevel(star.level) === currentLevel)
+        acceptableStars.push(star);
+    }
   }
+  Math.seedrandom(new Date().getTime());
+  var chosenStar = acceptableStars[Math.floor(Math.random() * acceptableStars.length)];
 
-  gameModel.bossPosition = {x:xLocation, y:yLocation};
+  gameModel.bossPosition = {x:chosenStar.x, y:chosenStar.y};
 };
 
 Boss.nudgeLocation = function() {
   var currentLevel = Constants.levelsPerBoss * (gameModel.bossesDefeated + 1);
 
-  var xLocation = gameModel.bossPosition.x + (Math.random() > 0.5 ? 1 : -1);
-  var yLocation = gameModel.bossPosition.y + (Math.random() > 0.5 ? 1 : -1);
+  var xLocation, yLocation;
+  var locationFound = false;
 
-  if (xLocation < -currentLevel)
-    xLocation = -currentLevel;
-  if (xLocation > currentLevel)
-    xLocation = currentLevel;
-  if (yLocation < -currentLevel)
-    yLocation = -currentLevel;
-  if (yLocation > currentLevel)
-    yLocation = currentLevel;
+  while (locationFound === false) {
+
+    xLocation = gameModel.bossPosition.x + (Math.random() > 0.5 ? 1 : -1);
+    yLocation = gameModel.bossPosition.y + (Math.random() > 0.5 ? 1 : -1);
+
+    if (xLocation < -currentLevel)
+      xLocation = -currentLevel;
+    if (xLocation > currentLevel)
+      xLocation = currentLevel;
+    if (yLocation < -currentLevel)
+      yLocation = -currentLevel;
+    if (yLocation > currentLevel)
+      yLocation = currentLevel;
+
+    if (StarChart.generateStar(xLocation, yLocation).exists) {
+      locationFound = true;
+    } else {
+      console.log("star does not exist, trying new location");
+    }
+  }
+
 
   gameModel.bossPosition = {x:xLocation, y:yLocation};
 
@@ -93,6 +109,7 @@ Boss.update = function(timeDiff) {
     Boss.maxSpeed = 75;
     Boss.patternChanged = false;
     Boss.damage = EnemyShips.damageEnemyShip;
+    Boss.bulletHell = Math.random() > 0.6;
     var seed = Date.now();
 
     Boss.texture = glowTexture(PIXI.Texture.fromCanvas(Ships.shipArt(size, seed, this.colors)));
@@ -122,6 +139,7 @@ Boss.update = function(timeDiff) {
     Boss.initialized = true;
     Boss.collisionAllowed = false;
     Boss.shield.init();
+    Enemies.enemiesSpawned++;
   }
 
   Stars.shipTrails.updateShip(Boss, timeDiff);
@@ -163,20 +181,31 @@ Boss.update = function(timeDiff) {
     EnemyShips.checkForPlayerCollision(Boss, timeDiff);
     Boss.shield.update();
 
-    if (Boss.lastBullet >= 1.5 && Math.random() > 0.9 || Boss.bulletsLeft > 0) {
-      if (Boss.bulletsLeft <= 0) {
-        Boss.bulletsLeft = Math.max(5,Math.round(Math.random() * Boss.maxBulletsPerShot));
-      }
-      if (Boss.lastBullet >= 0.15) {
-        if (Math.random() > 0.9) {
-          Bullets.enemyBullets.newBulletFan(Boss, 5);
-        } else {
-          Bullets.enemyBullets.newEnemyBullet(Boss);
+    if (Boss.bulletHell) {
+      if (Boss.lastBullet >= 3 && Math.random() > 0.9 || Boss.bulletsLeft > 0) {
+        if (Boss.bulletsLeft <= 0) {
+          Boss.bulletsLeft = Math.max(5,Math.round(Math.random() * (Boss.maxBulletsPerShot - 5)));
         }
-        Boss.lastBullet = 0;
-        Boss.bulletsLeft--;
+        if (Boss.lastBullet >= 0.60) {
+          Bullets.enemyBullets.newBulletFan(Boss, 5 + Math.round(Math.random() * 3));
+          Boss.lastBullet = 0;
+          Boss.bulletsLeft--;
+        }
+      }
+    } else {
+      if (Boss.lastBullet >= 1.5 && Math.random() > 0.9 || Boss.bulletsLeft > 0) {
+        if (Boss.bulletsLeft <= 0) {
+          Boss.bulletsLeft = Math.max(5,Math.round(Math.random() * Boss.maxBulletsPerShot));
+        }
+        if (Boss.lastBullet >= 0.15) {
+          Bullets.enemyBullets.newEnemyBullet(Boss);
+          Boss.lastBullet = 0;
+          Boss.bulletsLeft--;
+        }
       }
     }
+
+
     Boss.lastBullet+=timeDiff;
 
     if (!Boss.patternChanged && Boss.health < Boss.maxHealth / 2) {

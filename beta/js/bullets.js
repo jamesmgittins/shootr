@@ -47,9 +47,8 @@ Bullets.splashDamage = {
 };
 
 
-
 Bullets.blasts = {
-	texture: (function() {
+	texture: function() {
 		var blast = document.createElement('canvas');
 		blast.width = 32;
 		blast.height = 32;
@@ -65,10 +64,10 @@ Bullets.blasts = {
 		blastCtx.fillRect(0, 0, 32, 32);
 
 		return PIXI.Texture.fromCanvas(blast);
-	}()),
+	},
 	getSpritePool : function() {
 		if (!this.spritePool) {
-			this.spritePool = SpritePool.create(this.texture, explosionContainer);
+			this.spritePool = SpritePool.create(Bullets.blasts.texture(), explosionContainer);
 		}
 		return this.spritePool;
 	},
@@ -103,7 +102,7 @@ Bullets.blasts = {
 Bullets.enemyRails = {
 	getSpritePool:function() {
 		if (!this.spritePool) {
-			this.spritePool = SpritePool.create(Stars.stars.texture, bulletContainer);
+			this.spritePool = SpritePool.create(Stars.stars.getTexture(), bulletContainer);
 		}
 		return this.spritePool;
 	},
@@ -180,6 +179,19 @@ Bullets.enemyBullets = {
 	destroy : function() {
 		this.getSpritePool().destroy();
 		this.spritePool = undefined;
+
+		if (Bullets.explosionBits.spritePool) {
+			Bullets.explosionBits.spritePool.destroy();
+			Bullets.explosionBits.spritePool = undefined;
+		}
+		if (Bullets.enemyRails.spritePool) {
+			Bullets.enemyRails.spritePool.destroy();
+			Bullets.enemyRails.spritePool = undefined;
+		}
+		if (Bullets.blasts.spritePool) {
+			Bullets.blasts.spritePool.destroy();
+			Bullets.blasts.spritePool = undefined;
+		}
 	},
 	enemyShotSpeed: 100,
 	enemyShotStrength: 1,
@@ -193,7 +205,7 @@ Bullets.enemyBullets = {
 		if (ship.xLoc < 0 || ship.xLoc > canvasWidth || ship.yLoc < 0 || ship.yLoc > canvasHeight)
 			return;
 
-		var bullet = this.spritePool.nextSprite();
+		var bullet = this.getSpritePool().nextSprite();
 
 		bullet.xLoc = ship.xLoc;
 		bullet.yLoc = ship.yLoc + 16;
@@ -301,7 +313,7 @@ Bullets.explosionBits = {
 	bitsPerExplosion: 10,
 	getSpritePool : function() {
 		if (!this.spritePool) {
-			this.spritePool = SpritePool.create(Stars.stars.texture, explosionContainer);
+			this.spritePool = SpritePool.create(Stars.stars.getTexture(), explosionContainer);
 		}
 		return this.spritePool;
 	},

@@ -175,7 +175,7 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
     PlayerShip.playerShip.container.rotation = PlayerShip.playerShip.rotation;
 
 	if (PlayerShip.playerShip.rolling > 0.3) {
-		Stars.shipTrails.updatePlayerShip(PlayerShip.playerShip,timeDiff);
+		Stars.playerShipTrails.updatePlayerShip(PlayerShip.playerShip,timeDiff);
 		PlayerShip.playerShip.engine1.alpha = 0.5 + Math.random() * 0.5;
 		PlayerShip.playerShip.engine2.alpha = 0.5 + Math.random() * 0.5;
 	}
@@ -189,6 +189,7 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
 
 
 PlayerShip.damagePlayerShip = function (playerShip, damage) {
+	playerShip.timesDamaged++;
 	playerShip.currShield -= damage * getDamageReduction();
 	playerShip.lastDmg = 0;
 	Sounds.damage.play(PlayerShip.playerShip.xLoc);
@@ -292,7 +293,7 @@ PlayerShip.reset = function() {
 		PlayerShip.playerShip.engine2.position.x = 12 * scalingFactor;
 		PlayerShip.playerShip.engine1.position.x = -12 * scalingFactor;
 	}
-
+	PlayerShip.playerShip.timesDamaged = 0;
 	PlayerShip.playerShip.xLoc = canvasWidth / 2;
 	PlayerShip.playerShip.yLoc = canvasHeight - (canvasHeight / 6);
 	PlayerShip.playerShip.inPlay = 1;

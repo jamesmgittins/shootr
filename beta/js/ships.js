@@ -301,7 +301,7 @@ Ships.fragments = {
 	bitsPerExplosion: 12,
 	getSpritePool:function() {
 		if (!this.spritePool) {
-			this.spritePool = SpritePool.create(Stars.stars.texture, starContainer);
+			this.spritePool = SpritePool.create(Stars.stars.getTexture(), starContainer);
 		}
 		return this.spritePool;
 	},
@@ -350,41 +350,32 @@ Ships.explosionBits = {
 	discardedSprites: [],
 	initNumber : 256,
 	sprite:[],
+	getSpritePool : function() {
+		if (!this.spritePool) {
+			this.spritePool = SpritePool.create(Stars.stars.getTexture(), starContainer);
+		}
+		return this.spritePool;
+	},
 	update:function(timeDiff){
-		for (var i = 0; i < Ships.explosionBits.sprite.length; i++) {
-			if (Ships.explosionBits.sprite[i].visible) {
-				Ships.explosionBits.sprite[i].alpha -= 0.7 * timeDiff;
-				if (Ships.explosionBits.sprite[i].alpha <= 0) {
-					Ships.explosionBits.sprite[i].visible = false;
-					Ships.explosionBits.discardedSprites.push(Ships.explosionBits.sprite[i]);
-				} else {
-					Ships.explosionBits.sprite[i].position.x += Ships.explosionBits.sprite[i].xSpeed * timeDiff;
-					Ships.explosionBits.sprite[i].position.y += Ships.explosionBits.sprite[i].ySpeed * timeDiff;
-
+		if (this.spritePool) {
+			for (var i = 0; i < this.spritePool.sprites.length; i++) {
+				var sprite = this.spritePool.sprites[i];
+				if (sprite.visible) {
+					sprite.alpha -= 0.7 * timeDiff;
+					if (sprite.alpha <= 0) {
+						sprite.visible = false;
+						this.spritePool.discardSprite(sprite);
+					} else {
+						sprite.position.x += sprite.xSpeed * timeDiff;
+						sprite.position.y += sprite.ySpeed * timeDiff;
+					}
 				}
 			}
 		}
 	},
-	initialize:function(){
-		Ships.explosionBits.sprites = new PIXI.Container();
-		starContainer.addChild(Ships.explosionBits.sprites);
-		for (var i = 0; i < Ships.explosionBits.initNumber; i++) {
-			var sprite = new PIXI.Sprite(Stars.stars.texture);
-			Ships.explosionBits.sprite.push(sprite);
-			Ships.explosionBits.sprites.addChild(sprite);
-		}
-	},
 	newExplosionBit: function (xLoc, yLoc, colors, size) {
-		var sprite;
 
-		if (Ships.explosionBits.discardedSprites.length > 0) {
-			sprite = Ships.explosionBits.discardedSprites.pop();
-			sprite.visible = true;
-		} else {
-			sprite = new PIXI.Sprite(Stars.stars.texture);
-			Ships.explosionBits.sprite.push(sprite);
-			Ships.explosionBits.sprites.addChild(sprite);
-		}
+		var sprite = this.getSpritePool().nextSprite();
 
 		sprite.visible = true;
 		sprite.alpha = 1;

@@ -168,15 +168,34 @@ SpritePool = {
 				}
 			},
 			changeTexture : function(texture) {
+				// this.destroyTextures();
 				this.texture = texture;
 				for (var i = 0; i < this.sprites.length; i++) {
 					this.sprites[i].texture = texture;
 					this.sprites[i].anchor = {x:0.5,y:0.5};
 				}
 			},
-			destroy : function() {
+			// destroyTextures : function() {
+			// 	if (this.texture) {
+			// 		if (Array.isArray(this.texture)) {
+			// 			this.texture.forEach(function(texture){
+			// 				if (texture) {
+			// 					texture.destroy(true);
+			// 				}
+			// 			});
+			// 		} else {
+			// 			if (this.texture.baseTexture)
+			// 				var baseTexture = this.texture.baseTexture;
+			// 			this.texture.destroy(true);
+			// 		}
+			// 	}
+			// },
+			destroy : function(leaveTextures) {
 				if (!this.destroyed) {
-					container.removeChild(this.container);
+					// container.removeChild(this.container);
+					this.container.destroy({children:true, texture:!leaveTextures, baseTexture:!leaveTextures});
+					// if (!leaveTextures)
+					// 	this.destroyTextures();
 				}
 				this.destroyed = true;
 			}
@@ -185,8 +204,6 @@ SpritePool = {
 };
 
 function glowTexture(texture, options) {
-
-
 
 	var resize = options && options.resize ? options.resize : 1;
 	var width = texture.width * resize;
@@ -236,8 +253,10 @@ function glowTexture(texture, options) {
 	renderer.render(container, glowTexture);
 
 	// return new PIXI.Texture(glowTexture, new PIXI.Rectangle(width / 2 - 2, height / 2 - 2, width + 4, height + 4));
-	return new PIXI.Texture(glowTexture);
-	// return glowTexture;
+	var returnTexture = new PIXI.Texture(glowTexture);
+	returnTexture.glowTexture = glowTexture;
+	// texture.destroy(true);
+	return returnTexture;
 }
 
 function recursiveApplyToChildren(container, apply) {
@@ -252,7 +271,7 @@ function recursiveApplyToChildren(container, apply) {
 function removeAllFromContainer(container) {
 	for (var i = container.children.length - 1; i >= 0; i--) {
 		container.removeChild(container.children[i]);
-		//item.destroy();
+		container.children[i].destroy(true);
 	}
 }
 
@@ -272,15 +291,15 @@ function skewImage(image) {
   }
 	return canvas;
 }
-
-function getText(text, size, options) {
+function getText(text, size, options, destroyLater) {
 
 	return new PIXI.Text(text, {
-		font: Math.round(size) + 'px Dosis',
+		fontFamily: 'Dosis',
+		fontSize : Math.round(size),
 		fill: options.fill || "#FFF",
 		stroke: options.stroke || "#000",
 		strokeThickness: options.strokeThickness || 0,
 		align: options.align || 'left'
 	});
-	
+
 }

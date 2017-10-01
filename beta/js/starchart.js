@@ -10,6 +10,7 @@ StarChart = {
     return true;
   },
   launchButton :{title:"Launch Ship", click:function(){
+    clearTextureCache();
     gameModel.targetSystem = {x:StarChart.selectedStar.x,y:StarChart.selectedStar.y};
     changeLevel(StarChart.generateStar(StarChart.selectedStar.x, StarChart.selectedStar.y).level);
     changeState(states.running);
@@ -25,9 +26,9 @@ StarChart = {
         ok:function(){
           StarChart.fastTravelButton.text.visible = false;
           gameModel.currentSystem = {x:StarChart.selectedStar.x,y:StarChart.selectedStar.y};
-          var level = Math.max(1,Math.abs(StarChart.selectedStar.x),Math.abs(StarChart.selectedStar.y));
+          // var level = Math.max(1,Math.abs(StarChart.selectedStar.x),Math.abs(StarChart.selectedStar.y));
           gameModel.p1.credits -= StarChart.fastTravelCost;
-          changeLevel(level);
+          changeLevel(StarChart.selectedStar.level);
       		StarChart.currentPosition = {x:gameModel.currentSystem.x*-1,y:gameModel.currentSystem.y*-1};
           StarChart.currentStar = StarChart.generateStar(gameModel.currentSystem.x, gameModel.currentSystem.y);
           StarChart.deselectStar();
@@ -37,8 +38,8 @@ StarChart = {
       } else {
         StarChart.fastTravelButton.text.visible = false;
         gameModel.currentSystem = {x:StarChart.selectedStar.x,y:StarChart.selectedStar.y};
-        var level = Math.max(1,Math.abs(StarChart.selectedStar.x),Math.abs(StarChart.selectedStar.y));
-        changeLevel(level);
+        // var level = Math.max(1,Math.abs(StarChart.selectedStar.x),Math.abs(StarChart.selectedStar.y));
+        changeLevel(StarChart.selectedStar.level);
     		StarChart.currentPosition = {x:gameModel.currentSystem.x*-1,y:gameModel.currentSystem.y*-1};
         StarChart.currentStar = StarChart.generateStar(gameModel.currentSystem.x, gameModel.currentSystem.y);
         StarChart.deselectStar();
@@ -152,28 +153,66 @@ StarChart = {
   }
 };
 
+StarChart.closestHistoryStar = function(x, y, xWobble, yWobble) {
+  var closestStarSoFar = {x:0, y:0, distance:magnitude(x, y)};
+  var distance = 0;
+  for (var i = 0; i < gameModel.historyWhenBossDefeated.length; i++) {
+    distance = distanceBetweenPoints(x + xWobble, y + yWobble, gameModel.historyWhenBossDefeated[i].start.x, gameModel.historyWhenBossDefeated[i].start.y);
+    if (distance < closestStarSoFar.distance) {
+      closestStarSoFar.distance = distance;
+      closestStarSoFar.x = gameModel.history[i].start.x;
+      closestStarSoFar.y = gameModel.history[i].start.y;
+    }
+    distance = distanceBetweenPoints(x + xWobble, y + yWobble, gameModel.historyWhenBossDefeated[i].end.x, gameModel.historyWhenBossDefeated[i].end.y);
+    if (distance < closestStarSoFar.distance) {
+      closestStarSoFar.distance = distance;
+      closestStarSoFar.x = gameModel.history[i].end.x;
+      closestStarSoFar.y = gameModel.history[i].end.y;
+    }
+  }
+  return closestStarSoFar;
+};
+
 StarChart.generateStar = function(x, y) {
+
   var seed = (56788 - x) * (y === 0 ? 13370: y);
   Math.seedrandom(seed);
-	var scale = 0.35 + Math.random() * 0.2 + (Math.random() > 0.9 ? Math.random() * 0.9 : 0);
-  return {
-    x:x,
-    y:y,
-    seed:seed,
-    tint:Math.random() > 0.7 ? {r:255,g:Math.random() * 255,b:Math.random() * 16} : // reddish stars
-					Math.random() > 0.8 ? {r:200 + Math.random() * 55,g:255,b:Math.random() * 16} : // yellowish stars
-					Math.random() > 0.9 ? {r:200 + Math.random() * 10,g:200 + Math.random() * 10,b:255} : // blueish stars
-					{r:200 + Math.random() * 55,g:200 + Math.random() * 55,b:200 + Math.random() * 55}, // white stars
-    xWobble:-0.4 + Math.random() * 0.8,
-    yWobble:-0.4 + Math.random() * 0.8,
-// 		xWobble:0,
-//    yWobble:0,
-    name:StarNames.createName(),
-		scale:scale,
-		exists:true,
-    asteroids:Math.random() > 0.9,
-		level:starLevelModify(Math.max(1,Math.abs(x),Math.abs(y)))
-  };
+  var origin = x === 0 && y === 0;
+  var starExists = origin || Math.random() > 0.6;
+
+  if (starExists) {
+    var scale = 0.6 + Math.random() * 0.5 + (Math.random() > 0.9 ? Math.random() * 1.5 : 0);
+    var tint = Math.random() > 0.7 ? {r:255,g:Math.random() * 255,b:Math.random() * 16} : // reddish stars
+          Math.random() > 0.8 ? {r:200 + Math.random() * 55,g:255,b:Math.random() * 16} : // yellowish stars
+          Math.random() > 0.9 ? {r:200 + Math.random() * 10,g:200 + Math.random() * 10,b:255} : // blueish stars
+          {r:200 + Math.random() * 55,g:200 + Math.random() * 55,b:200 + Math.random() * 55}; // white stars
+
+    var xWobble = origin ? 0 : -0.4 + Math.random() * 0.8;
+    var yWobble = origin ? 0 : -0.4 + Math.random() * 0.8;
+    var closestHistoryStar = StarChart.closestHistoryStar(x, y, xWobble, yWobble);
+
+    return {
+      x:x,
+      y:y,
+      seed:seed,
+      yWobble:yWobble,
+      xWobble:xWobble,
+      tint:tint,
+      name:StarNames.createName(),
+  		scale:scale,
+  		exists:true,
+      asteroids:Math.random() > 0.9,
+  		level:Math.max(
+              1,
+              Math.ceil(closestHistoryStar.distance / Constants.starDistancePerLevel)
+            )
+    };
+  } else {
+    return { // return a star that doesn't exist
+      x:x, y:y, tint:{r:255,g:255,b:255}, xWobble:0, yWobble:0, name:"Nothing", scale:1, seed:seed,	exists:false, asteroids:false, level:1
+    };
+  }
+
 };
 
 StarChart.locator = {
@@ -455,6 +494,12 @@ StarChart.initialize = function () {
   StarChart.backButton.text.anchor = {x:0,y:1};
   StarChart.backButton.text.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.95 - 25};
 
+  StarChart.levelRestriction = getText("You cannot travel to this system until the current boss is defeated", fontSize, { align: 'center' });
+  StarChart.levelRestriction.tint = MainMenu.unselectableTint;
+  StarChart.levelRestriction.anchor = {x:0.5,y:1};
+  StarChart.levelRestriction.position = {x:renderer.width * 0.5,y: renderer.height * 0.95 - 25};
+  StarChart.levelRestriction.visible=false;
+
   StarChart.launchButton.text = getText(StarChart.launchButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.select) + ")", fontSize, { align: 'center' });
   StarChart.launchButton.tint = MainMenu.buttonTint;
   StarChart.launchButton.text.anchor = {x:0.5,y:1};
@@ -478,6 +523,7 @@ StarChart.initialize = function () {
   StarChart.menuContainer.addChild(StarChart.backButton.text);
   StarChart.menuContainer.addChild(StarChart.fastTravelButton.text);
   StarChart.menuContainer.addChild(StarChart.launchButton.text);
+  StarChart.menuContainer.addChild(StarChart.levelRestriction);
 
 	var blast = document.createElement('canvas');
 	blast.width = 31;
@@ -520,6 +566,13 @@ StarChart.initialize = function () {
 		StarChart.backButton.text.anchor = {x:0,y:1};
 		StarChart.backButton.text.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.95 - 25};
 		StarChart.menuContainer.addChild(StarChart.backButton.text);
+
+    StarChart.levelRestriction = getText("You cannot travel to this system until the current boss is defeated", fontSize, { align: 'center' });
+    StarChart.levelRestriction.tint = MainMenu.unselectableTint;
+    StarChart.levelRestriction.anchor = {x:0.5,y:1};
+    StarChart.levelRestriction.position = {x:renderer.width * 0.5,y: renderer.height * 0.95 - 25};
+    StarChart.levelRestriction.visible=false;
+    StarChart.menuContainer.addChild(StarChart.levelRestriction);
 
 		StarChart.launchButton.text = getText(StarChart.launchButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.select) + ")", fontSize, { align: 'center' });
 		StarChart.launchButton.tint = MainMenu.buttonTint;
@@ -615,6 +668,7 @@ StarChart.initialize = function () {
     StarChart.currentPosition = {x:gameModel.currentSystem.x*-1,y:gameModel.currentSystem.y*-1};
     StarChart.currentStar = StarChart.generateStar(gameModel.currentSystem.x, gameModel.currentSystem.y);
 		StarChart.centerStar = StarChart.currentStar;
+    StarChart.origin = StarChart.generateStar(0, 0);
 
     for (var i = gameModel.currentSystem.x - StarChart.distanceToPlotX; i <= gameModel.currentSystem.x + StarChart.distanceToPlotX; i++) {
       StarChart.chart[i] = [];
@@ -664,6 +718,12 @@ StarChart.initialize = function () {
     StarChart.rangeCircle = new PIXI.Graphics();
     StarChart.menuContainer.addChild(StarChart.rangeCircle);
 
+    if (StarChart.levelCircle)
+      StarChart.menuContainer.removeChild(StarChart.levelCircle);
+
+    StarChart.levelCircle = new PIXI.Graphics();
+    StarChart.menuContainer.addChild(StarChart.levelCircle);
+
 		StarChart.starField.resetPositions();
 
     StarChart.menuContainer.removeChild(StarChart.starInfo);
@@ -696,7 +756,8 @@ StarChart.initialize = function () {
         var star = StarChart.chart[i][j];
         if (star.sprite) {
           var extraSpace = 32;
-          if (cursorPosition.x >= star.sprite.getBounds().x - extraSpace && cursorPosition.x - star.sprite.getBounds().x <= star.sprite.getBounds().width + extraSpace &&
+          if (star.sprite.visible &&
+            cursorPosition.x >= star.sprite.getBounds().x - extraSpace && cursorPosition.x - star.sprite.getBounds().x <= star.sprite.getBounds().width + extraSpace &&
             cursorPosition.y >= star.sprite.getBounds().y - extraSpace && cursorPosition.y - star.sprite.getBounds().y <= star.sprite.getBounds().height + extraSpace) {
             StarChart.mouseOverGraphic.visible=true;
             StarChart.mouseOverGraphic.position.x = star.sprite.position.x + 2 - StarChart.mouseOverGraphic.getBounds().width / 2;
@@ -711,7 +772,7 @@ StarChart.initialize = function () {
   };
 
   StarChart.selectStar = function(star) {
-    if (StarChart.selectedStar && StarChart.selectedStar.seed == star.seed)
+    if ((star.sprite && !star.sprite.visible) || (StarChart.selectedStar && StarChart.selectedStar.seed == star.seed))
       return;
 
     StarChart.selectedStar = star;
@@ -722,47 +783,57 @@ StarChart.initialize = function () {
     StarChart.starInfo.visible = true;
     StarChart.starInfo.charCounter = 0;
 
-    if (StarChart.selectedStarDistance() < StarChart.maxDistance && StarChart.selectedStarDistance() > 0) {
-      StarChart.launchButton.text.visible=true;
-      StarChart.selectGraphic.tint = MainMenu.buttonTint;
-
-    } else {
-      StarChart.launchButton.text.visible=false;
-      StarChart.selectGraphic.tint = MainMenu.unselectableTint;
-    }
-		StarChart.launchButton.text.position = {x:renderer.width * 0.5,y: renderer.height * 0.95 - 25};
-
-		StarChart.fastTravelButton.text.visible = false;
-    StarChart.fastTravelCost = 0;
-
-    if (StarChart.selectedStarDistance() > 0) {
-      gameModel.history.forEach(function(hist){
-  			if ((hist.start.x == star.x && hist.start.y == star.y) || (hist.end.x == star.x && hist.end.y == star.y)) {
-  				StarChart.fastTravelButton.text.visible = true;
-  			}
-  		});
-
-      StarChart.fastTravelButton.text.text = StarChart.fastTravelButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.leftShoulder) + ")";
-
-      if (StarChart.selectedStarDistance() > StarChart.maxDistance && !StarChart.fastTravelButton.text.visible) {
-        StarChart.fastTravelCost =  StarChart.selectedStarDistance() * 234 * Math.pow(Constants.starJumpScaling, calculateAdjustedStarLevel(star.level)) * getBuyPriceModifier();
-        StarChart.fastTravelButton.text.text = "Buy spacewarp to this system for " + formatMoney(StarChart.fastTravelCost) + " Credits (" + ShootrUI.getInputButtonDescription(buttonTypes.leftShoulder) + ")";
-        StarChart.fastTravelButton.text.visible = true;
-      }
-    }
-
-    if (gameModel.bossPosition && gameModel.bossPosition.x == StarChart.selectedStar.x && gameModel.bossPosition.y == StarChart.selectedStar.y) {
+    if (calculateAdjustedStarLevel(star.level) > maxLevelAllowed()) {
+      StarChart.levelRestriction.visible=true;
       StarChart.fastTravelButton.text.visible = false;
-    }
-
-
-    if (StarChart.launchButton.text.visible && StarChart.fastTravelButton.text.visible) {
-      StarChart.launchButton.text.position = {x:renderer.width * 0.4,y: renderer.height * 0.95 - 25};
-      StarChart.fastTravelButton.text.position = {x:renderer.width * 0.6,y: renderer.height * 0.95 - 25};
+      StarChart.launchButton.text.visible=false;
     } else {
-      StarChart.fastTravelButton.text.position = {x:renderer.width * 0.5,y: renderer.height * 0.95 - 25};
+      StarChart.levelRestriction.visible=false;
+      if (StarChart.selectedStarDistance() < StarChart.maxDistance && StarChart.selectedStarDistance() > 0) {
+        StarChart.launchButton.text.visible=true;
+        StarChart.selectGraphic.tint = MainMenu.buttonTint;
+
+      } else {
+        StarChart.launchButton.text.visible=false;
+        StarChart.selectGraphic.tint = MainMenu.unselectableTint;
+      }
       StarChart.launchButton.text.position = {x:renderer.width * 0.5,y: renderer.height * 0.95 - 25};
+
+      StarChart.fastTravelButton.text.visible = false;
+      StarChart.fastTravelCost = 0;
+
+      if (StarChart.selectedStarDistance() > 0) {
+        gameModel.history.forEach(function(hist){
+          if ((hist.start.x == star.x && hist.start.y == star.y) || (hist.end.x == star.x && hist.end.y == star.y)) {
+            StarChart.fastTravelButton.text.visible = true;
+          }
+        });
+
+        StarChart.fastTravelButton.text.text = StarChart.fastTravelButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.leftShoulder) + ")";
+
+        if (StarChart.selectedStarDistance() > StarChart.maxDistance && !StarChart.fastTravelButton.text.visible) {
+          StarChart.fastTravelCost =  StarChart.selectedStarDistance() * 234 * Math.pow(Constants.starJumpScaling, calculateAdjustedStarLevel(star.level)) * getBuyPriceModifier();
+          StarChart.fastTravelButton.text.text = "Buy spacewarp to this system for " + formatMoney(StarChart.fastTravelCost) + " Credits (" + ShootrUI.getInputButtonDescription(buttonTypes.leftShoulder) + ")";
+          StarChart.fastTravelButton.text.visible = true;
+        }
+      }
+
+      if (gameModel.bossPosition && gameModel.bossPosition.x == StarChart.selectedStar.x && gameModel.bossPosition.y == StarChart.selectedStar.y) {
+        StarChart.fastTravelButton.text.visible = false;
+      }
+
+
+      if (StarChart.launchButton.text.visible && StarChart.fastTravelButton.text.visible) {
+        StarChart.launchButton.text.position = {x:renderer.width * 0.4,y: renderer.height * 0.95 - 25};
+        StarChart.fastTravelButton.text.position = {x:renderer.width * 0.6,y: renderer.height * 0.95 - 25};
+      } else {
+        StarChart.fastTravelButton.text.position = {x:renderer.width * 0.5,y: renderer.height * 0.95 - 25};
+        StarChart.launchButton.text.position = {x:renderer.width * 0.5,y: renderer.height * 0.95 - 25};
+      }
+
     }
+
+
 
   };
 
@@ -861,7 +932,7 @@ StarChart.initialize = function () {
 	StarChart.distanceBetweenStars = function(x1,y1,x2,y2) {
 		var star1 = StarChart.generateStar(x1,y1);
 		var star2 = StarChart.generateStar(x2,y2);
-		return (8 * distanceBetweenPoints(star2.x + star2.xWobble, star2.y + star2.yWobble, star1.x + star1.xWobble, star1.y + star1.yWobble));
+		return (Constants.starDistance * distanceBetweenPoints(star2.x + star2.xWobble, star2.y + star2.yWobble, star1.x + star1.xWobble, star1.y + star1.yWobble));
 	};
 
 	StarChart.selectedStarDistance = function() {
@@ -1034,9 +1105,12 @@ StarChart.initialize = function () {
           star.sprite.position.y = pixelPositionY;
           star.sprite.visible = true;
 					star.sprite.scale.x = star.sprite.scale.y = star.scale * StarChart.zoom * 0.5;
-          star.sprite.alpha = StarChart.calcFade(pixelPositionX,pixelPositionY,bounds);
+          var alphaMultiplier = calculateAdjustedStarLevel(star.level) <= maxLevelAllowed() ? 1 : Math.max(0,Math.pow(0.5, calculateAdjustedStarLevel(star.level) - maxLevelAllowed()));
+          if (alphaMultiplier < 0.1)
+            star.sprite.visible = false;
+          star.sprite.alpha = StarChart.calcFade(pixelPositionX,pixelPositionY,bounds) * alphaMultiplier;
 
-          if (star.asteroids) {
+          if (star.asteroids && star.level <= maxLevelAllowed() && star.sprite.visible) {
             if (!star.asteroidSprites) {
               star.asteroidSprites = [];
               Math.seedrandom(star.seed);
@@ -1052,8 +1126,8 @@ StarChart.initialize = function () {
             for (var c = 0; c < star.asteroidSprites.length; c++) {
               star.asteroidSprites[c].anchor = {x: star.asteroidSprites[c].achorMod - (StarChart.zoom / 6), y: 0.5};
               star.asteroidSprites[c].scale.x = star.asteroidSprites[c].scale.y = 0.2 + 0.1 * StarChart.zoom;
-              star.asteroidSprites[c].visible = StarChart.zoom > 0.3;
-              star.asteroidSprites[c].alpha = Math.min(1, (StarChart.zoom - 0.3) * 2);
+              star.asteroidSprites[c].visible = StarChart.zoom > 0.2;
+              star.asteroidSprites[c].alpha = Math.min(1, (StarChart.zoom - 0.2) * 2) * alphaMultiplier;
               star.asteroidSprites[c].rotation += star.asteroidSprites[c].rotationSpeed * timeDiff;
               star.asteroidSprites[c].position.x = pixelPositionX;
               star.asteroidSprites[c].position.y = pixelPositionY;
@@ -1151,12 +1225,25 @@ StarChart.initialize = function () {
     // StarChart.rangeCircle.alpha = 0.5;
     var circleX = centerPixels.x + ((StarChart.currentPosition.x + StarChart.currentStar.x + StarChart.currentStar.xWobble) * starSpacing);
     var circleY = centerPixels.y + ((StarChart.currentPosition.y + StarChart.currentStar.y + StarChart.currentStar.yWobble) * starSpacing);
-    var radius = StarChart.maxDistance * starSpacing / 8;
+    var radius = StarChart.maxDistance * starSpacing / Constants.starDistance;
     StarChart.rangeCircle.drawCircle(
       circleX,
       circleY,
       radius
     );
+
+    // StarChart.levelCircle.clear();
+    // StarChart.levelCircle.lineStyle(Math.max(Math.max(1,gameModel.resolutionFactor),2 * gameModel.resolutionFactor), 0xFFFFFF);
+    // StarChart.levelCircle.tint = MainMenu.unselectableTint;
+    // StarChart.levelCircle.alpha = 0.2;
+    // var circleX = centerPixels.x + ((StarChart.currentPosition.x + StarChart.origin.x + StarChart.origin.xWobble) * starSpacing);
+    // var circleY = centerPixels.y + ((StarChart.currentPosition.y + StarChart.origin.y + StarChart.origin.yWobble) * starSpacing);
+    // var radius = maxLevelAllowed() * starSpacing * Constants.starDistancePerLevel;
+    // StarChart.levelCircle.drawCircle(
+    //   circleX,
+    //   circleY,
+    //   radius
+    // );
 
     var firstStar, secondStar;
 

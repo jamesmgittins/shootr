@@ -5,8 +5,10 @@ var Constants = {
 	shieldLevelScaling : 1.39,
 	weaponLevelScaling : 1.38,
 	shipLevelPriceScaling : 1.43,
-	levelsPerBoss:6,
+	levelsPerBoss:3,
 	maxScreenShake:2.7,
+	starDistancePerLevel:1.8,
+	starDistance:8,
 	itemColors : {
 		normal:0x2E7D32,
 		super:0x1565C0,
@@ -40,8 +42,8 @@ var gameModel = {
 	weaponIdCounter:1
 };
 
-function starLevelModify(level) {
-	return Math.ceil(level / 2);
+function maxLevelAllowed() {
+	return (gameModel.bossesDefeated + 1) * Constants.levelsPerBoss;
 }
 
 function calculateShipLevel() {
@@ -52,11 +54,13 @@ function calculateShipLevel() {
 }
 
 function calculateAdjustedStarLevel(starLevel) {
-	return Math.max(calculateShipLevel(), starLevel);
+	// return Math.max(calculateShipLevel(), starLevel);
+	// return Math.max(starLevel, (gameModel.bossesDefeated * Constants.levelsPerBoss) + 1);
+	return Math.max(starLevel, (gameModel.bossesDefeated * Constants.levelsPerBoss) + starLevel - 1);
 }
 
 function valueForRoute(route) {
-	return 0.5 * Math.pow(1.43, route);
+	return 1.5 * Math.pow(1.43, route);
 }
 
 function calculateIncome() {
@@ -69,7 +73,7 @@ function calculateIncome() {
 
 function calculateIncomeSinceLastCheck(time) {
 	if (gameModel.lastTradeUpdate < new Date().getTime() - time) {
-		var timeDifference = (new Date().getTime() - gameModel.lastTradeUpdate) / 1000;
+		var timeDifference = Math.min(86400, (new Date().getTime() - gameModel.lastTradeUpdate) / 1000); // cap time to 86400 = 24 Hours
 		var amountEarned = timeDifference * calculateIncome();
 		addCredits(amountEarned, true);
 		gameModel.lastTradeUpdate = new Date().getTime();
@@ -93,10 +97,11 @@ function findInHistory(systemA, systemB) {
 
 function addToHistory(systemA, systemB) {
 	if (!findInHistory(systemA, systemB)) {
+		var destinationStar = StarChart.generateStar(systemB.x, systemB.y);
 		gameModel.history.push({
 			start:systemA,
 			end:systemB,
-			completedLevel:calculateAdjustedStarLevel(starLevelModify(Math.max(Math.abs(systemB.x), Math.abs(systemB.y))))
+			completedLevel:calculateAdjustedStarLevel(destinationStar.level)
 		});
 	}
 }
@@ -157,8 +162,8 @@ function load() {
 			p1 : {
 				ship: Shipyard.generateShip(1, 45, false),
 				weapons: [PlasmaCannon.plasmaCannon(1,123,Weapons.rarity[0])],
-				shields: [ArmsDealer.generateShield(1, 234, false)],
-				credits: 0,
+				shields: [Shields.generateShield(1, 234, false)],
+				credits: 500,
 				totalCredits: 0,
 				temporaryCredits : 0,
 				perkPoints:0,
@@ -167,6 +172,7 @@ function load() {
 			currentSystem: {x:0,y:0},
 			targetSystem: {x:0,y:0},
 			history: [],
+			historyWhenBossDefeated: [],
 			bossesDefeated : 0,
 			weaponIdCounter: gameModel.weaponIdCounter,
 			resolutionFactor:1,

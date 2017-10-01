@@ -58,6 +58,8 @@ StationMenu = {
   }},
   currentSelection:0,
   onShow : function() {
+    var currentStar = StarChart.generateStar(gameModel.currentSystem.x, gameModel.currentSystem.y);
+    StationMenu.titleText.text = StationMenu.menuTitle + "\nCurrent Location: " + currentStar.name + "\nLevel: " + calculateAdjustedStarLevel(currentStar.level);
     var amountEarned = calculateIncomeSinceLastCheck(30000);
     if (amountEarned > 0) {
       Modal.show({text:"You have earned " + formatMoney(amountEarned) + " Credits from your\ncleared trade routes while you were away"});
@@ -92,7 +94,7 @@ DeathMenu = {
   },
   onShow:function(){
     DeathMenu.selectIndex(0);
-    DeathMenu.moneyLostText.text = "You have lost " + formatMoney(gameModel.p1.temporaryCredits) + " credits\nand " + gameModel.lootCollected.length + " cargo crate" + (gameModel.lootCollected.length > 1 ? "s" : "");
+    DeathMenu.moneyLostText.text = "You have lost " + formatMoney(gameModel.p1.temporaryCredits) + " credits\nand " + gameModel.lootCollected.length + " cargo crate" + (gameModel.lootCollected.length !== 1 ? "s" : "");
   }
 };
 
@@ -267,12 +269,14 @@ VolumeMenu = {
   menuTitle:"Volume",
   menuOptions:[
     {title:"Up",click:function(){
+      Howler.mute(false);
       gameModel.masterVolume += 0.05;
       Howler.volume(gameModel.masterVolume);
       VolumeMenu.volumeText.text = (gameModel.masterVolume * 100).toFixed() + "%";
     }},
     {title:"Down",click:function(){
       if (gameModel.masterVolume - 0.05 > 0) {
+        Howler.mute(false);
         gameModel.masterVolume -= 0.05;
         Howler.volume(gameModel.masterVolume);
         VolumeMenu.volumeText.text = (gameModel.masterVolume * 100).toFixed() + "%";
@@ -358,8 +362,8 @@ InitializeMenu = function (menu) {
     } else {
       for (i=menu.menuContainer.children.length - 1; i >= 0; i--){
         var item = menu.menuContainer.children[i];
+        item.destroy(true);
         menu.menuContainer.removeChild(item);
-        item.destroy();
       }
     }
 
@@ -459,6 +463,7 @@ InitializeMenu = function (menu) {
   menu.drawButtonDescription = function(button) {
     if (button.description) {
       if (menu.descriptionContainer) {
+        menu.descriptionContainer.destroy(true);
         menu.menuContainer.removeChild(menu.descriptionContainer);
       }
       menu.descriptionContainer = new PIXI.Container();
@@ -482,6 +487,7 @@ InitializeMenu = function (menu) {
       menu.descriptionContainer.position = {x:renderer.width / 2, y: renderer.height * 0.95 - 25};
     } else {
       if (menu.descriptionContainer) {
+        menu.descriptionContainer.destroy(true);
         menu.menuContainer.removeChild(menu.descriptionContainer);
       }
     }
@@ -738,7 +744,7 @@ MainMenu.updateAll = function(timeDiff) {
     creditChange = calculateIncomeSinceLastCheck(500);
 
   for (var i = 0; i < Menus.length; i ++) {
-    if (Menus[i].menuContainer.visible) {
+    if (Menus[i].menuContainer && Menus[i].menuContainer.visible) {
       if (Menus[i].update) {
         Menus[i].update(timeDiff);
       }
@@ -747,7 +753,7 @@ MainMenu.updateAll = function(timeDiff) {
   }
 
   for (var k = 0; k < OtherMenus.length; k++) {
-    if (OtherMenus[k].menuContainer.visible) {
+    if (OtherMenus[k].menuContainer && OtherMenus[k].menuContainer.visible) {
       if (OtherMenus[k].update) {
         OtherMenus[k].update(timeDiff);
       }
@@ -758,7 +764,7 @@ MainMenu.updateAll = function(timeDiff) {
 
 MainMenu.updateCredits = function(menu, creditChange) {
   if (menu.showCurrentCredits && menu.currentCredits && creditChange > 0) {
-    menu.currentCredits.text = formatMoney(gameModel.p1.credits) + " Credits";
+    menu.currentCredits.text = formatMoney(gameModel.p1.credits) + " Credits" + "\nTexture Cache = " + Object.keys(PIXI.utils.BaseTextureCache).length;
   }
 };
 
@@ -853,11 +859,8 @@ Modal = {
   initialize : function() {
     this.dialogContainer = new PIXI.Container();
 
-  	var background = new PIXI.Graphics();
-  	background.beginFill(0x003030);
-  	background.drawRect(renderer.width * 0.25, renderer.height * 0.2, renderer.width * 0.5, renderer.height * 0.6);
-  	background.alpha = 0.99;
-  	this.dialogContainer.addChild(background);
+  	this.dialogBackground = new PIXI.Graphics();
+  	this.dialogContainer.addChild(this.dialogBackground);
 
     this.dialogContents = new PIXI.Container();
     this.dialogContainer.addChild(this.dialogContents);
@@ -874,7 +877,6 @@ Modal = {
       }
   		Modal.hide();
   	};
-
 
     this.buttonSelection = "ok";
 
@@ -898,6 +900,10 @@ Modal = {
 
 
   show : function(options) {
+    this.dialogBackground.clear();
+    this.dialogBackground.beginFill(0x003030);
+  	this.dialogBackground.drawRect(renderer.width * 0.25, renderer.height * 0.2, renderer.width * 0.5, renderer.height * 0.6);
+  	this.dialogBackground.alpha = 0.99;
     if (options) {
       if (options.text) {
         var textMessage = getText(options.text, 22 * scalingFactor, {});
@@ -906,7 +912,6 @@ Modal = {
         this.dialogContents.addChild(textMessage);
       }
       if (options.container) {
-
         this.dialogContents.addChild(options.container);
       }
       if (options.ok) {
@@ -933,6 +938,7 @@ Modal = {
     Modal.cancelButton.onCancel = false;
     Modal.dialogContainer.visible = false;
     Modal.dialogContents.children.forEach(function(child){
+      child.destroy(true);
       Modal.dialogContents.removeChild(child);
     });
   },

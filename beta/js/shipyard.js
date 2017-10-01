@@ -25,7 +25,7 @@ Shipyard.generateShip = function(level, seed, ultra) {
     rearWeaponLevel:    Math.max(1,Math.round(level - 0.7 + Math.random() * 1.5)),
     shieldLevel:        Math.max(1,Math.round(level - 0.7 + Math.random() * 1.5)),
     speed : 1 + Math.random() * 0.5 + Math.min(0.5, level / 150),
-    range : 12 + (level * 0.5) + Math.random() * 2,
+    range : 12 + level + Math.random() * 0.2 * level,
 		colorIndex : prefix.index,
     name:(ultra? "Ultra " : "") + prefix.name + " " + Shipyard.suffixes[Math.floor(Math.random() * Shipyard.suffixes.length)],
     dualEngines : Math.random() > 0.7
@@ -97,7 +97,8 @@ Shipyard.initialize = function () {
   var level = calculateAdjustedStarLevel(star.level);
 
   for (i = 0; i < 3; i++) {
-    var ship = Shipyard.generateShip(Math.random() > 0.9 ? level + 1 : level, star.seed + i, false);
+    var randomLevel = Math.max(1, Math.round(gameModel.currentLevel + (Math.random() * (Boss.currentLevel() - gameModel.currentLevel) * 0.8)));
+    var ship = Shipyard.generateShip(randomLevel, star.seed + i, false);
 
     Shipyard.ships[i] = ship;
     Shipyard.ships[i].background = new PIXI.Graphics();

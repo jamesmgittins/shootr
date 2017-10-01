@@ -26,6 +26,10 @@ BioGelGun = {
   },
 
 	updateBullets : function(timeDiff, spritePool) {
+
+		if (spritePool.destroyed)
+			return;
+
 		for (var i = 0; i < spritePool.sprites.length; i++) {
 			var sprite = spritePool.sprites[i];
 			var vector;
@@ -35,6 +39,8 @@ BioGelGun = {
 					if (sprite.ship.inPlay) {
 
 						sprite.scale.x = sprite.scale.y -= timeDiff * (1 / BioGelGun.damageOverTimeSec);
+						sprite.lastSpread += timeDiff;
+
 						if (sprite.scale.x < 0) {
 							spritePool.discardSprite(sprite);
 						} else {
@@ -43,14 +49,20 @@ BioGelGun = {
 							sprite.position.x = (sprite.ship.xLoc + vector.x) * scalingFactor;
 							sprite.position.y = (sprite.ship.yLoc + vector.y) * scalingFactor;
 						}
-					} else {
-						if (sprite.weapon.spread) {
+						if (sprite.weapon.spread && sprite.lastSpread > 1 && sprite.bulletStrength >= sprite.weapon.damagePerShot * 0.5) {
+							sprite.lastSpread = 0;
 							var speed = RotateVector2d(0, BioGelGun.minSpeed, Math.random() * 2 * Math.PI);
 							BioGelGun.individualBullet(spritePool, speed, {
 								x: sprite.position.x / scalingFactor,
 								y: sprite.position.y / scalingFactor
-							}, sprite.bulletStrength, 0.5, sprite.weapon);
+							}, sprite.bulletStrength * 0.5, 0.5, sprite.weapon);
 						}
+					} else {
+						var speed = RotateVector2d(0, BioGelGun.minSpeed, Math.random() * 2 * Math.PI);
+						BioGelGun.individualBullet(spritePool, speed, {
+							x: sprite.position.x / scalingFactor,
+							y: sprite.position.y / scalingFactor
+						}, sprite.bulletStrength * 0.5, 0.5, sprite.weapon);
 						spritePool.discardSprite(sprite);
 					}
 				} else {
@@ -98,6 +110,7 @@ BioGelGun = {
 		var sprite = spritePool.nextSprite();
 
 		sprite.bulletStrength = damage;
+		sprite.lastSpread = 0;
 
 		if (weapon.ultra || weapon.hyper) {
 			sprite.tint = rgbToHex(0, 150 + Math.random() * 35, 180);
@@ -157,7 +170,7 @@ BioGelGun = {
 						x: position.x + leftPosAdj.x,
 						y: position.y + leftPosAdj.y
 					}, weapon.damagePerShot * damageModifier * 0.5, leftSize, this.weapon);
-					this.weapon.alternateFire = false;
+
 
 					speed = RotateVector2d(0, BioGelGun.startSpeed, -position.angle - wobble + Math.random() * wobble * 2);
 					var rightPosAdj = RotateVector2d(0, -8, -position.angle - Math.PI / 2);
@@ -165,15 +178,18 @@ BioGelGun = {
 						x: position.x + rightPosAdj.x,
 						y: position.y + rightPosAdj.y
 					}, weapon.damagePerShot * damageModifier * 0.5, 1 - leftSize, this.weapon);
-					this.weapon.alternateFire = true;
+
 				} else {
 					BioGelGun.individualBullet(this.spritePool, speed, {
 						x: position.x,
 						y: position.y
 					}, weapon.damagePerShot * damageModifier, 1, this.weapon);
-					this.weapon.alternateFire = true;
+
 				}
-			}
+			},
+			destroy : function() {
+        this.spritePool.destroy();
+      }
 		};
   }
 };
@@ -209,7 +225,7 @@ BioGelGun.bioGelGun = function(level,seed,rarity) {
 
 	if (rarity.ultra || rarity.hyper) {
 			bioGelGun.ultraName = "Toxic Avenger";
-			bioGelGun.ultraText = "Blobs will spread if an enemy is destroyed";
+			bioGelGun.ultraText = "Gel will periodically spread";
 			bioGelGun.spread = true;
 	}
 

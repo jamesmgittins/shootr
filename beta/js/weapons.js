@@ -4,7 +4,8 @@ Weapons = {
   	railGun:1,
 	  missileLauncher:2,
     vulcanCannon:3,
-    bioGelGun: 4
+    bioGelGun: 4,
+    sonicWave: 5
   },
   rarity : [
     {
@@ -27,7 +28,7 @@ Weapons = {
     {
       hyper:true,
       factor:3.5,
-      chance:0.02,
+      chance:0.03,
       prefix : "Hyper "
     }
   ]
@@ -119,9 +120,11 @@ Weapons.getIconSvg =  function(item) {
       return "img/blaster.svg";
   if (item.weaponType == Weapons.types.bioGelGun)
       return "img/biohazard.svg";
+  if (item.weaponType == Weapons.types.sonicWave)
+      return "img/wifi.svg";
 };
 
-Weapons.generateWeapon = function(level, seed, ultra) {
+Weapons.generateWeapon = function(level, seed, ultra, rarity) {
 
   var weaponRarity = Weapons.rarity[0];
 
@@ -131,12 +134,15 @@ Weapons.generateWeapon = function(level, seed, ultra) {
     }
   }
 
+  weaponRarity = rarity || weaponRarity;
+
   var weaponGenFunctions = [
     Weapons.laserCannon,
     Weapons.missileLauncher,
     VulcanCannon.vulcanCannon,
     BioGelGun.bioGelGun,
-    PlasmaCannon.plasmaCannon
+    PlasmaCannon.plasmaCannon,
+    SonicWave.sonicWave
   ];
 
   return weaponGenFunctions[Math.floor(Math.random() * weaponGenFunctions.length)](level,seed,weaponRarity);
@@ -159,6 +165,9 @@ Weapons.createWeaponLogic = function(weapon, container) {
 
   if (weapon.weaponType == Weapons.types.bioGelGun)
     return BioGelGun.create(weapon, container);
+
+  if (weapon.weaponType == Weapons.types.sonicWave)
+    return SonicWave.create(weapon, container);
 };
 
 
@@ -215,6 +224,16 @@ Weapons.update = function(timeDiff) {
 Weapons.reset = function() {
   Bullets.enemyBullets.destroy();
 
-  removeAllFromContainer(playerBulletContainer);
+  if (Weapons.weaponLogic.frontWeapon) {
+    Weapons.weaponLogic.frontWeapon.destroy();
+  }
+  if (Weapons.weaponLogic.turretWeapon){
+    Weapons.weaponLogic.turretWeapon.destroy();
+  }
+  if (Weapons.weaponLogic.rearWeapon) {
+    Weapons.weaponLogic.rearWeapon.destroy();
+  }
   Weapons.weaponLogic = {};
+
+  removeAllFromContainer(playerBulletContainer);
 };

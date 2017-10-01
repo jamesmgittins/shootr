@@ -59,7 +59,7 @@ var endStar;
 
 function changeLevel(level) {
 
-	gameModel.currentLevel = Boss.isInTargetSystem() ? Math.max(starLevelModify(Boss.currentLevel()), calculateAdjustedStarLevel(level)) : calculateAdjustedStarLevel(level);
+	gameModel.currentLevel = Boss.isInTargetSystem() ? Math.max(Boss.currentLevel(), calculateAdjustedStarLevel(level)) : calculateAdjustedStarLevel(level);
 
 	var levelDifficultyModifier = Math.pow(Constants.difficultyLevelScaling, gameModel.currentLevel - 1);
 
@@ -97,11 +97,14 @@ function changeLevel(level) {
 	EnemyShips.waveBulletFrequency = Math.max(2500 - gameModel.currentLevel, 500);
 	EnemyShips.shipHealth = (10 * gameModel.currentLevel * levelDifficultyModifier) - 5 + gameModel.currentLevel;
 	EnemyShips.maxBulletsPerShot = Math.min(8, gameModel.currentLevel / 7);
-	Boss.health = EnemyShips.shipHealth * 100;
+	Boss.health = EnemyShips.shipHealth * 70;
 	Boss.initialized = false;
 
 	distance = StarChart.distanceBetweenStars(gameModel.currentSystem.x,gameModel.currentSystem.y, gameModel.targetSystem.x, gameModel.targetSystem.y);
 	resetGame();
+	if (startStar.asteroids || endStar.asteroids) {
+		Asteroids.getATexture();
+	}
 	save();
 }
 
@@ -140,11 +143,6 @@ function changeState(state) {
 			Sounds.music.fadeOut();
 			Boss.shield.hide();
 
-			if (Boss.isInTargetSystem()) {
-				gameModel.bossesDefeated++;
-				Boss.randomLocation();
-			}
-
 			gameModel.lootCollected.forEach(function(item) {
 				if (item.type == Constants.itemTypes.weapon)
 					gameModel.p1.weapons.push(item);
@@ -158,6 +156,13 @@ function changeState(state) {
 			gameModel.purchaseHistory = [];
 			addCredits(gameModel.p1.temporaryCredits);
 			gameModel.p1.temporaryCredits = 0;
+
+			if (Boss.isInTargetSystem()) {
+				gameModel.bossesDefeated++;
+				gameModel.historyWhenBossDefeated = gameModel.history.slice();
+				Boss.randomLocation();
+			}
+
 			save();
 
 		}
@@ -181,30 +186,36 @@ function changeState(state) {
 
 			DeathMenu.show();
 
-			if (Boss.bossActive()) {
-				Boss.nudgeLocation();
-				save();
-			}
-
 			resetGame();
 		}
 	});
 }
 
+function clearTextureCache() {
+	for (var basetextureUrl in PIXI.utils.BaseTextureCache) {
+		if (basetextureUrl.includes("text"))
+	  	delete PIXI.utils.BaseTextureCache[basetextureUrl];
+	}
+	for (var textureUrl in PIXI.utils.TextureCache) {
+		if (textureUrl.includes("text"))
+	  	delete PIXI.utils.TextureCache[textureUrl];
+	}
+}
+
 function resetGame() {
+
+	clearTextureCache();	
+
 	Weapons.reset();
-	Powerups.reset();
+	Powerups.resize();
 	Boss.reset();
 	Enemies.reset();
-
-
+	GameText.reset();
 
 	timeLeft = levelTime;
 	PlayerShip.reset();
 	Stars.StartEndStars.sprite.visible = false;
 	gameModel.lootCollected = [];
-	GameText.status.lootIcons = [];
-	GameText.levelComplete.lootLayouts = [];
 	gameModel.p1.temporaryCredits = 0;
 
 	for (var i = 0; i < Bullets.enemyBullets.maxEnemyBullets; i++) {
@@ -246,6 +257,7 @@ function update() {
 		Stars.stars.update(timeDiff);
 		Stars.nebulaBackground.update(timeDiff);
 		Stars.shipTrails.update(timeDiff);
+		Stars.playerShipTrails.update(timeDiff);
 	// 	PlayerShip.cursor.update(timeDiff);
 
 		if (currentState == states.running) {
@@ -430,7 +442,8 @@ function startGame() {
 	resizeCanvas();
 
 	var loadMessage = document.getElementById("loading-message");
-	loadMessage.parentNode.removeChild(loadMessage);
+	if (loadMessage)
+		loadMessage.parentNode.removeChild(loadMessage);
 
 	window.addEventListener("resize",updateAfterScreenSizeChange);
 
@@ -511,7 +524,6 @@ function startGame() {
 
   PlayerShip.controllerPointer.initialize();
 	Ships.blasts.initialize();
-	Ships.explosionBits.initialize();
 	Powerups.initialize();
 
 	GameText.initialize();
@@ -530,7 +542,7 @@ function startGame() {
 // 	PlayerShip.cursor.initialize();
 
   update();
-  changeLevel(gameModel.currentLevel);
+  changeLevel(StarChart.generateStar(gameModel.currentSystem.x, gameModel.currentSystem.y).level);
 
 }
 

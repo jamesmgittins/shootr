@@ -1,10 +1,14 @@
 RailGun = {
 
 	generateTexture : function() {
-    return Stars.stars.texture;
+    return Stars.stars.getTexture();
   },
 
 	updateBullets : function(timeDiff, spritePool) {
+
+		if (spritePool.destroyed)
+			return;
+
     for (var i = 0; i < spritePool.sprites.length; i++) {
       var sprite = spritePool.sprites[i];
       if (sprite.visible) {
@@ -97,8 +101,7 @@ RailGun = {
         }
 			},
 			beamTrails : {
-				// spritePool : SpritePool.create(Stars.stars.texture, container),
-				spritePool : SpritePool.create(Stars.stars.texture, container),
+				spritePool : SpritePool.create(Stars.stars.getTexture(), container),
 				update:function(timeDiff) {
 					for (var i = 0; i < this.spritePool.sprites.length; i++) {
 						var sprite = this.spritePool.sprites[i];
@@ -134,7 +137,10 @@ RailGun = {
 					part.xSpeed = (-40 + Math.random() * 80) * scalingFactor;
 					part.ySpeed = (-40 + Math.random() * 80) * scalingFactor;
 				}
-			}
+			},
+			destroy : function() {
+        this.spritePool.destroy();
+      }
 		};
   }
 };

@@ -92,6 +92,9 @@ Enemies = {
     Enemies.enemiesKilled = 0;
     Enemies.enemiesSpawned = 0;
     Enemies.allDeadTimer = 0;
+    Enemies.enemySpawners = [];
+    Enemies.waves = [];
+    Enemies.activeWaves = [];
 
   },
 

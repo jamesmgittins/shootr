@@ -28,6 +28,10 @@ PlasmaCannon = {
   },
 
 	updateBullets : function(timeDiff, spritePool) {
+
+		if (spritePool.destroyed)
+			return;
+
 		for (var i = 0; i < spritePool.sprites.length; i++) {
 			var sprite = spritePool.sprites[i];
 
@@ -40,14 +44,18 @@ PlasmaCannon = {
 
 				if (sprite.yLoc < -8 || sprite.yLoc > canvasHeight + 8 ||
 					sprite.xLoc < -8 || sprite.xLoc > canvasWidth + 8) {
-					if (Math.random() < sprite.ricochet) {
-						if (sprite.yLoc < -8 || sprite.yLoc > canvasHeight + 8)
-							sprite.ySpeed *= -1;
-						if (sprite.xLoc < -8 || sprite.xLoc > canvasWidth + 8)
-							sprite.xSpeed *= -1;
-					} else {
-						spritePool.discardSprite(sprite);
+					if (Math.random() < sprite.weapon.ricochet) {
+
+						var speed = RotateVector2d(0, sprite.weapon.bulletSpeed, Math.random() * 2 * Math.PI);
+
+						PlasmaCannon.individualBullet(spritePool, speed, {
+							x: PlayerShip.playerShip.xLoc,
+							y: PlayerShip.playerShip.yLoc
+						}, sprite.bulletStrength * 0.5, 0.5, sprite.weapon);
+
 					}
+					spritePool.discardSprite(sprite);
+
 				} else {
 					for (var j = 0; j < Enemies.activeShips.length; j++) {
 						var enemyShip = Enemies.activeShips[j];
@@ -72,7 +80,7 @@ PlasmaCannon = {
 		sprite.xSpeed = speed.x;
 		sprite.ySpeed = speed.y;
 
-		sprite.ricochet = weapon.ricochet;
+		sprite.weapon = weapon;
 		sprite.rotation = Math.atan2(speed.x, speed.y);
 
 		sprite.visible = true;
@@ -100,6 +108,9 @@ PlasmaCannon = {
 					return this.weapon.lastShot > 1 / this.weapon.shotsPerSecond;
 				}
 			},
+			destroy : function() {
+        this.spritePool.destroy();
+      },
 			fireShot : function(position, damageModifier) {
 				this.weapon.lastShot = 0;
 				var wobble = (1 - this.weapon.accuracy) * 0.2;
@@ -184,11 +195,11 @@ PlasmaCannon.plasmaCannon = function(level,seed,rarity) {
 
 	if (rarity.ultra || rarity.hyper) {
 		if (Math.random() > 0.7 ) {
-			plasmaCannon.ricochet = 0.1 + (Math.random() * 0.2);
+			plasmaCannon.ricochet = 0.25 + (Math.random() * 0.25);
 			plasmaCannon.ultraName = "Second Chances";
-			plasmaCannon.ultraText = "Bullets have a " + Math.round(plasmaCannon.ricochet * 100) + "% chance to ricochet off the edge of the screen";
+			plasmaCannon.ultraText = "Missed shots have a " + Math.round(plasmaCannon.ricochet * 100) + "% chance to fire a new bullet";
 		} else {
-			plasmaCannon.passThrough = 0.1 + (Math.random() * 0.2);
+			plasmaCannon.passThrough = 0.25 + (Math.random() * 0.25);
 			plasmaCannon.ultraName = "Deep Thunder";
 			plasmaCannon.ultraText = "Bullets have a " + Math.round(plasmaCannon.passThrough * 100) + "% chance to not be destroyed";
 		}

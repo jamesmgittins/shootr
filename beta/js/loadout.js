@@ -316,6 +316,9 @@ Loadout.updateTotalDPS = function() {
 
 Loadout.hide = function() {
   Loadout.menuContainer.visible = false;
+  Loadout.weaponsContainer.visible = false;
+  Loadout.weapons = [];
+  Loadout.shields = [];
 };
 
 Loadout.show = function() {
@@ -487,7 +490,7 @@ Loadout.resize = function () {
 };
 
 Loadout.checkMouseOver = function () {
-  if (!Loadout.menuContainer.visible)
+  if (!Loadout.menuContainer || !Loadout.menuContainer.visible)
     return false;
 
   if (MainMenu.checkButton(Loadout.backButton)) {
@@ -613,7 +616,8 @@ Loadout.showItemHover = function(item, button) {
     return;
 
   if (Loadout.itemHover && Loadout.itemHover.item.id != item.id) {
-    Loadout.menuContainer.removeChild(Loadout.itemHover);
+    // Loadout.menuContainer.removeChild(Loadout.itemHover);
+    Loadout.itemHover.destroy(true);
     Loadout.itemHover = false;
   }
   if (!Loadout.itemHover) {
@@ -648,7 +652,7 @@ Loadout.showItemHover = function(item, button) {
 
 Loadout.hideItemHover = function() {
   if (Loadout.itemHover) {
-    Loadout.menuContainer.removeChild(Loadout.itemHover);
+    Loadout.itemHover.destroy(true);
     Loadout.itemHover = false;
   }
 };

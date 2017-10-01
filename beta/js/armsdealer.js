@@ -15,49 +15,15 @@ ArmsDealer = {
 	showCurrentCredits : true
 };
 
-ArmsDealer.generateShield = function(level, seed, ultra) {
 
-  var weaponRarity = Weapons.rarity[0];
-
-  for (var i=0; i<Weapons.rarity.length; i++) {
-    if (ultra && Math.random() < Weapons.rarity[i].chance) {
-      weaponRarity = Weapons.rarity[i];
-    }
-  }
-
-	return ArmsDealer.generateShieldItem(level, seed, weaponRarity);
-
-};
-
-
-ArmsDealer.generateShieldItem = function(level, seed, rarity) {
-
-
-	var levelMod = Math.pow(Constants.shieldLevelScaling, level - 1);
-	Math.seedrandom(seed);
-	var capacity = (level * 11 + (Math.random() * level * 3)) * levelMod * rarity.factor;
-	var chargePerSecond = (level * 3 + Math.random() * 2) * levelMod * rarity.factor;
-	var chargeDelay = 3 + Math.random() * 2;
-	return {
-		type: "shield",
-		super:rarity.super,
-		ultra:rarity.ultra,
-		ultraName:"Immovable Object",
-		ultraText:"10% Chance for enemy bullets to reflect",
-		hyper:rarity.hyper,
-		name: rarity.prefix + "Energy Shield",
-		seed: seed,
-		level: level,
-		capacity: capacity,
-		chargePerSecond: chargePerSecond,
-		chargeDelay: chargeDelay,
-		price: Math.round((capacity + chargePerSecond) * 17 * (5 / chargeDelay)),
-		id: gameModel.weaponIdCounter++
-	};
-};
 
 ArmsDealer.hide = function() {
 	ArmsDealer.menuContainer.visible = false;
+	ArmsDealer.menuContainer.destroy(true);
+	ArmsDealer.menuContainer = undefined;
+	if (ArmsDealer.dialogContainer && typeof ArmsDealer.dialogContainer.destroy === "function")
+		ArmsDealer.dialogContainer.destroy(true);
+	// ArmsDealer.dialogContainer = undefined;
 };
 
 ArmsDealer.show = function() {
@@ -146,10 +112,12 @@ ArmsDealer.createItemIcon = function(item, options) {
 	border.drawRect(0, 0, 128 * scale, 24 * scale);
 	itemContainer.addChild(border);
 
-	var svgToUse = "img/shield.svg";
+	var svgToUse;
 
 	if (item.type == "weapon") {
 		svgToUse = Weapons.getIconSvg(item);
+	} else {
+		svgToUse = Shields.getIconSvg(item);
 	}
 
 	var pic = new PIXI.Sprite(PIXI.Texture.fromImage(svgToUse, undefined, undefined, 0.4));
@@ -386,7 +354,7 @@ ArmsDealer.initialize = function() {
 	ArmsDealer.buyText = getText("Buy  ("+ShootrUI.getInputButtonDescription(buttonTypes.leftShoulder)+")", fontSize, {align: 'center'});
 
 	ArmsDealer.buyText.position = {
-		x: renderer.width / 3,
+		x: renderer.width * 0.4,
 		y: renderer.height * 0.05 + 25
 	};
 	ArmsDealer.buyText.anchor = {
@@ -421,7 +389,7 @@ ArmsDealer.initialize = function() {
 	ArmsDealer.sellText = getText("Sell  ("+ShootrUI.getInputButtonDescription(buttonTypes.rightShoulder)+")", fontSize, {align: 'center'});
 
 	ArmsDealer.sellText.position = {
-		x: (renderer.width / 3) * 2,
+		x: renderer.width * 0.6,
 		y: renderer.height * 0.05 + 25
 	};
 	ArmsDealer.sellText.anchor = {
@@ -430,6 +398,84 @@ ArmsDealer.initialize = function() {
 	};
 	ArmsDealer.sellText.tint = MainMenu.buttonTint;
 	ArmsDealer.menuContainer.addChild(ArmsDealer.sellText);
+
+	ArmsDealer.sellAllText = {
+		text:getText("Sell Junk", fontSize, {align: 'center'}),
+		click : function() {
+
+			var junkItems = [];
+			var totalValue = 0;
+
+			// find junk
+			gameModel.p1.weapons.forEach(function(weapon) {
+				if (weapon.id != gameModel.p1.frontWeapon.id && weapon.id != gameModel.p1.turretWeapon.id && weapon.id != gameModel.p1.rearWeapon.id && !ArmsDealer.weaponComparison(weapon).upgrade) {
+					junkItems.push(weapon);
+					totalValue += weapon.price / 2;
+				}
+			});
+			gameModel.p1.shields.forEach(function(shield) {
+				if (shield.id != gameModel.p1.shield.id && !ArmsDealer.shieldComparison(shield).upgrade) {
+					junkItems.push(shield);
+					totalValue += shield.price / 2;
+				}
+			});
+
+			Modal.show({
+        text:"Sell " + junkItems.length + " junk items for " + formatMoney(totalValue) + " Credits?",
+        ok : function() {
+
+					var weapons = [];
+
+					gameModel.p1.weapons.forEach(function(weapon) {
+						var keepItem = true;
+						junkItems.forEach(function(junkItem){
+							if (junkItem.id === weapon.id)
+								keepItem = false;
+						});
+						if (keepItem)
+							weapons.push(weapon);
+					});
+
+					gameModel.p1.weapons = weapons;
+
+					var shields = [];
+					gameModel.p1.shields.forEach(function(shield) {
+						var keepItem = true;
+						junkItems.forEach(function(junkItem){
+							if (junkItem.id === shield.id)
+								keepItem = false;
+						});
+						if (keepItem)
+							shields.push(shield);
+					});
+
+					gameModel.p1.shields = shields;
+
+          gameModel.p1.credits += totalValue;
+          Sounds.powerup.play();
+          save();
+					ArmsDealer.initialize();
+					ArmsDealer.menuContainer.visible = true;
+					ArmsDealer.sellTab.click();
+        },
+        cancel : function(){
+
+        }
+      });
+
+		}
+	};
+
+	ArmsDealer.sellAllText.text.position = {
+		x: renderer.width * 0.7,
+		y: renderer.height * 0.05 + 25
+	};
+	ArmsDealer.sellAllText.text.anchor = {
+		x: 0.5,
+		y: 0
+	};
+	ArmsDealer.sellAllText.text.tint = MainMenu.buttonTint;
+	ArmsDealer.menuContainer.addChild(ArmsDealer.sellAllText.text);
 
 	ArmsDealer.sellTab = {
 		text: ArmsDealer.sellText,
@@ -474,7 +520,7 @@ ArmsDealer.initialize = function() {
 
 	var numOptions = Math.round(5 + Math.random() * 2);
 	for (var j = 0; j <numOptions; j++)
-		ArmsDealer.buyOptions.push(Math.random() > 0.8 ? ArmsDealer.generateShield(level, seed++, false) : Weapons.generateWeapon(level, seed++, false));
+		ArmsDealer.buyOptions.push(Math.random() > 0.8 ? Shields.generateShield(level, seed++, false) : Weapons.generateWeapon(level, seed++, false));
 
 	ArmsDealer.buyButtons = [];
 	// ArmsDealer.gridWidth = 9
@@ -566,13 +612,15 @@ ArmsDealer.initialize = function() {
 };
 
 ArmsDealer.resize = function() {
-	var visible = ArmsDealer.menuContainer.visible;
-	ArmsDealer.initialize();
-	ArmsDealer.menuContainer.visible = visible;
+	if (ArmsDealer.menuContainer) {
+		var visible = ArmsDealer.menuContainer.visible;
+		ArmsDealer.initialize();
+		ArmsDealer.menuContainer.visible = visible;
+	}
 };
 
 ArmsDealer.checkMouseOver = function() {
-	if (!ArmsDealer.menuContainer.visible)
+	if (!ArmsDealer.menuContainer || !ArmsDealer.menuContainer.visible)
 		return false;
 
 	if (ArmsDealer.dialogContainer) {
@@ -593,6 +641,11 @@ ArmsDealer.checkMouseOver = function() {
 
 	if (MainMenu.checkButton(ArmsDealer.sellTab)) {
 		ArmsDealer.select(ArmsDealer.sellTab);
+		return true;
+	}
+
+	if (MainMenu.checkButton(ArmsDealer.sellAllText)) {
+		ArmsDealer.select(ArmsDealer.sellAllText);
 		return true;
 	}
 
@@ -673,7 +726,8 @@ ArmsDealer.showDialog = function(index, buy) {
 
 ArmsDealer.cancelItem = function() {
 	ArmsDealer.menuContainer.removeChild(ArmsDealer.dialogContainer);
-	ArmsDealer.dialogContainer = false;
+	// ArmsDealer.dialogContainer.destroy(true);
+	// ArmsDealer.dialogContainer = false;
 };
 
 ArmsDealer.buyItem = function(index) {
@@ -747,7 +801,7 @@ ArmsDealer.sellItem = function(index) {
 
 ArmsDealer.checkClicks = function() {
 
-	if (!ArmsDealer.menuContainer.visible)
+	if (!ArmsDealer.menuContainer || !ArmsDealer.menuContainer.visible)
 		return false;
 
 	if (MainMenu.checkButton(ArmsDealer.backButton)) {
@@ -763,12 +817,16 @@ ArmsDealer.checkClicks = function() {
 		ArmsDealer.sellTab.click();
 		return true;
 	}
+	if (MainMenu.checkButton(ArmsDealer.sellAllText)) {
+		ArmsDealer.sellAllText.click();
+		return true;
+	}
 
 	if (ArmsDealer.dialogContainer) {
 		if (MainMenu.checkButton(ArmsDealer.dialogCancel)) {
 			ArmsDealer.dialogCancel.click();
 		}
-		if (MainMenu.checkButton(ArmsDealer.dialogOk)) {
+		if (ArmsDealer.dialogContainer && MainMenu.checkButton(ArmsDealer.dialogOk)) {
 			ArmsDealer.dialogOk.click();
 		}
 	}
@@ -800,6 +858,7 @@ ArmsDealer.select = function(button) {
 	ArmsDealer.backButton.text.tint = MainMenu.buttonTint;
 	ArmsDealer.buyTab.text.tint = MainMenu.buttonTint;
 	ArmsDealer.sellTab.text.tint = MainMenu.buttonTint;
+	ArmsDealer.sellAllText.text.tint = MainMenu.buttonTint;
 
 	if (ArmsDealer.dialogContainer) {
 		ArmsDealer.dialogCancel.text.tint = MainMenu.buttonTint;
@@ -842,7 +901,7 @@ ArmsDealer.moveSelection = function(colDelta, rowDelta) {
 };
 
 ArmsDealer.up = function() {
-	if (!ArmsDealer.menuContainer.visible)
+	if (!ArmsDealer.menuContainer || !ArmsDealer.menuContainer.visible)
 		return false;
 
 	if (ArmsDealer.dialogContainer) {
@@ -863,7 +922,7 @@ ArmsDealer.up = function() {
 };
 
 ArmsDealer.down = function() {
-	if (!ArmsDealer.menuContainer.visible)
+	if (!ArmsDealer.menuContainer || !ArmsDealer.menuContainer.visible)
 		return false;
 
 	if (ArmsDealer.dialogContainer) {
@@ -884,7 +943,7 @@ ArmsDealer.down = function() {
 };
 
 ArmsDealer.left = function() {
-	if (!ArmsDealer.menuContainer.visible)
+	if (!ArmsDealer.menuContainer || !ArmsDealer.menuContainer.visible)
 		return false;
 
 	if (ArmsDealer.dialogContainer) {
@@ -905,7 +964,7 @@ ArmsDealer.left = function() {
 };
 
 ArmsDealer.right = function() {
-	if (!ArmsDealer.menuContainer.visible)
+	if (!ArmsDealer.menuContainer || !ArmsDealer.menuContainer.visible)
 		return false;
 
 	if (ArmsDealer.dialogContainer) {
@@ -926,7 +985,7 @@ ArmsDealer.right = function() {
 };
 
 ArmsDealer.aButtonPress = function() {
-	if (!ArmsDealer.menuContainer.visible)
+	if (!ArmsDealer.menuContainer || !ArmsDealer.menuContainer.visible)
 		return false;
 
 	if (ArmsDealer.dialogContainer) {
@@ -947,7 +1006,7 @@ ArmsDealer.aButtonPress = function() {
 };
 
 ArmsDealer.bButtonPress = function() {
-	if (!ArmsDealer.menuContainer.visible)
+	if (!ArmsDealer.menuContainer || !ArmsDealer.menuContainer.visible)
 		return false;
 
 	if (ArmsDealer.dialogContainer) {
@@ -960,7 +1019,7 @@ ArmsDealer.bButtonPress = function() {
 };
 
 ArmsDealer.l1ButtonPress = function() {
-	if (!ArmsDealer.menuContainer.visible)
+	if (!ArmsDealer.menuContainer || !ArmsDealer.menuContainer.visible)
 		return false;
 
 	ArmsDealer.buyTab.click();
@@ -968,7 +1027,7 @@ ArmsDealer.l1ButtonPress = function() {
 };
 
 ArmsDealer.r1ButtonPress = function() {
-	if (!ArmsDealer.menuContainer.visible)
+	if (!ArmsDealer.menuContainer || !ArmsDealer.menuContainer.visible)
 		return false;
 
 	ArmsDealer.sellTab.click();
@@ -982,6 +1041,7 @@ ArmsDealer.showItemHover = function(button) {
 
   if (ArmsDealer.itemHover && ArmsDealer.itemHover.item.id != button.weapon.id) {
     ArmsDealer.menuContainer.removeChild(ArmsDealer.itemHover);
+		ArmsDealer.itemHover.destroy(true);
     ArmsDealer.itemHover = false;
   }
   if (!ArmsDealer.itemHover) {

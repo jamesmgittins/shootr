@@ -1,13 +1,11 @@
 var Stars = {};
 
-Stars.NUM_STARS = 250;
-
 Stars.StartEndStars = {
 	acceleration : 0.4,
 	maxSpeed : 1,
 	sprite  : {},
 	texture : function (starSize) {
-		var size = 32 * scalingFactor * starSize;
+		var size = 16 * scalingFactor * starSize;
 		var blast = document.createElement('canvas');
 		blast.width = size;
 		blast.height = size;
@@ -79,6 +77,11 @@ Stars.StartEndStars = {
 Stars.nebulaBackground = {
 	size: 640,
 	initTexture: function(seed) {
+
+		if (this.texture) {
+			this.texture.destroy(true);
+		}
+
 		Math.seedrandom(seed);
 		var size = Stars.nebulaBackground.size;
 		var nebulaCanvas = document.createElement('canvas');
@@ -102,9 +105,11 @@ Stars.nebulaBackground = {
 			ctx.fillRect(0, 0, size, size * 2);
 		}
 
+		this.texture = PIXI.Texture.fromCanvas(nebulaCanvas);
+
 
 		if (!Stars.nebulaBackground.sprite) {
-			Stars.nebulaBackground.sprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(nebulaCanvas));
+			Stars.nebulaBackground.sprite = new PIXI.Sprite(this.texture);
 			starContainer.addChild(Stars.nebulaBackground.sprite);
 		} else {
 			Stars.nebulaBackground.sprite.texture = PIXI.Texture.fromCanvas(nebulaCanvas);
@@ -124,6 +129,7 @@ Stars.nebulaBackground = {
 };
 
 Stars.stars = {
+	numStars : 250,
 	getTexture: function() {
 		var blast = document.createElement('canvas');
 		blast.width = 1;
@@ -133,50 +139,39 @@ Stars.stars = {
 		// draw shape
 		blastCtx.fillStyle = "#ffffff";
 		blastCtx.fillRect(0, 0, 1, 1);
-
 		return PIXI.Texture.fromCanvas(blast);
 	},
-	speed: [],
-	sprite: [],
-	xLoc: [],
-	yLoc: [],
 	speedFactor : 1,
-	show:function() {
-		Math.seedrandom(Date.now());
-		for (var i = 0; i < Stars.stars.sprite.length; i++) {
-			Stars.stars.speed[i] = 10 + Math.random() * 10;
-			Stars.stars.xLoc[i] = canvasWidth * Math.random();
-			Stars.stars.yLoc[i] = -10 + (canvasWidth + 10) * Math.random();
-
-			if (Math.random() > 0.8)
-				Stars.stars.sprite[i].tint = 0x808080 + Math.random() * 0x808080;
-
-			Stars.stars.sprite[i].scale.x = Stars.stars.sprite[i].scale.y = (Stars.stars.speed[i] / 10) * gameModel.resolutionFactor;
+	getSpritePool : function() {
+		if (!this.spritePool) {
+			this.spritePool = SpritePool.create(Stars.stars.getTexture(), Stars.stars.sprites);
 		}
+		return this.spritePool;
+	},
+	show:function() {
 		Stars.stars.sprites.visible = true;
 	},
 	hide:function() {
 		Stars.stars.sprites.visible = false;
 	},
 	initialize: function() {
-		Stars.stars.texture = Stars.stars.getTexture();
 		Math.seedrandom(Date.now());
 
 		Stars.stars.sprites = new PIXI.Container();
 		starContainer.addChild(Stars.stars.sprites);
 
-		for (var i = 0; i < Stars.NUM_STARS * gameModel.detailLevel; i++) {
-			Stars.stars.speed[i] = 10 + Math.random() * 10;
-			Stars.stars.sprite[i] = new PIXI.Sprite(Stars.stars.texture);
-			Stars.stars.xLoc[i] = canvasWidth * Math.random();
-			Stars.stars.yLoc[i] = canvasWidth * Math.random();
+		for (var i = 0; i < Stars.stars.numStars * gameModel.detailLevel; i++) {
+
+			var sprite = this.getSpritePool().nextSprite();
+
+			sprite.speed = 10 + Math.random() * 10;
+			sprite.xLoc = canvasWidth * Math.random();
+			sprite.yLoc = canvasWidth * Math.random();
 
 			if (Math.random() > 0.8)
-				Stars.stars.sprite[i].tint = 0x808080 + Math.random() * 0x808080;
+				sprite.tint = 0x808080 + Math.random() * 0x808080;
 
-			Stars.stars.sprite[i].scale.x = Stars.stars.sprite[i].scale.y = (Stars.stars.speed[i] / 10) * gameModel.resolutionFactor;
-
-			Stars.stars.sprites.addChild(Stars.stars.sprite[i]);
+			sprite.scale.x = sprite.scale.y = (sprite.speed / 10) * gameModel.resolutionFactor;
 		}
 		Stars.StartEndStars.initialize();
 	},
@@ -186,21 +181,16 @@ Stars.stars = {
 			return;
 
 		// Math.seedrandom(Date.now());
-		for (var i = 0; i < Stars.stars.sprite.length; i++) {
+		for (var i = 0; i < this.spritePool.sprites.length; i++) {
+			var sprite = this.spritePool.sprites[i];
+			sprite.yLoc += sprite.speed * timeDiff * Stars.stars.speedFactor;
+			sprite.position.x = sprite.xLoc * scalingFactor;
+			sprite.position.y = sprite.yLoc * scalingFactor;
 
-			Stars.stars.yLoc[i] += Stars.stars.speed[i] * timeDiff * Stars.stars.speedFactor;
-			Stars.stars.sprite[i].position.x = Stars.stars.xLoc[i] * scalingFactor;
-			Stars.stars.sprite[i].position.y = Stars.stars.yLoc[i] * scalingFactor;
-
-			if (Stars.stars.yLoc[i] > canvasHeight + 5) {
-				Stars.stars.yLoc[i] = -5;
-				Stars.stars.xLoc[i] = Math.random() * canvasWidth;
-				Stars.stars.sprite[i].position.x = Stars.stars.xLoc[i] * scalingFactor;
-   			Stars.stars.sprite[i].position.y = Stars.stars.yLoc[i] * scalingFactor;
-				if (Math.random() > 0.8)
-					Stars.stars.sprite[i].tint = 0x808080 + Math.random() * 0x808080;
-				else
-					Stars.stars.sprite[i].tint = 0xFFFFFF;
+			if (sprite.yLoc > canvasHeight + 5) {
+				sprite.yLoc = -5;
+				sprite.position.x = sprite.xLoc * scalingFactor;
+				sprite.position.y = sprite.yLoc * scalingFactor;
 			}
 		}
 		Stars.StartEndStars.update(timeDiff);
@@ -210,7 +200,7 @@ Stars.stars = {
 Stars.powerupParts = {
 	getSpritePool : function() {
 		if (!this.spritePool) {
-			this.spritePool = SpritePool.create(Stars.stars.texture, uiContainer);
+			this.spritePool = SpritePool.create(Stars.stars.getTexture(), uiContainer);
 		}
 		return this.spritePool;
 	},
@@ -250,10 +240,10 @@ Stars.powerupParts = {
 	}
 };
 
-Stars.shipTrails = {
+Stars.playerShipTrails = {
 	getSpritePool : function() {
 		if (!this.spritePool) {
-			this.spritePool = SpritePool.create(Stars.stars.texture, starContainer);
+			this.spritePool = SpritePool.create(PlayerShip.engineTexture(), starContainer);
 		}
 		return this.spritePool;
 	},
@@ -270,7 +260,7 @@ Stars.shipTrails = {
 				x: spriteLoc.x + xRandom,
 				y: spriteLoc.y
 			};
-			part.texture = sprite.texture;
+
 			part.fadeSpeed = 3.2;
 			part.scale.x = (1 + Math.random() * 0.3);
 			part.scale.y = (1 + Math.random() * 0.3);
@@ -279,19 +269,6 @@ Stars.shipTrails = {
 
 			var engineSizeMod = Math.min(Math.max(ship.ySpeed * -1, -100), 100) / 200;
 			sprite.scale.y = 1 + engineSizeMod;
-		} else {
-			if (ship.trailX < 0 || ship.trailX > canvasWidth)
-				return;
-
-			position = {
-				x: (ship.trailX - 3 + (Math.random() * 6)) * scalingFactor,
-				y: ship.trailY * scalingFactor
-			};
-			part.texture = Stars.stars.texture;
-			part.fadeSpeed = 8 * scalingFactor;
-			part.scale.x = (1 + Math.random() * 2) * scalingFactor;
-			part.scale.y = (2 + Math.random() * 2) * scalingFactor;
-			part.tint = Math.random() > 0.45 ? 0xffff00 : 0xff5600;
 		}
 
 
@@ -307,11 +284,68 @@ Stars.shipTrails = {
 		ship.lastTrail += timeDiff * 1000;
 		if (!ship.enemyShip && ship.lastTrail > Stars.shipTrails.trailFrequency + (ship.ySpeed / 2)) {
 			ship.lastTrail = 0;
-			Stars.shipTrails.newPart(ship, ship.engine1);
+			this.newPart(ship, ship.engine1);
 			if (ship.dualEngines) {
-				Stars.shipTrails.newPart(ship, ship.engine2);
+				this.newPart(ship, ship.engine2);
 			}
 		}
+	},
+	update: function(timeDiff) {
+		this.getSpritePool();
+		for (var i = 0; i < this.spritePool.sprites.length; i++) {
+
+			var sprite = this.spritePool.sprites[i];
+
+			if (sprite.visible) {
+
+				sprite.scale.x -= sprite.fadeSpeed * timeDiff;
+				sprite.scale.y -= sprite.fadeSpeed * timeDiff;
+
+				if (sprite.scale.x <= 0) {
+					this.spritePool.discardSprite(sprite);
+				} else {
+					sprite.position.y += sprite.ySpeed * timeDiff;
+					sprite.position.x += sprite.xSpeed * timeDiff;
+				}
+			}
+		}
+	}
+}
+
+Stars.shipTrails = {
+	getSpritePool : function() {
+		if (!this.spritePool) {
+			this.spritePool = SpritePool.create(Stars.stars.getTexture(), starContainer);
+		}
+		return this.spritePool;
+	},
+	trailFrequency : 30,
+	newPart: function(ship, sprite) {
+
+		var position;
+		var part = this.getSpritePool().nextSprite();
+
+		if (ship.trailX < 0 || ship.trailX > canvasWidth)
+			return;
+
+		position = {
+			x: (ship.trailX - 3 + (Math.random() * 6)) * scalingFactor,
+			y: ship.trailY * scalingFactor
+		};
+
+		part.fadeSpeed = 8 * scalingFactor;
+		part.scale.x = (1 + Math.random() * 2) * scalingFactor;
+		part.scale.y = (2 + Math.random() * 2) * scalingFactor;
+		part.tint = Math.random() > 0.45 ? 0xffff00 : 0xff5600;
+
+
+		part.visible = true;
+
+		part.alpha = 1;
+		part.position = position;
+
+		part.ySpeed = ((ship.enemyShip ? -0.7 : 1) * (280 + Math.random() * 100)) * scalingFactor;
+		part.xSpeed = (-10 + Math.random() * 20) * scalingFactor;
 	},
 	updateShip: function(ship, timeDiff) {
 		ship.lastTrail += timeDiff * 1000;

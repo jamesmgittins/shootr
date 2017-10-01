@@ -169,7 +169,7 @@ Asteroids = {
     this.shipsExited = 0;
 
     this.destroy = function() {
-  		this.spritePool.destroy();
+  		this.spritePool.destroy(true);
   		this.finished = true;
   	};
   },
@@ -240,7 +240,7 @@ Asteroids = {
     }
 
     if (this.finished) {
-      this.spritePool.destroy();
+      this.spritePool.destroy(true);
     }
   },
 

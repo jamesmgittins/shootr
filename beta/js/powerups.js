@@ -4,7 +4,7 @@ var MoneyPickup = {
 	speed:50,
 	getSpritePool : function() {
 		if (!this.spritePool) {
-			this.diamondTexture =  glowTexture(PIXI.Texture.fromImage("img/diamond.svg"), {resize:0.04 * scalingFactor, blurAmount : 0.5});
+			this.diamondTexture = glowTexture(PIXI.Texture.fromImage("img/diamond.svg"), {resize:0.04 * scalingFactor, blurAmount : 0.5});
 			this.sapphireTexture = glowTexture(PIXI.Texture.fromImage("img/sapphire.svg"), {resize:0.04 * scalingFactor, blurAmount : 0.5});
 			this.spritePool = SpritePool.create(
 				[this.sapphireTexture,this.diamondTexture],
@@ -14,6 +14,10 @@ var MoneyPickup = {
 	},
 	inPlay:function() {
 		return this.spritePool && this.spritePool.discardedSprites.length < this.spritePool.sprites.length;
+	},
+	reset : function() {
+		this.getSpritePool().destroy();
+		this.spritePool = false;
 	},
 	newMoneyPickup:function(x, y, value, alternate){
 		var pickup = this.getSpritePool().nextSprite();
@@ -37,8 +41,7 @@ var MoneyPickup = {
 		pickup.lastTrail = 0;
 	},
 	resize : function() {
-		this.getSpritePool().destroy();
-		this.spritePool = false;
+		this.reset();
 	},
 	update : function(timeDiff) {
 		if (this.spritePool) {
@@ -141,11 +144,14 @@ var Powerups = {
 		return Powerups.sprite[0].visible;
 	},
 	reset:function() {
-		for (var i = 0; i < Powerups.maxPowerups; i++) {
-			if (Powerups.sprite[i].visible) {
-				Powerups.sprite[i].visible = false;
-			}
-		}
+		MoneyPickup.reset();
+		this.sprite = [];
+		this.texture = {};
+
+		if (Powerups.sprites)
+			powerupContainer.removeChild(Powerups.sprites);
+
+		this.initialize();
 		PlayerShip.playerShip.powerupTime = Powerups.powerupLength + 1;
 	},
 	resize:function() {
@@ -190,6 +196,17 @@ var Powerups = {
 			Powerups.sprites.addChild(Powerups.sprite[i]);
 		}
 		powerupContainer.addChild(Powerups.sprites);
+	},
+	getRandomItem : function() {
+		var baseSeed = Date.now();
+		var level = gameModel.currentLevel > 1 ?
+			Math.max(1, Math.floor(gameModel.currentLevel + (Math.random() * (Boss.currentLevel() - gameModel.currentLevel) * 0.8))) :
+			gameModel.currentLevel;
+		if (Math.random() > 0.75) {
+			return Shields.generateShield(level, baseSeed, true);
+		} else {
+			return Weapons.generateWeapon(level, baseSeed, true);
+		}
 	},
 	update : function(timeDiff) {
 		MoneyPickup.update(timeDiff);
@@ -250,19 +267,16 @@ var Powerups = {
 							Powerups.sprite[i].visible = false;
 							// gameModel.lootCollected++;
 
-							var baseSeed = Date.now();
-							var level = gameModel.currentLevel > 1 ? Math.max(1,Math.round(gameModel.currentLevel + (Math.random() * 2.6) - 1)) : gameModel.currentLevel;
-							if (Math.random() > 0.75) {
-								var shield = ArmsDealer.generateShield(level, baseSeed + i, true);
-								gameModel.lootCollected.push(shield);
-								GameText.levelComplete.lootLayouts.push(ArmsDealer.createItemLayout(shield, false, true));
-								GameText.status.lootIcons.push(ArmsDealer.createItemIcon(shield, {buy:false, cache:true}));
-							} else {
-								var weapon = Weapons.generateWeapon(level, baseSeed + i, true);
-								gameModel.lootCollected.push(weapon);
-								GameText.levelComplete.lootLayouts.push(ArmsDealer.createItemLayout(weapon, false, true));
-								GameText.status.lootIcons.push(ArmsDealer.createItemIcon(weapon, {buy:false, cache:true}));
+
+							var lootInCrate = Math.random() > 0.8 ? 2 : 1;
+
+							for (var j = 0; j < lootInCrate; j++ ) {
+								var item = Powerups.getRandomItem();
+								gameModel.lootCollected.push(item);
+								GameText.levelComplete.lootLayouts.push(ArmsDealer.createItemLayout(item, false, true));
+								GameText.status.lootIcons.push(ArmsDealer.createItemIcon(item, {buy:false, cache:true}));
 							}
+
 
 						}
 					} else {

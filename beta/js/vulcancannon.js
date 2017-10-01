@@ -23,6 +23,10 @@ VulcanCannon = {
   },
 
 	updateBullets : function(timeDiff, spritePool) {
+
+		if (spritePool.destroyed)
+			return;
+
 		for (var i = 0; i < spritePool.sprites.length; i++) {
 			var sprite = spritePool.sprites[i];
 
@@ -49,6 +53,7 @@ VulcanCannon = {
 						if (sprite.lastEnemyDamaged != enemyShip.id && enemyShip.detectCollision(enemyShip, sprite.xLoc, sprite.yLoc)) {
 							Enemies.damageEnemy(enemyShip, sprite.xLoc, sprite.yLoc, sprite.bulletStrength);
 							if (sprite.passThrough) {
+								sprite.bulletStrength = sprite.bulletStrength * 0.6;
 								sprite.lastEnemyDamaged = enemyShip.id;
 							} else {
 								spritePool.discardSprite(sprite);
@@ -119,7 +124,10 @@ VulcanCannon = {
 
 				Sounds.playerBullets.play(position.x);
 				VulcanCannon.individualBullet(this.spritePool, speed, position, weapon.damagePerShot * damageModifier, 1, this.weapon);
-			}
+			},
+			destroy : function() {
+        this.spritePool.destroy();
+      }
 		};
   }
 };

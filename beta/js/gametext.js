@@ -1,5 +1,5 @@
 var GameText = {
-	initialize:function(){
+	initialize:function() {
 		GameText.status.initialize();
 		GameText.credits.initialize();
 		GameText.damage.initialize();
@@ -13,11 +13,37 @@ var GameText = {
 		GameText.damage.update(timeDiff);
 		GameText.levelComplete.update(timeDiff);
 	},
-	resize:function(){
+	resize:function() {
 		GameText.status.resize();
 		GameText.credits.resize();
 		GameText.bigText.resize();
 		GameText.damage.resize();
+	},
+	reset:function() {
+		GameText.status.lootIcons = [];
+		GameText.levelComplete.lootLayouts = [];
+
+		if (GameText.damage.container) {
+			GameText.damage.container.destroy(true);
+		}
+		GameText.damage.texts = [];
+		GameText.damage.discardedText = [];
+		GameText.damage.initialize();
+
+		if (GameText.credits.container) {
+			GameText.credits.container.destroy(true);
+		}
+		GameText.credits.texts = [];
+		GameText.credits.currText = 0;
+		GameText.credits.initialize();
+
+		if (GameText.bigText.container) {
+			GameText.bigText.container.destroy(true);
+		}
+
+		GameText.bigText.texts = [];
+		GameText.bigText.currText = 0;
+		GameText.bigText.initialize();
 	}
 };
 
@@ -128,6 +154,19 @@ GameText.status = {
 
 		GameText.status.container.addChild(GameText.status.enemies);
 
+		GameText.status.rating = getText("Current rating - 0%", fontSize, {	align: 'center'	});
+		GameText.status.rating.tint = MainMenu.buttonTint;
+		GameText.status.rating.anchor = {
+			x: 0.5,
+			y: 0.5
+		};
+		GameText.status.rating.position = {
+			x: Math.max(sideSpace / 2, GameText.status.enemies.getBounds().width / 1.9),
+			y: 135 * scalingFactor
+		};
+
+		GameText.status.container.addChild(GameText.status.rating);
+
 		GameText.status.credits = getText(formatMoney(gameModel.p1.credits) + " credits", fontSize, {	align: 'center'	});
 		GameText.status.credits.lastCredits = 0;
 		GameText.status.credits.timer = 1;
@@ -191,10 +230,14 @@ GameText.status = {
 		GameText.shieldDisplay.percentage = 0;
 	},
 	hide: function() {
-		GameText.status.container.visible = false;
+		if (GameText.status.container) {
+			// GameText.status.container.destroy(true);
+			// GameText.status.container = undefined;
+			GameText.status.container.visible = false;
+		}
 	},
 	update: function(timeDiff) {
-		if (!GameText.status.container.visible)
+		if (!GameText.status.container || !GameText.status.container.visible)
 			return;
 
 		var sideSpace = (renderer.width - renderer.height) / 2;
@@ -211,6 +254,11 @@ GameText.status = {
 		GameText.status.enemies.text = (distance * Math.max(0, timeLeft) / levelTime).toFixed(1) + " Light Years to Target";
 		GameText.status.fps.text = fps + " fps";
 
+		if (Enemies.enemiesSpawned > 0) {
+			GameText.status.rating.text = "Current rating - " + (Math.round(Enemies.enemiesKilled / Enemies.enemiesSpawned * 100) - PlayerShip.playerShip.timesDamaged) + "%";
+		}
+
+
 		GameText.status.credits.timer += timeDiff;
 		var creditChange = calculateIncomeSinceLastCheck(500);
 		if (GameText.status.credits.lastCredits != gameModel.p1.temporaryCredits || creditChange > 0) {
@@ -223,7 +271,9 @@ GameText.status = {
 		GameText.status.credits.tint = GameText.status.credits.timer < 0.1 ? MainMenu.selectedButtonTint : MainMenu.buttonTint;
 
 		// if an icon not yet displayed
-		if (GameText.status.lootContainer.children.length < GameText.status.lootIcons.length) {
+		if (GameText.status.lootContainer.children.length < GameText.status.lootIcons.length &&
+				(GameText.status.lootContainer.children.length == 0 || GameText.status.lootContainer.children[GameText.status.lootContainer.children.length - 1].position.y >= renderer.height * 0.03)
+				) {
 
 			// get next one and add to container
 			var newCrate = GameText.status.lootIcons[GameText.status.lootContainer.children.length];
@@ -238,7 +288,7 @@ GameText.status = {
 
 		// move crates down if needed
 		if (GameText.status.lootContainer.children.length > 0 &&
-			GameText.status.lootContainer.children[GameText.status.lootContainer.children.length-1].position.y < renderer.height * 0.03) {
+			GameText.status.lootContainer.children[GameText.status.lootContainer.children.length-1].position.y <= renderer.height * 0.03) {
 			var speed = 160 * scalingFactor * timeDiff;
 			GameText.status.lootContainer.children.forEach(function(crate){
 				crate.position.y += speed;
@@ -252,9 +302,11 @@ GameText.status = {
 
 	},
 	resize: function() {
-		var visible = GameText.status.container.visible;
-		GameText.status.initialize();
-		GameText.status.container.visible = visible;
+		if (GameText.status.container && GameText.status.container.visible) {
+			var visible = GameText.status.container.visible;
+			GameText.status.initialize();
+			GameText.status.container.visible = visible;
+		}
 	}
 };
 
@@ -270,7 +322,7 @@ GameText.damage = {
 	resize: function() {
 		var textSize = (GameText.damage.fontSize * scalingFactor).toFixed();
 		GameText.damage.texts.forEach(function(text){
-			text.style.font = textSize + 'px Dosis';
+			text.style.fontSize = textSize;
 		});
 	},
 	update: function(timeDiff) {
@@ -344,7 +396,7 @@ GameText.credits = {
 	resize: function() {
 		var textSize = (20 * scalingFactor).toFixed();
 		for (var i = 0; i < GameText.credits.maxTexts; i++) {
-			GameText.credits.texts[i].style.font = textSize + 'px Dosis';
+			GameText.credits.texts[i].style.fontSize = textSize;
 		}
 	},
 	update: function(timeDiff) {
@@ -380,7 +432,7 @@ GameText.bigText = {
 	resize: function() {
 		var textSize = (32 * scalingFactor).toFixed();
 		for (var i = 0; i < GameText.bigText.maxTexts; i++) {
-			GameText.bigText.texts[i].style.font = textSize + 'px Dosis';
+			GameText.bigText.texts[i].style.fontSize = textSize;
 		}
 	},
 	initialize: function() {
@@ -430,7 +482,7 @@ GameText.levelComplete = {
 	lastParticle:0,
 	lootLayouts:[],
 	update:function(timeDiff){
-		if (!this.container.visible)
+		if (!this.container || !this.container.visible)
 			return;
 
 		this.lastParticle += timeDiff;
@@ -488,6 +540,7 @@ GameText.levelComplete = {
 				this.scoreBoard.visible = false;
 			}
 			if (gameModel.lootCollected.length === 0 || this.lootTimer > gameModel.lootCollected.length * this.secondsPerLoot) {
+				this.textMessage.visible = false;
 				changeState(states.station);
 			}
 		}
@@ -502,7 +555,7 @@ GameText.levelComplete = {
 		this.lootOpening = false;
 		this.lootTimer = 0;
 
-		this.textMessage = getText("Level Complete\nYou have collected "  + formatMoney(gameModel.p1.temporaryCredits) + " credits\nPress " + ShootrUI.getInputButtonDescription(buttonTypes.select) + " to Continue", 32 * scalingFactor, { align: 'center' });
+		this.textMessage = getText("Level Complete\nYou have collected "  + formatMoney(gameModel.p1.temporaryCredits) + " credits\nPress " + ShootrUI.getInputButtonDescription(buttonTypes.select) + " to Continue", 32 * scalingFactor, { align: 'center' }, true);
 		this.textMessage.tint = MainMenu.buttonTint;
 		this.textMessage.anchor = {x:0.5,y:0.5};
 		this.textMessage.position = {x:renderer.width / 2, y:renderer.height / 2};
@@ -525,13 +578,8 @@ GameText.levelComplete = {
 		}
 	},
 	hide:function() {
-		this.container.visible=false;
-
-		var arr = this.container.children;
-		arr.forEach(function(ele){
-			GameText.levelComplete.container.removeChild(ele);
-			ele.destroy();
-		});
+		this.container.destroy(true);
+		this.initialize();
 	},
 	checkForClick:function() {
 		if (this.container.visible)
@@ -544,26 +592,41 @@ GameText.levelComplete = {
 		var backgroundCol = Constants.itemColors.normal;
 		var borderCol = Constants.itemBorders.normal;
 
-		var rating = Enemies.enemiesKilled / Enemies.enemiesSpawned;
+		var rating = (Enemies.enemiesKilled / Enemies.enemiesSpawned) - (PlayerShip.playerShip.timesDamaged / 100);
 		var ratingDesc = "NORMAL";
 
-		if (rating >= 0.85) {
+		var bonusLoot = [];
+
+		var lootSeed = Date.now();
+
+		if (rating >= 0.60) {
 			backgroundCol = Constants.itemColors.super;
 			borderCol = Constants.itemBorders.super;
 			ratingDesc = "SUPER";
+			bonusLoot.push(Powerups.getRandomItem());
 		}
 
-		if (rating >= 0.95) {
+		if (rating >= 0.85) {
 			backgroundCol = Constants.itemColors.ultra;
 			borderCol = Constants.itemBorders.ultra;
 			ratingDesc = "ULTRA";
+			bonusLoot.push(Powerups.getRandomItem());
+		}
+
+		if (rating >= 0.95) {
+			backgroundCol = Constants.itemColors.hyper;
+			borderCol = Constants.itemBorders.hyper;
+			ratingDesc = "HYPER";
+			bonusLoot.push(Powerups.getRandomItem());
 		}
 
 		if (rating >= 1) {
 			backgroundCol = Constants.itemColors.hyper;
 			borderCol = Constants.itemBorders.hyper;
-			ratingDesc = "HYPER";
+			ratingDesc = "PERFECT";
+			bonusLoot.push(Powerups.getRandomItem());
 		}
+
 
 		var border = new PIXI.Graphics();
 		border.beginFill(backgroundCol);
@@ -582,7 +645,7 @@ GameText.levelComplete = {
 			y: 1 * scalingFactor
 		};
 
-		var ratingText = getText("Rating: " + ratingDesc, 30 * scalingFactor, {
+		var ratingText = getText("Rating: " + ratingDesc + " (" + Math.round(rating * 100) + "%)", 30 * scalingFactor, {
 			fill: backgroundCol,
 			stroke: borderCol,
 			align: 'right'
@@ -596,10 +659,10 @@ GameText.levelComplete = {
 		container.addChild(levelText);
 		container.addChild(ratingText);
 
-		var spacing = 42;
+		var spacing = 44;
 		var startPos = 52;
 
-		var killedText = getText("Enemies Destroyed: " + Math.round(rating * 100) + "%", 22 * scalingFactor, {
+		var killedText = getText("Enemies Destroyed: " + Math.round(Enemies.enemiesKilled / Enemies.enemiesSpawned * 100) + "%\nHits taken: " + PlayerShip.playerShip.timesDamaged, 22 * scalingFactor, {
 			fill: borderCol,
 			stroke: backgroundCol
 		});
@@ -614,7 +677,7 @@ GameText.levelComplete = {
 		});
 		collectedText.position = {
 			x: 5 * scalingFactor,
-			y: (startPos + spacing) * scalingFactor
+			y: (startPos + spacing + 13) * scalingFactor
 		};
 
 		var cratesText = getText("Cargo Crates Collected: " + gameModel.lootCollected.length, 22 * scalingFactor, {
@@ -660,15 +723,46 @@ GameText.levelComplete = {
 			container.addChild(valueText);
 		}
 
+		if (bonusLoot.length > 0) {
+			var lootContainer = new PIXI.Container();
+			var lootPositionX = 0;
+			for (var lootCount = 0; lootCount < bonusLoot.length; lootCount++) {
+				gameModel.lootCollected.push(bonusLoot[lootCount]);
+				GameText.levelComplete.lootLayouts.push(ArmsDealer.createItemLayout(bonusLoot[lootCount], false, true));
+				var lootLayout = ArmsDealer.createItemIcon(bonusLoot[lootCount], {buy:false, cache:true});
+				lootLayout.children.forEach(function(child) {
+					child.tint = 0xFFFFFF;
+				});
+				lootLayout.position.x = (lootLayout.width + 25) * lootCount;
+				lootContainer.addChild(lootLayout);
+			}
+			var bonusText = getText("Bonus loot!", 30 * scalingFactor, {
+				fill: borderCol,
+				stroke: backgroundCol,
+				align: 'center'
+			});
+			bonusText.anchor = {x:0.5,y:0};
+			bonusText.position = {
+				x: lootContainer.width / 2,
+				y: -35 * scalingFactor
+			};
+			lootContainer.addChild(bonusText);
+			lootContainer.anchor = {x:0, y:0};
+			lootContainer.position.x = (container.width / 2) - (lootContainer.width / 2);
+			lootContainer.position.y = container.height + 50 * scalingFactor;
+			container.addChild(lootContainer);
+		}
+
 		var continueText = getText("Press " + ShootrUI.getInputButtonDescription(buttonTypes.select) + (gameModel.lootCollected.length === 0 ? " to Continue" : " to inspect the contents"), 22 * scalingFactor, {
 			fill: borderCol,
 			stroke: backgroundCol
 		});
-		continueText.anchor = {x:0.5,y:1};
+		continueText.anchor = {x:0.5,y:0};
 		continueText.position = {
 			x: 512 * scalingFactor / 2,
-			y: (212 - 5) * scalingFactor
+			y: container.height + 25 * scalingFactor
 		};
+
 
 		container.addChild(continueText);
 
