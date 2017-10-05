@@ -102,9 +102,6 @@ function changeLevel(level) {
 
 	distance = StarChart.distanceBetweenStars(gameModel.currentSystem.x,gameModel.currentSystem.y, gameModel.targetSystem.x, gameModel.targetSystem.y);
 	resetGame();
-	if (startStar.asteroids || endStar.asteroids) {
-		Asteroids.getATexture();
-	}
 	save();
 }
 
@@ -191,23 +188,12 @@ function changeState(state) {
 	});
 }
 
-function clearTextureCache() {
-	for (var basetextureUrl in PIXI.utils.BaseTextureCache) {
-		if (basetextureUrl.includes("text"))
-	  	delete PIXI.utils.BaseTextureCache[basetextureUrl];
-	}
-	for (var textureUrl in PIXI.utils.TextureCache) {
-		if (textureUrl.includes("text"))
-	  	delete PIXI.utils.TextureCache[textureUrl];
-	}
-}
-
 function resetGame() {
-
-	clearTextureCache();	
+	var message = "Resetting game, Before: " + Object.keys(PIXI.utils.BaseTextureCache).length + ", After: ";
+	clearTextureCache();
 
 	Weapons.reset();
-	Powerups.resize();
+	Powerups.reset();
 	Boss.reset();
 	Enemies.reset();
 	GameText.reset();
@@ -226,6 +212,9 @@ function resetGame() {
 	}
 	destroyedWarning = false;
 	PlayerShip.playerShip.container.visible = true;
+
+	message += Object.keys(PIXI.utils.BaseTextureCache).length;
+	debug && console.log(message);
 }
 
 var tintPercent = 0;
@@ -274,7 +263,7 @@ function update() {
 			);
 
 			// update game state
-	// 		Terrain.update(timeDiff);
+			Terrain.update(timeDiff);
 			PlayerShip.updatePlayerShip(timeDiff);
 			Enemies.update(timeDiff);
 			Weapons.update(timeDiff);
@@ -327,7 +316,7 @@ var updateScreenShake =  function(timeDiff) {
 var coords;
 var stage;
 
-var starContainer;
+var backgroundContainer;
 var bulletContainer;
 var playerBulletContainer;
 var enemyShipContainer;
@@ -491,7 +480,8 @@ function startGame() {
 	document.addEventListener("DOMMouseScroll", mouseWheelHandler, false);
 
 	// create different sprite layers
-	starContainer = new PIXI.Container();
+	backgroundContainer = new PIXI.Container();
+	shipTrailContainer = new PIXI.Container();
 	bulletContainer = new PIXI.Container();
 	playerBulletContainer = new PIXI.Container();
 	enemyShipContainer = new PIXI.Container();
@@ -507,7 +497,8 @@ function startGame() {
 	explosionContainer = new PIXI.Container();
 	uiContainer = new PIXI.Container();
 
-	stage.addChild(starContainer);
+	stage.addChild(backgroundContainer);
+	stage.addChild(shipTrailContainer);
 	stage.addChild(enemyShipContainer);
 	stage.addChild(powerupContainer);
 	stage.addChild(playerBulletContainer);
@@ -520,15 +511,13 @@ function startGame() {
 	Stars.nebulaBackground.initTexture(1);
 	Stars.stars.initialize();
   PlayerShip.initialize();
-// 	Terrain.initialize();
+	Terrain.initialize();
 
   PlayerShip.controllerPointer.initialize();
 	Ships.blasts.initialize();
 	Powerups.initialize();
 
 	GameText.initialize();
-
-	resetGame();
 
   ShootrUI.updateGamepadSelect();
 

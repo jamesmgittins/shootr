@@ -185,7 +185,14 @@ SpritePool = {
   }
 };
 
+var blurFilters = false;
+var texturesCreated = [];
+
 function glowTexture(texture, options) {
+
+	// console.log("creating glow texture for " + arguments.callee.caller.toString());
+	// if (1 == 1)
+	// 	return texture;
 
 	var resize = options && options.resize ? options.resize : 1;
 	var width = texture.width * resize;
@@ -202,11 +209,12 @@ function glowTexture(texture, options) {
 
 
 	var container = new PIXI.Container();
+	var blurTexture;
 
 	// only add blur effect for higher resolutions
 	if (renderer.height > 900 && gameModel.detailLevel >= 1) {
 
-		var blurTexture = PIXI.RenderTexture.create(width * 2, height * 2);
+		blurTexture = PIXI.RenderTexture.create(width * 2, height * 2);
 		var blurredSprite = new PIXI.Sprite(texture);
 		blurredSprite.scale = {x:resize, y:resize};
 		blurredSprite.anchor = {x:0.5, y:0.5};
@@ -216,7 +224,9 @@ function glowTexture(texture, options) {
 
 		var bigBlurSprite = new PIXI.Sprite(blurTexture);
 
-		blurFilters = [new PIXI.filters.BlurFilter()];
+		if (!blurFilters)
+			blurFilters = [new PIXI.filters.BlurFilter()];
+
 		blurFilters[0].blur = Math.round(gameModel.resolutionFactor * 5);
 		bigBlurSprite.filters = blurFilters;
 		bigBlurSprite.alpha = options && options.blurAmount ? options.blurAmount : 1;
@@ -228,16 +238,30 @@ function glowTexture(texture, options) {
 	renderer.render(container, glowTexture);
 
 	// return new PIXI.Texture(glowTexture, new PIXI.Rectangle(width / 2 - 2, height / 2 - 2, width + 4, height + 4));
-	var returnTexture = new PIXI.Texture(glowTexture);
-
-	if (options && !options.dontDestroyOriginal) {
+	// var returnTexture = new PIXI.Texture(glowTexture);
+	//
+	if (!options || !options.dontDestroyOriginal) {
 		texture.destroy(true);
+		if (blurTexture)
+			blurTexture.destroy(true);
 		container.destroy(true);
 	}
 
 
-
-	return returnTexture;
+	// returnTexture.glowDestroy = function() {
+	// 	normalSprite.destroy(true);
+	// 	returnTexture.destroy(true);
+	// 	texture.destroy(true);
+	// 	container.destroy(true);
+	// 	blurredSprite.destroy(true);
+	// 	bigBlurSprite.destroy(true);
+	// 	glowTexture.destroy(true);
+	// };
+	// texturesCreated.push(texture);
+	// texturesCreated.push(blurTexture);
+	// texturesCreated.push(glowTexture);
+	return glowTexture;
+	// return returnTexture;
 }
 
 function recursiveApplyToChildren(container, apply) {

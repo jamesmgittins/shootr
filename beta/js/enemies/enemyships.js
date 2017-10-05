@@ -83,7 +83,6 @@ EnemyShips.wave = function () {
 	this.texture = glowTexture(PIXI.Texture.fromCanvas(Ships.shipArt(size, seed, this.colors)));
 	this.damageTexture = glowTexture(PIXI.Texture.fromCanvas(Ships.shipArt(size, seed, this.colors, true)));
 	this.spritePool = SpritePool.create(this.texture, frontEnemyContainer);
-
 	this.offset = Math.round(size / 2);
 	this.ships = [];
 	this.shipsExited = 0;

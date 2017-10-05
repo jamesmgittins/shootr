@@ -301,7 +301,7 @@ Ships.fragments = {
 	bitsPerExplosion: 12,
 	getSpritePool:function() {
 		if (!this.spritePool) {
-			this.spritePool = SpritePool.create(Stars.stars.getTexture(), starContainer);
+			this.spritePool = SpritePool.create(Stars.stars.getTexture(), shipTrailContainer);
 		}
 		return this.spritePool;
 	},
@@ -352,7 +352,7 @@ Ships.explosionBits = {
 	sprite:[],
 	getSpritePool : function() {
 		if (!this.spritePool) {
-			this.spritePool = SpritePool.create(Stars.stars.getTexture(), starContainer);
+			this.spritePool = SpritePool.create(Stars.stars.getTexture(), shipTrailContainer);
 		}
 		return this.spritePool;
 	},

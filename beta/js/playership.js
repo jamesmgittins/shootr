@@ -254,7 +254,7 @@ PlayerShip.setupTextures = function(){
 	playerShipContainer.addChild(PlayerShip.playerShip.container);
 	PlayerShip.playerShip.sprite = new PIXI.Sprite(glowTexture(PIXI.Texture.fromCanvas(PlayerShip.playerShip.art)));
 	PlayerShip.playerShip.engine1 = new PIXI.Sprite(PlayerShip.engineTexture());
-	PlayerShip.playerShip.engine2 = new PIXI.Sprite(PlayerShip.engineTexture());
+	PlayerShip.playerShip.engine2 = new PIXI.Sprite(PlayerShip.playerShip.engine1.texture);
 	PlayerShip.playerShip.container.addChild(PlayerShip.playerShip.engine1);
 	PlayerShip.playerShip.container.addChild(PlayerShip.playerShip.engine2);
 	PlayerShip.playerShip.container.addChild(PlayerShip.playerShip.sprite);
@@ -283,13 +283,11 @@ PlayerShip.updateSize = function() {
 PlayerShip.initialize = function () {
 	if (!playerShipContainer)
 		return;
-		
+
 	PlayerShip.setupTextures();
 	PlayerShip.playerShip.colors = Ships.enemyColors[gameModel.p1.ship.colorIndex];
 	PlayerShip.playerShip.xLoc = canvasWidth / 2;
 	PlayerShip.playerShip.yLoc = canvasHeight - (canvasHeight / 6);
-
-
 
 	PlayerShip.playerShip.rolling = 100;
 

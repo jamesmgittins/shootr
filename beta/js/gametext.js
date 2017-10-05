@@ -433,6 +433,7 @@ GameText.credits = {
 		}
 	},
 	newCreditText: function(x, y, text) {
+
 		GameText.credits.currText++;
 		if (GameText.credits.currText >= GameText.credits.maxTexts) {
 			GameText.credits.currText = 0;

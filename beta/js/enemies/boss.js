@@ -11,7 +11,6 @@ Boss = {
   maxBulletsPerShot:15,
   enemyShip : true,
   damage : EnemyShips.damageEnemyShip,
-	destroy : EnemyShips.destroy,
 	detectCollision : Ships.detectCollision,
   id:"boss"
 };
@@ -46,7 +45,7 @@ Boss.calculateLevel = function(bossNumber) {
   if (bossNumber === 3) {
     return 10;
   }
-  return 10 + bossNumber * Constants.levelsPerBoss;
+  return 10 + (bossNumber - 3) * Constants.levelsPerBoss;
 };
 
 Boss.currentLevel = function() {
@@ -208,6 +207,11 @@ Boss.reset = function() {
   if (Boss.spritePool){
     Boss.spritePool.discardAll();
   }
+};
+
+Boss.destroy = function() {
+  EnemyShips.destroy(Boss);
+  Boss.shield.hide();
 };
 
 Boss.shield = {

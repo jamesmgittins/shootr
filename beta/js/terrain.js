@@ -95,7 +95,7 @@ var Terrain = {
     shape.clear();
 
     var midPoint = canvasHeight / 2;
-    var heightMultiplier = (((shape.yLoc - midPoint) / midPoint) / Terrain.terrainGenerator.max) * scalingFactor * Terrain.ySpacing * 10;
+    var heightMultiplier = (((shape.yLoc - midPoint) / midPoint) / Terrain.terrainGenerator.max) * scalingFactor * Terrain.ySpacing * 5;
     var xLoc = 0;
 
     for (var i=0; i< shape.heightMap.length - 1;i++) {
@@ -113,11 +113,11 @@ var Terrain = {
   initialize:function() {
 
     Terrain.container = new PIXI.Container();
-    starContainer.addChild(Terrain.container);
+    backgroundContainer.addChild(Terrain.container);
     Terrain.terrainGenerator = new TerrainGenerator(9);
     Terrain.terrainGenerator.generate(1);
     Terrain.currentIndex = 0;
-    Terrain.offset = Math.round(Math.random() * (Terrain.terrainGenerator.size / 2))
+    Terrain.offset = Math.round(Math.random() * (Terrain.terrainGenerator.size / 2));
     Terrain.xSpacing = canvasHeight / Terrain.points;
 
     for (var i = canvasHeight; i > 0; i -= Terrain.ySpacing) {

@@ -3,7 +3,9 @@ var MoneyPickup = {
 	xMaxSpeed : 20,
 	speed:50,
 	initialize : function () {
+		if (!this.diamondTexture)
 		this.diamondTexture = glowTexture(PIXI.Texture.fromImage("img/diamond.svg"), {resize:0.04 * scalingFactor, blurAmount : 0.5, dontDestroyOriginal:true});
+		if (!this.sapphireTexture)
 		this.sapphireTexture = glowTexture(PIXI.Texture.fromImage("img/sapphire.svg"), {resize:0.04 * scalingFactor, blurAmount : 0.5, dontDestroyOriginal:true});
 	},
 	getSpritePool : function() {
@@ -18,17 +20,7 @@ var MoneyPickup = {
 		return this.spritePool && this.spritePool.discardedSprites.length < this.spritePool.sprites.length;
 	},
 	reset : function() {
-		if (this.diamondTexture && this.sapphireTexture) {
-			this.diamondTexture.destroy(true);
-			this.sapphireTexture.destroy(true);
-
-			if (this.spritePool) {
-				this.getSpritePool().destroy();
-				this.spritePool = false;
-			}
-			this.initialize();
-		}
-
+		this.getSpritePool().discardAll();
 	},
 	newMoneyPickup:function(x, y, value, alternate){
 		if (this.getSpritePool()) {
@@ -54,7 +46,18 @@ var MoneyPickup = {
 		}
 	},
 	resize : function() {
-		this.reset();
+		if (this.diamondTexture && this.sapphireTexture) {
+			this.diamondTexture.destroy(true);
+			this.sapphireTexture.destroy(true);
+			this.diamondTexture = false;
+			this.sapphireTexture = false;
+
+			if (this.spritePool) {
+				this.getSpritePool().destroy();
+				this.spritePool = false;
+			}
+			this.initialize();
+		}
 	},
 	update : function(timeDiff) {
 		if (this.spritePool) {
@@ -159,17 +162,9 @@ var Powerups = {
 	},
 	reset:function() {
 		MoneyPickup.reset();
-		this.sprite = [];
-		this.texture = {};
-
-		if (Powerups.sprites) {
-			powerupContainer.removeChild(Powerups.sprites);
-			for (var i = 0; i < Powerups.sprite.length; i++) {
-				Powerups.sprites.removeChild(Powerups.sprite[i]);
-				Powerups.sprite[i].destroy(true);
-			}
-		}
-		this.initialize();
+		this.sprite.forEach(function(sprite){
+			sprite.visible = false;
+		});
 		PlayerShip.playerShip.powerupTime = Powerups.powerupLength + 1;
 	},
 	resize:function() {
@@ -274,7 +269,6 @@ var Powerups = {
 							for (var j = 0; j < lootInCrate; j++ ) {
 								var item = Powerups.getRandomItem();
 								gameModel.lootCollected.push(item);
-								// GameText.levelComplete.lootLayouts.push(ArmsDealer.createItemLayout(item, false, true));
 								GameText.status.lootIcons.push(ArmsDealer.createItemIcon(item, {buy:false, cache:true}));
 							}
 

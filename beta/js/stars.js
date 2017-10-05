@@ -1,5 +1,13 @@
 var Stars = {};
 
+Stars.getContainer = function() {
+	if (!Stars.container) {
+		Stars.container = new PIXI.Container();
+		backgroundContainer.addChild(Stars.container);
+	}
+	return Stars.container;
+};
+
 Stars.StartEndStars = {
 	acceleration : 0.4,
 	maxSpeed : 1,
@@ -32,7 +40,7 @@ Stars.StartEndStars = {
 		Stars.stars.sprites.addChild(Stars.StartEndStars.sprite);
 	},
 	update : function(timeDiff) {
-		if (currentState == states.running) {
+		if (currentState == states.running && inSpace) {
 			Stars.stars.speedFactor = 1;
 			if (Stars.StartEndStars.sprite.visible) {
 				if (Stars.StartEndStars.sprite.yLoc > canvasHeight * 0.1)
@@ -113,7 +121,7 @@ Stars.nebulaBackground = {
 
 		if (!Stars.nebulaBackground.sprite) {
 			Stars.nebulaBackground.sprite = new PIXI.Sprite(this.texture);
-			starContainer.addChild(Stars.nebulaBackground.sprite);
+			Stars.getContainer().addChild(Stars.nebulaBackground.sprite);
 		} else {
 			Stars.nebulaBackground.sprite.texture = PIXI.Texture.fromCanvas(nebulaCanvas);
 		}
@@ -122,7 +130,7 @@ Stars.nebulaBackground = {
 
 	},
 	update: function(timeDiff) {
-		if (Stars.nebulaBackground.sprite) {
+		if (Stars.nebulaBackground.sprite && inSpace) {
 			Stars.nebulaBackground.sprite.scale.x = canvasHeight / Stars.nebulaBackground.size * scalingFactor;
 			Stars.nebulaBackground.sprite.scale.y = Stars.nebulaBackground.sprite.scale.x * 2;
 			var adjustment = Math.max(0,Math.min(1,(levelTime - timeLeft) / levelTime));
@@ -152,16 +160,16 @@ Stars.stars = {
 		return this.spritePool;
 	},
 	show:function() {
-		Stars.stars.sprites.visible = true;
+		Stars.getContainer().visible = true;
 	},
 	hide:function() {
-		Stars.stars.sprites.visible = false;
+		Stars.getContainer().visible = false;
 	},
 	initialize: function() {
 		Math.seedrandom(Date.now());
 
 		Stars.stars.sprites = new PIXI.Container();
-		starContainer.addChild(Stars.stars.sprites);
+		Stars.getContainer().addChild(Stars.stars.sprites);
 
 		for (var i = 0; i < Stars.stars.numStars * gameModel.detailLevel; i++) {
 
@@ -246,7 +254,7 @@ Stars.powerupParts = {
 Stars.playerShipTrails = {
 	getSpritePool : function() {
 		if (!this.spritePool) {
-			this.spritePool = SpritePool.create(PlayerShip.engineTexture(), starContainer);
+			this.spritePool = SpritePool.create(PlayerShip.engineTexture(), shipTrailContainer);
 		}
 		return this.spritePool;
 	},
@@ -318,7 +326,7 @@ Stars.playerShipTrails = {
 Stars.shipTrails = {
 	getSpritePool : function() {
 		if (!this.spritePool) {
-			this.spritePool = SpritePool.create(Stars.stars.getTexture(), starContainer);
+			this.spritePool = SpritePool.create(Stars.stars.getTexture(), shipTrailContainer);
 		}
 		return this.spritePool;
 	},
