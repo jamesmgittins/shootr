@@ -81,11 +81,30 @@ Enemies = {
 
   reset:function() {
 
+    if (!enemyShipContainer)
+      return;
+
     for (var c=0; c < Enemies.waves.length; c++) {
       if (Enemies.waves[c].destroy) {
         Enemies.waves[c].destroy();
       }
     }
+    if (backgroundEnemyContainer)
+      backgroundEnemyContainer.destroy(true);
+
+    if (bulletContainer)
+     bulletContainer.destroy(true);
+
+    if (frontEnemyContainer)
+      frontEnemyContainer.destroy(true);
+
+    backgroundEnemyContainer = new PIXI.Container();
+    bulletContainer = new PIXI.Container();
+    frontEnemyContainer = new PIXI.Container();
+
+    enemyShipContainer.addChild(backgroundEnemyContainer);
+  	enemyShipContainer.addChild(bulletContainer);
+  	enemyShipContainer.addChild(frontEnemyContainer);
 
     Enemies.difficultyFactor = 1;
     Enemies.difficultyCheck = 0;
@@ -95,18 +114,24 @@ Enemies = {
     Enemies.enemySpawners = [];
     Enemies.waves = [];
     Enemies.activeWaves = [];
+    Asteroids.deleteTextures();
 
   },
 
   enemySpawners : [],
   getEnemySpawners : function() {
     if (this.enemySpawners.length === 0) {
-      this.enemySpawners = [
-        function(){return new EnemyShips.wave();},
-        function(){return new UFOs.bulletWave();},
-        function(){return new UFOs.railWave();},
-        function(){return new EnemyShips.wave();}
-      ];
+      this.enemySpawners = [];
+      this.enemySpawners.push(function(){return new EnemyShips.wave();});
+      this.enemySpawners.push(function(){return new EnemyShips.wave();});
+      this.enemySpawners.push(function(){return new UFOs.bulletWave();});
+
+      if (gameModel.currentLevel > 2)
+        this.enemySpawners.push(function(){return new UFOs.railWave();});
+
+      if (gameModel.currentLevel > 3)
+        this.enemySpawners.push(function(){return new Squarepusher.bulletWave();});
+
     }
     return this.enemySpawners;
   },
@@ -123,6 +148,7 @@ Enemies = {
 
     // return new EnemyShips.wave();
     // return new UFOs.bulletWave();
+    // return new Squarepusher.bulletWave();
   }
 
 

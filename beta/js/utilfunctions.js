@@ -168,36 +168,18 @@ SpritePool = {
 				}
 			},
 			changeTexture : function(texture) {
-				// this.destroyTextures();
 				this.texture = texture;
 				for (var i = 0; i < this.sprites.length; i++) {
 					this.sprites[i].texture = texture;
 					this.sprites[i].anchor = {x:0.5,y:0.5};
 				}
 			},
-			// destroyTextures : function() {
-			// 	if (this.texture) {
-			// 		if (Array.isArray(this.texture)) {
-			// 			this.texture.forEach(function(texture){
-			// 				if (texture) {
-			// 					texture.destroy(true);
-			// 				}
-			// 			});
-			// 		} else {
-			// 			if (this.texture.baseTexture)
-			// 				var baseTexture = this.texture.baseTexture;
-			// 			this.texture.destroy(true);
-			// 		}
-			// 	}
-			// },
 			destroy : function(leaveTextures) {
 				if (!this.destroyed) {
-					// container.removeChild(this.container);
 					this.container.destroy({children:true, texture:!leaveTextures, baseTexture:!leaveTextures});
-					// if (!leaveTextures)
-					// 	this.destroyTextures();
 				}
 				this.destroyed = true;
+
 			}
     };
   }
@@ -224,9 +206,7 @@ function glowTexture(texture, options) {
 	// only add blur effect for higher resolutions
 	if (renderer.height > 900 && gameModel.detailLevel >= 1) {
 
-		var blurContainer = new PIXI.Container();
 		var blurTexture = PIXI.RenderTexture.create(width * 2, height * 2);
-
 		var blurredSprite = new PIXI.Sprite(texture);
 		blurredSprite.scale = {x:resize, y:resize};
 		blurredSprite.anchor = {x:0.5, y:0.5};
@@ -241,12 +221,7 @@ function glowTexture(texture, options) {
 		bigBlurSprite.filters = blurFilters;
 		bigBlurSprite.alpha = options && options.blurAmount ? options.blurAmount : 1;
 		container.addChild(bigBlurSprite);
-
-		// container.addChild(blurContainer);
-
-		// console.log("creating a glow texture, bigBlurSprite = " + bigBlurSprite.width + " x " + bigBlurSprite.height + ", normalsprite = " + normalSprite.width + " x " + normalSprite.height);
 	}
-
 
 	container.addChild(normalSprite);
 	// container.cacheAsBitmap = true;
@@ -254,8 +229,14 @@ function glowTexture(texture, options) {
 
 	// return new PIXI.Texture(glowTexture, new PIXI.Rectangle(width / 2 - 2, height / 2 - 2, width + 4, height + 4));
 	var returnTexture = new PIXI.Texture(glowTexture);
-	returnTexture.glowTexture = glowTexture;
-	// texture.destroy(true);
+
+	if (options && !options.dontDestroyOriginal) {
+		texture.destroy(true);
+		container.destroy(true);
+	}
+
+
+
 	return returnTexture;
 }
 
@@ -270,8 +251,9 @@ function recursiveApplyToChildren(container, apply) {
 
 function removeAllFromContainer(container) {
 	for (var i = container.children.length - 1; i >= 0; i--) {
-		container.removeChild(container.children[i]);
-		container.children[i].destroy(true);
+		var item = container.children[i];
+		container.removeChild(item);
+		item.destroy(true);
 	}
 }
 
@@ -302,4 +284,62 @@ function getText(text, size, options, destroyLater) {
 		align: options.align || 'left'
 	});
 
+}
+
+function checkForKeepers(container, texturesToKeep, baseTexturesToKeep) {
+	container.children.forEach(function(item){
+		if (item.texture) {
+			if (item.texture.textureCacheIds && item.texture.textureCacheIds.length > 0) {
+				texturesToKeep.push(item.texture.textureCacheIds[0]);
+			}
+			if (item.texture.baseTexture)
+				baseTexturesToKeep.push(item.texture.baseTexture.uid);
+		}
+	});
+}
+
+function clearTextureCache() {
+	var message = "Clearing Cache, Before: " + Object.keys(PIXI.utils.BaseTextureCache).length + ", After: ";
+	var texturesToKeep = [];
+	var baseTexturesToKeep = [];
+
+	// checkForKeepers(gameContainer, texturesToKeep, baseTexturesToKeep);
+	// checkForKeepers(stage, texturesToKeep, baseTexturesToKeep);
+	//
+	// for (var textureUrl in PIXI.utils.TextureCache) {
+	// 	var keep = false;
+	// 	texturesToKeep.forEach(function(toKeep) {
+	// 		if (toKeep == textureUrl)
+	// 			keep = true;
+	// 	});
+	// 	if (!keep)
+	// 		PIXI.utils.TextureCache[textureUrl].destroy(true);
+	// }
+	//
+	// for (var basetextureUrl in PIXI.utils.BaseTextureCache) {
+	// 	var keep = false;
+	// 	baseTexturesToKeep.forEach(function(toKeep) {
+	// 		if (toKeep == PIXI.utils.BaseTextureCache[basetextureUrl].uid)
+	// 			keep = true;
+	// 	});
+	// 	if (!keep)
+	// 		PIXI.utils.BaseTextureCache[basetextureUrl].destroy(true);
+	// }
+
+
+	// for (var basetextureUrl in PIXI.utils.BaseTextureCache) {
+	// 	if (basetextureUrl.includes("text")) {
+	// 		delete PIXI.utils.BaseTextureCache[basetextureUrl];
+	// 	}
+	// }
+	// for (var textureUrl in PIXI.utils.TextureCache) {
+	// 	if (textureUrl.includes("text")) {
+	// 		delete PIXI.utils.TextureCache[textureUrl];
+	// 	}
+	// }
+	renderer.textureGC.maxIdle = 120;
+	renderer.textureGC.run();
+
+	message += Object.keys(PIXI.utils.BaseTextureCache).length;
+	debug && console.log(message);
 }

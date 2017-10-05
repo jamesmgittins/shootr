@@ -47,13 +47,11 @@ Shields.generateEnergyShieldItem = function(level, seed, rarity) {
 	var capacity = (level * 11 + (Math.random() * level * 3)) * levelMod * rarity.factor;
 	var chargePerSecond = (level * 3 + Math.random() * 2) * levelMod * rarity.factor;
 	var chargeDelay = 3 + Math.random() * 2;
-	return {
+	var shield = {
 		type: "shield",
 		super:rarity.super,
 		ultra:rarity.ultra,
 		hyper:rarity.hyper,
-		ultraName:"Immovable Object",
-		ultraText:"10% Chance for enemy bullets to reflect",
 		name: rarity.prefix + "Energy Shield",
 		seed: seed,
 		level: level,
@@ -64,6 +62,14 @@ Shields.generateEnergyShieldItem = function(level, seed, rarity) {
 		id: gameModel.weaponIdCounter++,
     shieldType : Shields.types.energy
 	};
+
+  if (rarity.ultra || rarity.hyper) {
+		shield.recharge = true;
+		shield.ultraName = "Immovable Object";
+		shield.ultraText = "10% Chance to absorb damage and recharge your shield";
+	}
+
+  return shield;
 };
 
 Shields.generateBarrierShieldItem = function(level, seed, rarity) {
@@ -74,13 +80,11 @@ Shields.generateBarrierShieldItem = function(level, seed, rarity) {
 	var capacity = (level * 18 + (Math.random() * level * 3)) * levelMod * rarity.factor;
 	var chargePerSecond = (level * 0.6 + Math.random() * 0.3) * levelMod * rarity.factor;
 	var chargeDelay = 0.5;
-	return {
+	var shield = {
 		type: "shield",
 		super:rarity.super,
 		ultra:rarity.ultra,
 		hyper:rarity.hyper,
-		ultraName:"The Tortoise",
-		ultraText:"Shield will recharge at double rate when below 50%",
 		name: rarity.prefix + "Nanotech Barrier",
 		seed: seed,
 		level: level,
@@ -91,4 +95,12 @@ Shields.generateBarrierShieldItem = function(level, seed, rarity) {
 		id: gameModel.weaponIdCounter++,
     shieldType : Shields.types.barrier
 	};
+
+  if (rarity.ultra || rarity.hyper) {
+		shield.doubleRate = true;
+		shield.ultraName = "The Tortoise";
+		shield.ultraText = "Shield will recharge at double rate when below 50%";
+	}
+
+  return shield;
 };

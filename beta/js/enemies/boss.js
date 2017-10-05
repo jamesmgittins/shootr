@@ -12,7 +12,8 @@ Boss = {
   enemyShip : true,
   damage : EnemyShips.damageEnemyShip,
 	destroy : EnemyShips.destroy,
-	detectCollision : Ships.detectCollision
+	detectCollision : Ships.detectCollision,
+  id:"boss"
 };
 
 Boss.flightPatterns = [
@@ -32,8 +33,24 @@ Boss.isInTargetSystem = function() {
   return gameModel.bossPosition && gameModel.bossPosition.x == gameModel.targetSystem.x && gameModel.targetSystem.y == gameModel.bossPosition.y;
 };
 
+Boss.calculateLevel = function(bossNumber) {
+  if (bossNumber === 0) {
+    return 0;
+  }
+  if (bossNumber === 1) {
+    return 3;
+  }
+  if (bossNumber === 2) {
+    return 6;
+  }
+  if (bossNumber === 3) {
+    return 10;
+  }
+  return 10 + bossNumber * Constants.levelsPerBoss;
+};
+
 Boss.currentLevel = function() {
-  return Constants.levelsPerBoss * (gameModel.bossesDefeated + 1);
+  return Boss.calculateLevel(gameModel.bossesDefeated + 1);
 };
 
 Boss.bossActive = function() {
@@ -43,8 +60,6 @@ Boss.bossActive = function() {
 Boss.randomLocation = function() {
   if (!gameModel.bossesDefeated)
     gameModel.bossesDefeated = 0;
-
-
 
   var currentLevel = Boss.currentLevel();
   var maxDistanceToPlot = Math.round(Constants.starDistancePerLevel * currentLevel);
@@ -62,38 +77,6 @@ Boss.randomLocation = function() {
   var chosenStar = acceptableStars[Math.floor(Math.random() * acceptableStars.length)];
 
   gameModel.bossPosition = {x:chosenStar.x, y:chosenStar.y};
-};
-
-Boss.nudgeLocation = function() {
-  var currentLevel = Constants.levelsPerBoss * (gameModel.bossesDefeated + 1);
-
-  var xLocation, yLocation;
-  var locationFound = false;
-
-  while (locationFound === false) {
-
-    xLocation = gameModel.bossPosition.x + (Math.random() > 0.5 ? 1 : -1);
-    yLocation = gameModel.bossPosition.y + (Math.random() > 0.5 ? 1 : -1);
-
-    if (xLocation < -currentLevel)
-      xLocation = -currentLevel;
-    if (xLocation > currentLevel)
-      xLocation = currentLevel;
-    if (yLocation < -currentLevel)
-      yLocation = -currentLevel;
-    if (yLocation > currentLevel)
-      yLocation = currentLevel;
-
-    if (StarChart.generateStar(xLocation, yLocation).exists) {
-      locationFound = true;
-    } else {
-      console.log("star does not exist, trying new location");
-    }
-  }
-
-
-  gameModel.bossPosition = {x:xLocation, y:yLocation};
-
 };
 
 Boss.update = function(timeDiff) {

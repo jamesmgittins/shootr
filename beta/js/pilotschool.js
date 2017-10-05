@@ -11,6 +11,11 @@ PilotSchool = {
   showCurrentCredits:true,
   hide : function() {
     PilotSchool.menuContainer.visible = false;
+    for (i = PilotSchool.menuContainer.children.length - 1; i >= 0; i--){
+      var item = PilotSchool.menuContainer.children[i];
+      PilotSchool.menuContainer.removeChild(item);
+      item.destroy(true);
+    }
   },
   show : function() {
     PilotSchool.initialize();
@@ -28,7 +33,7 @@ PilotSchool.initialize = function () {
     for (i = PilotSchool.menuContainer.children.length - 1; i >= 0; i--){
       var item = PilotSchool.menuContainer.children[i];
       PilotSchool.menuContainer.removeChild(item);
-      item.destroy();
+      item.destroy(true);
     }
   }
   var fontSize = Math.round(MainMenu.fontSize * scalingFactor);

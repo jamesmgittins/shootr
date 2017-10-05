@@ -103,8 +103,8 @@ Loadout.showWeapons = function() {
 
   for (var i=Loadout.weaponsContainer.children.length - 1; i >= 0; i--){
     var item = Loadout.weaponsContainer.children[i];
-    Loadout.weaponsContainer.removeChild(item);
-    item.destroy();
+    // Loadout.weaponsContainer.removeChild(item);
+    item.visible=false;
   }
 
   var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
@@ -262,8 +262,9 @@ Loadout.showShields = function() {
 
   for (var i=Loadout.weaponsContainer.children.length - 1; i >= 0; i--){
     var item = Loadout.weaponsContainer.children[i];
-    Loadout.weaponsContainer.removeChild(item);
-    item.destroy();
+    // Loadout.weaponsContainer.removeChild(item);
+    // item.destroy();
+    item.visible = false;
   }
 
   var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
@@ -319,6 +320,19 @@ Loadout.hide = function() {
   Loadout.weaponsContainer.visible = false;
   Loadout.weapons = [];
   Loadout.shields = [];
+  Loadout.weaponMenuOpen = false;
+
+  if (Loadout.firingWeapon)
+    Loadout.firingWeapon.destroy();
+
+  if (Loadout.menuContainer) {
+    for (i = Loadout.menuContainer.children.length - 1; i >= 0; i--){
+      var item = Loadout.menuContainer.children[i];
+      Loadout.menuContainer.removeChild(item);
+      item.destroy(true);
+    }
+  }
+
 };
 
 Loadout.show = function() {
@@ -335,7 +349,7 @@ Loadout.initialize = function () {
     for (i = Loadout.menuContainer.children.length - 1; i >= 0; i--){
       var item = Loadout.menuContainer.children[i];
       Loadout.menuContainer.removeChild(item);
-      item.destroy();
+      item.destroy(true);
     }
   }
   Loadout.firingWeapons = [];
@@ -801,6 +815,8 @@ Loadout.update = function(timeDiff) {
         }
       } else {
         // set up weapon
+        if (Loadout.firingWeapon)
+          Loadout.firingWeapon.destroy();
         Loadout.firingWeapon = Weapons.createWeaponLogic(Loadout.equippedWeapon, Loadout.bulletContainer);
         Loadout.equippedWeapon.lastShot = 1;
         Loadout.firingWeapons.push(Loadout.firingWeapon);

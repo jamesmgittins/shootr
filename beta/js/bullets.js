@@ -177,8 +177,10 @@ Bullets.enemyBullets = {
 		return this.spritePool;
 	},
 	destroy : function() {
-		this.getSpritePool().destroy();
-		this.spritePool = undefined;
+		if (this.spritePool) {
+			this.getSpritePool().destroy();
+			this.spritePool = undefined;
+		}
 
 		if (Bullets.explosionBits.spritePool) {
 			Bullets.explosionBits.spritePool.destroy();

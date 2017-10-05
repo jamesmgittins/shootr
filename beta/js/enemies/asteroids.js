@@ -98,36 +98,6 @@ Asteroids = {
   },
 
 
-  numTextures : 1,
-  textureCounter : 0,
-  getATexture : function() {
-    if (!Asteroids.textures) {
-      // var seed = Date.now();
-      Asteroids.textures = [];
-      // for (var i =0; i < Asteroids.numTextures * gameModel.detailLevel; i++) {
-      //   seed++;
-      //   Asteroids.textures.push(
-      //     {
-      //       texture:Asteroids.createTexture(seed, false, 128),
-      //       damageTexture:Asteroids.createTexture(seed, true, 128)
-      //     }
-      //   );
-      // }
-    }
-    Asteroids.textureCounter++;
-    if (Asteroids.textureCounter >= Asteroids.textures.length)
-      Asteroids.textureCounter = 0;
-
-    if (!Asteroids.textures[Asteroids.textureCounter]) {
-      var seed = Date.now();
-      Asteroids.textures[Asteroids.textureCounter] = {texture:Asteroids.createTexture(seed, false, 128), damageTexture:Asteroids.createTexture(seed, true, 128)};
-    }
-
-
-    return Asteroids.textures[Asteroids.textureCounter];
-  },
-
-
   sizeTextures : [],
   sizeGranularity : 8,
   seed : Date.now(),
@@ -141,7 +111,15 @@ Asteroids = {
     return this.sizeTextures[Math.round(size / this.sizeGranularity)];
   },
 
-
+  deleteTextures : function() {
+    for (var i = 0; i < this.sizeTextures.length; i++) {
+      if (this.sizeTextures[i]) {
+        this.sizeTextures[i].texture.destroy(true);
+        this.sizeTextures[i].damageTexture.destroy(true);
+      }
+    }
+    this.sizeTextures = [];
+  },
 
   wave : function() {
     this.update = Asteroids.updateWave;
@@ -156,7 +134,7 @@ Asteroids = {
 
     // var seed = Date.now();
 
-    this.texture = Asteroids.getATexture().texture;
+    this.texture = Asteroids.createTexture(this.seed, false, 20);
     this.spritePool = SpritePool.create(this.texture, backgroundEnemyContainer);
 
     this.ships = [];
@@ -240,7 +218,7 @@ Asteroids = {
     }
 
     if (this.finished) {
-      this.spritePool.destroy(true);
+      this.destroy(true);
     }
   },
 

@@ -90,6 +90,8 @@ EnemyShips.wave = function () {
 
 	this.destroy = function() {
 		this.spritePool.destroy();
+		this.damageTexture.destroy(true);
+		this.texture.destroy(true);
 		this.finished = true;
 	};
 };
@@ -364,6 +366,6 @@ EnemyShips.update = function (timeDiff) {
 	if (this.shipsExited + this.shipsDestroyed >= this.shipsInWave || (this.shipsExited + this.shipsDestroyed >= this.shipsSpawned && timeLeft < 0)) {
 		this.finished = true;
 		this.wavePattern.inUse = false;
-		this.spritePool.destroy();
+		this.destroy();
 	}
 };

@@ -270,7 +270,7 @@ VolumeMenu = {
   menuOptions:[
     {title:"Up",click:function(){
       Howler.mute(false);
-      gameModel.masterVolume += 0.05;
+      gameModel.masterVolume = Math.min(1, gameModel.masterVolume + 0.05);
       Howler.volume(gameModel.masterVolume);
       VolumeMenu.volumeText.text = (gameModel.masterVolume * 100).toFixed() + "%";
     }},
@@ -339,6 +339,13 @@ ResolutionMenu = {
         })()
       });
     }
+  }
+};
+
+MainMenu.resetContainers = function() {
+  for (var i=Menus.length-1; i>=0;i--) {
+    Menus[i].menuContainer.visible = false;
+    Menus[i].menuContainer = false;
   }
 };
 
@@ -764,7 +771,9 @@ MainMenu.updateAll = function(timeDiff) {
 
 MainMenu.updateCredits = function(menu, creditChange) {
   if (menu.showCurrentCredits && menu.currentCredits && creditChange > 0) {
-    menu.currentCredits.text = formatMoney(gameModel.p1.credits) + " Credits" + "\nTexture Cache = " + Object.keys(PIXI.utils.BaseTextureCache).length;
+    menu.currentCredits.text = formatMoney(gameModel.p1.credits) + " Credits";
+    if (debug)
+      menu.currentCredits.text += "\nTexture Cache = " + Object.keys(PIXI.utils.BaseTextureCache).length;
   }
 };
 
@@ -785,9 +794,13 @@ InitializeMenus = function() {
   }
   StarChart.initialize();
   Shipyard.initialize();
+  Shipyard.hide();
   Loadout.initialize();
+  Loadout.hide();
   ArmsDealer.initialize();
+  ArmsDealer.hide();
   PilotSchool.initialize();
+  PilotSchool.hide();
   Modal.initialize();
 };
 

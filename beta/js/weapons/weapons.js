@@ -222,6 +222,10 @@ Weapons.update = function(timeDiff) {
 };
 
 Weapons.reset = function() {
+
+  PlayerShip.playerShip.spreadShot = 0;
+  PlayerShip.playerShip.crossShot = 0;
+
   Bullets.enemyBullets.destroy();
 
   if (Weapons.weaponLogic.frontWeapon) {
@@ -235,5 +239,6 @@ Weapons.reset = function() {
   }
   Weapons.weaponLogic = {};
 
-  removeAllFromContainer(playerBulletContainer);
+  if (playerBulletContainer)
+    removeAllFromContainer(playerBulletContainer);
 };

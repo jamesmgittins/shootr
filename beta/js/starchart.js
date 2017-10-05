@@ -10,7 +10,6 @@ StarChart = {
     return true;
   },
   launchButton :{title:"Launch Ship", click:function(){
-    clearTextureCache();
     gameModel.targetSystem = {x:StarChart.selectedStar.x,y:StarChart.selectedStar.y};
     changeLevel(StarChart.generateStar(StarChart.selectedStar.x, StarChart.selectedStar.y).level);
     changeState(states.running);
@@ -19,38 +18,24 @@ StarChart = {
 		cursorPosition = {x:-200,y:-200};
   }},
 	fastTravelButton :{title:"Fast Travel", click:function(){
-    if (StarChart.fastTravelButton.text.visible && StarChart.selectedStar && gameModel.p1.credits > StarChart.fastTravelCost) {
+    if (StarChart.fastTravelButton.text.visible && StarChart.selectedStar) {
 
-      if (StarChart.fastTravelCost > 0) {
-        Modal.show({text:"Purchase spacewarp to " + StarChart.selectedStar.name + " for " + formatMoney(StarChart.fastTravelCost) + " Credits?",
-        ok:function(){
-          StarChart.fastTravelButton.text.visible = false;
-          gameModel.currentSystem = {x:StarChart.selectedStar.x,y:StarChart.selectedStar.y};
-          // var level = Math.max(1,Math.abs(StarChart.selectedStar.x),Math.abs(StarChart.selectedStar.y));
-          gameModel.p1.credits -= StarChart.fastTravelCost;
-          changeLevel(StarChart.selectedStar.level);
-      		StarChart.currentPosition = {x:gameModel.currentSystem.x*-1,y:gameModel.currentSystem.y*-1};
-          StarChart.currentStar = StarChart.generateStar(gameModel.currentSystem.x, gameModel.currentSystem.y);
-          StarChart.deselectStar();
-          StarChart.selectStar(StarChart.currentStar);
-        },
-        cancel:function(){}});
-      } else {
-        StarChart.fastTravelButton.text.visible = false;
-        gameModel.currentSystem = {x:StarChart.selectedStar.x,y:StarChart.selectedStar.y};
-        // var level = Math.max(1,Math.abs(StarChart.selectedStar.x),Math.abs(StarChart.selectedStar.y));
-        changeLevel(StarChart.selectedStar.level);
-    		StarChart.currentPosition = {x:gameModel.currentSystem.x*-1,y:gameModel.currentSystem.y*-1};
-        StarChart.currentStar = StarChart.generateStar(gameModel.currentSystem.x, gameModel.currentSystem.y);
-        StarChart.deselectStar();
-        StarChart.selectStar(StarChart.currentStar);
-      }
+      StarChart.fastTravelButton.text.visible = false;
+      gameModel.currentSystem = {x:StarChart.selectedStar.x,y:StarChart.selectedStar.y};
+      // var level = Math.max(1,Math.abs(StarChart.selectedStar.x),Math.abs(StarChart.selectedStar.y));
+      changeLevel(StarChart.selectedStar.level);
+  		StarChart.currentPosition = {x:gameModel.currentSystem.x*-1,y:gameModel.currentSystem.y*-1};
+      StarChart.currentStar = StarChart.generateStar(gameModel.currentSystem.x, gameModel.currentSystem.y);
+      StarChart.deselectStar();
+      StarChart.selectStar(StarChart.currentStar);
     }
   }},
   tradeRouteText : {
     initialize : function() {
       if (StarChart.tradeRouteText.text) {
         StarChart.menuContainer.removeChild(StarChart.tradeRouteText.text);
+        if (StarChart.tradeRouteText.text && !StarChart.tradeRouteText.text._destroyed)
+          StarChart.tradeRouteText.text.destroy(true);
       }
       StarChart.tradeRouteText.text = getText(gameModel.history.length + " trade routes cleared\nEarning " + formatMoney(calculateIncome()) + " credits per second", MainMenu.fontSize * scalingFactor, { align: 'center' });
     	StarChart.tradeRouteText.text.tint = MainMenu.buttonTint;
@@ -61,6 +46,8 @@ StarChart = {
 
       if (StarChart.currentCredits) {
         StarChart.menuContainer.removeChild(StarChart.currentCredits);
+        if (!StarChart.currentCredits._destroyed)
+        StarChart.currentCredits.destroy(true);
       }
       StarChart.currentCredits = getText(formatMoney(gameModel.p1.credits) + " Credits", MainMenu.fontSize * scalingFactor, { align: 'center'});
       StarChart.currentCredits.tint = MainMenu.titleTint;
@@ -70,6 +57,8 @@ StarChart = {
 
       if (StarChart.rangeText) {
         StarChart.menuContainer.removeChild(StarChart.rangeText);
+        if (!StarChart.rangeText._destroyed)
+          StarChart.rangeText.destroy(true);
       }
       StarChart.rangeText = getText("Maximum Range\n" + formatMoney(StarChart.maxDistance) + " light years", MainMenu.fontSize * scalingFactor, { align: 'center' });
       StarChart.rangeText.tint = MainMenu.buttonTint;
@@ -112,13 +101,12 @@ StarChart = {
       return StarChart.Stars.spritePool;
     },
     initialize : function() {
-      StarChart.Stars.texture = this.getTexture();
       if (!StarChart.Stars.sprites){
         StarChart.Stars.sprites = new PIXI.Container();
         StarChart.menuContainer.addChild(StarChart.Stars.sprites);
       }
-      StarChart.Stars.getSpritePool().discardAll();
-      StarChart.Stars.getSpritePool().changeTexture(this.getTexture());
+      StarChart.Stars.getSpritePool().destroy();
+      StarChart.Stars.spritePool = undefined;
     }
   },
   trackMouse: false,
@@ -178,7 +166,7 @@ StarChart.generateStar = function(x, y) {
   var seed = (56788 - x) * (y === 0 ? 13370: y);
   Math.seedrandom(seed);
   var origin = x === 0 && y === 0;
-  var starExists = origin || Math.random() > 0.6;
+  var starExists = magnitude(x,y) < 4 ? origin || Math.random() > 0.3 : origin || Math.random() > 0.6;
 
   if (starExists) {
     var scale = 0.6 + Math.random() * 0.5 + (Math.random() > 0.9 ? Math.random() * 1.5 : 0);
@@ -230,6 +218,8 @@ StarChart.locator = {
 
         if (StarChart.locator.sprite) {
           StarChart.menuContainer.removeChild(StarChart.locator.sprite);
+          if (!StarChart.locator.sprite._destroyed)
+            StarChart.locator.sprite.destroy(true);
         }
 
         StarChart.locator.sprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(blast));
@@ -240,6 +230,8 @@ StarChart.locator = {
 
         if (StarChart.locator.bossSprite) {
           StarChart.menuContainer.removeChild(StarChart.locator.bossSprite);
+          if (!StarChart.locator.bossSprite._destroyed)
+            StarChart.locator.bossSprite.destroy(true);
         }
 
         StarChart.locator.bossSprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(blast));
@@ -287,18 +279,6 @@ StarChart.locator = {
 };
 
 StarChart.starField = {
-	texture: (function() {
-		var blast = document.createElement('canvas');
-		blast.width = 1;
-		blast.height = 1;
-		var blastCtx = blast.getContext('2d');
-
-		// draw shape
-		blastCtx.fillStyle = "#ffffff";
-		blastCtx.fillRect(0, 0, 1, 1);
-
-		return PIXI.Texture.fromCanvas(blast);
-	})(),
 	numStars:600,
 	speed: [],
 	sprite: [],
@@ -322,9 +302,11 @@ StarChart.starField = {
     // var bounds = StarChart.menuBackground.getBounds();
     // var bounds = renderer;
 
+    var texture = Stars.stars.getTexture();
+
 		for (var i = 0; i < StarChart.starField.numStars; i++) {
 			StarChart.starField.speed[i] = 1 + Math.random() * 50;
-			StarChart.starField.sprite[i] = new PIXI.Sprite(StarChart.starField.texture);
+			StarChart.starField.sprite[i] = new PIXI.Sprite(texture);
 			StarChart.starField.xLoc[i] = 0 + Math.random() * renderer.width;
 			StarChart.starField.yLoc[i] = 0 + Math.random() * renderer.height;
 			StarChart.starField.sprite[i].position.x = StarChart.starField.xLoc[i];
@@ -409,7 +391,8 @@ StarChart.initializeHistory = function() {
   if (StarChart.history) {
     for (var i=0; i < StarChart.history.length; i++) {
       StarChart.menuContainer.removeChild(StarChart.history[i].line);
-      StarChart.history[i].line.destroy();
+      if (!StarChart.history[i].line._destroyed)
+        StarChart.history[i].line.destroy(true);
     }
   }
   StarChart.history = [];
@@ -451,13 +434,13 @@ StarChart.initialize = function () {
 	if (StarChart.menuContainer) {
 		StarChart.menuContainer.children.forEach(function(child){
 			StarChart.menuContainer.removeChild(child);
+      child.destroy(true);
 		});
 	} else {
 		StarChart.menuContainer = new PIXI.Container();
   	gameContainer.addChild(StarChart.menuContainer);
 	}
 	StarChart.menuContainer.visible = false;
-
 
   StarChart.createBackground();
 
@@ -548,7 +531,10 @@ StarChart.initialize = function () {
 
   StarChart.resize = function () {
 		var visible = StarChart.menuContainer.visible;
-// 		StarChart.initialize();
+    // StarChart.menuContainer.destroy(true);
+    // StarChart.menuContainer=false;
+		// StarChart.initialize();
+    StarChart.menuContainer.visible = visible;
 		StarChart.menuContainer.visible = visible;
 
     StarChart.createBackground();
@@ -694,8 +680,12 @@ StarChart.initialize = function () {
       StarChart.bossStar = StarChart.generateStar(gameModel.bossPosition.x, gameModel.bossPosition.y);
     }
 
-    if (StarChart.skullSprite)
+    if (StarChart.skullSprite) {
       StarChart.menuContainer.removeChild(StarChart.skullSprite);
+      if (!StarChart.skullSprite._destroyed)
+        StarChart.skullSprite.destroy(true);
+    }
+
 
     StarChart.skullSprite = new PIXI.Sprite(PIXI.Texture.fromImage("img/death-skull.svg", undefined, undefined, 0.15));
     StarChart.skullSprite.anchor = {x:-0.5,y:-0.5};
@@ -703,8 +693,12 @@ StarChart.initialize = function () {
     StarChart.skullSprite.scaleMod = 0;
     StarChart.menuContainer.addChild(StarChart.skullSprite);
 
-		if (StarChart.shipSprite)
-			StarChart.menuContainer.removeChild(StarChart.shipSprite);
+		if (StarChart.shipSprite){
+      StarChart.menuContainer.removeChild(StarChart.shipSprite);
+      if (!StarChart.shipSprite._destroyed)
+        StarChart.shipSprite.destroy(true);
+    }
+
 
     var shipTexture = Ships.shipArt(32, gameModel.p1.ship.seed, Ships.enemyColors[gameModel.p1.ship.colorIndex]);
     StarChart.shipSprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(shipTexture));
@@ -712,14 +706,22 @@ StarChart.initialize = function () {
 
     StarChart.menuContainer.addChild(StarChart.shipSprite);
 
-    if (StarChart.rangeCircle)
+    if (StarChart.rangeCircle) {
       StarChart.menuContainer.removeChild(StarChart.rangeCircle);
+      if (!StarChart.rangeCircle._destroyed)
+        StarChart.rangeCircle.destroy(true);
+    }
+
 
     StarChart.rangeCircle = new PIXI.Graphics();
     StarChart.menuContainer.addChild(StarChart.rangeCircle);
 
-    if (StarChart.levelCircle)
+    if (StarChart.levelCircle) {
       StarChart.menuContainer.removeChild(StarChart.levelCircle);
+      if (!StarChart.levelCircle._destroyed)
+        StarChart.levelCircle.destroy(true);
+    }
+
 
     StarChart.levelCircle = new PIXI.Graphics();
     StarChart.menuContainer.addChild(StarChart.levelCircle);
@@ -731,7 +733,7 @@ StarChart.initialize = function () {
   };
 
   StarChart.checkMouseOver = function () {
-    if (!StarChart.menuContainer.visible || lastUsedInput == inputTypes.controller)
+    if (!StarChart.menuContainer || !StarChart.menuContainer.visible || lastUsedInput == inputTypes.controller)
       return false;
 
 		StarChart.cursorSprite.visible = false;
@@ -800,7 +802,6 @@ StarChart.initialize = function () {
       StarChart.launchButton.text.position = {x:renderer.width * 0.5,y: renderer.height * 0.95 - 25};
 
       StarChart.fastTravelButton.text.visible = false;
-      StarChart.fastTravelCost = 0;
 
       if (StarChart.selectedStarDistance() > 0) {
         gameModel.history.forEach(function(hist){
@@ -811,11 +812,6 @@ StarChart.initialize = function () {
 
         StarChart.fastTravelButton.text.text = StarChart.fastTravelButton.title + " (" + ShootrUI.getInputButtonDescription(buttonTypes.leftShoulder) + ")";
 
-        if (StarChart.selectedStarDistance() > StarChart.maxDistance && !StarChart.fastTravelButton.text.visible) {
-          StarChart.fastTravelCost =  StarChart.selectedStarDistance() * 234 * Math.pow(Constants.starJumpScaling, calculateAdjustedStarLevel(star.level)) * getBuyPriceModifier();
-          StarChart.fastTravelButton.text.text = "Buy spacewarp to this system for " + formatMoney(StarChart.fastTravelCost) + " Credits (" + ShootrUI.getInputButtonDescription(buttonTypes.leftShoulder) + ")";
-          StarChart.fastTravelButton.text.visible = true;
-        }
       }
 
       if (gameModel.bossPosition && gameModel.bossPosition.x == StarChart.selectedStar.x && gameModel.bossPosition.y == StarChart.selectedStar.y) {
@@ -882,7 +878,7 @@ StarChart.initialize = function () {
   };
 
   StarChart.show = function() {
-// 		StarChart.initialize();
+		// StarChart.initialize();
     StarChart.initializeStars();
     StarChart.menuContainer.visible = true;
 
@@ -905,6 +901,7 @@ StarChart.initialize = function () {
   };
 
   StarChart.hide = function() {
+    // StarChart.menuContainer.destroy(true);
     StarChart.menuContainer.visible = false;
     Sounds.mapMusic.fadeOut();
   };
@@ -960,13 +957,19 @@ StarChart.initialize = function () {
   };
 
 	StarChart.calculateTint = function(star) {
-		var factor = Math.min(StarChart.zoom * 2,1);
+		var factor = Math.min(StarChart.zoom * 4,1);
 
-		return rgbToHex(
-			255 - (255 - star.tint.r) * factor,
-			255 - (255 - star.tint.g) * factor,
-			255 - (255 - star.tint.b) * factor
-		);
+    if (calculateAdjustedStarLevel(star.level) <= maxLevelAllowed()) {
+      return rgbToHex(
+  			255 - (255 - star.tint.r) * factor,
+  			255 - (255 - star.tint.g) * factor,
+  			255 - (255 - star.tint.b) * factor
+  		);
+    } else {
+      return 0xFF0000;
+    }
+
+
 	};
 
 	StarChart.movementSpeed = 3;

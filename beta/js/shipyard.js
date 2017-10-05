@@ -24,8 +24,8 @@ Shipyard.generateShip = function(level, seed, ultra) {
     turretWeaponLevel:  Math.max(1,Math.round(level - 0.7 + Math.random() * 1.5)),
     rearWeaponLevel:    Math.max(1,Math.round(level - 0.7 + Math.random() * 1.5)),
     shieldLevel:        Math.max(1,Math.round(level - 0.7 + Math.random() * 1.5)),
-    speed : 1 + Math.random() * 0.5 + Math.min(0.5, level / 150),
-    range : 12 + level + Math.random() * 0.2 * level,
+    speed : Math.min(1 + Math.random() * 0.5 + Math.min(0.5, level / 150), 1.6),
+    range : 12 + (level / 2) + (Math.random() * 0.1 * level),
 		colorIndex : prefix.index,
     name:(ultra? "Ultra " : "") + prefix.name + " " + Shipyard.suffixes[Math.floor(Math.random() * Shipyard.suffixes.length)],
     dualEngines : Math.random() > 0.7
@@ -33,12 +33,17 @@ Shipyard.generateShip = function(level, seed, ultra) {
 
   var priceMultiplier = (ship.frontWeaponLevel / level) * (ship.turretWeaponLevel / level) * (ship.rearWeaponLevel / level) * (ship.shieldLevel / level) * (ship.range / 15) * ship.speed;
 
-  ship.price = Math.round(level * levelMod * (1500 + 200 * priceMultiplier));
+  ship.price = Math.round(level * levelMod * (1000 + 200 * priceMultiplier));
   return ship;
 };
 
 Shipyard.hide = function() {
   Shipyard.menuContainer.visible = false;
+  for (i = Shipyard.menuContainer.children.length - 1; i >= 0; i--){
+    var item = Shipyard.menuContainer.children[i];
+    Shipyard.menuContainer.removeChild(item);
+    item.destroy(true);
+  }
   Shipyard.currentSelection=-1;
 };
 
@@ -60,7 +65,7 @@ Shipyard.initialize = function () {
     for (i = Shipyard.menuContainer.children.length - 1; i >= 0; i--){
       var item = Shipyard.menuContainer.children[i];
       Shipyard.menuContainer.removeChild(item);
-      item.destroy();
+      item.destroy(true);
     }
   }
   var fontSize = Math.round(MainMenu.fontSize * scalingFactor);
@@ -204,7 +209,7 @@ Shipyard.buyShip = function(ship) {
 };
 
 Shipyard.checkMouseOver = function () {
-  if (!Shipyard.menuContainer.visible)
+  if (!Shipyard.menuContainer || !Shipyard.menuContainer.visible)
     return false;
 
   if (MainMenu.checkButton(Shipyard.backButton)) {
@@ -381,42 +386,46 @@ Shipyard.prefixes = [
 
 Shipyard.suffixes = [
   "Adder",
-	"Ant",
-	"Bear",
-	"Buzzard",
-	"Centipede",
-	"Cobra",
-	"Coyote",
-	"Deathstalker",
-	"Dragon",
-	"Eagle",
-	"Falcon",
-	"Flea",
-	"Fox",
-	"Gator",
-	"Gazelle",
-	"Ghost",
-	"Hawk",
-	"Hornet",
-	"Komodo",
-	"Leopard",
-	"Lion",
-	"Lizard",
-	"Mosquito",
-	"Panther",
-	"Parasite",
-	"Rhino",
-	"Scorpion",
-	"Shark",
-	"Shrew",
-	"Snake",
-	"Spectre",
-	"Stinger",
-	"Tiger",
-	"Vampire",
-	"Viper",
-	"Vulture",
-	"Warthog",
-	"Wasp",
-	"Wolf"
+  "Ant",
+  "Barracuda",
+  "Bear",
+  "Bison",
+  "Buzzard",
+  "Centipede",
+  "Cobra",
+  "Coyote",
+  "Deathstalker",
+  "Dragon",
+  "Eagle",
+  "Eel",
+  "Falcon",
+  "Flea",
+  "Fox",
+  "Gator",
+  "Gazelle",
+  "Ghost",
+  "Hawk",
+  "Hornet",
+  "Komodo",
+  "Leopard",
+  "Lion",
+  "Lizard",
+  "Mosquito",
+  "Panther",
+  "Parasite",
+  "Rhino",
+  "Scorpion",
+  "Shark",
+  "Shrew",
+  "Snake",
+  "Spectre",
+  "Spider",
+  "Stinger",
+  "Tiger",
+  "Vampire",
+  "Viper",
+  "Vulture",
+  "Warthog",
+  "Wasp",
+  "Wolf"
 ];

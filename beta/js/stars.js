@@ -3,7 +3,7 @@ var Stars = {};
 Stars.StartEndStars = {
 	acceleration : 0.4,
 	maxSpeed : 1,
-	sprite  : {},
+	sprite   : undefined,
 	texture : function (starSize) {
 		var size = 16 * scalingFactor * starSize;
 		var blast = document.createElement('canvas');
@@ -23,6 +23,9 @@ Stars.StartEndStars = {
 		return PIXI.Texture.fromCanvas(blast);
 	},
 	initialize : function () {
+		if (Stars.StartEndStars.sprite) {
+			Stars.StartEndStars.sprite.destroy(true);
+		}
 		Stars.StartEndStars.sprite = new PIXI.Sprite(Stars.StartEndStars.texture(1));
 		Stars.StartEndStars.sprite.visible = false;
 		Stars.StartEndStars.sprite.anchor = {x:0.5, y:0.5};
@@ -310,7 +313,7 @@ Stars.playerShipTrails = {
 			}
 		}
 	}
-}
+};
 
 Stars.shipTrails = {
 	getSpritePool : function() {

@@ -21,7 +21,6 @@ var GameText = {
 	},
 	reset:function() {
 		GameText.status.lootIcons = [];
-		GameText.levelComplete.lootLayouts = [];
 
 		if (GameText.damage.container) {
 			GameText.damage.container.destroy(true);
@@ -54,42 +53,53 @@ GameText.shieldDisplay = {
 	endRgb : hexToRgb("#1976D2"),
 	create:function(container) {
 
+		if (loader.loading)
+			return;
+
 		var sideSpace = (renderer.width - renderer.height) / 2;
 		var maxHeight = renderer.height * 0.3;
 
 		GameText.shieldDisplay.shieldContainer = new PIXI.Container();
 
+		if (loader.resources["img/ship-emblem.svg"]) {
+			if (loader.resources["img/ship-emblem.svg"].texture && !loader.resources["img/ship-emblem.svg"].texture._destroyed)
+				loader.resources["img/ship-emblem.svg"].texture.destroy(true);
+			delete loader.resources["img/ship-emblem.svg"];
+		}
 
-		var maskSprite = PIXI.Sprite.fromImage("img/ship-emblem.svg");
+		loader.add("img/ship-emblem.svg").load(function() {
+			var maskSprite = PIXI.Sprite.fromImage("img/ship-emblem.svg");
 
-		GameText.shieldDisplay.shieldContainer.mask = maskSprite;
-		GameText.shieldDisplay.shieldContainer.addChild(maskSprite);
+			GameText.shieldDisplay.shieldContainer.mask = maskSprite;
+			GameText.shieldDisplay.shieldContainer.addChild(maskSprite);
 
-		var background = new PIXI.Graphics();
-		background.beginFill(0xFFFFFF);
-		background.drawRect(0, 0, maskSprite.width, maskSprite.height);
-		background.tint = 0x560b0b;
-		GameText.shieldDisplay.shieldContainer.addChild(background);
+			var background = new PIXI.Graphics();
+			background.beginFill(0xFFFFFF);
+			background.drawRect(0, 0, maskSprite.width, maskSprite.height);
+			background.tint = 0x560b0b;
+			GameText.shieldDisplay.shieldContainer.addChild(background);
 
-		GameText.shieldDisplay.shieldLevel = new PIXI.Graphics();
-		GameText.shieldDisplay.shieldLevel.beginFill(0xFFFFFF);
-		GameText.shieldDisplay.shieldLevel.drawRect(0, 0, maskSprite.width, maskSprite.height);
-		GameText.shieldDisplay.shieldLevel.tint = 0x0D47A1;
+			GameText.shieldDisplay.shieldLevel = new PIXI.Graphics();
+			GameText.shieldDisplay.shieldLevel.beginFill(0xFFFFFF);
+			GameText.shieldDisplay.shieldLevel.drawRect(0, 0, maskSprite.width, maskSprite.height);
+			GameText.shieldDisplay.shieldLevel.tint = 0x0D47A1;
 
-		GameText.shieldDisplay.shieldContainer.addChild(GameText.shieldDisplay.shieldLevel);
+			GameText.shieldDisplay.shieldContainer.addChild(GameText.shieldDisplay.shieldLevel);
 
-		GameText.shieldDisplay.shieldContainer.scale.x = GameText.shieldDisplay.shieldContainer.scale.y = sideSpace > maxHeight ? maxHeight / maskSprite.width : sideSpace / maskSprite.width;
+			GameText.shieldDisplay.shieldContainer.scale.x = GameText.shieldDisplay.shieldContainer.scale.y = sideSpace > maxHeight ? maxHeight / maskSprite.width : sideSpace / maskSprite.width;
 
-		GameText.shieldDisplay.shieldContainer.position.y = renderer.height - (maskSprite.height * GameText.shieldDisplay.shieldContainer.scale.y);
-		GameText.shieldDisplay.shieldContainer.position.x = (sideSpace - (maskSprite.height * GameText.shieldDisplay.shieldContainer.scale.y)) / 2;
+			GameText.shieldDisplay.shieldContainer.position.y = renderer.height - (maskSprite.height * GameText.shieldDisplay.shieldContainer.scale.y);
+			GameText.shieldDisplay.shieldContainer.position.x = (sideSpace - (maskSprite.height * GameText.shieldDisplay.shieldContainer.scale.y)) / 2;
+		});
 
 		container.addChild(GameText.shieldDisplay.shieldContainer);
+
 	},
 	update:function(timeDiff) {
 		var percentage = PlayerShip.playerShip.currShield / PlayerShip.playerShip.maxShield;
 
 		// update shield display
-		if (GameText.shieldDisplay.percentage != percentage) {
+		if (GameText.shieldDisplay.percentage != percentage && GameText.shieldDisplay.shieldContainer.mask) {
 			GameText.shieldDisplay.shieldLevel.clear();
 			GameText.shieldDisplay.shieldLevel.beginFill(0xFFFFFF);
 			var bounds = GameText.shieldDisplay.shieldContainer.mask;
@@ -126,6 +136,9 @@ GameText.shieldDisplay = {
 GameText.status = {
 	lootIcons:[],
 	initialize: function() {
+		if (!gameContainer)
+			return;
+
 		if (GameText.status.container) {
 			for (var i = GameText.status.container.children.length - 1; i >= 0; i--) {
 				var item = GameText.status.container.children[i];
@@ -231,9 +244,9 @@ GameText.status = {
 	},
 	hide: function() {
 		if (GameText.status.container) {
-			// GameText.status.container.destroy(true);
-			// GameText.status.container = undefined;
-			GameText.status.container.visible = false;
+			GameText.status.container.destroy(true);
+			GameText.status.container = undefined;
+			// GameText.status.container.visible = false;
 		}
 	},
 	update: function(timeDiff) {
@@ -253,6 +266,8 @@ GameText.status = {
 
 		GameText.status.enemies.text = (distance * Math.max(0, timeLeft) / levelTime).toFixed(1) + " Light Years to Target";
 		GameText.status.fps.text = fps + " fps";
+		if (debug)
+			GameText.status.fps.text += "\ncache size\n" + Object.keys(PIXI.utils.BaseTextureCache).length;
 
 		if (Enemies.enemiesSpawned > 0) {
 			GameText.status.rating.text = "Current rating - " + (Math.round(Enemies.enemiesKilled / Enemies.enemiesSpawned * 100) - PlayerShip.playerShip.timesDamaged) + "%";
@@ -272,7 +287,7 @@ GameText.status = {
 
 		// if an icon not yet displayed
 		if (GameText.status.lootContainer.children.length < GameText.status.lootIcons.length &&
-				(GameText.status.lootContainer.children.length == 0 || GameText.status.lootContainer.children[GameText.status.lootContainer.children.length - 1].position.y >= renderer.height * 0.03)
+				(GameText.status.lootContainer.children.length === 0 || GameText.status.lootContainer.children[GameText.status.lootContainer.children.length - 1].position.y >= renderer.height * 0.03)
 				) {
 
 			// get next one and add to container
@@ -316,6 +331,9 @@ GameText.damage = {
 	discardedText : [],
 	speed: -50,
 	initialize: function() {
+		if (!uiContainer)
+			return;
+
 		GameText.damage.container = new PIXI.Container();
 		uiContainer.addChild(GameText.damage.container);
 	},
@@ -380,6 +398,9 @@ GameText.credits = {
 	texts: [],
 	speed: -50,
 	initialize: function() {
+		if (!uiContainer)
+			return;
+
 		GameText.credits.container = new PIXI.Container();
 
 		for (var i = 0; i < GameText.credits.maxTexts; i++) {
@@ -436,6 +457,9 @@ GameText.bigText = {
 		}
 	},
 	initialize: function() {
+		if (!uiContainer)
+			return;
+
 		GameText.bigText.container = new PIXI.Container();
 
 		var textSize = (32 * scalingFactor).toFixed();
@@ -554,6 +578,7 @@ GameText.levelComplete = {
 		this.container.visible = true;
 		this.lootOpening = false;
 		this.lootTimer = 0;
+		this.lootLayouts = [];
 
 		this.textMessage = getText("Level Complete\nYou have collected "  + formatMoney(gameModel.p1.temporaryCredits) + " credits\nPress " + ShootrUI.getInputButtonDescription(buttonTypes.select) + " to Continue", 32 * scalingFactor, { align: 'center' }, true);
 		this.textMessage.tint = MainMenu.buttonTint;
@@ -569,6 +594,9 @@ GameText.levelComplete = {
 		this.container.addChild(this.scoreBoard);
 
 		if (gameModel.lootCollected.length > 0) {
+			gameModel.lootCollected.forEach(function(loot){
+				GameText.levelComplete.lootLayouts.push(ArmsDealer.createItemLayout(loot, false, true));
+			});
 			this.textMessage.text = "Level Complete\nYou have collected "  + formatMoney(gameModel.p1.temporaryCredits) + " credits\nand " + gameModel.lootCollected.length + " crate" + (gameModel.lootCollected.length>1?"s":"") + "\nPress " + ShootrUI.getInputButtonDescription(buttonTypes.select) + " to inspect the contents";
 			this.lootLayouts.forEach(function(layout) {
 				layout.position = {x:renderer.width / 2 - (layout.width / 2), y:renderer.height / 2 - (layout.height / 2)};

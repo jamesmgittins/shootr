@@ -1,11 +1,13 @@
 var Constants = {
+	canvasWidth : 640,
+	canvasHeight : 640,
 	localStorageVariable: "shootrGameModel",
 	starJumpScaling : 1.4,
 	difficultyLevelScaling : 1.4,
 	shieldLevelScaling : 1.39,
 	weaponLevelScaling : 1.38,
-	shipLevelPriceScaling : 1.43,
-	levelsPerBoss:3,
+	shipLevelPriceScaling : 1.45,
+	levelsPerBoss:5,
 	maxScreenShake:2.7,
 	starDistancePerLevel:1.8,
 	starDistance:8,
@@ -43,7 +45,7 @@ var gameModel = {
 };
 
 function maxLevelAllowed() {
-	return (gameModel.bossesDefeated + 1) * Constants.levelsPerBoss;
+	return Boss.currentLevel();
 }
 
 function calculateShipLevel() {
@@ -56,7 +58,7 @@ function calculateShipLevel() {
 function calculateAdjustedStarLevel(starLevel) {
 	// return Math.max(calculateShipLevel(), starLevel);
 	// return Math.max(starLevel, (gameModel.bossesDefeated * Constants.levelsPerBoss) + 1);
-	return Math.max(starLevel, (gameModel.bossesDefeated * Constants.levelsPerBoss) + starLevel - 1);
+	return Math.max(starLevel, Boss.calculateLevel(gameModel.bossesDefeated) + starLevel - 1);
 }
 
 function valueForRoute(route) {

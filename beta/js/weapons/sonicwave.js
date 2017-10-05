@@ -1,6 +1,6 @@
 SonicWave = {
 
-	widenPerSecond : 1.3,
+	widenPerSecond : 1.35,
 	maxWidth : 10,
 	heightenPerSecond : 0.5,
 	maxHeight: 5,
@@ -51,15 +51,8 @@ SonicWave = {
 				sprite.position.y = sprite.yLoc * scalingFactor;
 
 				if (sprite.yLoc < -8 || sprite.yLoc > canvasHeight + 8 ||
-					sprite.xLoc < -8 || sprite.xLoc > canvasWidth + 8) {
-					if (Math.random() < sprite.ricochet) {
-						if (sprite.yLoc < -8 || sprite.yLoc > canvasHeight + 8)
-							sprite.ySpeed *= -1;
-						if (sprite.xLoc < -8 || sprite.xLoc > canvasWidth + 8)
-							sprite.xSpeed *= -1;
-					} else {
-						spritePool.discardSprite(sprite);
-					}
+						sprite.xLoc < -32 || sprite.xLoc > canvasWidth + 32) {
+					spritePool.discardSprite(sprite);
 				} else {
 					for (var j = 0; j < Enemies.activeShips.length; j++) {
 						var enemyShip = Enemies.activeShips[j];
@@ -134,7 +127,7 @@ SonicWave = {
 			fireShot : function(position, damageModifier) {
 				this.weapon.lastShot = 0;
 				var wobble = (1 - this.weapon.accuracy) * 0.1;
-				var speed = RotateVector2d(0, this.weapon.bulletSpeed, -position.angle - wobble + Math.random() * wobble * 2);
+				var speed = RotateVector2d(0, this.weapon.bulletSpeed, position.rear ? (-position.angle * 0.7) - wobble + Math.random() * wobble * 2 : -position.angle - wobble + Math.random() * wobble * 2);
 
 				Sounds.playerBullets.play(position.x);
 

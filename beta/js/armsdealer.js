@@ -19,8 +19,13 @@ ArmsDealer = {
 
 ArmsDealer.hide = function() {
 	ArmsDealer.menuContainer.visible = false;
-	ArmsDealer.menuContainer.destroy(true);
-	ArmsDealer.menuContainer = undefined;
+
+	for (var i = ArmsDealer.menuContainer.children.length - 1; i >= 0; i--) {
+		var item = ArmsDealer.menuContainer.children[i];
+		ArmsDealer.menuContainer.removeChild(item);
+		item.destroy(true);
+	}
+
 	if (ArmsDealer.dialogContainer && typeof ArmsDealer.dialogContainer.destroy === "function")
 		ArmsDealer.dialogContainer.destroy(true);
 	// ArmsDealer.dialogContainer = undefined;
@@ -312,7 +317,7 @@ ArmsDealer.initialize = function() {
 		for (var i = ArmsDealer.menuContainer.children.length - 1; i >= 0; i--) {
 			var item = ArmsDealer.menuContainer.children[i];
 			ArmsDealer.menuContainer.removeChild(item);
-			//item.destroy();
+			item.destroy(true);
 		}
 	}
 	ArmsDealer.dialogContainer = false;
@@ -623,6 +628,22 @@ ArmsDealer.checkMouseOver = function() {
 	if (!ArmsDealer.menuContainer || !ArmsDealer.menuContainer.visible)
 		return false;
 
+	for (var i = 0; i < ArmsDealer.buyButtons.length; i++) {
+		if (MainMenu.checkButton(ArmsDealer.buyButtons[i])) {
+			ArmsDealer.select(ArmsDealer.buyButtons[i]);
+			return true;
+		}
+	}
+
+	for (i = 0; i < ArmsDealer.sellButtons.length; i++) {
+		if (MainMenu.checkButton(ArmsDealer.sellButtons[i])) {
+			ArmsDealer.select(ArmsDealer.sellButtons[i]);
+			return true;
+		}
+	}
+	// nothing hovered if we get to here so hide the hover
+	ArmsDealer.hideItemHover();
+
 	if (ArmsDealer.dialogContainer) {
 		if (MainMenu.checkButton(ArmsDealer.dialogCancel)) {
 			ArmsDealer.select(ArmsDealer.dialogCancel);
@@ -653,22 +674,6 @@ ArmsDealer.checkMouseOver = function() {
 		ArmsDealer.select(ArmsDealer.backButton);
 		return true;
 	}
-
-	for (var i = 0; i < ArmsDealer.buyButtons.length; i++) {
-		if (MainMenu.checkButton(ArmsDealer.buyButtons[i])) {
-			ArmsDealer.select(ArmsDealer.buyButtons[i]);
-			return true;
-		}
-	}
-
-	for (i = 0; i < ArmsDealer.sellButtons.length; i++) {
-		if (MainMenu.checkButton(ArmsDealer.sellButtons[i])) {
-			ArmsDealer.select(ArmsDealer.sellButtons[i]);
-			return true;
-		}
-	}
-
-	ArmsDealer.hideItemHover();
 
 	return false;
 };
@@ -1077,6 +1082,7 @@ ArmsDealer.showItemHover = function(button) {
 ArmsDealer.hideItemHover = function() {
   if (ArmsDealer.itemHover) {
     ArmsDealer.menuContainer.removeChild(ArmsDealer.itemHover);
+		ArmsDealer.itemHover.destroy(true);
     ArmsDealer.itemHover = false;
   }
 };

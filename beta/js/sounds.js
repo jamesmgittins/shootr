@@ -111,5 +111,5 @@ Sounds.playerLaser = createHowlBank("sounds/15_LAZGUN2.wav",0.3, 100, 0);
 Sounds.playerMissile = createHowlBank("sounds/07_BYPASS1.wav", 0.3, 500, 0);
 Sounds.dodge = createHowlBank("sounds/05_PASS3.wav", 0.7, 50, 0.2);
 Sounds.winChimes = createHowlBank("sounds/winchimes.wav", 0.3, 100, 0);
-Sounds.music = createMusicBank(["music/gamemusic4.mp3","music/gamemusic3.mp3","music/GameMusic2.mp3"],0.7);
+Sounds.music = createMusicBank(["music/gamemusic4.mp3","music/gamemusic3.mp3","music/gamemusic2.mp3"],0.7);
 Sounds.mapMusic = createMusicBank(["music/gamemapmusic.mp3"],0.3);

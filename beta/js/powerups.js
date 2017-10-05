@@ -2,10 +2,12 @@ var MoneyPickup = {
 	xAcceleration:25,
 	xMaxSpeed : 20,
 	speed:50,
+	initialize : function () {
+		this.diamondTexture = glowTexture(PIXI.Texture.fromImage("img/diamond.svg"), {resize:0.04 * scalingFactor, blurAmount : 0.5, dontDestroyOriginal:true});
+		this.sapphireTexture = glowTexture(PIXI.Texture.fromImage("img/sapphire.svg"), {resize:0.04 * scalingFactor, blurAmount : 0.5, dontDestroyOriginal:true});
+	},
 	getSpritePool : function() {
-		if (!this.spritePool) {
-			this.diamondTexture = glowTexture(PIXI.Texture.fromImage("img/diamond.svg"), {resize:0.04 * scalingFactor, blurAmount : 0.5});
-			this.sapphireTexture = glowTexture(PIXI.Texture.fromImage("img/sapphire.svg"), {resize:0.04 * scalingFactor, blurAmount : 0.5});
+		if (!this.spritePool && this.sapphireTexture) {
 			this.spritePool = SpritePool.create(
 				[this.sapphireTexture,this.diamondTexture],
 				powerupContainer);
@@ -16,29 +18,40 @@ var MoneyPickup = {
 		return this.spritePool && this.spritePool.discardedSprites.length < this.spritePool.sprites.length;
 	},
 	reset : function() {
-		this.getSpritePool().destroy();
-		this.spritePool = false;
+		if (this.diamondTexture && this.sapphireTexture) {
+			this.diamondTexture.destroy(true);
+			this.sapphireTexture.destroy(true);
+
+			if (this.spritePool) {
+				this.getSpritePool().destroy();
+				this.spritePool = false;
+			}
+			this.initialize();
+		}
+
 	},
 	newMoneyPickup:function(x, y, value, alternate){
-		var pickup = this.getSpritePool().nextSprite();
-		if (alternate) {
-			pickup.texture = this.diamondTexture;
-			pickup.alternate = true;
-		} else {
-			pickup.texture = this.sapphireTexture;
-			pickup.alternate = false;
+		if (this.getSpritePool()) {
+			var pickup = this.getSpritePool().nextSprite();
+			if (alternate) {
+				pickup.texture = this.diamondTexture;
+				pickup.alternate = true;
+			} else {
+				pickup.texture = this.sapphireTexture;
+				pickup.alternate = false;
+			}
+			pickup.visible = true;
+			pickup.moneyValue = value;
+			pickup.xLoc = x;
+			pickup.yLoc = y;
+			pickup.xSpeed = 0;
+			pickup.speed = MoneyPickup.speed + Math.random() * MoneyPickup.speed;
+			pickup.position = {x:x * scalingFactor, y: y * scalingFactor};
+			pickup.rotSpeed = -2 + Math.random() * 4;
+			pickup.tintNumber = 0;
+			pickup.tintMod = 600;
+			pickup.lastTrail = 0;
 		}
-		pickup.visible = true;
-		pickup.moneyValue = value;
-		pickup.xLoc = x;
-		pickup.yLoc = y;
-		pickup.xSpeed = 0;
-		pickup.speed = MoneyPickup.speed + Math.random() * MoneyPickup.speed;
-		pickup.position = {x:x * scalingFactor, y: y * scalingFactor};
-		pickup.rotSpeed = -2 + Math.random() * 4;
-		pickup.tintNumber = 0;
-		pickup.tintMod = 600;
-		pickup.lastTrail = 0;
 	},
 	resize : function() {
 		this.reset();
@@ -140,6 +153,7 @@ var Powerups = {
 	baseChance : 0.95,
 	lastPowerupSpawned : 0,
 	minFrequency: 15,
+	baseSeed : Date.now(),
 	inPlay:function(){
 		return Powerups.sprite[0].visible;
 	},
@@ -148,9 +162,13 @@ var Powerups = {
 		this.sprite = [];
 		this.texture = {};
 
-		if (Powerups.sprites)
+		if (Powerups.sprites) {
 			powerupContainer.removeChild(Powerups.sprites);
-
+			for (var i = 0; i < Powerups.sprite.length; i++) {
+				Powerups.sprites.removeChild(Powerups.sprite[i]);
+				Powerups.sprite[i].destroy(true);
+			}
+		}
 		this.initialize();
 		PlayerShip.playerShip.powerupTime = Powerups.powerupLength + 1;
 	},
@@ -158,54 +176,31 @@ var Powerups = {
 		MoneyPickup.resize();
 		for (var i = 0; i < Powerups.sprite.length; i++) {
 			Powerups.sprites.removeChild(Powerups.sprite[i]);
-			Powerups.sprite[i].destroy();
+			Powerups.sprite[i].destroy(true);
 		}
+		Powerups.sprite = [];
 		Powerups.initialize();
 	},
-	createTexture : function() {
-		var size = scalingFactor * 32;
-		var blast = document.createElement('canvas');
-		blast.width = size;
-		blast.height = size;
-		var blastCtx = blast.getContext('2d');
-
-		// draw shape
-		blastCtx.fillStyle = "#ffffff";
-		blastCtx.fillRect(0, 0, size, size);
-
-		blastCtx.fillStyle = "#000";
-		var fontSize = 30 * scalingFactor;
-		blastCtx.font = fontSize + "px Arial";
-		blastCtx.fillText("?",8 * scalingFactor,27 * scalingFactor);
-
-		return PIXI.Texture.fromCanvas(blast);
-	},
 	initialize : function() {
+		if (powerupContainer) {
+			MoneyPickup.initialize();
+			Powerups.texture = glowTexture(
+				PIXI.Texture.fromImage("img/perspective-dice-random.svg",undefined,undefined,0.5 * scalingFactor),
+				{resize:0.1 * scalingFactor, blurAmount : 0.6, dontDestroyOriginal:true}
+			);
 
-		// Powerups.texture = Powerups.createTexture();
-		Powerups.texture = glowTexture(
-			PIXI.Texture.fromImage("img/perspective-dice-random.svg",undefined,undefined,0.1 * scalingFactor),
-			{resize:0.1 * scalingFactor, blurAmount : 0.6}
-		);
-
-		Powerups.sprites = new PIXI.Container();
-		for (var i = 0; i < Powerups.maxPowerups; i++) {
-			Powerups.sprite[i] = new PIXI.Sprite(Powerups.texture);
-			Powerups.sprite[i].visible = false;
-			Powerups.sprite[i].anchor = { x: 0.5, y: 0.5 };
-			Powerups.sprites.addChild(Powerups.sprite[i]);
+			Powerups.sprites = new PIXI.Container();
+			powerupContainer.addChild(Powerups.sprites);
 		}
-		powerupContainer.addChild(Powerups.sprites);
 	},
 	getRandomItem : function() {
-		var baseSeed = Date.now();
 		var level = gameModel.currentLevel > 1 ?
 			Math.max(1, Math.floor(gameModel.currentLevel + (Math.random() * (Boss.currentLevel() - gameModel.currentLevel) * 0.8))) :
 			gameModel.currentLevel;
 		if (Math.random() > 0.75) {
-			return Shields.generateShield(level, baseSeed, true);
+			return Shields.generateShield(level, this.baseSeed++, true);
 		} else {
-			return Weapons.generateWeapon(level, baseSeed, true);
+			return Weapons.generateWeapon(level, this.baseSeed++, true);
 		}
 	},
 	update : function(timeDiff) {
@@ -221,6 +216,12 @@ var Powerups = {
 			Powerups.tintMod *= -1;
 
 		for (var i = 0; i < Powerups.maxPowerups; i++) {
+			if (!Powerups.sprite[i]) {
+				Powerups.sprite[i] = new PIXI.Sprite(Powerups.texture);
+				Powerups.sprite[i].visible = false;
+				Powerups.sprite[i].anchor = { x: 0.5, y: 0.5 };
+				Powerups.sprites.addChild(Powerups.sprite[i]);
+			}
 			if (Powerups.sprite[i].visible) {
 				Powerups.xLoc[i] += Powerups.xSpeed[i] * timeDiff;
 				Powerups.yLoc[i] += Powerups.ySpeed[i] * timeDiff;
@@ -273,7 +274,7 @@ var Powerups = {
 							for (var j = 0; j < lootInCrate; j++ ) {
 								var item = Powerups.getRandomItem();
 								gameModel.lootCollected.push(item);
-								GameText.levelComplete.lootLayouts.push(ArmsDealer.createItemLayout(item, false, true));
+								// GameText.levelComplete.lootLayouts.push(ArmsDealer.createItemLayout(item, false, true));
 								GameText.status.lootIcons.push(ArmsDealer.createItemIcon(item, {buy:false, cache:true}));
 							}
 

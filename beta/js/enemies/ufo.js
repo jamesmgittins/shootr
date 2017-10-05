@@ -304,6 +304,8 @@ UFOs.wave = function () {
 	this.destroy = function() {
 		this.engineSpritePool.destroy();
 		this.spritePool.destroy();
+		this.damageTexture.destroy(true);
+		this.texture.destroy(true);
 		this.finished = true;
 	};
 };
@@ -479,7 +481,7 @@ UFOs.updateShip = function (eShip, timeDiff) {
 				eShip.firing = false;
 				eShip.wave.firing = false;
 				if (eShip.wave.bulletType) {
-					Bullets.enemyBullets.newBulletFan(eShip, 7);
+					Bullets.enemyBullets.newBulletFan(eShip, Math.min(Math.round(1 + gameModel.currentLevel / 2), 7));
 				} else {
 					Bullets.enemyRails.newRail(eShip);
 				}
@@ -508,8 +510,7 @@ UFOs.update = function (timeDiff) {
 	if (this.shipsExited + this.shipsDestroyed >= this.shipsInWave || (this.shipsExited + this.shipsDestroyed >= this.shipsSpawned && timeLeft < 0)) {
 		this.finished = true;
 		this.wavePattern.inUse = false;
-		this.spritePool.destroy();
-		this.engineSpritePool.destroy();
+		this.destroy();
 	}
 };
 

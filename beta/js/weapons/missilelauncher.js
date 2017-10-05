@@ -230,7 +230,7 @@ MissileLauncher = {
       },
       destroy : function() {
         this.missileTrails.spritePool.destroy();
-        this.spritePool.destroy(true);
+        this.spritePool.destroy();
       }
 		};
   }
