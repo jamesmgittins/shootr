@@ -2,8 +2,7 @@ PlasmaCannon = {
 
 
 	hotDogTexture : function() {
-		return glowTexture(PIXI.Texture.fromImage("img/hot-dog-icon.svg"), {resize:0.12 * scalingFactor, blurAmount : 0.1});
-		// return PIXI.Texture.fromImage("img/hot-dog-icon.svg");
+			return glowTexture(PIXI.Texture.fromImage("img/hot-dog.svg"), {resize:0.06 * scalingFactor, blurAmount : 0.4, dontDestroyOriginal:true});
 	},
 
 
@@ -69,6 +68,9 @@ PlasmaCannon = {
 						var enemyShip = Enemies.activeShips[j];
 						if (sprite.lastEnemyDamaged != enemyShip.id && enemyShip.detectCollision(enemyShip, sprite.xLoc, sprite.yLoc)) {
 							Enemies.damageEnemy(enemyShip, sprite.xLoc, sprite.yLoc, sprite.bulletStrength);
+							if (Math.random() < sprite.weapon.empChance) {
+								EMP.newEmp(sprite.xLoc, sprite.yLoc, sprite.weapon.emp, Math.random() > 0.5 ? 0xf92a2a : 0xf9b32a, 250);
+							}
 							if (Math.random() < sprite.weapon.passThrough) {
 								sprite.lastEnemyDamaged = enemyShip.id;
 							} else {
@@ -203,25 +205,28 @@ PlasmaCannon.plasmaCannon = function(level,seed,rarity) {
 		bulletSpeed: 400,
 		price: Math.round(dps * 30),
 		id: gameModel.weaponIdCounter++,
-		weaponType : Weapons.types.plasmaCannon
+		weaponType : Weapons.types.plasmaCannon,
+		empChance : -1
 	};
 
 	if (rarity.ultra || rarity.hyper) {
-		if (Math.random() > 0.5 ) {
-			plasmaCannon.ricochet = 0.25 + (Math.random() * 0.25);
-			plasmaCannon.ultraName = "Second Chances";
-			plasmaCannon.ultraText = "Missed shots have a " + Math.round(plasmaCannon.ricochet * 100) + "% chance to fire a new bullet";
-		} else {
-			plasmaCannon.passThrough = 0.25 + (Math.random() * 0.25);
-			plasmaCannon.ultraName = "Deep Thunder";
-			plasmaCannon.ultraText = "Bullets have a " + Math.round(plasmaCannon.passThrough * 100) + "% chance to not be destroyed";
-		}
-	}
-
-	if (rarity.ultra) {
 		if (Math.random() > 0.9 && bulletsPerShot == 1) {
+			plasmaCannon.ultraName = "Ketchup or Mustard";
 			plasmaCannon.name = "Ultra Hot Dog Blaster";
 			plasmaCannon.alternateTexture = "hotdog";
+			plasmaCannon.empChance = 0.05;
+			plasmaCannon.emp = damagePerShot * 2;
+			plasmaCannon.ultraText = "5% chance on hit to cover the screen with condiments for " + formatMoney(plasmaCannon.emp) + " damage";
+		} else {
+			if (Math.random() > 0.5 ) {
+				plasmaCannon.ricochet = 0.25 + (Math.random() * 0.25);
+				plasmaCannon.ultraName = "Second Chances";
+				plasmaCannon.ultraText = "Missed shots have a " + Math.round(plasmaCannon.ricochet * 100) + "% chance to fire a new bullet";
+			} else {
+				plasmaCannon.passThrough = 0.25 + (Math.random() * 0.25);
+				plasmaCannon.ultraName = "Deep Thunder";
+				plasmaCannon.ultraText = "Bullets have a " + Math.round(plasmaCannon.passThrough * 100) + "% chance to not be destroyed";
+			}
 		}
 	}
 

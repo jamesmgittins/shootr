@@ -1,7 +1,7 @@
 var Constants = {
 	canvasWidth : 640,
 	canvasHeight : 640,
-	localStorageVariable: "shootrGameModel",
+	localStorageVariable: "shootrGameModelBeta",
 	starJumpScaling : 1.4,
 	difficultyLevelScaling : 1.4,
 	shieldLevelScaling : 1.39,

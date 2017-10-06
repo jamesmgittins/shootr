@@ -131,8 +131,9 @@ function formatMoney(input) {
 SpritePool = {
   create : function(texture, container) {
     var spriteContainer = new PIXI.Container();
-    container.addChild(spriteContainer);
-    return {
+		container.addChild(spriteContainer);
+
+    var spritePool = {
       sprites : [],
       discardedSprites : [],
       container : spriteContainer,
@@ -182,6 +183,7 @@ SpritePool = {
 
 			}
     };
+		return spritePool;
   }
 };
 
@@ -240,12 +242,17 @@ function glowTexture(texture, options) {
 	// return new PIXI.Texture(glowTexture, new PIXI.Rectangle(width / 2 - 2, height / 2 - 2, width + 4, height + 4));
 	// var returnTexture = new PIXI.Texture(glowTexture);
 	//
-	if (!options || !options.dontDestroyOriginal) {
-		texture.destroy(true);
-		if (blurTexture)
-			blurTexture.destroy(true);
-		container.destroy(true);
-	}
+	// if (!options || !options.dontDestroyOriginal) {
+	// 	texture.destroy(true);
+	// 	if (blurTexture)
+	// 		blurTexture.destroy(true);
+	// 	container.destroy(true);
+	// }
+
+	texture.destroy(!options || !options.dontDestroyOriginal);
+	if (blurTexture)
+		blurTexture.destroy(true);
+	container.destroy(true);
 
 
 	// returnTexture.glowDestroy = function() {

@@ -114,8 +114,6 @@ function changeState(state) {
 	setTimeout(function(){
 		currentState = state;
 
-
-
 		Enemies.activeShips = [];
 
 		if (state == states.running) {
@@ -547,7 +545,7 @@ window.onload = function() {
 		.add("img/perspective-dice-random.svg")
 		.add("img/sapphire.svg")
 		.add("img/diamond.svg")
-		.add("img/hot-dog-icon.svg")
+		.add("img/hot-dog.svg")
 		// .add("img/level-one.svg")
 		// .add("img/level-two.svg")
 		// .add("img/level-three.svg")
@@ -556,7 +554,10 @@ window.onload = function() {
 		// .add("img/blaster.svg")
 		// .add("img/shield.svg")
 		.add("img/ship-emblem.svg")
-		.load(startGame);
+		.load(function(){
+			// PIXI.Texture.fromImage("img/hot-dog.svg");
+			startGame();
+		});
 
 	// loader.onProgress.add(function(){
 	// 	document.getElementById("loading-message").innerText += ".";

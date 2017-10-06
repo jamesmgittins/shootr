@@ -1,5 +1,46 @@
 RailGun = {
 
+	laserCannon : function(level,seed,rarity) {
+
+		var levelMod = Math.pow(Constants.weaponLevelScaling, level - 1);
+		Math.seedrandom(seed);
+		var dps = (level * 9 + (Math.random() * level * 2)) * levelMod * rarity.factor;
+		var shotsPerSecond = 0.6 + Math.random() * 1.3;
+		var damagePerShot = dps / shotsPerSecond;
+		var laserCannon = {
+	    super:rarity.super,
+			ultra:rarity.ultra,
+	    hyper:rarity.hyper,
+			type: Constants.itemTypes.weapon,
+			name: rarity.prefix + "Railgun",
+			seed: seed,
+			level: level,
+			dps: dps,
+			shotsPerSecond: shotsPerSecond,
+			damagePerShot: damagePerShot,
+			accuracy: 0.5 + Math.random() * 0.5,
+			price: Math.round(dps * 30),
+			id: gameModel.weaponIdCounter++,
+			weaponType : Weapons.types.railGun
+		};
+
+		if (rarity.ultra || rarity.hyper) {
+			if (Math.random() > 0.5) {
+				laserCannon.splitBeamOnKill = true;
+				laserCannon.ultraName = "Chain Reaction";
+				laserCannon.ultraText = "Whenever this gun destroys an enemy, the beam will split";
+			} else {
+				laserCannon.emp = damagePerShot * 0.2;
+				laserCannon.empChance = 0.08 + Math.random() * 0.04;
+				laserCannon.ultraName = "Focus Charge";
+				laserCannon.ultraText = Math.round(laserCannon.empChance * 100) + "% chance on hit to trigger a shockwave for " + formatMoney(laserCannon.emp) + " damage";
+			}
+
+		}
+
+		return laserCannon;
+	},
+
 	generateTexture : function() {
     return Stars.stars.getTexture();
   },
@@ -70,7 +111,9 @@ RailGun = {
           x: position.x,
           y: position.y
         };
-         var damage = this.weapon.damagePerShot * damageModifier;
+       	var damage = this.weapon.damagePerShot * damageModifier;
+
+			 	var empFired = false;
 
         for (var i = 0; i < 256; i++) {
           location.x += vector.x;
@@ -91,6 +134,10 @@ RailGun = {
 
 							if (!Enemies.activeShips[j].inPlay && this.weapon.splitBeamOnKill) {
 								this.fireShot({x:location.x, y:location.y, angle:Math.random() * 2 * Math.PI}, 0.5);
+							}
+							if (Math.random() < this.weapon.empChance && !empFired) {
+								EMP.newEmp(location.x, location.y, this.weapon.emp, sprite.tint, 300);
+								empFired = true;
 							}
               damage *= 0.5;
             }
