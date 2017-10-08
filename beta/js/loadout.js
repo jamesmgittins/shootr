@@ -406,7 +406,7 @@ Loadout.initialize = function () {
 
   Loadout.renderContainer = new PIXI.Container();
   Loadout.shipRenderTexture = PIXI.RenderTexture.create(renderer.width * 0.3, renderer.height * 0.7);
-  Loadout.renderSprite = new PIXI.Sprite(Loadout.shipRenderTexture);
+  Loadout.renderSprite = createSprite(Loadout.shipRenderTexture);
   Loadout.menuContainer.addChild(Loadout.renderSprite);
 
   Loadout.renderSprite.position = {x:renderer.width * 0.35,y:renderer.height * 0.15};
@@ -420,7 +420,7 @@ Loadout.initialize = function () {
   Loadout.bulletContainer = new PIXI.Container();
   Loadout.renderContainer.addChild(Loadout.bulletContainer);
 
-  Loadout.shipSprite = new PIXI.Sprite(
+  Loadout.shipSprite = createSprite(
     glowTexture(
       PIXI.Texture.fromCanvas(Ships.shipArt(PlayerShip.SHIP_SIZE, gameModel.p1.ship.seed, Ships.enemyColors[gameModel.p1.ship.colorIndex]))
     )

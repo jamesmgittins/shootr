@@ -50,7 +50,7 @@ VulcanCannon = {
 				} else {
 					for (var j = 0; j < Enemies.activeShips.length; j++) {
 						var enemyShip = Enemies.activeShips[j];
-						if (sprite.lastEnemyDamaged != enemyShip.id && enemyShip.detectCollision(enemyShip, sprite.xLoc, sprite.yLoc)) {
+						if (sprite.lastEnemyDamaged != enemyShip.id && enemyShip.detectCollision(sprite.xLoc, sprite.yLoc)) {
 							Enemies.damageEnemy(enemyShip, sprite.xLoc, sprite.yLoc, sprite.bulletStrength);
 							if (sprite.passThrough) {
 								sprite.bulletStrength = sprite.bulletStrength * 0.6;
@@ -99,7 +99,7 @@ VulcanCannon = {
 		return {
 			weapon : weapon,
 			rearAngleMod:0.8,
-			spritePool : SpritePool.create(VulcanCannon.generateTexture(), container),
+			spritePool : new SpritePool(VulcanCannon.generateTexture(), container),
 			resize : function(){
 				this.spritePool.changeTexture(VulcanCannon.generateTexture());
 			},

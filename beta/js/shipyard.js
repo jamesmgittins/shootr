@@ -41,7 +41,6 @@ Shipyard.hide = function() {
   Shipyard.menuContainer.visible = false;
   for (i = Shipyard.menuContainer.children.length - 1; i >= 0; i--){
     var item = Shipyard.menuContainer.children[i];
-    Shipyard.menuContainer.removeChild(item);
     item.destroy(true);
   }
   Shipyard.currentSelection=-1;
@@ -64,7 +63,6 @@ Shipyard.initialize = function () {
   } else {
     for (i = Shipyard.menuContainer.children.length - 1; i >= 0; i--){
       var item = Shipyard.menuContainer.children[i];
-      Shipyard.menuContainer.removeChild(item);
       item.destroy(true);
     }
   }
@@ -120,7 +118,7 @@ Shipyard.initialize = function () {
     shipBacking.drawRect(bounds.x + 15, bounds.y + bounds.height / 9, bounds.width - 30, bounds.height / 2.5);
     Shipyard.menuContainer.addChild(shipBacking);
 
-    var sprite = new PIXI.Sprite(
+    var sprite = createSprite(
       glowTexture(
         PIXI.Texture.fromCanvas(Ships.shipArt(PlayerShip.SHIP_SIZE * 2, Shipyard.ships[i].seed, Ships.enemyColors[Shipyard.ships[i].colorIndex]))
       )

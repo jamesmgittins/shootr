@@ -244,7 +244,7 @@ UFOs.railWave = function() {
 	var seed = Date.now();
 	wave.texture = glowTexture(PIXI.Texture.fromCanvas(UFOs.getMirrorTexture(wave.size, seed, wave.colors)));
 	wave.damageTexture = glowTexture(PIXI.Texture.fromCanvas(UFOs.getMirrorTexture(wave.size, seed, wave.colors, true)));
-	wave.spritePool = SpritePool.create(this.texture, frontEnemyContainer);
+	wave.spritePool = new SpritePool(this.texture, frontEnemyContainer);
 	wave.bulletType = false;
 	wave.firingTime = UFOs.railFiringTime;
 	return wave;
@@ -257,7 +257,7 @@ UFOs.bulletWave = function() {
 	var seed = Date.now();
 	wave.texture = glowTexture(PIXI.Texture.fromCanvas(UFOs.getRotateTexture(wave.size, seed, wave.colors)));
 	wave.damageTexture = glowTexture(PIXI.Texture.fromCanvas(UFOs.getRotateTexture(wave.size, seed, wave.colors, true)));
-	wave.spritePool = SpritePool.create(this.texture, frontEnemyContainer);
+	wave.spritePool = new SpritePool(this.texture, frontEnemyContainer);
 	wave.bulletType = true;
 	wave.firingTime = UFOs.bulletFiringTime;
 	return wave;
@@ -266,8 +266,6 @@ UFOs.bulletWave = function() {
 
 
 UFOs.wave = function () {
-
-	this.update = UFOs.update;
 
 	this.shipFrequency = (3000 + (Math.random() * 1000));
 	this.lastShipSpawned = 0;
@@ -289,7 +287,7 @@ UFOs.wave = function () {
 	this.size = Math.round(64 + Math.random() * 16);
 	this.colors = Ships.enemyColors[Math.floor(Math.random() * Ships.enemyColors.length)];
 
-	this.engineSpritePool = SpritePool.create(UFOs.engineTexture(), frontEnemyContainer);
+	this.engineSpritePool = new SpritePool(UFOs.engineTexture(), frontEnemyContainer);
 
 	this.shipHealth = EnemyShips.shipHealth * 2.5;
 	this.firing = false;
@@ -300,23 +298,10 @@ UFOs.wave = function () {
 	this.offset = Math.round(this.size / 2.2);
 	this.ships = [];
 	this.shipsExited = 0;
-
-	this.destroy = function() {
-		this.engineSpritePool.destroy();
-		this.spritePool.destroy();
-		this.damageTexture.destroy(true);
-		this.texture.destroy(true);
-		this.finished = true;
-	};
 };
 
 
-
 UFOs.enemyShip = function (wave) {
-
-	this.damage = UFOs.damageEnemyShip;
-	this.destroy = UFOs.destroy;
-	this.detectCollision = UFOs.detectCollision;
 
 	this.wave = wave;
 	this.xLoc = canvasWidth * wave.wavePattern.xCoords[0];
@@ -356,17 +341,15 @@ UFOs.enemyShip = function (wave) {
 };
 
 
-
-UFOs.detectCollision = function (ufo, xLoc, yLoc) {
-	if (ufo.inPlay === 1 && distanceBetweenPoints(ufo.xLoc, ufo.yLoc, xLoc, yLoc) < ufo.offset) {
+UFOs.enemyShip.prototype.detectCollision = function (xLoc, yLoc) {
+	if (this.inPlay === 1 && distanceBetweenPoints(this.xLoc, this.yLoc, xLoc, yLoc) < this.offset) {
 		return true;
 	}
 	return false;
 };
 
 
-
-UFOs.damageEnemyShip = function(xLoc, yLoc, damage, noEffect) {
+UFOs.enemyShip.prototype.damage = function(xLoc, yLoc, damage, noEffect) {
 	if (this.health > 0) {
 
 		if (!noEffect) {
@@ -405,85 +388,92 @@ UFOs.damageEnemyShip = function(xLoc, yLoc, damage, noEffect) {
 };
 
 
+UFOs.enemyShip.prototype.destroy = function () {
 
-UFOs.updateShip = function (eShip, timeDiff) {
-	if (eShip.inPlay) {
+	EnemyShips.destroy(this);
+	this.wave.engineSpritePool.discardSprite(this.engineSprite);
 
-		if (eShip.xLoc > 0 && eShip.xLoc < canvasWidth && eShip.yLoc > 0 && eShip.yLoc < canvasHeight)
-			Enemies.activeShips.push(eShip);
+};
 
-		if (Math.sqrt(Math.pow(eShip.xLoc - eShip.xTar, 2) +
-						Math.pow(eShip.yLoc - eShip.yTar, 2)) > 35) {
 
-			EnemyShips.updateShipSpeed(eShip, timeDiff);
+UFOs.enemyShip.prototype.update = function (timeDiff) {
+	if (this.inPlay) {
 
-			eShip.sprite.position.x = eShip.xLoc * scalingFactor;
-			eShip.sprite.position.y = eShip.yLoc * scalingFactor;
-			eShip.engineSprite.position = eShip.sprite.position;
-			eShip.engineSprite.alpha = 0.3 + Math.random() * 0.5;
+		if (this.xLoc > 0 && this.xLoc < canvasWidth && this.yLoc > 0 && this.yLoc < canvasHeight)
+			Enemies.activeShips.push(this);
 
-			eShip.sprite.rotation += eShip.wave.rotationDirection * timeDiff;
+		if (Math.sqrt(Math.pow(this.xLoc - this.xTar, 2) +
+						Math.pow(this.yLoc - this.yTar, 2)) > 35) {
 
-			eShip.lastDamaged += timeDiff;
-			if (eShip.lastDamaged > 0.06)
-				eShip.sprite.texture = eShip.wave.texture;
+			EnemyShips.updateShipSpeed(this, timeDiff);
 
-			if (eShip.health < eShip.wave.shipHealth / 3) {
+			this.sprite.position.x = this.xLoc * scalingFactor;
+			this.sprite.position.y = this.yLoc * scalingFactor;
+			this.engineSprite.position = this.sprite.position;
+			this.engineSprite.alpha = 0.3 + Math.random() * 0.5;
 
-				eShip.lastParticle += timeDiff;
-				if (eShip.lastParticle > 0.1) {
-					Stars.powerupParts.newPowerupPart(eShip.sprite.position.x - (20 * scalingFactor) + (Math.random() * 40 * scalingFactor),
-																				eShip.sprite.position.y - (20 * scalingFactor) + (Math.random() * 40 * scalingFactor),
-																				calculateTintFromString(eShip.wave.colors[Math.floor(Math.random() * eShip.wave.colors.length)]));
-					eShip.lastParticle = 0;
+			this.sprite.rotation += this.wave.rotationDirection * timeDiff;
+
+			this.lastDamaged += timeDiff;
+			if (this.lastDamaged > 0.06)
+				this.sprite.texture = this.wave.texture;
+
+			if (this.health < this.wave.shipHealth / 3) {
+
+				this.lastParticle += timeDiff;
+				if (this.lastParticle > 0.1) {
+					Stars.powerupParts.newPowerupPart(this.sprite.position.x - (20 * scalingFactor) + (Math.random() * 40 * scalingFactor),
+																				this.sprite.position.y - (20 * scalingFactor) + (Math.random() * 40 * scalingFactor),
+																				calculateTintFromString(this.wave.colors[Math.floor(Math.random() * this.wave.colors.length)]));
+					this.lastParticle = 0;
 				}
 
 			}
 
 		} else {
-			eShip.nextCoord++;
+			this.nextCoord++;
 
-			if (eShip.nextCoord >= eShip.wave.wavePattern.xCoords.length) {
-				eShip.inPlay = 0;
-				eShip.wave.spritePool.discardSprite(eShip.sprite);
-				eShip.wave.shipsExited++;
-				if (eShip.firing)
-					eShip.wave.firing = false;
+			if (this.nextCoord >= this.wave.wavePattern.xCoords.length) {
+				this.inPlay = 0;
+				this.wave.spritePool.discardSprite(this.sprite);
+				this.wave.shipsExited++;
+				if (this.firing)
+					this.wave.firing = false;
 			} else {
-				eShip.xTar = canvasWidth * eShip.wave.wavePattern.xCoords[eShip.nextCoord];
-				eShip.yTar = canvasHeight * eShip.wave.wavePattern.yCoords[eShip.nextCoord];
+				this.xTar = canvasWidth * this.wave.wavePattern.xCoords[this.nextCoord];
+				this.yTar = canvasHeight * this.wave.wavePattern.yCoords[this.nextCoord];
 			}
 		}
-		EnemyShips.checkForSplashDamage(eShip);
-		EnemyShips.checkForPlayerCollision(eShip, timeDiff);
+		EnemyShips.checkForSplashDamage(this);
+		EnemyShips.checkForPlayerCollision(this, timeDiff);
 
-		if (eShip.health < eShip.wave.shipHealth)
-			eShip.sprite.tint = calculateTint(eShip.health / eShip.wave.shipHealth);
+		if (this.health < this.wave.shipHealth)
+			this.sprite.tint = calculateTint(this.health / this.wave.shipHealth);
 
-		eShip.engineSprite.scale.x = eShip.engineSprite.scale.y = 1;
-		eShip.engineSprite.tint = 0xFFFFFF;
+		this.engineSprite.scale.x = this.engineSprite.scale.y = 1;
+		this.engineSprite.tint = 0xFFFFFF;
 
-		if (eShip.inPlay && !eShip.wave.firing && Math.random() > 0.9 && (eShip.xLoc > 0 && eShip.xLoc < canvasWidth && eShip.yLoc > 0 && eShip.yLoc < canvasHeight)) {
-			eShip.firingTime = 0;
-			eShip.firing = true;
-			eShip.wave.firing = true;
+		if (this.inPlay && !this.wave.firing && Math.random() > 0.9 && (this.xLoc > 0 && this.xLoc < canvasWidth && this.yLoc > 0 && this.yLoc < canvasHeight)) {
+			this.firingTime = 0;
+			this.firing = true;
+			this.wave.firing = true;
 		}
-		if (eShip.firing) {
-			eShip.firingTime += timeDiff;
-			eShip.sprite.rotation += eShip.wave.rotationDirection * eShip.firingTime * timeDiff;
-			eShip.engineSprite.scale.x = eShip.engineSprite.scale.y = 1 + eShip.firingTime / UFOs.railFiringTime;
+		if (this.firing) {
+			this.firingTime += timeDiff;
+			this.sprite.rotation += this.wave.rotationDirection * this.firingTime * timeDiff;
+			this.engineSprite.scale.x = this.engineSprite.scale.y = 1 + this.firingTime / UFOs.railFiringTime;
 
-			if (eShip.firingTime > eShip.wave.firingTime - 0.5) {
-				eShip.engineSprite.tint = 0xFF0000;
+			if (this.firingTime > this.wave.firingTime - 0.5) {
+				this.engineSprite.tint = 0xFF0000;
 			}
 
-			if (eShip.firingTime > eShip.wave.firingTime) {
-				eShip.firing = false;
-				eShip.wave.firing = false;
-				if (eShip.wave.bulletType) {
-					Bullets.enemyBullets.newBulletFan(eShip, Math.min(Math.round(1 + gameModel.currentLevel / 2), 7));
+			if (this.firingTime > this.wave.firingTime) {
+				this.firing = false;
+				this.wave.firing = false;
+				if (this.wave.bulletType) {
+					Bullets.enemyBullets.newBulletFan(this, Math.min(Math.round(1 + gameModel.currentLevel / 2), 7));
 				} else {
-					Bullets.enemyRails.newRail(eShip);
+					Bullets.enemyRails.newRail(this);
 				}
 			}
 		}
@@ -491,8 +481,7 @@ UFOs.updateShip = function (eShip, timeDiff) {
 };
 
 
-
-UFOs.update = function (timeDiff) {
+UFOs.wave.prototype.update = function (timeDiff) {
 
 	this.lastShipSpawned += timeDiff * 1000;
 
@@ -504,7 +493,7 @@ UFOs.update = function (timeDiff) {
 				this.shipsSpawned++;
 			}
 		} else {
-			UFOs.updateShip(this.ships[j],timeDiff);
+			this.ships[j].update(timeDiff);
 		}
 	}
 	if (this.shipsExited + this.shipsDestroyed >= this.shipsInWave || (this.shipsExited + this.shipsDestroyed >= this.shipsSpawned && timeLeft < 0)) {
@@ -514,11 +503,10 @@ UFOs.update = function (timeDiff) {
 	}
 };
 
-
-
-UFOs.destroy = function (ship) {
-
-	EnemyShips.destroy(ship);
-	ship.wave.engineSpritePool.discardSprite(ship.engineSprite);
-
+UFOs.wave.prototype.destroy = function() {
+	this.engineSpritePool.destroy();
+	this.spritePool.destroy();
+	this.damageTexture.destroy(true);
+	this.texture.destroy(true);
+	this.finished = true;
 };

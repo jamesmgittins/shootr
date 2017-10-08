@@ -213,5 +213,6 @@ Weapons.reset = function() {
   Weapons.weaponLogic = {};
 
   if (playerBulletContainer)
-    removeAllFromContainer(playerBulletContainer);
+    playerBulletContainer.removeChildren(0);
+    // removeAllFromContainer(playerBulletContainer);
 };

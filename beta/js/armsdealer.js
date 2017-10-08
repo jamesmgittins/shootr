@@ -22,7 +22,6 @@ ArmsDealer.hide = function() {
 
 	for (var i = ArmsDealer.menuContainer.children.length - 1; i >= 0; i--) {
 		var item = ArmsDealer.menuContainer.children[i];
-		ArmsDealer.menuContainer.removeChild(item);
 		item.destroy(true);
 	}
 
@@ -125,8 +124,7 @@ ArmsDealer.createItemIcon = function(item, options) {
 		svgToUse = Shields.getIconSvg(item);
 	}
 
-	var pic = new PIXI.Sprite(PIXI.Texture.fromImage(svgToUse, undefined, undefined, 0.4));
-	// var pic = new PIXI.Sprite(glowTexture(PIXI.Texture.fromImage(svgToUse, undefined, undefined, 0.4),{blurAmount:0.5, resize:0.4}));
+	var pic = createSprite(PIXI.Texture.fromImage(svgToUse, undefined, undefined, 0.4));
 
 	pic.scale.x = pic.scale.y = 0.3 * scale;
 
@@ -220,7 +218,7 @@ ArmsDealer.createItemIcon = function(item, options) {
 	priceText.tint = priceText.defaultTint = levelText.tint = levelText.defaultTint = pic.tint = pic.defaultTint = border.tint = border.defaultTint = 0xAAAAAA;
 
 	// if (options.cache)
-	// 	itemContainer.cacheAsBitmap = true;
+		// itemContainer.cacheAsBitmap = true;
 
 	return itemContainer;
 };
@@ -316,7 +314,6 @@ ArmsDealer.initialize = function() {
 	} else {
 		for (var i = ArmsDealer.menuContainer.children.length - 1; i >= 0; i--) {
 			var item = ArmsDealer.menuContainer.children[i];
-			ArmsDealer.menuContainer.removeChild(item);
 			item.destroy(true);
 		}
 	}
@@ -1045,7 +1042,6 @@ ArmsDealer.showItemHover = function(button) {
     return;
 
   if (ArmsDealer.itemHover && ArmsDealer.itemHover.item.id != button.weapon.id) {
-    ArmsDealer.menuContainer.removeChild(ArmsDealer.itemHover);
 		ArmsDealer.itemHover.destroy(true);
     ArmsDealer.itemHover = false;
   }
@@ -1081,7 +1077,6 @@ ArmsDealer.showItemHover = function(button) {
 
 ArmsDealer.hideItemHover = function() {
   if (ArmsDealer.itemHover) {
-    ArmsDealer.menuContainer.removeChild(ArmsDealer.itemHover);
 		ArmsDealer.itemHover.destroy(true);
     ArmsDealer.itemHover = false;
   }

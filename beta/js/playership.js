@@ -18,13 +18,12 @@ PlayerShip.controllerPointer = {
 		drawline(blastCtx, "#0b0", 1, 1, 9 * scalingFactor, 8 * scalingFactor);
 		drawline(blastCtx, "#0b0", 1, 15 * scalingFactor, 9 * scalingFactor, 8 * scalingFactor);
 
-		PlayerShip.controllerPointer.sprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(blast));
+		PlayerShip.controllerPointer.sprite = createSprite(PIXI.Texture.fromCanvas(blast));
 		PlayerShip.controllerPointer.sprite.anchor = { x: -6, y: 0.5 };
 		PlayerShip.controllerPointer.sprite.visible = false;
 		uiContainer.addChild(PlayerShip.controllerPointer.sprite);
 	},
 	resize : function() {
-		uiContainer.removeChild(PlayerShip.controllerPointer.sprite);
 		PlayerShip.controllerPointer.sprite.destroy(true);
 		PlayerShip.controllerPointer.initialize();
 	},
@@ -252,9 +251,9 @@ PlayerShip.setupTextures = function(){
 
 	PlayerShip.playerShip.container = new PIXI.Container();
 	playerShipContainer.addChild(PlayerShip.playerShip.container);
-	PlayerShip.playerShip.sprite = new PIXI.Sprite(glowTexture(PIXI.Texture.fromCanvas(PlayerShip.playerShip.art)));
-	PlayerShip.playerShip.engine1 = new PIXI.Sprite(PlayerShip.engineTexture());
-	PlayerShip.playerShip.engine2 = new PIXI.Sprite(PlayerShip.playerShip.engine1.texture);
+	PlayerShip.playerShip.sprite = createSprite(glowTexture(PIXI.Texture.fromCanvas(PlayerShip.playerShip.art)));
+	PlayerShip.playerShip.engine1 = createSprite(PlayerShip.engineTexture());
+	PlayerShip.playerShip.engine2 = createSprite(PlayerShip.playerShip.engine1.texture);
 	PlayerShip.playerShip.container.addChild(PlayerShip.playerShip.engine1);
 	PlayerShip.playerShip.container.addChild(PlayerShip.playerShip.engine2);
 	PlayerShip.playerShip.container.addChild(PlayerShip.playerShip.sprite);

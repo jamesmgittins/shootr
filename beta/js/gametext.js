@@ -23,6 +23,7 @@ var GameText = {
 		GameText.status.lootIcons = [];
 
 		if (GameText.damage.container) {
+			GameText.damage.texts.forEach(discardText);
 			GameText.damage.container.destroy(true);
 		}
 		GameText.damage.texts = [];
@@ -30,6 +31,7 @@ var GameText = {
 		GameText.damage.initialize();
 
 		if (GameText.credits.container) {
+			GameText.credits.texts.forEach(discardText);
 			GameText.credits.container.destroy(true);
 		}
 		GameText.credits.texts = [];
@@ -37,6 +39,7 @@ var GameText = {
 		GameText.credits.initialize();
 
 		if (GameText.bigText.container) {
+			GameText.bigText.texts.forEach(discardText);
 			GameText.bigText.container.destroy(true);
 		}
 
@@ -142,7 +145,6 @@ GameText.status = {
 		if (GameText.status.container) {
 			for (var i = GameText.status.container.children.length - 1; i >= 0; i--) {
 				var item = GameText.status.container.children[i];
-				GameText.status.container.removeChild(item);
 				item.destroy();
 			}
 		} else {

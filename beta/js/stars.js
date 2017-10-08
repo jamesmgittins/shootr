@@ -34,7 +34,7 @@ Stars.StartEndStars = {
 		if (Stars.StartEndStars.sprite) {
 			Stars.StartEndStars.sprite.destroy(true);
 		}
-		Stars.StartEndStars.sprite = new PIXI.Sprite(Stars.StartEndStars.texture(1));
+		Stars.StartEndStars.sprite = createSprite(Stars.StartEndStars.texture(1));
 		Stars.StartEndStars.sprite.visible = false;
 		Stars.StartEndStars.sprite.anchor = {x:0.5, y:0.5};
 		Stars.stars.sprites.addChild(Stars.StartEndStars.sprite);
@@ -120,7 +120,7 @@ Stars.nebulaBackground = {
 
 
 		if (!Stars.nebulaBackground.sprite) {
-			Stars.nebulaBackground.sprite = new PIXI.Sprite(this.texture);
+			Stars.nebulaBackground.sprite = createSprite(this.texture);
 			Stars.getContainer().addChild(Stars.nebulaBackground.sprite);
 		} else {
 			Stars.nebulaBackground.sprite.texture = PIXI.Texture.fromCanvas(nebulaCanvas);
@@ -155,7 +155,7 @@ Stars.stars = {
 	speedFactor : 1,
 	getSpritePool : function() {
 		if (!this.spritePool) {
-			this.spritePool = SpritePool.create(Stars.stars.getTexture(), Stars.stars.sprites);
+			this.spritePool = new SpritePool(Stars.stars.getTexture(), Stars.stars.sprites);
 		}
 		return this.spritePool;
 	},
@@ -211,7 +211,7 @@ Stars.stars = {
 Stars.powerupParts = {
 	getSpritePool : function() {
 		if (!this.spritePool) {
-			this.spritePool = SpritePool.create(Stars.stars.getTexture(), uiContainer);
+			this.spritePool = new SpritePool(Stars.stars.getTexture(), uiContainer);
 		}
 		return this.spritePool;
 	},
@@ -254,7 +254,7 @@ Stars.powerupParts = {
 Stars.playerShipTrails = {
 	getSpritePool : function() {
 		if (!this.spritePool) {
-			this.spritePool = SpritePool.create(PlayerShip.engineTexture(), shipTrailContainer);
+			this.spritePool = new SpritePool(PlayerShip.engineTexture(), shipTrailContainer);
 		}
 		return this.spritePool;
 	},
@@ -324,25 +324,29 @@ Stars.playerShipTrails = {
 };
 
 Stars.shipTrails = {
+	created:0,
+	discarded:0,
 	getSpritePool : function() {
 		if (!this.spritePool) {
-			this.spritePool = SpritePool.create(Stars.stars.getTexture(), shipTrailContainer);
+			this.spritePool = new SpritePool(Stars.stars.getTexture(), shipTrailContainer);
 		}
 		return this.spritePool;
 	},
 	trailFrequency : 30,
 	newPart: function(ship, sprite) {
 
-		var position;
-		var part = this.getSpritePool().nextSprite();
-
 		if (ship.trailX < 0 || ship.trailX > canvasWidth)
 			return;
+
+		var position;
+		var part = this.getSpritePool().nextSprite();
 
 		position = {
 			x: (ship.trailX - 3 + (Math.random() * 6)) * scalingFactor,
 			y: ship.trailY * scalingFactor
 		};
+
+		this.created++;
 
 		part.fadeSpeed = 8 * scalingFactor;
 		part.scale.x = (1 + Math.random() * 2) * scalingFactor;
@@ -364,11 +368,11 @@ Stars.shipTrails = {
 			ship.lastTrail = 0;
 			if (ship.dualEngines) {
 				ship.trailX -= 12;
-				Stars.shipTrails.newPart(ship);
+				this.newPart(ship);
 				ship.trailX += 24;
-				Stars.shipTrails.newPart(ship);
+				this.newPart(ship);
 			} else {
-				Stars.shipTrails.newPart(ship);
+				this.newPart(ship);
 			}
 
 		}
@@ -385,6 +389,7 @@ Stars.shipTrails = {
 				sprite.scale.y -= sprite.fadeSpeed * timeDiff;
 
 				if (sprite.scale.x <= 0) {
+					this.discarded++;
 					this.spritePool.discardSprite(sprite);
 				} else {
 					sprite.position.y += sprite.ySpeed * timeDiff;

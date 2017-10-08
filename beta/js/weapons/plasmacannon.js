@@ -66,7 +66,7 @@ PlasmaCannon = {
 				} else {
 					for (var j = 0; j < Enemies.activeShips.length; j++) {
 						var enemyShip = Enemies.activeShips[j];
-						if (sprite.lastEnemyDamaged != enemyShip.id && enemyShip.detectCollision(enemyShip, sprite.xLoc, sprite.yLoc)) {
+						if (sprite.lastEnemyDamaged != enemyShip.id && enemyShip.detectCollision(sprite.xLoc, sprite.yLoc)) {
 							Enemies.damageEnemy(enemyShip, sprite.xLoc, sprite.yLoc, sprite.bulletStrength);
 							if (Math.random() < sprite.weapon.empChance) {
 								EMP.newEmp(sprite.xLoc, sprite.yLoc, sprite.weapon.emp, Math.random() > 0.5 ? 0xf92a2a : 0xf9b32a, 250);
@@ -110,7 +110,7 @@ PlasmaCannon = {
 
 		return {
 			weapon : weapon,
-			spritePool : SpritePool.create(weapon.alternateTexture == "hotdog" ? PlasmaCannon.hotDogTexture() : PlasmaCannon.generateTexture(), container),
+			spritePool : new SpritePool(weapon.alternateTexture == "hotdog" ? PlasmaCannon.hotDogTexture() : PlasmaCannon.generateTexture(), container),
 			resize : function(){
 				this.spritePool.changeTexture(weapon.alternateTexture == "hotdog" ? PlasmaCannon.hotDogTexture() : PlasmaCannon.generateTexture());
 			},

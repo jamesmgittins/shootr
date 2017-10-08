@@ -10,7 +10,7 @@ var MoneyPickup = {
 	},
 	getSpritePool : function() {
 		if (!this.spritePool && this.sapphireTexture) {
-			this.spritePool = SpritePool.create(
+			this.spritePool = new SpritePool(
 				[this.sapphireTexture,this.diamondTexture],
 				powerupContainer);
 		}
@@ -170,7 +170,6 @@ var Powerups = {
 	resize:function() {
 		MoneyPickup.resize();
 		for (var i = 0; i < Powerups.sprite.length; i++) {
-			Powerups.sprites.removeChild(Powerups.sprite[i]);
 			Powerups.sprite[i].destroy(true);
 		}
 		Powerups.sprite = [];
@@ -189,8 +188,9 @@ var Powerups = {
 		}
 	},
 	getRandomItem : function() {
+		var maxLevelDifference = Boss.currentLevel() - gameModel.currentLevel;
 		var level = gameModel.currentLevel > 1 ?
-			Math.max(1, Math.floor(gameModel.currentLevel + (Math.random() * (Boss.currentLevel() - gameModel.currentLevel) * 0.8))) :
+			Math.max(1, Math.round(gameModel.currentLevel + (Math.random() * maxLevelDifference * (1 - maxLevelDifference * 0.1)))) :
 			gameModel.currentLevel;
 		if (Math.random() > 0.75) {
 			return Shields.generateShield(level, this.baseSeed++, true);
@@ -212,7 +212,7 @@ var Powerups = {
 
 		for (var i = 0; i < Powerups.maxPowerups; i++) {
 			if (!Powerups.sprite[i]) {
-				Powerups.sprite[i] = new PIXI.Sprite(Powerups.texture);
+				Powerups.sprite[i] = createSprite(Powerups.texture);
 				Powerups.sprite[i].visible = false;
 				Powerups.sprite[i].anchor = { x: 0.5, y: 0.5 };
 				Powerups.sprites.addChild(Powerups.sprite[i]);

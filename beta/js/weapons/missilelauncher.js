@@ -102,7 +102,7 @@ MissileLauncher = {
         }
 
         for (var k = 0; k < Enemies.activeShips.length; k++) {
-          if (sprite.visible && Enemies.activeShips[k].detectCollision(Enemies.activeShips[k], sprite.xLoc, sprite.yLoc)) {
+          if (sprite.visible && Enemies.activeShips[k].detectCollision(sprite.xLoc, sprite.yLoc)) {
             spritePool.discardSprite(sprite);
             Enemies.damageEnemy(Enemies.activeShips[k], sprite.xLoc, sprite.yLoc, sprite.damage);
             MissileLauncher.generateExplosion(sprite.xLoc, sprite.yLoc);
@@ -146,7 +146,7 @@ MissileLauncher = {
 		return {
 			weapon : weapon,
       rearAngleMod : MissileLauncher.rearAngleMod,
-			spritePool : SpritePool.create(MissileLauncher.generateTexture(), container),
+			spritePool : new SpritePool(MissileLauncher.generateTexture(), container),
 			resize : function(){
 				this.spritePool.changeTexture(MissileLauncher.generateTexture());
 			},
@@ -172,7 +172,7 @@ MissileLauncher = {
 				MissileLauncher.individualBullet(this.spritePool, speed, position, weapon.damagePerShot * damageModifier, 1, this.weapon);
 			},
       missileTrails : {
-        spritePool : SpritePool.create((function() {
+        spritePool : new SpritePool((function() {
           var size = 8 * scalingFactor;
           var blast = document.createElement('canvas');
           blast.width = size + 4;

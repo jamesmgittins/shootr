@@ -370,7 +370,6 @@ InitializeMenu = function (menu) {
       for (i=menu.menuContainer.children.length - 1; i >= 0; i--){
         var item = menu.menuContainer.children[i];
         item.destroy(true);
-        menu.menuContainer.removeChild(item);
       }
     }
 
@@ -471,7 +470,6 @@ InitializeMenu = function (menu) {
     if (button.description) {
       if (menu.descriptionContainer) {
         menu.descriptionContainer.destroy(true);
-        menu.menuContainer.removeChild(menu.descriptionContainer);
       }
       menu.descriptionContainer = new PIXI.Container();
       menu.menuContainer.addChild(menu.descriptionContainer);
@@ -495,7 +493,6 @@ InitializeMenu = function (menu) {
     } else {
       if (menu.descriptionContainer) {
         menu.descriptionContainer.destroy(true);
-        menu.menuContainer.removeChild(menu.descriptionContainer);
       }
     }
   };
@@ -950,9 +947,8 @@ Modal = {
     Modal.okButton.onOk = false;
     Modal.cancelButton.onCancel = false;
     Modal.dialogContainer.visible = false;
-    Modal.dialogContents.children.forEach(function(child){
-      child.destroy(true);
-      Modal.dialogContents.removeChild(child);
+    Modal.dialogContents.children.forEach(function(item){
+      item.destroy(true);
     });
   },
 

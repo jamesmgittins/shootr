@@ -1,12 +1,12 @@
 var Constants = {
 	canvasWidth : 640,
 	canvasHeight : 640,
-	localStorageVariable: "shootrGameModelBeta",
-	starJumpScaling : 1.4,
+	localStorageVariable: "shootrGameModel",
 	difficultyLevelScaling : 1.4,
 	shieldLevelScaling : 1.39,
 	weaponLevelScaling : 1.38,
-	shipLevelPriceScaling : 1.45,
+	shipLevelPriceScaling : 1.44,
+	tradeRouteScaling: 1.44,
 	levelsPerBoss:5,
 	maxScreenShake:2.7,
 	starDistancePerLevel:1.8,
@@ -62,7 +62,7 @@ function calculateAdjustedStarLevel(starLevel) {
 }
 
 function valueForRoute(route) {
-	return 1.5 * Math.pow(1.43, route);
+	return 1.5 * Math.pow(Constants.tradeRouteScaling, route);
 }
 
 function calculateIncome() {
@@ -252,7 +252,7 @@ var pilotUpgrades = [
 	{
 		id : "damage",
 		name : "Targeting Training",
-		description : "Increase all damge dealt by 1%",
+		description : "Increase all damage dealt by 1%",
 		basePrice : 100000,
 		levelFactor : 1.9
 	},

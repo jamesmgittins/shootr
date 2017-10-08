@@ -130,7 +130,7 @@ Enemies = {
         this.enemySpawners.push(function(){return new UFOs.railWave();});
 
       if (gameModel.currentLevel > 3)
-        this.enemySpawners.push(function(){return new Squarepusher.bulletWave();});
+        this.enemySpawners.push(function(){return new Squarepusher.wave();});
 
     }
     return this.enemySpawners;
@@ -148,7 +148,7 @@ Enemies = {
 
     // return new EnemyShips.wave();
     // return new UFOs.bulletWave();
-    // return new Squarepusher.bulletWave();
+    // return new Squarepusher.wave();
   }
 
 

@@ -135,7 +135,7 @@ Asteroids = {
     // var seed = Date.now();
 
     this.texture = Asteroids.createTexture(this.seed, false, 20);
-    this.spritePool = SpritePool.create(this.texture, backgroundEnemyContainer);
+    this.spritePool = new SpritePool(this.texture, backgroundEnemyContainer);
 
     this.ships = [];
     this.newAsteroids = [];
@@ -324,8 +324,8 @@ Asteroids = {
 
 
 
-  detectCollision : function (asteroid, xLoc, yLoc) {
-    if (asteroid.inPlay === 1 && distanceBetweenPoints(asteroid.xLoc, asteroid.yLoc, xLoc, yLoc) < asteroid.offset) {
+  detectCollision : function (xLoc, yLoc) {
+    if (this.inPlay === 1 && distanceBetweenPoints(this.xLoc, this.yLoc, xLoc, yLoc) < this.offset) {
   		return true;
   	}
   	return false;

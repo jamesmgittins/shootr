@@ -11,7 +11,9 @@ Boss = {
   maxBulletsPerShot:15,
   enemyShip : true,
   damage : EnemyShips.damageEnemyShip,
-	detectCollision : Ships.detectCollision,
+	detectCollision : function(x, y) {
+    return Ships.detectCollision(this, x, y);
+  },
   id:"boss"
 };
 
@@ -98,7 +100,7 @@ Boss.update = function(timeDiff) {
     Boss.damageTexture = glowTexture(PIXI.Texture.fromCanvas(Ships.shipArt(size, seed, this.colors, true)));
 
     if (!Boss.spritePool){
-      Boss.spritePool = SpritePool.create(Boss.texture, enemyShipContainer);
+      Boss.spritePool = new SpritePool(Boss.texture, enemyShipContainer);
     }
 
     Boss.sprite = Boss.spritePool.nextSprite();

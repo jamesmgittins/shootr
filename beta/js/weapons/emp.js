@@ -21,7 +21,7 @@ EMP = {
   },
   getSpritePool : function () {
     if (!this.spritePool) {
-      this.spritePool = SpritePool.create(EMP.createTexture(), playerBulletContainer);
+      this.spritePool = new SpritePool(EMP.createTexture(), playerBulletContainer);
     }
     return this.spritePool;
   },

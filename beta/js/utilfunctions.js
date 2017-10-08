@@ -1,3 +1,5 @@
+
+// Util functions not game specific
 function magnitude(x,y) {
 	return Math.sqrt(x * x + y * y);
 }
@@ -128,147 +130,72 @@ function formatMoney(input) {
 }
 
 
-SpritePool = {
-  create : function(texture, container) {
-    var spriteContainer = new PIXI.Container();
-		container.addChild(spriteContainer);
-
-    var spritePool = {
-      sprites : [],
-      discardedSprites : [],
-      container : spriteContainer,
-      texture: texture,
-			textureCount : 0,
-      nextSprite : function() {
-        if (this.discardedSprites.length > 0) {
-          return this.discardedSprites.pop();
-        } else {
-					var sprite;
-					if (Array.isArray(this.texture)) {
-						sprite = new PIXI.Sprite(this.texture[this.textureCount]);
-						this.textureCount++;
-						if (this.textureCount > this.texture.length)
-							this.textureCount = 0;
-					} else {
-						sprite = new PIXI.Sprite(this.texture);
-					}
-          sprite.anchor = {x:0.5,y:0.5};
-          this.sprites.push(sprite);
-          this.container.addChild(sprite);
-          return sprite;
-        }
-      },
-      discardSprite : function(sprite) {
-				sprite.visible = false;
-        this.discardedSprites.push(sprite);
-      },
-			discardAll : function() {
-				this.discardedSprites = this.sprites.slice();
-				for (var i = 0; i < this.sprites.length; i++) {
-					this.sprites[i].visible = false;
-				}
-			},
-			changeTexture : function(texture) {
-				this.texture = texture;
-				for (var i = 0; i < this.sprites.length; i++) {
-					this.sprites[i].texture = texture;
-					this.sprites[i].anchor = {x:0.5,y:0.5};
-				}
-			},
-			destroy : function(leaveTextures) {
-				if (!this.destroyed) {
-					this.container.destroy({children:true, texture:!leaveTextures, baseTexture:!leaveTextures});
-				}
-				this.destroyed = true;
-
-			}
-    };
-		return spritePool;
-  }
-};
 
 var blurFilters = false;
 var texturesCreated = [];
 
-function glowTexture(texture, options) {
+var normalSprite;
+var blurredSprite;
+var bigBlurSprite;
+var blurContainer;
 
-	// console.log("creating glow texture for " + arguments.callee.caller.toString());
-	// if (1 == 1)
-	// 	return texture;
+function glowTexture(texture, options) {
 
 	var resize = options && options.resize ? options.resize : 1;
 	var width = texture.width * resize;
 	var height = texture.height * resize;
 
-
 	var glowTexture = PIXI.RenderTexture.create(width * 2, height * 2);
 
+	if (!normalSprite)
+		normalSprite = new PIXI.Sprite(texture);
+	else
+		normalSprite.texture = texture;
 
-	var normalSprite = new PIXI.Sprite(texture);
 	normalSprite.scale = {x:resize, y:resize};
 	normalSprite.anchor = {x:0.5, y:0.5};
 	normalSprite.position = {x:width, y:height};
 
 
-	var container = new PIXI.Container();
-	var blurTexture;
 
-	// only add blur effect for higher resolutions
-	if (renderer.height > 900 && gameModel.detailLevel >= 1) {
 
-		blurTexture = PIXI.RenderTexture.create(width * 2, height * 2);
-		var blurredSprite = new PIXI.Sprite(texture);
-		blurredSprite.scale = {x:resize, y:resize};
-		blurredSprite.anchor = {x:0.5, y:0.5};
-		blurredSprite.position = {x:width, y:height};
+	var blurTexture = PIXI.RenderTexture.create(width * 2, height * 2);
+	if (!blurredSprite)
+		blurredSprite = createSprite(texture);
+	else
+		blurredSprite.texture = texture;
 
-		renderer.render(blurredSprite, blurTexture);
+	blurredSprite.scale = {x:resize, y:resize};
+	blurredSprite.anchor = {x:0.5, y:0.5};
+	blurredSprite.position = {x:width, y:height};
 
-		var bigBlurSprite = new PIXI.Sprite(blurTexture);
+	renderer.render(blurredSprite, blurTexture);
 
-		if (!blurFilters)
-			blurFilters = [new PIXI.filters.BlurFilter()];
+	if (!bigBlurSprite)
+		bigBlurSprite = new PIXI.Sprite(blurTexture);
+	else
+		bigBlurSprite.texture = blurTexture;
 
-		blurFilters[0].blur = Math.round(gameModel.resolutionFactor * 5);
-		bigBlurSprite.filters = blurFilters;
-		bigBlurSprite.alpha = options && options.blurAmount ? options.blurAmount : 1;
-		container.addChild(bigBlurSprite);
+	if (!blurFilters)
+		blurFilters = [new PIXI.filters.BlurFilter()];
+
+	blurFilters[0].blur = Math.round(gameModel.resolutionFactor * 5);
+	bigBlurSprite.filters = blurFilters;
+	bigBlurSprite.alpha = options && options.blurAmount ? options.blurAmount : 1;
+
+	if (!blurContainer) {
+		blurContainer = new PIXI.Container();
+		blurContainer.addChild(bigBlurSprite);
+		blurContainer.addChild(normalSprite);
 	}
 
-	container.addChild(normalSprite);
-	// container.cacheAsBitmap = true;
-	renderer.render(container, glowTexture);
-
-	// return new PIXI.Texture(glowTexture, new PIXI.Rectangle(width / 2 - 2, height / 2 - 2, width + 4, height + 4));
-	// var returnTexture = new PIXI.Texture(glowTexture);
-	//
-	// if (!options || !options.dontDestroyOriginal) {
-	// 	texture.destroy(true);
-	// 	if (blurTexture)
-	// 		blurTexture.destroy(true);
-	// 	container.destroy(true);
-	// }
+	renderer.render(blurContainer, glowTexture);
 
 	texture.destroy(!options || !options.dontDestroyOriginal);
 	if (blurTexture)
 		blurTexture.destroy(true);
-	container.destroy(true);
 
-
-	// returnTexture.glowDestroy = function() {
-	// 	normalSprite.destroy(true);
-	// 	returnTexture.destroy(true);
-	// 	texture.destroy(true);
-	// 	container.destroy(true);
-	// 	blurredSprite.destroy(true);
-	// 	bigBlurSprite.destroy(true);
-	// 	glowTexture.destroy(true);
-	// };
-	// texturesCreated.push(texture);
-	// texturesCreated.push(blurTexture);
-	// texturesCreated.push(glowTexture);
 	return glowTexture;
-	// return returnTexture;
 }
 
 function recursiveApplyToChildren(container, apply) {
@@ -304,9 +231,35 @@ function skewImage(image) {
   }
 	return canvas;
 }
-function getText(text, size, options, destroyLater) {
+var globalDiscardedText = [];
 
-	return new PIXI.Text(text, {
+function discardText(text) {
+	text.visible = false;
+	if (text.parent)
+		text.parent.removeChild(text);
+	globalDiscardedText.push(text);
+}
+
+function getText(text, size, options) {
+
+	if (globalDiscardedText.length > 0) {
+		var recoveredText = globalDiscardedText.pop();
+		recoveredText.text = text;
+		recoveredText.tint = 0xFFFFFF;
+		recoveredText.rotation = 0;
+		recoveredText.alpha = 1;
+		recoveredText.anchor.x = recoveredText.anchor.y = 0;
+		recoveredText.position.x = recoveredText.position.y = 0;
+		recoveredText.visible = true;
+		recoveredText.style.fontSize = Math.round(size);
+		recoveredText.style.fill = options.fill || "#FFF";
+		recoveredText.style.stroke = options.stroke || "#000";
+		recoveredText.style.strokeThickness = options.strokeThickness || 0;
+		recoveredText.style.align = options.align || 'left';
+		return recoveredText;
+	}
+
+	var aText = new PIXI.Text(text, {
 		fontFamily: 'Dosis',
 		fontSize : Math.round(size),
 		fill: options.fill || "#FFF",
@@ -314,6 +267,13 @@ function getText(text, size, options, destroyLater) {
 		strokeThickness: options.strokeThickness || 0,
 		align: options.align || 'left'
 	});
+
+	// aText.destroy = function() {
+	// 	console.log("auto discarding text");
+	// 	discardText(this);
+	// }
+
+	return aText;
 
 }
 
@@ -331,46 +291,119 @@ function checkForKeepers(container, texturesToKeep, baseTexturesToKeep) {
 
 function clearTextureCache() {
 	var message = "Clearing Cache, Before: " + Object.keys(PIXI.utils.BaseTextureCache).length + ", After: ";
-	var texturesToKeep = [];
-	var baseTexturesToKeep = [];
 
-	// checkForKeepers(gameContainer, texturesToKeep, baseTexturesToKeep);
-	// checkForKeepers(stage, texturesToKeep, baseTexturesToKeep);
-	//
-	// for (var textureUrl in PIXI.utils.TextureCache) {
-	// 	var keep = false;
-	// 	texturesToKeep.forEach(function(toKeep) {
-	// 		if (toKeep == textureUrl)
-	// 			keep = true;
-	// 	});
-	// 	if (!keep)
-	// 		PIXI.utils.TextureCache[textureUrl].destroy(true);
-	// }
-	//
-	// for (var basetextureUrl in PIXI.utils.BaseTextureCache) {
-	// 	var keep = false;
-	// 	baseTexturesToKeep.forEach(function(toKeep) {
-	// 		if (toKeep == PIXI.utils.BaseTextureCache[basetextureUrl].uid)
-	// 			keep = true;
-	// 	});
-	// 	if (!keep)
-	// 		PIXI.utils.BaseTextureCache[basetextureUrl].destroy(true);
-	// }
-
-
-	// for (var basetextureUrl in PIXI.utils.BaseTextureCache) {
-	// 	if (basetextureUrl.includes("text")) {
-	// 		delete PIXI.utils.BaseTextureCache[basetextureUrl];
-	// 	}
-	// }
-	// for (var textureUrl in PIXI.utils.TextureCache) {
-	// 	if (textureUrl.includes("text")) {
-	// 		delete PIXI.utils.TextureCache[textureUrl];
-	// 	}
-	// }
 	renderer.textureGC.maxIdle = 120;
 	renderer.textureGC.run();
 
 	message += Object.keys(PIXI.utils.BaseTextureCache).length;
 	debug && console.log(message);
 }
+
+var globalDiscardedSprites = [];
+function discardSprite(sprite) {
+	sprite.visible = false;
+	globalDiscardedSprites.push(sprite);
+	if (sprite.parent) {
+		sprite.parent.removeChild(sprite);
+	}
+}
+function createSprite(texture, dontUseDiscardedSprites) {
+	var sprite;
+	if (!dontUseDiscardedSprites && globalDiscardedSprites.length > 0) {
+		sprite = globalDiscardedSprites.pop();
+		sprite.texture = texture;
+		sprite.alpha = 1;
+		sprite.anchor.x = sprite.anchor.y = 0;
+		sprite.visible = true;
+		sprite.rotation = 0;
+		sprite.scale.x = sprite.scale.y = 1;
+		sprite.tint = 0xFFFFFF;
+	} else {
+		sprite = new PIXI.Sprite(texture);
+	}
+	// sprite.destroy = function() {
+	// 	console.log("auto destroying sprite");
+	// 	discardSprite(this);
+	// };
+	return sprite;
+}
+
+function SpritePool(texture, container, dontUseDiscardedSprites) {
+	var spriteContainer = new PIXI.Container();
+	container.addChild(spriteContainer);
+	this.sprites = [];
+	this.discardedSprites = [];
+	this.container = spriteContainer;
+	this.texture = texture;
+	this.textureCount = 0;
+	this.dontUseDiscardedSprites = dontUseDiscardedSprites;
+}
+
+SpritePool.prototype.nextSprite = function() {
+	if (this.discardedSprites.length > 0) {
+		return this.discardedSprites.pop();
+	} else {
+		var sprite;
+		if (Array.isArray(this.texture)) {
+			sprite = createSprite(this.texture[this.textureCount], this.dontUseDiscardedSprites);
+			this.textureCount++;
+			if (this.textureCount > this.texture.length)
+				this.textureCount = 0;
+		} else {
+			sprite = createSprite(this.texture, this.dontUseDiscardedSprites);
+		}
+		sprite.anchor = {x:0.5,y:0.5};
+		this.sprites.push(sprite);
+		this.container.addChild(sprite);
+		return sprite;
+	}
+};
+
+SpritePool.prototype.discardSprite = function(sprite) {
+	sprite.visible = false;
+	this.discardedSprites.push(sprite);
+};
+
+SpritePool.prototype.discardAll = function() {
+	this.discardedSprites = this.sprites.slice();
+	for (var i = 0; i < this.sprites.length; i++) {
+		this.sprites[i].visible = false;
+	}
+};
+
+SpritePool.prototype.changeTexture = function(texture) {
+	this.texture = texture;
+	for (var i = 0; i < this.sprites.length; i++) {
+		this.sprites[i].texture = texture;
+		this.sprites[i].anchor = {x:0.5,y:0.5};
+	}
+};
+
+SpritePool.prototype.forEach = function(apply) {
+	for (var i = 0; i < this.sprites.length; i++) {
+		apply(this.sprites[i]);
+	}
+};
+
+SpritePool.prototype.destroy = function(leaveTextures) {
+	if (!this.destroyed) {
+		// this.sprites.forEach(function(child){
+		// 	discardSprite(child);
+		// });
+		// this.container.removeChildren(0);
+		// this.container.destroy();
+		this.container.destroy({children:true, texture:!leaveTextures, baseTexture:!leaveTextures});
+		// if (Array.isArray(this.texture)) {
+		// 	this.texture.forEach(function(text){
+		// 		if (text && !text._destroyed)
+		// 			text.destroy(!leaveTextures);
+		// 	})
+		// } else {
+		// 	if (this.texture && !this.texture._destroyed)
+		// 		this.texture.destroy(!leaveTextures);
+		// }
+	}
+	this.sprites = [];
+	this.discardedSprites = [];
+	this.destroyed = true;
+};

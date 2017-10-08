@@ -13,7 +13,6 @@ PilotSchool = {
     PilotSchool.menuContainer.visible = false;
     for (i = PilotSchool.menuContainer.children.length - 1; i >= 0; i--){
       var item = PilotSchool.menuContainer.children[i];
-      PilotSchool.menuContainer.removeChild(item);
       item.destroy(true);
     }
   },
@@ -32,7 +31,6 @@ PilotSchool.initialize = function () {
   } else {
     for (i = PilotSchool.menuContainer.children.length - 1; i >= 0; i--){
       var item = PilotSchool.menuContainer.children[i];
-      PilotSchool.menuContainer.removeChild(item);
       item.destroy(true);
     }
   }

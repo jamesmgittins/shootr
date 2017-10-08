@@ -67,7 +67,7 @@ Bullets.blasts = {
 	},
 	getSpritePool : function() {
 		if (!this.spritePool) {
-			this.spritePool = SpritePool.create(Bullets.blasts.texture(), explosionContainer);
+			this.spritePool = new SpritePool(Bullets.blasts.texture(), explosionContainer);
 		}
 		return this.spritePool;
 	},
@@ -102,7 +102,7 @@ Bullets.blasts = {
 Bullets.enemyRails = {
 	getSpritePool:function() {
 		if (!this.spritePool) {
-			this.spritePool = SpritePool.create(Stars.stars.getTexture(), bulletContainer);
+			this.spritePool = new SpritePool(Stars.stars.getTexture(), bulletContainer);
 		}
 		return this.spritePool;
 	},
@@ -172,7 +172,7 @@ Bullets.enemyBullets = {
 	},
 	getSpritePool:function() {
 		if (!this.spritePool) {
-			this.spritePool = SpritePool.create(Bullets.enemyBullets.texture(), bulletContainer);
+			this.spritePool = new SpritePool(Bullets.enemyBullets.texture(), bulletContainer);
 		}
 		return this.spritePool;
 	},
@@ -315,7 +315,7 @@ Bullets.explosionBits = {
 	bitsPerExplosion: 10,
 	getSpritePool : function() {
 		if (!this.spritePool) {
-			this.spritePool = SpritePool.create(Stars.stars.getTexture(), explosionContainer);
+			this.spritePool = new SpritePool(Stars.stars.getTexture(), explosionContainer);
 		}
 		return this.spritePool;
 	},

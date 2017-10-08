@@ -70,7 +70,7 @@ RailGun = {
 
 		return {
 			weapon : weapon,
-			spritePool : SpritePool.create(RailGun.generateTexture(), container),
+			spritePool : new SpritePool(RailGun.generateTexture(), container),
 			resize : function(){
 				this.spritePool.changeTexture(RailGun.generateTexture());
 			},
@@ -127,7 +127,7 @@ RailGun = {
           for (var j = 0; j < Enemies.activeShips.length; j ++) {
             if (!Enemies.activeShips[j].damagedByRailgun &&
 								distanceBetweenPoints(location.x, location.y, Enemies.activeShips[j].xLoc, Enemies.activeShips[j].yLoc) <= 100 &&
-								Enemies.activeShips[j].detectCollision(Enemies.activeShips[j], location.x, location.y)) {
+								Enemies.activeShips[j].detectCollision(location.x, location.y)) {
 
               Enemies.damageEnemy(Enemies.activeShips[j], location.x, location.y, damage);
               Enemies.activeShips[j].damagedByRailgun = true;
@@ -148,7 +148,7 @@ RailGun = {
         }
 			},
 			beamTrails : {
-				spritePool : SpritePool.create(Stars.stars.getTexture(), container),
+				spritePool : new SpritePool(Stars.stars.getTexture(), container),
 				update:function(timeDiff) {
 					for (var i = 0; i < this.spritePool.sprites.length; i++) {
 						var sprite = this.spritePool.sprites[i];

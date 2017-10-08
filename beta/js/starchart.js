@@ -96,7 +96,7 @@ StarChart = {
     },
     getSpritePool: function() {
       if (!StarChart.Stars.spritePool) {
-        StarChart.Stars.spritePool = SpritePool.create(this.getTexture(), StarChart.Stars.sprites);
+        StarChart.Stars.spritePool = new SpritePool(this.getTexture(), StarChart.Stars.sprites);
       }
       return StarChart.Stars.spritePool;
     },
@@ -206,14 +206,14 @@ StarChart.generateStar = function(x, y) {
 StarChart.locator = {
 	    initialize: function () {
         var blast = document.createElement('canvas');
-        blast.width = 10;
-        blast.height = 16;
+        blast.width = 20;
+        blast.height = 32;
         var blastCtx = blast.getContext('2d');
 
         blastCtx.lineWidth = 2;
 
-        drawline(blastCtx, "#FFF", 1, 1, 9, 8);
-        drawline(blastCtx, "#FFF", 1, 15, 9, 8);
+        drawline(blastCtx, "#FFF", 1, 1, 19, 16);
+        drawline(blastCtx, "#FFF", 1, 31, 19, 16);
 
 
         if (StarChart.locator.sprite) {
@@ -222,8 +222,8 @@ StarChart.locator = {
             StarChart.locator.sprite.destroy(true);
         }
 
-        StarChart.locator.sprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(blast));
-        StarChart.locator.sprite.anchor = { x: -25, y: 0.5 };
+        StarChart.locator.sprite = createSprite(PIXI.Texture.fromCanvas(blast));
+        StarChart.locator.sprite.anchor = { x: -11, y: 0.5 };
         StarChart.locator.sprite.visible = false;
         StarChart.locator.sprite.tint = MainMenu.buttonTint;
         StarChart.menuContainer.addChild(StarChart.locator.sprite);
@@ -234,8 +234,8 @@ StarChart.locator = {
             StarChart.locator.bossSprite.destroy(true);
         }
 
-        StarChart.locator.bossSprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(blast));
-        StarChart.locator.bossSprite.anchor = { x: -25, y: 0.5 };
+        StarChart.locator.bossSprite = createSprite(PIXI.Texture.fromCanvas(blast));
+        StarChart.locator.bossSprite.anchor = { x: -11, y: 0.5 };
         StarChart.locator.bossSprite.visible = false;
         StarChart.locator.bossSprite.tint = MainMenu.unselectableTint;
         StarChart.menuContainer.addChild(StarChart.locator.bossSprite);
@@ -249,7 +249,8 @@ StarChart.locator = {
       var xDiff;
       var yDiff;
 
-      if (distanceBetweenPoints(StarChart.currentStar.x,StarChart.currentStar.y,StarChart.currentPosition.x * -1,StarChart.currentPosition.y * -1) > 2.5 / StarChart.zoom) {
+      if (StarChart.shipSprite.position.x < 0 || StarChart.shipSprite.position.x > renderer.width || StarChart.shipSprite.position.y < 0 || StarChart.shipSprite.position.y > renderer.height) {
+      // if (distanceBetweenPoints(StarChart.currentStar.x,StarChart.currentStar.y,StarChart.currentPosition.x * -1,StarChart.currentPosition.y * -1) > 2.5 / StarChart.zoom) {
 
 					xDiff = StarChart.currentStar.x + StarChart.currentStar.xWobble + StarChart.currentPosition.x;
 	        yDiff = -1 * StarChart.currentPosition.y - (StarChart.currentStar.y + StarChart.currentStar.yWobble);
@@ -262,7 +263,8 @@ StarChart.locator = {
       } else {
           StarChart.locator.sprite.visible = false;
       }
-      if (gameModel.bossPosition && distanceBetweenPoints(StarChart.bossStar.x,StarChart.bossStar.y,StarChart.currentPosition.x * -1,StarChart.currentPosition.y * -1) > 2.5 / StarChart.zoom) {
+      if (StarChart.skullSprite.position.x < 0 || StarChart.skullSprite.position.x > renderer.width || StarChart.skullSprite.position.y < 0 || StarChart.skullSprite.position.y > renderer.height) {
+      // if (gameModel.bossPosition && distanceBetweenPoints(StarChart.bossStar.x,StarChart.bossStar.y,StarChart.currentPosition.x * -1,StarChart.currentPosition.y * -1) > 2.5 / StarChart.zoom) {
 
           xDiff = StarChart.bossStar.x + StarChart.bossStar.xWobble + StarChart.currentPosition.x;
           yDiff = -1 * StarChart.currentPosition.y - (StarChart.bossStar.y + StarChart.bossStar.yWobble);
@@ -288,10 +290,11 @@ StarChart.starField = {
 	initialize: function() {
 
 		if (StarChart.starField.sprites) {
-			StarChart.starField.sprites.children.forEach(function(child){
-				StarChart.starField.sprites.removeChild(child);
-			});
-      StarChart.menuContainer.removeChild(StarChart.starField.sprites);
+      StarChart.starField.sprites.destroy(true);
+			// StarChart.starField.sprites.children.forEach(function(child){
+			// 	StarChart.starField.sprites.removeChild(child);
+			// });
+      // StarChart.menuContainer.removeChild(StarChart.starField.sprites);
 		}
     StarChart.starField.sprites = new PIXI.Container();
     StarChart.menuContainer.addChild(StarChart.starField.sprites);
@@ -306,7 +309,7 @@ StarChart.starField = {
 
 		for (var i = 0; i < StarChart.starField.numStars; i++) {
 			StarChart.starField.speed[i] = 1 + Math.random() * 50;
-			StarChart.starField.sprite[i] = new PIXI.Sprite(texture);
+			StarChart.starField.sprite[i] = createSprite(texture);
 			StarChart.starField.xLoc[i] = 0 + Math.random() * renderer.width;
 			StarChart.starField.yLoc[i] = 0 + Math.random() * renderer.height;
 			StarChart.starField.sprite[i].position.x = StarChart.starField.xLoc[i];
@@ -518,7 +521,7 @@ StarChart.initialize = function () {
 	drawline(blastCtx, "#FFF", 15, 1, 15, 29);
 	drawline(blastCtx, "#FFF", 1, 15, 29, 15);
 
-	StarChart.cursorSprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(blast));
+	StarChart.cursorSprite = createSprite(PIXI.Texture.fromCanvas(blast));
   StarChart.cursorSprite.tint = MainMenu.buttonTint;
 	StarChart.cursorSprite.anchor = {x:0.5,y:0.5};
 	StarChart.cursorSprite.visible = false;
@@ -664,15 +667,29 @@ StarChart.initialize = function () {
     }
 
     if (StarChart.asteroids) {
-      StarChart.asteroids.destroy();
+      StarChart.asteroids.forEach(function(asteroid){
+        asteroid.visible = false;
+        if (asteroid.star) {
+          asteroid.star.asteroidSprites = false;
+          asteroid.star = undefined;
+        }
+      });
+      StarChart.asteroids.discardAll();
+      // StarChart.asteroids.destroy();
+      // StarChart.asteroids=false;
     }
-    var seed = Date.now();
-    StarChart.asteroids = SpritePool.create([
+
+    if (!StarChart.asteroids) {
+      var seed = Date.now();
+      StarChart.asteroids = new SpritePool([
         Asteroids.createTexture(seed, false, 64),
         Asteroids.createTexture(seed + 1, false, 64),
         Asteroids.createTexture(seed + 2, false, 64),
         Asteroids.createTexture(seed + 3, false, 64)
-    ], StarChart.menuContainer);
+      ], StarChart.menuContainer, true);
+    }
+
+
 
 		StarChart.maxDistance = gameModel.p1.ship.range * getUpgradedRange();
 
@@ -687,7 +704,7 @@ StarChart.initialize = function () {
     }
 
 
-    StarChart.skullSprite = new PIXI.Sprite(PIXI.Texture.fromImage("img/death-skull.svg", undefined, undefined, 0.15));
+    StarChart.skullSprite = createSprite(PIXI.Texture.fromImage("img/death-skull.svg", undefined, undefined, 0.15));
     StarChart.skullSprite.anchor = {x:-0.5,y:-0.5};
     StarChart.skullSprite.visible = false;
     StarChart.skullSprite.scaleMod = 0;
@@ -701,7 +718,7 @@ StarChart.initialize = function () {
 
 
     var shipTexture = Ships.shipArt(32, gameModel.p1.ship.seed, Ships.enemyColors[gameModel.p1.ship.colorIndex]);
-    StarChart.shipSprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(shipTexture));
+    StarChart.shipSprite = createSprite(PIXI.Texture.fromCanvas(shipTexture));
     StarChart.shipSprite.anchor = {x:-0.5,y:0.3};
 
     StarChart.menuContainer.addChild(StarChart.shipSprite);
@@ -904,6 +921,24 @@ StarChart.initialize = function () {
     // StarChart.menuContainer.destroy(true);
     StarChart.menuContainer.visible = false;
     Sounds.mapMusic.fadeOut();
+    StarChart.Stars.getSpritePool().destroy();
+    StarChart.Stars.spritePool = undefined;
+
+    StarChart.chart.forEach(function(chartArray){
+      chartArray.forEach(function(star){
+        delete star.sprite;
+      })
+    })
+
+    if (StarChart.asteroids) {
+      StarChart.asteroids.forEach(function(asteroid){
+        if (asteroid.star) {
+          asteroid.star.asteroidSprites = false;
+          asteroid.star = undefined;
+        }
+      });
+      StarChart.asteroids.discardAll();
+    }
   };
 
   StarChart.calcFade = function (x,y,bounds) {
@@ -1113,7 +1148,7 @@ StarChart.initialize = function () {
             star.sprite.visible = false;
           star.sprite.alpha = StarChart.calcFade(pixelPositionX,pixelPositionY,bounds) * alphaMultiplier;
 
-          if (star.asteroids && star.level <= maxLevelAllowed() && star.sprite.visible) {
+          if (star.asteroids && star.level <= maxLevelAllowed() && star.sprite.visible && StarChart.asteroids && !StarChart.asteroids.destroyed && StarChart.zoom > 0.2) {
             if (!star.asteroidSprites) {
               star.asteroidSprites = [];
               Math.seedrandom(star.seed);
@@ -1121,6 +1156,7 @@ StarChart.initialize = function () {
               var whichWay = Math.random() > 0.5 ? -1 : 1;
               for (var b = 0; b < howMany; b++) {
                 star.asteroidSprites[b] = StarChart.asteroids.nextSprite();
+                star.asteroidSprites[b].star = star;
                 star.asteroidSprites[b].rotation = Math.random() * Math.PI * 2;
                 star.asteroidSprites[b].rotationSpeed = (0.3 + Math.random() * 0.3) * whichWay;
                 star.asteroidSprites[b].achorMod = -0.1 + Math.random() * 0.2;
@@ -1142,7 +1178,7 @@ StarChart.initialize = function () {
 						StarChart.Stars.getSpritePool().discardSprite(star.sprite);
 						star.sprite = undefined;
           }
-          if (star.asteroidSprites) {
+          if (star.asteroidSprites && StarChart.asteroids) {
             for (var l = 0; l < star.asteroidSprites.length; l++) {
               StarChart.asteroids.discardSprite(star.asteroidSprites[l]);
             }

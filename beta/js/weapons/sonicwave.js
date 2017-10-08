@@ -1,13 +1,14 @@
 SonicWave = {
 
 	widenPerSecond : 1.35,
-	maxWidth : 10,
+	maxWidth : 5,
 	heightenPerSecond : 0.5,
-	maxHeight: 5,
+	maxHeight: 3,
+	spriteSize : 16,
 
 
 	generateTexture : function() {
-    var size = 8 * scalingFactor;
+    var size = this.spriteSize * scalingFactor;
     var blast = document.createElement('canvas');
     blast.width = size + 4;
     blast.height = size + 4;
@@ -15,8 +16,10 @@ SonicWave = {
     blastCtx.shadowBlur = 5;
     blastCtx.shadowColor = "white";
     var radgrad = blastCtx.createRadialGradient(size / 2 + 2, size / 2 + 2, 0, size / 2 + 2, size / 2 + 2, size / 2);
-    radgrad.addColorStop(0, 'rgba(255,255,255,1)');
+    radgrad.addColorStop(0, 'rgba(255,255,255,0)');
+		radgrad.addColorStop(0.5, 'rgba(255,255,255,0)');
     radgrad.addColorStop(0.8, 'rgba(255,255,255,0.5)');
+		radgrad.addColorStop(0.9, 'rgba(255,255,255,1)');
     radgrad.addColorStop(1, 'rgba(255,255,255,0)');
     blastCtx.fillStyle = radgrad;
     // blastCtx.fillRect(0, 0, size + 4, size + 4);
@@ -56,24 +59,24 @@ SonicWave = {
 				} else {
 					for (var j = 0; j < Enemies.activeShips.length; j++) {
 						var enemyShip = Enemies.activeShips[j];
-						var leftEdge = RotateVector2d(-4 * sprite.scale.x, 0, sprite.rotation);
-						var leftSide = RotateVector2d(-2 * sprite.scale.x, 0, sprite.rotation);
-						var rightEdge = RotateVector2d(4 * sprite.scale.x, 0, sprite.rotation);
-						var rightSide = RotateVector2d(2 * sprite.scale.x, 0, sprite.rotation);
+						var leftEdge = RotateVector2d(-8 * sprite.scale.x, 0, sprite.rotation);
+						var leftSide = RotateVector2d(-4 * sprite.scale.x, 0, sprite.rotation);
+						var rightEdge = RotateVector2d(8 * sprite.scale.x, 0, sprite.rotation);
+						var rightSide = RotateVector2d(4 * sprite.scale.x, 0, sprite.rotation);
 
-						if (enemyShip.detectCollision(enemyShip, sprite.xLoc, sprite.yLoc)) {
+						if (enemyShip.detectCollision(sprite.xLoc, sprite.yLoc)) {
 							Enemies.damageEnemy(enemyShip, sprite.xLoc, sprite.yLoc, sprite.bulletStrength);
 							spritePool.discardSprite(sprite);
-						} else if (enemyShip.detectCollision(enemyShip, sprite.xLoc + leftEdge.x, sprite.yLoc + leftEdge.y)) {
+						} else if (enemyShip.detectCollision(sprite.xLoc + leftEdge.x, sprite.yLoc + leftEdge.y)) {
 							Enemies.damageEnemy(enemyShip, sprite.xLoc + leftEdge.x, sprite.yLoc + leftEdge.y, sprite.bulletStrength);
 							spritePool.discardSprite(sprite);
-						} else if (enemyShip.detectCollision(enemyShip, sprite.xLoc + rightEdge.x, sprite.yLoc + rightEdge.y)) {
+						} else if (enemyShip.detectCollision(sprite.xLoc + rightEdge.x, sprite.yLoc + rightEdge.y)) {
 							Enemies.damageEnemy(enemyShip, sprite.xLoc + rightEdge.x, sprite.yLoc + rightEdge.y, sprite.bulletStrength);
 							spritePool.discardSprite(sprite);
-						} else if (enemyShip.detectCollision(enemyShip, sprite.xLoc + leftSide.x, sprite.yLoc + leftSide.y)) {
+						} else if (enemyShip.detectCollision(sprite.xLoc + leftSide.x, sprite.yLoc + leftSide.y)) {
 							Enemies.damageEnemy(enemyShip, sprite.xLoc + leftSide.x, sprite.yLoc + leftSide.y, sprite.bulletStrength);
 							spritePool.discardSprite(sprite);
-						} else if (enemyShip.detectCollision(enemyShip, sprite.xLoc + rightSide.x, sprite.yLoc + rightSide.y)) {
+						} else if (enemyShip.detectCollision(sprite.xLoc + rightSide.x, sprite.yLoc + rightSide.y)) {
 							Enemies.damageEnemy(enemyShip, sprite.xLoc + rightSide.x, sprite.yLoc + rightSide.y, sprite.bulletStrength);
 							spritePool.discardSprite(sprite);
 						}
@@ -111,7 +114,7 @@ SonicWave = {
 
 		return {
 			weapon : weapon,
-			spritePool : SpritePool.create(SonicWave.generateTexture(), container),
+			spritePool : new SpritePool(SonicWave.generateTexture(), container),
 			resize : function(){
 				this.spritePool.changeTexture(SonicWave.generateTexture());
 			},
@@ -132,7 +135,7 @@ SonicWave = {
 				Sounds.playerBullets.play(position.x);
 
 				var damagePerShot = weapon.damagePerShot * damageModifier;
-				SonicWave.individualBullet(this.spritePool, speed, position, damagePerShot, 1.7, this.weapon);
+				SonicWave.individualBullet(this.spritePool, speed, position, damagePerShot, 1, this.weapon);
 			},
 			destroy : function() {
         this.spritePool.destroy();
