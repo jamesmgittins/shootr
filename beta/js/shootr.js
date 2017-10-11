@@ -94,9 +94,9 @@ function changeLevel(level) {
 
 	Stars.nebulaBackground.initTexture(StarChart.generateStar(gameModel.targetSystem.x, gameModel.targetSystem.y).seed);
 
-	EnemyShips.waveBulletFrequency = Math.max(2000 - gameModel.currentLevel, 500);
-	EnemyShips.shipHealth = ((12 + gameModel.bossesDefeated) * gameModel.currentLevel * levelDifficultyModifier) - 5 + gameModel.currentLevel;
-	EnemyShips.maxBulletsPerShot = Math.min(8, gameModel.currentLevel / 2);
+	EnemyShips.waveBulletFrequency = Math.max(1000 - gameModel.currentLevel, 500);
+	EnemyShips.shipHealth = (13 * gameModel.currentLevel * levelDifficultyModifier) - 5 + gameModel.currentLevel;
+	EnemyShips.maxBulletsPerShot = Math.min(8, gameModel.currentLevel / 5 + 1);
 	Boss.health = EnemyShips.shipHealth * 70;
 	Boss.initialized = false;
 

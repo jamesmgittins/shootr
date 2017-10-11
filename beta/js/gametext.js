@@ -362,12 +362,15 @@ GameText.damage = {
 
 		var text = false;
 
-		GameText.damage.texts.forEach(function(existingText){
-			if (existingText.visible && existingText.shipId == ship.id) {
-				text = existingText;
-				text.damageValue += damage;
-			}
-		});
+		if(!isCrit) {
+			GameText.damage.texts.forEach(function(existingText){
+				if (existingText.visible && existingText.shipId == ship.id) {
+					text = existingText;
+					text.damageValue += damage;
+				}
+			});
+		}
+
 
 		if (!text) {
 			if (GameText.damage.discardedText.length > 0) {
@@ -381,7 +384,10 @@ GameText.damage = {
 				GameText.damage.texts.push(text);
 			}
 			text.damageValue = damage;
-			text.shipId = ship.id;
+			if (!isCrit)
+				text.shipId = ship.id;
+			else
+				text.shipId = "crit";
 		}
 		if (isCrit) {
 			text.tint = 0xFFFF00;
@@ -453,6 +459,8 @@ GameText.credits = {
 };
 
 GameText.bigText = {
+	queue : [],
+	lastText : 1,
 	maxTexts: 3,
 	currText: 0,
 	texts: [],
@@ -492,17 +500,22 @@ GameText.bigText = {
 				}
 			}
 		}
+		this.lastText += timeDiff;
+		if (this.lastText > 1 && this.queue.length > 0) {
+			this.lastText = 0;
+			GameText.bigText.currText++;
+			if (GameText.bigText.currText >= GameText.bigText.maxTexts) {
+				GameText.bigText.currText = 0;
+			}
+			GameText.bigText.texts[GameText.bigText.currText].visible = true;
+			GameText.bigText.texts[GameText.bigText.currText].text = this.queue.shift();
+			GameText.bigText.texts[GameText.bigText.currText].position.x = (canvasWidth / 2) * scalingFactor;
+			GameText.bigText.texts[GameText.bigText.currText].position.y = (canvasHeight / 2) * scalingFactor;
+			GameText.bigText.texts[GameText.bigText.currText].alpha = 1;
+		}
 	},
 	newBigText: function(text) {
-		GameText.bigText.currText++;
-		if (GameText.bigText.currText >= GameText.bigText.maxTexts) {
-			GameText.bigText.currText = 0;
-		}
-		GameText.bigText.texts[GameText.bigText.currText].visible = true;
-		GameText.bigText.texts[GameText.bigText.currText].text = text;
-		GameText.bigText.texts[GameText.bigText.currText].position.x = (canvasWidth / 2) * scalingFactor;
-		GameText.bigText.texts[GameText.bigText.currText].position.y = (canvasHeight / 2) * scalingFactor;
-		GameText.bigText.texts[GameText.bigText.currText].alpha = 1;
+		this.queue.push(text);
 	}
 };
 

@@ -52,14 +52,14 @@ Talents = {
           icon : "img/defibrilate.svg"
         },
         {
-          name : "Dummy",
-          description : "This talent has not been written yet",
-          icon : "img/barbed-arrow.svg"
+          name : "First Cut is the Deepest",
+          description : "After taking damage gain 30% damage reduction for 5 seconds",
+          icon : "img/dripping-knife.svg"
         },
         {
-          name : "Dummy",
-          description : "This talent has not been written yet",
-          icon : "img/barbed-arrow.svg"
+          name : "I am rubber you are glue",
+          description : "Any damage taken is also inflicted upon the next enemy you hit",
+          icon : "img/splash.svg"
         }
       ]
     },
@@ -120,6 +120,7 @@ Talents = {
 
   startGame : function () {
     Talents.killCounter = 0;
+    Talents.dmgTaken = 0;
     if (Talents.getGameModelTalents().greedTalent == "Magnetic") {
       Buffs.newBuff("Magnetic", 10, "img/magnet.svg", Constants.itemColors.normal, true, true);
     }
@@ -160,7 +161,11 @@ Talents = {
 
 
   passiveDmgReduction : function() {
-    return Talents.getGameModelTalents().pridePoints * 0.05;
+    var additional = 0;
+    if (Buffs.isBuffActive("First Cut is the Deepest")) {
+      additional = 30;
+    }
+    return Talents.getGameModelTalents().pridePoints * 5 + additional;
   },
 
 
@@ -205,6 +210,16 @@ Talents = {
   },
 
 
+  enemyDamaged : function(amount) {
+    if (Buffs.isBuffActive("I am rubber you are glue")) {
+      Buffs.removeBuff("I am rubber you are glue");
+      amount += Talents.dmgTaken;
+      Talents.dmgTaken = 0;
+    }
+    return amount;
+  },
+
+
   crateCollected : function() {
     if (Talents.getGameModelTalents().prideTalent == "Tables Turned" && PlayerShip.playerShip.currShield < PlayerShip.playerShip.maxShield) {
       Buffs.newBuff("Tables Turned", 1, "img/energise.svg", Constants.itemColors.super, false, false);
@@ -213,7 +228,7 @@ Talents = {
   },
 
 
-  playerDamaged : function() {
+  playerDamaged : function(amount) {
     if (Talents.getGameModelTalents().greedTalent == "Untouchable" && PlayerShip.playerShip.currShield < PlayerShip.playerShip.maxShield) {
       Buffs.removeBuff("Untouchable");
     }
@@ -232,6 +247,13 @@ Talents = {
         PlayerShip.restoreShieldPercent(0.5);
         Buffs.newBuff("Last Chance", 2, "img/defibrilate.svg", Constants.itemColors.super, false);
       }
+    }
+    if (Talents.getGameModelTalents().prideTalent == "First Cut is the Deepest") {
+      Buffs.newBuff("First Cut is the Deepest", 5, "img/dripping-knife.svg", Constants.itemColors.super, false, false);
+    }
+    if (Talents.getGameModelTalents().prideTalent == "I am rubber you are glue") {
+      Talents.dmgTaken += amount;
+      Buffs.newBuff("I am rubber you are glue", 2, "img/splash.svg", Constants.itemColors.super, true, true);
     }
   },
 

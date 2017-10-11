@@ -212,8 +212,10 @@ EnemyShips.checkForSplashDamage = function (ship){
   }
 };
 
-EnemyShips.damageEnemyShip = function(xLoc, yLoc, damage, noEffect) {
+EnemyShips.damageEnemyShip = function(xLoc, yLoc, inputDamage, noEffect) {
 	if (this.health > 0) {
+
+		var damage = Talents.enemyDamaged(inputDamage);
 
 		var isCrit = Math.random() < getCritChance();
 		if (isCrit) {
@@ -231,7 +233,7 @@ EnemyShips.damageEnemyShip = function(xLoc, yLoc, damage, noEffect) {
 
 		this.health -= damage;
 
-		GameText.damage.newText(damage, this, isCrit);
+		GameText.damage.newText(damage, this, isCrit && !noEffect);
 
 		if (this.wave) {
 			var percentOfShipDamaged = damage / this.wave.shipHealth;

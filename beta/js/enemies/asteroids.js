@@ -306,8 +306,10 @@ Asteroids.asteroid.prototype.detectCollision = function(xLoc, yLoc) {
   return false;
 };
 
-Asteroids.asteroid.prototype.damage = function (xLoc, yLoc, damage, noEffect) {
+Asteroids.asteroid.prototype.damage = function (xLoc, yLoc, inputDamage, noEffect) {
   if (this.health > 0) {
+
+    var damage = Talents.enemyDamaged(inputDamage);
 
     var isCrit = Math.random() < getCritChance();
 		if (isCrit) {
@@ -330,7 +332,7 @@ Asteroids.asteroid.prototype.damage = function (xLoc, yLoc, damage, noEffect) {
 
     this.health -= damage;
 
-    GameText.damage.newText(damage, this, isCrit);
+    GameText.damage.newText(damage, this, isCrit && !noEffect);
 
     if (this.wave) {
       var percentOfShipDamaged = damage / this.wave.shipHealth;

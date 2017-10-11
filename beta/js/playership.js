@@ -204,7 +204,7 @@ PlayerShip.damagePlayerShip = function (playerShip, damage) {
 		stageSprite.screenShake = gameModel.maxScreenShake;
 		playerShip.sprite.texture=playerShip.sprite.damageTexture;
 		GameText.damage.newText((damage * getDamageReduction()), playerShip);
-		Talents.playerDamaged();
+		Talents.playerDamaged(damage * getDamageReduction());
 		if (playerShip.currShield <= 0 && playerShip.inPlay === 1) {
 			playerShip.container.visible=false;
 			if (Weapons.attackDrone.sprite) {
