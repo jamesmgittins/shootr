@@ -129,10 +129,7 @@ function formatMoney(input) {
 	return (input).toFixed(2);
 }
 
-
-
 var blurFilters = false;
-var texturesCreated = [];
 
 var normalSprite;
 var blurredSprite;
@@ -156,12 +153,9 @@ function glowTexture(texture, options) {
 	normalSprite.anchor = {x:0.5, y:0.5};
 	normalSprite.position = {x:width, y:height};
 
-
-
-
 	var blurTexture = PIXI.RenderTexture.create(width * 2, height * 2);
 	if (!blurredSprite)
-		blurredSprite = createSprite(texture);
+		blurredSprite = new PIXI.Sprite(texture);
 	else
 		blurredSprite.texture = texture;
 
@@ -207,13 +201,6 @@ function recursiveApplyToChildren(container, apply) {
 	}
 }
 
-function removeAllFromContainer(container) {
-	for (var i = container.children.length - 1; i >= 0; i--) {
-		var item = container.children[i];
-		container.removeChild(item);
-		item.destroy(true);
-	}
-}
 
 function skewImage(image) {
 	var canvas = document.createElement('canvas');
@@ -231,33 +218,8 @@ function skewImage(image) {
   }
 	return canvas;
 }
-var globalDiscardedText = [];
-
-function discardText(text) {
-	text.visible = false;
-	if (text.parent)
-		text.parent.removeChild(text);
-	globalDiscardedText.push(text);
-}
 
 function getText(text, size, options) {
-
-	if (globalDiscardedText.length > 0) {
-		var recoveredText = globalDiscardedText.pop();
-		recoveredText.text = text;
-		recoveredText.tint = 0xFFFFFF;
-		recoveredText.rotation = 0;
-		recoveredText.alpha = 1;
-		recoveredText.anchor.x = recoveredText.anchor.y = 0;
-		recoveredText.position.x = recoveredText.position.y = 0;
-		recoveredText.visible = true;
-		recoveredText.style.fontSize = Math.round(size);
-		recoveredText.style.fill = options.fill || "#FFF";
-		recoveredText.style.stroke = options.stroke || "#000";
-		recoveredText.style.strokeThickness = options.strokeThickness || 0;
-		recoveredText.style.align = options.align || 'left';
-		return recoveredText;
-	}
 
 	var aText = new PIXI.Text(text, {
 		fontFamily: 'Dosis',
@@ -268,25 +230,8 @@ function getText(text, size, options) {
 		align: options.align || 'left'
 	});
 
-	// aText.destroy = function() {
-	// 	console.log("auto discarding text");
-	// 	discardText(this);
-	// }
-
 	return aText;
 
-}
-
-function checkForKeepers(container, texturesToKeep, baseTexturesToKeep) {
-	container.children.forEach(function(item){
-		if (item.texture) {
-			if (item.texture.textureCacheIds && item.texture.textureCacheIds.length > 0) {
-				texturesToKeep.push(item.texture.textureCacheIds[0]);
-			}
-			if (item.texture.baseTexture)
-				baseTexturesToKeep.push(item.texture.baseTexture.uid);
-		}
-	});
 }
 
 function clearTextureCache() {
@@ -297,35 +242,6 @@ function clearTextureCache() {
 
 	message += Object.keys(PIXI.utils.BaseTextureCache).length;
 	debug && console.log(message);
-}
-
-var globalDiscardedSprites = [];
-function discardSprite(sprite) {
-	sprite.visible = false;
-	globalDiscardedSprites.push(sprite);
-	if (sprite.parent) {
-		sprite.parent.removeChild(sprite);
-	}
-}
-function createSprite(texture, dontUseDiscardedSprites) {
-	var sprite;
-	if (!dontUseDiscardedSprites && globalDiscardedSprites.length > 0) {
-		sprite = globalDiscardedSprites.pop();
-		sprite.texture = texture;
-		sprite.alpha = 1;
-		sprite.anchor.x = sprite.anchor.y = 0;
-		sprite.visible = true;
-		sprite.rotation = 0;
-		sprite.scale.x = sprite.scale.y = 1;
-		sprite.tint = 0xFFFFFF;
-	} else {
-		sprite = new PIXI.Sprite(texture);
-	}
-	// sprite.destroy = function() {
-	// 	console.log("auto destroying sprite");
-	// 	discardSprite(this);
-	// };
-	return sprite;
 }
 
 function SpritePool(texture, container, dontUseDiscardedSprites) {
@@ -345,12 +261,12 @@ SpritePool.prototype.nextSprite = function() {
 	} else {
 		var sprite;
 		if (Array.isArray(this.texture)) {
-			sprite = createSprite(this.texture[this.textureCount], this.dontUseDiscardedSprites);
+			sprite = new PIXI.Sprite(this.texture[this.textureCount], this.dontUseDiscardedSprites);
 			this.textureCount++;
 			if (this.textureCount > this.texture.length)
 				this.textureCount = 0;
 		} else {
-			sprite = createSprite(this.texture, this.dontUseDiscardedSprites);
+			sprite = new PIXI.Sprite(this.texture, this.dontUseDiscardedSprites);
 		}
 		sprite.anchor = {x:0.5,y:0.5};
 		this.sprites.push(sprite);
@@ -387,21 +303,7 @@ SpritePool.prototype.forEach = function(apply) {
 
 SpritePool.prototype.destroy = function(leaveTextures) {
 	if (!this.destroyed) {
-		// this.sprites.forEach(function(child){
-		// 	discardSprite(child);
-		// });
-		// this.container.removeChildren(0);
-		// this.container.destroy();
 		this.container.destroy({children:true, texture:!leaveTextures, baseTexture:!leaveTextures});
-		// if (Array.isArray(this.texture)) {
-		// 	this.texture.forEach(function(text){
-		// 		if (text && !text._destroyed)
-		// 			text.destroy(!leaveTextures);
-		// 	})
-		// } else {
-		// 	if (this.texture && !this.texture._destroyed)
-		// 		this.texture.destroy(!leaveTextures);
-		// }
 	}
 	this.sprites = [];
 	this.discardedSprites = [];

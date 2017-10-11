@@ -1,10 +1,8 @@
 PlasmaCannon = {
 
-
 	hotDogTexture : function() {
 			return glowTexture(PIXI.Texture.fromImage("img/hot-dog.svg"), {resize:0.06 * scalingFactor, blurAmount : 0.4, dontDestroyOriginal:true});
 	},
-
 
 	generateTexture : function() {
     var size = 8 * scalingFactor;
@@ -24,154 +22,146 @@ PlasmaCannon = {
 			PIXI.Texture.fromCanvas(blast),
 			{blurAmount : 0.4}
 		);
-  },
+  }
 
-	updateBullets : function(timeDiff, spritePool) {
+};
 
-		if (spritePool.destroyed)
-			return;
+PlasmaCannon.weaponLogic = function(weapon, container) {
+	weapon.lastShot = 0;
+	this.weapon = weapon;
+	this.spritePool = new SpritePool(weapon.alternateTexture == "hotdog" ? PlasmaCannon.hotDogTexture() : PlasmaCannon.generateTexture(), container);
+};
 
-		for (var i = 0; i < spritePool.sprites.length; i++) {
-			var sprite = spritePool.sprites[i];
+PlasmaCannon.weaponLogic.prototype.update = function(timeDiff) {
+	if (this.spritePool.destroyed)
+		return;
 
-			if (sprite.visible) {
-				sprite.xLoc += sprite.xSpeed * timeDiff;
-				sprite.yLoc -= sprite.ySpeed * timeDiff;
+	for (var i = 0; i < this.spritePool.sprites.length; i++) {
+		var sprite = this.spritePool.sprites[i];
 
-				sprite.position.x = sprite.xLoc * scalingFactor;
-				sprite.position.y = sprite.yLoc * scalingFactor;
+		if (sprite.visible) {
+			sprite.xLoc += sprite.xSpeed * timeDiff;
+			sprite.yLoc -= sprite.ySpeed * timeDiff;
 
-				if (sprite.yLoc < -8 || sprite.yLoc > canvasHeight + 8 ||
-					sprite.xLoc < -8 || sprite.xLoc > canvasWidth + 8) {
-					if (Math.random() < sprite.weapon.ricochet) {
+			sprite.position.x = sprite.xLoc * scalingFactor;
+			sprite.position.y = sprite.yLoc * scalingFactor;
 
-						var speed = RotateVector2d(0, sprite.weapon.bulletSpeed, Math.random() * 2 * Math.PI);
+			if (sprite.yLoc < -8 || sprite.yLoc > canvasHeight + 8 ||
+				sprite.xLoc < -8 || sprite.xLoc > canvasWidth + 8) {
+				if (Math.random() < this.weapon.ricochet) {
 
-						if (Loadout.weaponMenuOpen) {
-							PlasmaCannon.individualBullet(spritePool, speed, {
-								x: Loadout.shipSprite.position.x / scalingFactor,
-								y: Loadout.shipSprite.position.y / scalingFactor
-							}, sprite.bulletStrength, sprite.scale.x, sprite.weapon);
-						} else {
-							PlasmaCannon.individualBullet(spritePool, speed, {
-								x: PlayerShip.playerShip.xLoc,
-								y: PlayerShip.playerShip.yLoc
-							}, sprite.bulletStrength, sprite.scale.x, sprite.weapon);
-						}
+					var speed = RotateVector2d(0, this.weapon.bulletSpeed, Math.random() * 2 * Math.PI);
 
-
+					if (Loadout.weaponMenuOpen) {
+						this.individualBullet(speed, {
+							x: Loadout.shipSprite.position.x / scalingFactor,
+							y: Loadout.shipSprite.position.y / scalingFactor
+						}, sprite.bulletStrength, sprite.scale.x);
+					} else {
+						this.individualBullet(speed, {
+							x: PlayerShip.playerShip.xLoc,
+							y: PlayerShip.playerShip.yLoc
+						}, sprite.bulletStrength, sprite.scale.x);
 					}
-					spritePool.discardSprite(sprite);
 
-				} else {
-					for (var j = 0; j < Enemies.activeShips.length; j++) {
-						var enemyShip = Enemies.activeShips[j];
-						if (sprite.lastEnemyDamaged != enemyShip.id && enemyShip.detectCollision(sprite.xLoc, sprite.yLoc)) {
-							Enemies.damageEnemy(enemyShip, sprite.xLoc, sprite.yLoc, sprite.bulletStrength);
-							if (Math.random() < sprite.weapon.empChance) {
-								EMP.newEmp(sprite.xLoc, sprite.yLoc, sprite.weapon.emp, Math.random() > 0.5 ? 0xf92a2a : 0xf9b32a, 250);
-							}
-							if (Math.random() < sprite.weapon.passThrough) {
-								sprite.lastEnemyDamaged = enemyShip.id;
-							} else {
-								spritePool.discardSprite(sprite);
-							}
+
+				}
+				this.spritePool.discardSprite(sprite);
+
+			} else {
+				for (var j = 0; j < Enemies.activeShips.length; j++) {
+					var enemyShip = Enemies.activeShips[j];
+					if (sprite.lastEnemyDamaged != enemyShip.id && enemyShip.detectCollision(sprite.xLoc, sprite.yLoc)) {
+						Enemies.damageEnemy(enemyShip, sprite.xLoc, sprite.yLoc, sprite.bulletStrength);
+						if (Math.random() < this.weapon.empChance) {
+							EMP.newEmp(sprite.xLoc, sprite.yLoc, this.weapon.emp, Math.random() > 0.5 ? 0xf92a2a : 0xf9b32a, 250, (this.weapon.emp / 2));
+						}
+						if (Math.random() < this.weapon.passThrough) {
+							sprite.lastEnemyDamaged = enemyShip.id;
+						} else {
+							this.spritePool.discardSprite(sprite);
 						}
 					}
 				}
 			}
 		}
-	},
+	}
+};
 
-	individualBullet: function(spritePool, speed, position, damage, scale, weapon) {
+PlasmaCannon.weaponLogic.prototype.resize = function() {
+	this.spritePool.changeTexture(weapon.alternateTexture == "hotdog" ? PlasmaCannon.hotDogTexture() : PlasmaCannon.generateTexture());
+};
 
-		var sprite = spritePool.nextSprite();
+PlasmaCannon.weaponLogic.prototype.readyToFire = function(isWeaponFiring, timeDiff, fireRateModifier) {
+	if (isWeaponFiring) {
+		this.weapon.lastShot += timeDiff;
+		return this.weapon.lastShot > 1 / (this.weapon.shotsPerSecond * fireRateModifier);
+	}
+};
 
-		sprite.bulletStrength = damage;
-		sprite.tint = rgbToHex(255, 220 + Math.random() * 35, 75);
-		sprite.xLoc = position.x + (speed.x * 0.02);
-		sprite.yLoc = position.y - (speed.y * 0.02);
-		sprite.xSpeed = speed.x;
-		sprite.ySpeed = speed.y;
-		sprite.lastEnemyDamaged = undefined;
+PlasmaCannon.weaponLogic.prototype.destroy = function() {
+	this.spritePool.destroy();
+};
 
-		sprite.weapon = weapon;
-		sprite.rotation = Math.atan2(speed.x, speed.y);
+PlasmaCannon.weaponLogic.prototype.individualBullet = function(speed, position, damage, scale) {
+	var sprite = this.spritePool.nextSprite();
+	sprite.bulletStrength = damage;
+	sprite.tint = rgbToHex(255, 220 + Math.random() * 35, 75);
+	sprite.xLoc = position.x + (speed.x * 0.02);
+	sprite.yLoc = position.y - (speed.y * 0.02);
+	sprite.xSpeed = speed.x;
+	sprite.ySpeed = speed.y;
+	sprite.lastEnemyDamaged = undefined;
+	sprite.rotation = Math.atan2(speed.x, speed.y);
+	sprite.visible = true;
+	sprite.scale.x = sprite.scale.y = scale;
+	sprite.position.x = sprite.xLoc * scalingFactor;
+	sprite.position.y = sprite.yLoc * scalingFactor;
+};
 
-		sprite.visible = true;
-		sprite.scale.x = sprite.scale.y = scale;
-		sprite.position.x = sprite.xLoc * scalingFactor;
-		sprite.position.y = sprite.yLoc * scalingFactor;
-	},
+PlasmaCannon.weaponLogic.prototype.fireShot = function (position, damageModifier) {
+	this.weapon.lastShot = 0;
+	var wobble = (1 - this.weapon.accuracy) * 0.2;
+	var speed = RotateVector2d(0, this.weapon.bulletSpeed, -position.angle - wobble + Math.random() * wobble * 2);
 
-  create: function(weapon, container) {
+	Sounds.playerBullets.play(position.x);
 
-		weapon.lastShot = 0;
-
-		return {
-			weapon : weapon,
-			spritePool : new SpritePool(weapon.alternateTexture == "hotdog" ? PlasmaCannon.hotDogTexture() : PlasmaCannon.generateTexture(), container),
-			resize : function(){
-				this.spritePool.changeTexture(weapon.alternateTexture == "hotdog" ? PlasmaCannon.hotDogTexture() : PlasmaCannon.generateTexture());
-			},
-			update : function(timeDiff) {
-				PlasmaCannon.updateBullets(timeDiff, this.spritePool);
-			},
-			readyToFire : function(isWeaponFiring, timeDiff) {
-				if (isWeaponFiring) {
-					this.weapon.lastShot += timeDiff;
-					return this.weapon.lastShot > 1 / this.weapon.shotsPerSecond;
-				}
-			},
-			destroy : function() {
-        this.spritePool.destroy();
-      },
-			fireShot : function(position, damageModifier) {
-				this.weapon.lastShot = 0;
-				var wobble = (1 - this.weapon.accuracy) * 0.2;
-				var speed = RotateVector2d(0, this.weapon.bulletSpeed, -position.angle - wobble + Math.random() * wobble * 2);
-
-				Sounds.playerBullets.play(position.x);
-
-				var damagePerShot = weapon.damagePerShot * damageModifier;
-				switch (this.weapon.bullets) {
-					case 1:
-						PlasmaCannon.individualBullet(this.spritePool, speed, position, damagePerShot, 1.7, this.weapon);
-						break;
-					case 2:
-						var angle = Math.atan2(speed.x, speed.y);
-						var leftPosAdj = RotateVector2d(0, -5, angle + Math.PI / 2);
-						var rightPosAdj = RotateVector2d(0, -5, angle - Math.PI / 2);
-						PlasmaCannon.individualBullet(this.spritePool, speed, {
-							x: position.x + leftPosAdj.x,
-							y: position.y + leftPosAdj.y
-						}, damagePerShot / 2, 1.2, this.weapon);
-						PlasmaCannon.individualBullet(this.spritePool, speed, {
-							x: position.x + rightPosAdj.x,
-							y: position.y + rightPosAdj.y
-						}, damagePerShot / 2, 1.2, this.weapon);
-						break;
-					case 3:
-						var angleTrip = Math.atan2(speed.x, speed.y);
-						var leftPosAdjTrip = RotateVector2d(0, -10, angleTrip + Math.PI / 2);
-						var rightPosAdjTrip = RotateVector2d(0, -10, angleTrip - Math.PI / 2);
-						PlasmaCannon.individualBullet(this.spritePool, speed, {
-							x: position.x + leftPosAdjTrip.x,
-							y: position.y + leftPosAdjTrip.y
-						}, damagePerShot / 3, 1, this.weapon);
-						PlasmaCannon.individualBullet(this.spritePool, speed, {
-							x: position.x,
-							y: position.y
-						}, damagePerShot / 3, 1, this.weapon);
-						PlasmaCannon.individualBullet(this.spritePool, speed, {
-							x: position.x + rightPosAdjTrip.x,
-							y: position.y + rightPosAdjTrip.y
-						}, damagePerShot / 3, 1, this.weapon);
-						break;
-				}
-			}
-		};
-  }
+	var damagePerShot = this.weapon.damagePerShot * damageModifier;
+	switch (this.weapon.bullets) {
+		case 1:
+			this.individualBullet(speed, position, damagePerShot, 1.7);
+			break;
+		case 2:
+			var angle = Math.atan2(speed.x, speed.y);
+			var leftPosAdj = RotateVector2d(0, -5, angle + Math.PI / 2);
+			var rightPosAdj = RotateVector2d(0, -5, angle - Math.PI / 2);
+			this.individualBullet(speed, {
+				x: position.x + leftPosAdj.x,
+				y: position.y + leftPosAdj.y
+			}, damagePerShot / 2, 1.2);
+			this.individualBullet(speed, {
+				x: position.x + rightPosAdj.x,
+				y: position.y + rightPosAdj.y
+			}, damagePerShot / 2, 1.2);
+			break;
+		case 3:
+			var angleTrip = Math.atan2(speed.x, speed.y);
+			var leftPosAdjTrip = RotateVector2d(0, -10, angleTrip + Math.PI / 2);
+			var rightPosAdjTrip = RotateVector2d(0, -10, angleTrip - Math.PI / 2);
+			this.individualBullet(speed, {
+				x: position.x + leftPosAdjTrip.x,
+				y: position.y + leftPosAdjTrip.y
+			}, damagePerShot / 3, 1);
+			this.individualBullet(speed, {
+				x: position.x,
+				y: position.y
+			}, damagePerShot / 3, 1);
+			this.individualBullet(speed, {
+				x: position.x + rightPosAdjTrip.x,
+				y: position.y + rightPosAdjTrip.y
+			}, damagePerShot / 3, 1);
+			break;
+	}
 };
 
 PlasmaCannon.plasmaCannon = function(level,seed,rarity) {

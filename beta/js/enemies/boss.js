@@ -209,6 +209,7 @@ Boss.reset = function() {
   if (Boss.spritePool){
     Boss.spritePool.discardAll();
   }
+  Boss.initialized = false;
 };
 
 Boss.destroy = function() {

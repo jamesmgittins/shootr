@@ -22,7 +22,7 @@ var createMusicBank = function(audiofiles, volume) {
     soundCount:0,
     volume: volume,
     play:function(){
-      if (gameModel.music) {
+      if (gameModel.music && !this.sounds[this.soundCount].playing()) {
         this.sounds[this.soundCount].play();
         this.sounds[this.soundCount].volume(this.volume);
       }

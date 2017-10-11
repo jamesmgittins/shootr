@@ -18,7 +18,7 @@ PlayerShip.controllerPointer = {
 		drawline(blastCtx, "#0b0", 1, 1, 9 * scalingFactor, 8 * scalingFactor);
 		drawline(blastCtx, "#0b0", 1, 15 * scalingFactor, 9 * scalingFactor, 8 * scalingFactor);
 
-		PlayerShip.controllerPointer.sprite = createSprite(PIXI.Texture.fromCanvas(blast));
+		PlayerShip.controllerPointer.sprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(blast));
 		PlayerShip.controllerPointer.sprite.anchor = { x: -6, y: 0.5 };
 		PlayerShip.controllerPointer.sprite.visible = false;
 		uiContainer.addChild(PlayerShip.controllerPointer.sprite);
@@ -56,12 +56,25 @@ PlayerShip.playerShip = {
   lastDmg: 0,
   inPlay: 1,
 	charge:0,
-	lastTrail:0,
-	spreadShot: 0,
-	crossShot: 0,
-  powerupTime:0
+	lastTrail:0
 };
 
+PlayerShip.restoreShieldPercent = function(value) {
+	PlayerShip.restoreShield(PlayerShip.playerShip.maxShield * value);
+};
+
+PlayerShip.restoreShield = function(amount) {
+	if (gameModel.p1.shield.doubleRate && PlayerShip.playerShip.currShield < PlayerShip.playerShip.maxShield / 2) {
+		PlayerShip.playerShip.currShield += amount;
+	}
+	PlayerShip.playerShip.currShield += amount;
+
+	if (PlayerShip.playerShip.currShield > PlayerShip.playerShip.maxShield) {
+			PlayerShip.playerShip.currShield = PlayerShip.playerShip.maxShield;
+	}
+
+	Talents.shieldRestored();
+};
 
 
 PlayerShip.updatePlayerShip = function (timeDiff) {
@@ -75,12 +88,6 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
     }
 
 		PlayerShip.playerShip.rolling += timeDiff;
-
-    PlayerShip.playerShip.powerupTime += timeDiff;
-    if (PlayerShip.playerShip.powerupTime >= Powerups.powerupLength) {
-        PlayerShip.playerShip.spreadShot = 0;
-        PlayerShip.playerShip.crossShot = 0;
-    }
 
 		// Player has been bumped by collision
 		if (PlayerShip.playerShip.bumpMagnitude) {
@@ -160,14 +167,7 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
 
     PlayerShip.playerShip.lastDmg += timeDiff * 1000;
     if(PlayerShip.playerShip.lastDmg >= PlayerShip.playerShip.shieldDelay && PlayerShip.playerShip.currShield < PlayerShip.playerShip.maxShield) {
-			if (gameModel.p1.shield.doubleRate && PlayerShip.playerShip.currShield < PlayerShip.playerShip.maxShield / 2) {
-				PlayerShip.playerShip.currShield += PlayerShip.playerShip.shieldRegen * timeDiff;
-			}
-      PlayerShip.playerShip.currShield += PlayerShip.playerShip.shieldRegen * timeDiff;
-
-      if (PlayerShip.playerShip.currShield > PlayerShip.playerShip.maxShield) {
-          PlayerShip.playerShip.currShield = PlayerShip.playerShip.maxShield;
-      }
+			PlayerShip.restoreShield(PlayerShip.playerShip.shieldRegen * timeDiff);
     }
 		if(PlayerShip.playerShip.lastDmg >= 60) {
 			PlayerShip.playerShip.sprite.texture = PlayerShip.playerShip.sprite.nonDamageTexture;
@@ -193,10 +193,7 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
 
 PlayerShip.damagePlayerShip = function (playerShip, damage) {
 	if (gameModel.p1.shield.recharge && Math.random() < 0.1) {
-		playerShip.currShield += damage * getDamageReduction();
-		if (PlayerShip.playerShip.currShield > PlayerShip.playerShip.maxShield) {
-				PlayerShip.playerShip.currShield = PlayerShip.playerShip.maxShield;
-		}
+		PlayerShip.restoreShield(damage * getDamageReduction());
 		Sounds.damage.play(PlayerShip.playerShip.xLoc);
 		GameText.bigText.newBigText("Shield absorbed " + formatMoney(damage) + " damage!");
 	} else {
@@ -207,14 +204,22 @@ PlayerShip.damagePlayerShip = function (playerShip, damage) {
 		stageSprite.screenShake = gameModel.maxScreenShake;
 		playerShip.sprite.texture=playerShip.sprite.damageTexture;
 		GameText.damage.newText((damage * getDamageReduction()), playerShip);
+		Talents.playerDamaged();
 		if (playerShip.currShield <= 0 && playerShip.inPlay === 1) {
 			playerShip.container.visible=false;
+			if (Weapons.attackDrone.sprite) {
+				setTimeout(function(){
+					Weapons.attackDrone.sprite.visible = false;
+					Ships.generateExplosion(Weapons.attackDrone);
+				},600);
+			}
 			playerShip.inPlay = 0;
 			PlayerShip.allPlayersDead = 1;
 			PlayerShip.allDeadTimer = 0;
 			Ships.generateExplosion(playerShip);
 			Sounds.shipExplosion.play(PlayerShip.playerShip.xLoc);
 		}
+
 	}
 };
 
@@ -248,12 +253,13 @@ PlayerShip.setupTextures = function(){
 		PlayerShip.playerShip.container.destroy(true);
 		PlayerShip.playerShip.sprite.damageTexture.destroy(true);
 	}
-
+	Weapons.attackDroneContainer = new PIXI.Container();
+	playerShipContainer.addChild(Weapons.attackDroneContainer);
 	PlayerShip.playerShip.container = new PIXI.Container();
 	playerShipContainer.addChild(PlayerShip.playerShip.container);
-	PlayerShip.playerShip.sprite = createSprite(glowTexture(PIXI.Texture.fromCanvas(PlayerShip.playerShip.art)));
-	PlayerShip.playerShip.engine1 = createSprite(PlayerShip.engineTexture());
-	PlayerShip.playerShip.engine2 = createSprite(PlayerShip.playerShip.engine1.texture);
+	PlayerShip.playerShip.sprite = new PIXI.Sprite(glowTexture(PIXI.Texture.fromCanvas(PlayerShip.playerShip.art)));
+	PlayerShip.playerShip.engine1 = new PIXI.Sprite(PlayerShip.engineTexture());
+	PlayerShip.playerShip.engine2 = new PIXI.Sprite(PlayerShip.playerShip.engine1.texture);
 	PlayerShip.playerShip.container.addChild(PlayerShip.playerShip.engine1);
 	PlayerShip.playerShip.container.addChild(PlayerShip.playerShip.engine2);
 	PlayerShip.playerShip.container.addChild(PlayerShip.playerShip.sprite);
@@ -313,6 +319,10 @@ PlayerShip.reset = function() {
 	PlayerShip.playerShip.timesDamaged = 0;
 	PlayerShip.playerShip.xLoc = canvasWidth / 2;
 	PlayerShip.playerShip.yLoc = canvasHeight - (canvasHeight / 6);
+
+	Weapons.attackDrone.xLoc = PlayerShip.playerShip.xLoc + 20;
+	Weapons.attackDrone.yLoc = PlayerShip.playerShip.yLoc;
+
 	PlayerShip.playerShip.inPlay = 1;
 	PlayerShip.playerShip.lastDmg = 10000;
 	PlayerShip.allPlayersDead = 0;

@@ -393,7 +393,7 @@ Ships.generateExplosion = function (ship, xDiff, yDiff, delay) {
 			Bullets.splashDamage.createSplash(ship.xLoc + (xDiff || 0), ship.yLoc + (yDiff || 0), explosionSize, ship.wave.shipHealth, ship.wave.shipHealth * 2);
 		}
 
-		var numParts =(Ships.explosionBits.bitsPerExplosion + size * Ships.explosionBits.bitsPerExplosion) * gameModel.detailLevel;
+		var numParts = (Ships.explosionBits.getSpritePool().discardedSprites.length > 10 ? 1 : 0.5) * (Ships.explosionBits.bitsPerExplosion + size * Ships.explosionBits.bitsPerExplosion) * gameModel.detailLevel;
 		for (i = 0; i < numParts; i++) {
 				Ships.explosionBits.newExplosionBit(ship.xLoc + (xDiff || 0), ship.yLoc + (yDiff || 0), ship.colors || ship.wave.colors, explosionSize);
 		}

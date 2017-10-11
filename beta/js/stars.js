@@ -34,7 +34,7 @@ Stars.StartEndStars = {
 		if (Stars.StartEndStars.sprite) {
 			Stars.StartEndStars.sprite.destroy(true);
 		}
-		Stars.StartEndStars.sprite = createSprite(Stars.StartEndStars.texture(1));
+		Stars.StartEndStars.sprite = new PIXI.Sprite(Stars.StartEndStars.texture(1));
 		Stars.StartEndStars.sprite.visible = false;
 		Stars.StartEndStars.sprite.anchor = {x:0.5, y:0.5};
 		Stars.stars.sprites.addChild(Stars.StartEndStars.sprite);
@@ -120,7 +120,7 @@ Stars.nebulaBackground = {
 
 
 		if (!Stars.nebulaBackground.sprite) {
-			Stars.nebulaBackground.sprite = createSprite(this.texture);
+			Stars.nebulaBackground.sprite = new PIXI.Sprite(this.texture);
 			Stars.getContainer().addChild(Stars.nebulaBackground.sprite);
 		} else {
 			Stars.nebulaBackground.sprite.texture = PIXI.Texture.fromCanvas(nebulaCanvas);
@@ -188,7 +188,7 @@ Stars.stars = {
 	},
 	update: function(timeDiff) {
 
-		if (!Stars.stars.sprites.visible)
+		if (!Stars.getContainer().visible)
 			return;
 
 		// Math.seedrandom(Date.now());
@@ -333,7 +333,7 @@ Stars.shipTrails = {
 		return this.spritePool;
 	},
 	trailFrequency : 30,
-	newPart: function(ship, sprite) {
+	newPart: function(ship) {
 
 		if (ship.trailX < 0 || ship.trailX > canvasWidth)
 			return;

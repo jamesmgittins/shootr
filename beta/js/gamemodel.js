@@ -1,7 +1,7 @@
 var Constants = {
 	canvasWidth : 640,
 	canvasHeight : 640,
-	localStorageVariable: "shootrGameModelBeta",
+	localStorageVariable: "shootrGameModel",
 	difficultyLevelScaling : 1.4,
 	shieldLevelScaling : 1.39,
 	weaponLevelScaling : 1.38,
@@ -56,13 +56,11 @@ function calculateShipLevel() {
 }
 
 function calculateAdjustedStarLevel(starLevel) {
-	// return Math.max(calculateShipLevel(), starLevel);
-	// return Math.max(starLevel, (gameModel.bossesDefeated * Constants.levelsPerBoss) + 1);
 	return Math.max(starLevel, Boss.calculateLevel(gameModel.bossesDefeated) + starLevel - 1);
 }
 
 function valueForRoute(route) {
-	return 1.5 * Math.pow(Constants.tradeRouteScaling, route);
+	return Talents.passiveCredits(1.5 * Math.pow(Constants.tradeRouteScaling, route));
 }
 
 function calculateIncome() {
@@ -163,7 +161,7 @@ function load() {
 			antialiasing : false,
 			p1 : {
 				ship: Shipyard.generateShip(1, 45, false),
-				weapons: [PlasmaCannon.plasmaCannon(1,123,Weapons.rarity[0])],
+				weapons: [PlasmaCannon.plasmaCannon(1,123,Weapons.rarity[1])],
 				shields: [Shields.generateShield(1, 234, false)],
 				credits: 500,
 				totalCredits: 0,
@@ -203,20 +201,28 @@ function addCredits (value, fromTrade) {
 	save();
 }
 
+function getCritChance() {
+	return 0.05;
+}
+
+function getCritDamage() {
+	return 1.5 + Talents.passiveCritDamage();
+}
+
 function getUpgradedRange() {
 	return (100 + gameModel.p1.upgrades.range) / 100;
 }
 
 function getUpgradedSpeed() {
-	return (100 * gameModel.p1.ship.speed) + gameModel.p1.upgrades.speed;
+	return (150 * gameModel.p1.ship.speed) + gameModel.p1.upgrades.speed;
 }
 
 function getDamageReduction() {
-	return 100 / (100 + gameModel.p1.upgrades.defence);
+	return 100 / (100 + gameModel.p1.upgrades.defence + Talents.passiveDmgReduction());
 }
 
 function getDamageModifier() {
-	return (100 + gameModel.p1.upgrades.damage) / 100;
+	return (100 + gameModel.p1.upgrades.damage + Talents.damageIncrease()) / 100;
 }
 
 function getBuyPriceModifier() {

@@ -24,11 +24,7 @@ BioGelGun = {
 			PIXI.Texture.fromCanvas(blast),
 			{blurAmount : 0.2}
 		);
-  },
-
-	create : function (weapon, container) {
-		return new BioGelGun.weaponLogic(weapon, container);
-	}
+  }
 
 };
 
@@ -189,10 +185,10 @@ BioGelGun.weaponLogic.prototype.resize = function() {
 	this.spritePool.changeTexture(BioGelGun.generateTexture());
 };
 
-BioGelGun.weaponLogic.prototype.readyToFire = function(isWeaponFiring, timeDiff) {
+BioGelGun.weaponLogic.prototype.readyToFire = function(isWeaponFiring, timeDiff, fireRateModifier) {
 	if (isWeaponFiring) {
 		this.weapon.lastShot += timeDiff;
-		return this.weapon.lastShot > 1 / this.weapon.shotsPerSecond;
+		return this.weapon.lastShot > 1 / (this.weapon.shotsPerSecond * fireRateModifier);
 	}
 };
 

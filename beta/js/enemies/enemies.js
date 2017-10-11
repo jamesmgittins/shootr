@@ -3,6 +3,8 @@ Enemies = {
   lastWave : 6000,
   waveFrequency : 5000,
   maxWaves : 3,
+  waveBank : [],
+  asteroidBank : [],
   waves:[],
   activeWaves:[],
   activeShips:[],
@@ -114,6 +116,17 @@ Enemies = {
     Enemies.enemySpawners = [];
     Enemies.waves = [];
     Enemies.activeWaves = [];
+    Enemies.lastWave = 6000;
+    Enemies.waveBank.forEach(function(wave){
+      if (!wave.finished)
+        wave.destroy();
+    });
+    Enemies.waveBank = [];
+    Enemies.asteroidBank.forEach(function(wave){
+      if (!wave.finished)
+        wave.destroy();
+    });
+    Enemies.asteroidBank = [];
     Asteroids.deleteTextures();
 
   },
@@ -139,12 +152,30 @@ Enemies = {
 
   getEnemyWave:function() {
 
-    if ((startStar.asteroids && timeLeft / levelTime > 0.8) || (endStar.asteroids && timeLeft / levelTime < 0.30)) {
-      return new Asteroids.wave();
+    if (Enemies.waveBank.length == 0) {
+      Enemies.waveCount = 0;
+      for (var i = 0; i < 10; i++) {
+        Enemies.waveBank.push(this.getEnemySpawners()[Math.floor(Math.random() * this.getEnemySpawners().length)]());
+      }
+    }
+    if ((startStar.asteroids || endStar.asteroids) && Enemies.asteroidBank.length == 0) {
+      Enemies.asteroidCount = 0;
+      for (var i = 0; i < 4; i++) {
+        Enemies.asteroidBank.push(new Asteroids.wave());
+      }
     }
 
-
-    return this.getEnemySpawners()[Math.floor(Math.random() * this.getEnemySpawners().length)]();
+    if ((startStar.asteroids && timeLeft / levelTime > 0.8) || (endStar.asteroids && timeLeft / levelTime < 0.30)) {
+      if (Enemies.asteroidBank.length > Enemies.asteroidCount) {
+        return Enemies.asteroidBank[Enemies.asteroidCount++];
+      }
+      return new Asteroids.wave();
+    } else {
+      if (Enemies.waveBank.length > Enemies.waveCount) {
+        return Enemies.waveBank[Enemies.waveCount++];
+      }
+      return this.getEnemySpawners()[Math.floor(Math.random() * this.getEnemySpawners().length)]();
+    }
 
     // return new EnemyShips.wave();
     // return new UFOs.bulletWave();

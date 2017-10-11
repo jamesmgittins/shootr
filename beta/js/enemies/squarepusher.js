@@ -162,7 +162,6 @@ Squarepusher.wave.prototype.update = function (timeDiff) {
 		this.shipsExited + this.shipsDestroyed + this.spawnsDestroyed >= this.shipsInWave + this.spawnsCreated ||
 		(this.shipsExited + this.shipsDestroyed + this.spawnsDestroyed >= this.shipsSpawned + this.spawnsCreated && timeLeft < 0)) {
 
-		this.finished = true;
 		this.destroy();
 	}
 };
@@ -221,6 +220,11 @@ Squarepusher.enemyShip.prototype.detectCollision = function (xLoc, yLoc) {
 Squarepusher.enemyShip.prototype.damage = function(xLoc, yLoc, damage, noEffect) {
 	if (this.health > 0) {
 
+		var isCrit = Math.random() < getCritChance();
+		if (isCrit) {
+			damage *= getCritDamage();
+		}
+
 		if (!noEffect) {
 			Bullets.generateExplosion(xLoc, yLoc);
 			Sounds.enemyDamage.play(this.xLoc);
@@ -236,7 +240,7 @@ Squarepusher.enemyShip.prototype.damage = function(xLoc, yLoc, damage, noEffect)
 
 		this.health -= damage;
 
-		GameText.damage.newText(damage, this);
+		GameText.damage.newText(damage, this, isCrit);
 
 		if (this.wave) {
 			var percentOfShipDamaged = damage / this.wave.shipHealth;
@@ -260,12 +264,12 @@ Squarepusher.enemyShip.prototype.destroy = function () {
 
 	stageSprite.screenShake += gameModel.maxScreenShake;
 	this.inPlay = 0;
-
+	Talents.enemyDestroyed();
 	if (this.spawn) {
 		this.wave.spawnSpritePool.discardSprite(this.sprite);
 		this.wave.spawnsDestroyed++;
 
-		if (Math.random() > 0.8)
+		if (Math.random() > 0.9)
 			MoneyPickup.newMoneyPickup(this.xLoc, this.yLoc, (this.wave.shipHealth + Math.random() * this.wave.shipHealth * 5) / 10);
 
 	} else {
@@ -274,7 +278,7 @@ Squarepusher.enemyShip.prototype.destroy = function () {
 		this.wave.shipsDestroyed++;
 
 		if (Math.random() > 0.8)
-			MoneyPickup.newMoneyPickup(this.xLoc, this.yLoc, (this.wave.shipHealth + Math.random() * this.wave.shipHealth * 5));
+			MoneyPickup.newMoneyPickup(this.xLoc, this.yLoc, (this.wave.shipHealth + Math.random() * this.wave.shipHealth * 2));
 	}
 
 	Powerups.newPowerup(this.xLoc, this.yLoc);

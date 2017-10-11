@@ -39,7 +39,13 @@ EMP = {
         sprite.scale.x = sprite.scale.y = (sprite.radius / EMP.baseRadius) * scalingFactor;
         sprite.position.x = sprite.xLoc * scalingFactor;
         sprite.position.y = sprite.yLoc * scalingFactor;
-        if (sprite.radius > sprite.maxRadius) {
+        if (sprite.damageFade) {
+          sprite.damage -= sprite.damageFade * timeDiff;
+        }
+        if (sprite.damage < sprite.maxDamage / 2) {
+          sprite.alpha = sprite.damage / (sprite.maxDamage / 2);
+        }
+        if (sprite.radius > sprite.maxRadius || sprite.alpha <= 0) {
           this.spritePool.discardSprite(sprite);
         } else {
           for (var j = 0; j < Enemies.activeShips.length; j++) {
@@ -60,7 +66,7 @@ EMP = {
       }
     }
   },
-  newEmp : function(x, y, damage, tint, speed) {
+  newEmp : function(x, y, damage, tint, speed, damageFade) {
     var sprite = this.getSpritePool().nextSprite();
     sprite.anchor = {x:0.5, y:0.5};
     sprite.tint = tint;
@@ -70,7 +76,8 @@ EMP = {
     sprite.yLoc = y;
     sprite.position.y = y * scalingFactor;
     sprite.visible = true;
-    sprite.damage = damage;
+    sprite.maxDamage = sprite.damage = damage;
+    sprite.damageFade = damageFade;
     sprite.alpha = 1;
     sprite.scale.x = sprite.scale.y = 0;
     sprite.radius = 0;
@@ -79,6 +86,8 @@ EMP = {
       distanceBetweenPoints(x,y,0,0),
       distanceBetweenPoints(x,y,0,canvasHeight),
       distanceBetweenPoints(x,y,canvasWidth,0),
-      distanceBetweenPoints(x,y,canvasWidth,canvasHeight));
+      distanceBetweenPoints(x,y,canvasWidth,canvasHeight)
+    );
+    // Bullets.blasts.newBlast(x, y);
   }
 };

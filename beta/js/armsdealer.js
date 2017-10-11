@@ -124,7 +124,7 @@ ArmsDealer.createItemIcon = function(item, options) {
 		svgToUse = Shields.getIconSvg(item);
 	}
 
-	var pic = createSprite(PIXI.Texture.fromImage(svgToUse, undefined, undefined, 0.4));
+	var pic = new PIXI.Sprite(PIXI.Texture.fromImage(svgToUse, undefined, undefined, 0.4));
 
 	pic.scale.x = pic.scale.y = 0.3 * scale;
 

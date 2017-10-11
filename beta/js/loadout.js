@@ -311,7 +311,10 @@ Loadout.updateTotalDPS = function() {
     total += gameModel.p1.turretWeapon.dps;
   if (gameModel.p1.rearWeapon)
     total += gameModel.p1.rearWeapon.dps;
-  Loadout.totalDPS.text = "Total Damage Per Second: " + formatMoney(total);
+
+  var critAmount = total * getCritChance() * getCritDamage();
+  var totalPlusCrits = total * (1 - getCritChance()) + critAmount;
+  Loadout.totalDPS.text = "Total Damage Per Second: " + formatMoney(totalPlusCrits) + "\nCrit Chance: " + (getCritChance() * 100).toFixed(1) + "%   Crit Dmg: " + (getCritDamage() * 100).toFixed(1) + "%";
 };
 
 
@@ -381,11 +384,11 @@ Loadout.initialize = function () {
   Loadout.backButton.text.position = {x:renderer.width * 0.05 + 25,y: renderer.height * 0.95 - 25};
   Loadout.menuContainer.addChild(Loadout.backButton.text);
 
-  Loadout.totalDPS = getText("Total Damage Per Second: ", 26 * scalingFactor, { align: 'center' });
+  Loadout.totalDPS = getText("Total Damage Per Second: ", 22 * scalingFactor, { align: 'center' });
   Loadout.totalDPS.tint = MainMenu.buttonTint;
 
-  Loadout.totalDPS.anchor = {x:0.5,y:1};
-  Loadout.totalDPS.position = {x:renderer.width / 2,y: renderer.height * 0.95 - 25};
+  Loadout.totalDPS.anchor = {x:0.5,y:0};
+  Loadout.totalDPS.position = {x:renderer.width / 2,y: renderer.height * 0.73};
   Loadout.menuContainer.addChild(Loadout.totalDPS);
 
   Loadout.shipName = getText("Level " + gameModel.p1.ship.level + " " + gameModel.p1.ship.name, 26 * scalingFactor, { align: 'center' });
@@ -406,7 +409,7 @@ Loadout.initialize = function () {
 
   Loadout.renderContainer = new PIXI.Container();
   Loadout.shipRenderTexture = PIXI.RenderTexture.create(renderer.width * 0.3, renderer.height * 0.7);
-  Loadout.renderSprite = createSprite(Loadout.shipRenderTexture);
+  Loadout.renderSprite = new PIXI.Sprite(Loadout.shipRenderTexture);
   Loadout.menuContainer.addChild(Loadout.renderSprite);
 
   Loadout.renderSprite.position = {x:renderer.width * 0.35,y:renderer.height * 0.15};
@@ -420,7 +423,7 @@ Loadout.initialize = function () {
   Loadout.bulletContainer = new PIXI.Container();
   Loadout.renderContainer.addChild(Loadout.bulletContainer);
 
-  Loadout.shipSprite = createSprite(
+  Loadout.shipSprite = new PIXI.Sprite(
     glowTexture(
       PIXI.Texture.fromCanvas(Ships.shipArt(PlayerShip.SHIP_SIZE, gameModel.p1.ship.seed, Ships.enemyColors[gameModel.p1.ship.colorIndex]))
     )
@@ -794,13 +797,13 @@ Loadout.update = function(timeDiff) {
         // fire it
         if (Loadout.currentPosition === Loadout.positions.frontWeapon) {
           // front
-          if (Loadout.firingWeapon.readyToFire(true, timeDiff)) {
+          if (Loadout.firingWeapon.readyToFire(true, timeDiff, 1)) {
             Loadout.firingWeapon.fireShot({x: Loadout.shipSprite.position.x / scalingFactor, y: (Loadout.shipSprite.position.y / scalingFactor) - 8, angle:0}, 1);
           }
         }
         if (Loadout.currentPosition === Loadout.positions.turretWeapon) {
           // turret
-          if (Loadout.firingWeapon.readyToFire(true, timeDiff)) {
+          if (Loadout.firingWeapon.readyToFire(true, timeDiff, 1)) {
             PlayerShip.playerShip.xLoc = (Loadout.renderSprite.position.x + Loadout.shipSprite.position.x) / scalingFactor;
             PlayerShip.playerShip.yLoc = (Loadout.renderSprite.position.y + Loadout.shipSprite.position.y) / scalingFactor;
             Loadout.firingWeapon.fireShot({x: Loadout.shipSprite.position.x / scalingFactor, y: (Loadout.shipSprite.position.y / scalingFactor), angle:Bullets.getTurretAngle()}, 1);
@@ -808,7 +811,7 @@ Loadout.update = function(timeDiff) {
         }
         if (Loadout.currentPosition === Loadout.positions.rearWeapon) {
           // rear
-          if (Loadout.firingWeapon.readyToFire(true, timeDiff)) {
+          if (Loadout.firingWeapon.readyToFire(true, timeDiff, 1)) {
             Loadout.firingWeapon.fireShot({x: Loadout.shipSprite.position.x / scalingFactor + 16, y: (Loadout.shipSprite.position.y / scalingFactor) + 16, angle: (Math.PI / 8), rear:true}, 0.5);
             Loadout.firingWeapon.fireShot({x: Loadout.shipSprite.position.x / scalingFactor - 16, y: (Loadout.shipSprite.position.y / scalingFactor) + 16, angle:(-Math.PI / 8), rear:true}, 0.5);
           }

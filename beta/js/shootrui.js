@@ -349,7 +349,7 @@ function getBackgroundSprite() {
 
 
   if (!ShootrUI.backgroundSprite) {
-    ShootrUI.backgroundSprite = createSprite(PIXI.Texture.fromCanvas(nebulaCanvas));
+    ShootrUI.backgroundSprite = new PIXI.Sprite(PIXI.Texture.fromCanvas(nebulaCanvas));
   } else {
     ShootrUI.backgroundSprite.texture = PIXI.Texture.fromCanvas(nebulaCanvas);
   }

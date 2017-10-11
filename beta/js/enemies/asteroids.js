@@ -1,12 +1,8 @@
 Asteroids = {
 
-
-
   minShipsPerWave : 3,
   maxShipsPerWave : 5,
   startSize : 128,
-
-
 
   createTexture : function(seed, damage, size) {
     var colors = Ships.colors.brown;
@@ -97,7 +93,6 @@ Asteroids = {
     return glowTexture(PIXI.Texture.fromCanvas(shadowCanvas), {blurAmount: 1});
   },
 
-
   sizeTextures : [],
   sizeGranularity : 8,
   seed : Date.now(),
@@ -119,258 +114,231 @@ Asteroids = {
       }
     }
     this.sizeTextures = [];
-  },
+  }
+};
 
-  wave : function() {
-    this.update = Asteroids.updateWave;
+Asteroids.wave = function() {
 
-    this.shipsInWave = Asteroids.minShipsPerWave + Math.round(Math.random() * (Asteroids.maxShipsPerWave - Asteroids.minShipsPerWave) * Enemies.difficultyFactor);
-    this.shipsDestroyed = 0;
-    this.colors = Ships.colors.brown;
+  this.shipsInWave = Asteroids.minShipsPerWave + Math.round(Math.random() * (Asteroids.maxShipsPerWave - Asteroids.minShipsPerWave) * Enemies.difficultyFactor);
+  this.shipsDestroyed = 0;
+  this.colors = Ships.colors.brown;
 
-    this.asteroidWave = true;
+  this.asteroidWave = true;
 
-    this.shipHealth = EnemyShips.shipHealth * 2.5;
+  this.shipHealth = EnemyShips.shipHealth * 2.5;
 
-    // var seed = Date.now();
+  // var seed = Date.now();
 
-    this.texture = Asteroids.createTexture(this.seed, false, 20);
-    this.spritePool = new SpritePool(this.texture, backgroundEnemyContainer);
+  this.texture = Asteroids.createTexture(this.seed, false, 20);
+  this.spritePool = new SpritePool(this.texture, backgroundEnemyContainer);
 
-    this.ships = [];
-    this.newAsteroids = [];
-    var offset = Math.round(Asteroids.startSize / 2);
+  this.ships = [];
+  this.newAsteroids = [];
+  var offset = Math.round(Asteroids.startSize / 2);
 
-    for (var i = 0; i < this.shipsInWave; i++) {
-      this.ships.push(new Asteroids.asteroid(this, 128 + Math.random() * 64, offset + (canvasWidth - offset) * Math.random(), -offset - Math.random() * 200));
-    }
-    this.shipsExited = 0;
+  for (var i = 0; i < this.shipsInWave; i++) {
+    this.ships.push(new Asteroids.asteroid(this, 128 + Math.random() * 64, offset + (canvasWidth - offset) * Math.random(), -25 -offset - Math.random() * 200));
+  }
+  this.shipsExited = 0;
 
-    this.destroy = function() {
-  		this.spritePool.destroy(true);
-  		this.finished = true;
-  	};
-  },
-
-
-
-  asteroid : function(wave, size, x, y) {
-
-    this.damage = Asteroids.damageAsteroid;
-    this.destroy = Asteroids.destroy;
-    this.detectCollision = Asteroids.detectCollision;
-
-    this.wave = wave;
-    this.size = size;
-    this.offset = Math.round(size / 2.5);
-
-    var factor = this.size / Asteroids.startSize;
-
-    this.xLoc = x;
-    this.yLoc = y;
-
-    this.xSpeed = (-20 + Math.random() * 40) * Math.min(1 / factor, 2);
-    this.ySpeed = (40 + Math.random() * 20) * Math.min(1 / factor, 1.6);
-
-    this.health = wave.shipHealth * Enemies.difficultyFactor * factor;
-    this.inPlay = 1;
-    this.enemyShip = true;
-    this.rotation=Math.random() * 2 * Math.PI;
-    this.rotationSpeed = -0.3 + Math.random() * 0.6;
-
-    this.allDeadSurvivalTime = Math.random() * 1000;
-    this.id = Enemies.currShipId++;
-
-    var textures = Asteroids.getASizedTexture(size);
-    this.normalTexture = textures.texture;
-    this.damageTexture = textures.damageTexture;
-
-    this.sprite = wave.spritePool.nextSprite();
-    this.sprite.texture = this.normalTexture;
-    this.sprite.visible = true;
-    this.sprite.tint = 0xFFFFFF;
-    // this.sprite.scale.x = this.sprite.scale.y = factor;
-    this.sprite.scale.x = this.sprite.scale.y = 1;
-    this.sprite.position.x = this.xLoc * scalingFactor;
-    this.sprite.position.y = this.yLoc * scalingFactor;
-    this.sprite.anchor = {x:0.5,y:0.5};
-    this.sprite.rotation = -this.rotation;
-
-    // Enemies.enemiesSpawned++;
-  },
-
-
-
-  updateWave : function(timeDiff) {
-
-    for (var i = 0; i < this.newAsteroids.length; i++) {
-      this.ships.push(this.newAsteroids[i]);
-    }
-
-    this.newAsteroids = [];
-
+  this.destroy = function() {
+    this.spritePool.destroy(true);
     this.finished = true;
+  };
+};
 
-    for (var j = 0; j < this.ships.length; j++) {
-      Asteroids.updateAsteroid(this.ships[j],timeDiff);
-      if (this.ships[j].inPlay)
-        this.finished = false;
+Asteroids.wave.prototype.update = function(timeDiff) {
+  for (var i = 0; i < this.newAsteroids.length; i++) {
+    this.ships.push(this.newAsteroids[i]);
+  }
+
+  this.newAsteroids = [];
+
+  this.finished = true;
+
+  for (var j = 0; j < this.ships.length; j++) {
+    this.ships[j].update(timeDiff);
+    if (this.ships[j].inPlay)
+      this.finished = false;
+  }
+
+  if (this.finished) {
+    this.destroy(true);
+  }
+};
+
+Asteroids.asteroid = function(wave, size, x, y) {
+  this.wave = wave;
+  this.size = size;
+  this.offset = Math.round(size / 2.5);
+
+  var factor = this.size / Asteroids.startSize;
+
+  this.xLoc = x;
+  this.yLoc = y;
+
+  this.xSpeed = (-20 + Math.random() * 40) * Math.min(1 / factor, 2);
+  this.ySpeed = (40 + Math.random() * 20) * Math.min(1 / factor, 1.6);
+
+  this.health = wave.shipHealth * Enemies.difficultyFactor * factor;
+  this.inPlay = 1;
+  this.enemyShip = true;
+  this.rotation=Math.random() * 2 * Math.PI;
+  this.rotationSpeed = -0.3 + Math.random() * 0.6;
+
+  this.allDeadSurvivalTime = Math.random() * 1000;
+  this.id = Enemies.currShipId++;
+
+  var textures = Asteroids.getASizedTexture(size);
+  this.normalTexture = textures.texture;
+  this.damageTexture = textures.damageTexture;
+
+  this.sprite = wave.spritePool.nextSprite();
+  this.sprite.texture = this.normalTexture;
+  this.sprite.visible = true;
+  this.sprite.tint = 0xFFFFFF;
+  // this.sprite.scale.x = this.sprite.scale.y = factor;
+  this.sprite.scale.x = this.sprite.scale.y = 1;
+  this.sprite.position.x = this.xLoc * scalingFactor;
+  this.sprite.position.y = this.yLoc * scalingFactor;
+  this.sprite.anchor = {x:0.5,y:0.5};
+  this.sprite.rotation = -this.rotation;
+};
+
+Asteroids.asteroid.prototype.detectAsteroidCollision = function(asteroid) {
+  if (this.inPlay === 1 && asteroid.inPlay === 1 && distanceBetweenPoints(this.xLoc, this.yLoc, asteroid.xLoc, asteroid.yLoc) < this.offset + asteroid.offset)
+    return true;
+  return false;
+};
+
+Asteroids.asteroid.prototype.update = function(timeDiff) {
+  if (this.inPlay) {
+
+    Enemies.activeShips.push(this);
+
+    if (this.yLoc + this.offset > PlayerShip.playerShip.yLoc && this.ySpeed < 100) {
+      this.ySpeed += 10 * timeDiff;
+    }
+    this.xLoc += this.xSpeed * timeDiff;
+    if (this.ySpeed < 40) {
+      this.ySpeed += 20 * timeDiff;
+    }
+    this.yLoc += this.ySpeed * timeDiff;
+    this.rotation += this.rotationSpeed * timeDiff;
+
+    if (this.xLoc < 0 || this.xLoc > canvasWidth)
+      this.xSpeed *= -1;
+
+    if (this.yLoc > canvasHeight + this.offset) {
+      this.inPlay = 0;
+      this.wave.shipsExited++;
+      this.wave.spritePool.discardSprite(this.sprite);
     }
 
-    if (this.finished) {
-      this.destroy(true);
-    }
-  },
+    // check for collisions with other asteroids in this wave
+    for (var i = 0; i < Enemies.activeWaves.length; i++) {
+      if (Enemies.activeWaves[i].asteroidWave) {
+        for (var j = 0; j < Enemies.activeWaves[i].ships.length; j++) {
+          var asteroidToCheck = Enemies.activeWaves[i].ships[j];
+          if (this.id !== asteroidToCheck.id) {
+            if (this.detectAsteroidCollision(asteroidToCheck)) {
 
-  updateAsteroid : function(asteroid, timeDiff) {
-
-    if (asteroid.inPlay) {
-
-			Enemies.activeShips.push(asteroid);
-
-      if (asteroid.yLoc + asteroid.offset > PlayerShip.playerShip.yLoc && asteroid.ySpeed < 100) {
-        asteroid.ySpeed += 10 * timeDiff;
-      }
-      asteroid.xLoc += asteroid.xSpeed * timeDiff;
-      if (asteroid.ySpeed < 40) {
-        asteroid.ySpeed += 20 * timeDiff;
-      }
-      asteroid.yLoc += asteroid.ySpeed * timeDiff;
-      asteroid.rotation += asteroid.rotationSpeed * timeDiff;
-
-      if (asteroid.xLoc < 0 || asteroid.xLoc > canvasWidth)
-        asteroid.xSpeed *= -1;
-
-      if (asteroid.yLoc > canvasHeight + asteroid.offset) {
-        asteroid.inPlay = 0;
-        asteroid.wave.shipsExited++;
-        asteroid.wave.spritePool.discardSprite(asteroid.sprite);
-      }
-
-      // check for collisions with other asteroids in this wave
-      for (var i = 0; i < Enemies.activeWaves.length; i++) {
-        if (Enemies.activeWaves[i].asteroidWave) {
-          for (var j = 0; j < Enemies.activeWaves[i].ships.length; j++) {
-            var asteroidToCheck = Enemies.activeWaves[i].ships[j];
-            if (asteroid.id !== asteroidToCheck.id) {
-              if (Asteroids.detectAsteroidCollision(asteroid, asteroidToCheck)) {
-
-                if (asteroid.xLoc < asteroidToCheck.xLoc) {
-                  asteroid.xSpeed = -1 * Math.abs(asteroid.xSpeed);
-                  asteroidToCheck.xSpeed = Math.abs(asteroidToCheck.xSpeed);
-                } else {
-                  asteroid.xSpeed = Math.abs(asteroid.xSpeed);
-                  asteroidToCheck.xSpeed = -1 * Math.abs(asteroidToCheck.xSpeed);
-                }
-
-                if (asteroid.yLoc < asteroidToCheck.yLoc && asteroid.ySpeed > asteroidToCheck.ySpeed) {
-                  var speed = asteroid.ySpeed;
-                  asteroid.ySpeed = asteroidToCheck.ySpeed;
-                  asteroidToCheck.ySpeed = speed;
-                }
-
+              if (this.xLoc < asteroidToCheck.xLoc) {
+                this.xSpeed = -1 * Math.abs(this.xSpeed);
+                asteroidToCheck.xSpeed = Math.abs(asteroidToCheck.xSpeed);
+              } else {
+                this.xSpeed = Math.abs(this.xSpeed);
+                asteroidToCheck.xSpeed = -1 * Math.abs(asteroidToCheck.xSpeed);
               }
+
+              if (this.yLoc < asteroidToCheck.yLoc && this.ySpeed > asteroidToCheck.ySpeed) {
+                var speed = this.ySpeed;
+                this.ySpeed = asteroidToCheck.ySpeed;
+                asteroidToCheck.ySpeed = speed;
+              }
+
             }
           }
         }
       }
-
-      asteroid.sprite.position.x = asteroid.xLoc * scalingFactor;
-      asteroid.sprite.position.y = asteroid.yLoc * scalingFactor;
-      asteroid.sprite.rotation = -asteroid.rotation;
-
-      asteroid.lastDamaged += timeDiff;
-
-      if (asteroid.lastDamaged > 0.05)
-        asteroid.sprite.texture = asteroid.normalTexture;
-
-      EnemyShips.checkForPlayerCollision(asteroid, timeDiff);
-
-      if (asteroid.health < asteroid.wave.shipHealth)
-        asteroid.sprite.tint = calculateTint(asteroid.health / asteroid.wave.shipHealth);
-
-  	}
-  },
-
-
-
-  generateExplosion: function(asteroid) {
-    Ships.generateExplosion(asteroid);
-  },
-
-
-  destroy : function (asteroid) {
-
-  	stageSprite.screenShake += gameModel.maxScreenShake;
-  	asteroid.inPlay = 0;
-
-  	// Enemies.enemiesKilled++;
-
-		asteroid.wave.spritePool.discardSprite(asteroid.sprite);
-		asteroid.wave.shipsDestroyed++;
-
-    if (asteroid.size > 64) {
-      asteroid.wave.newAsteroids.push(
-        new Asteroids.asteroid(asteroid.wave, asteroid.size / 1.5, asteroid.xLoc - (asteroid.offset / 2), asteroid.yLoc - (asteroid.offset / 2) + Math.random() * asteroid.offset),
-        new Asteroids.asteroid(asteroid.wave, asteroid.size / 1.5, asteroid.xLoc + (asteroid.offset / 2), asteroid.yLoc - (asteroid.offset / 2) + Math.random() * asteroid.offset)
-      );
     }
 
-		MoneyPickup.newMoneyPickup(asteroid.xLoc, asteroid.yLoc, (asteroid.wave.shipHealth + Math.random() * asteroid.wave.shipHealth * 2), true);
+    this.sprite.position.x = this.xLoc * scalingFactor;
+    this.sprite.position.y = this.yLoc * scalingFactor;
+    this.sprite.rotation = -this.rotation;
 
-//  	Sounds.shipExplosion.play();
-  	Asteroids.generateExplosion(asteroid);
-  },
+    this.lastDamaged += timeDiff;
 
+    if (this.lastDamaged > 0.05)
+      this.sprite.texture = this.normalTexture;
 
+    EnemyShips.checkForPlayerCollision(this, timeDiff);
 
-  detectCollision : function (xLoc, yLoc) {
-    if (this.inPlay === 1 && distanceBetweenPoints(this.xLoc, this.yLoc, xLoc, yLoc) < this.offset) {
-  		return true;
-  	}
-  	return false;
-  },
+    if (this.health < this.wave.shipHealth)
+      this.sprite.tint = calculateTint(this.health / this.wave.shipHealth);
 
+  }
+};
 
+Asteroids.asteroid.prototype.destroy = function() {
+  stageSprite.screenShake += gameModel.maxScreenShake;
+  this.inPlay = 0;
+  this.wave.spritePool.discardSprite(this.sprite);
+  this.wave.shipsDestroyed++;
 
-  detectAsteroidCollision : function(asteroid1, asteroid2) {
-    if (asteroid1.inPlay === 1 && asteroid2.inPlay === 1 && distanceBetweenPoints(asteroid1.xLoc, asteroid1.yLoc, asteroid2.xLoc, asteroid2.yLoc) < asteroid1.offset + asteroid2.offset)
-      return true;
-    return false;
-  },
+  Talents.enemyDestroyed();
 
-
-  damageAsteroid : function(xLoc, yLoc, damage, noEffect) {
-  	if (this.health > 0) {
-
-  		if (!noEffect) {
-  			Bullets.generateExplosion(xLoc, yLoc);
-  			Sounds.enemyDamage.play();
-  			this.sprite.texture = this.damageTexture;
-  			this.lastDamaged = 0;
-        Ships.fragments.newFragment(xLoc, yLoc, this.wave.colors, 100 + Math.random() * 50);
-
-        var bumpSpeedX = this.xLoc - xLoc;
-				var bumpSpeedY = this.yLoc - yLoc;
-				var bumpMagMulti = ((damage / this.wave.shipHealth) * 50) / (magnitude(bumpSpeedX, bumpSpeedY) || 1);
-				this.xSpeed += bumpSpeedX * bumpMagMulti;
-				this.ySpeed += bumpSpeedY * bumpMagMulti;
-  		}
-
-  		this.health -= damage;
-
-  		GameText.damage.newText(damage, this);
-
-  		if (this.wave) {
-  			var percentOfShipDamaged = damage / this.wave.shipHealth;
-  			stageSprite.screenShake += gameModel.maxScreenShake * percentOfShipDamaged;
-  		}
-
-  		if (this.health <= 0) {
-  			this.destroy(this);
-  		}
-  	}
+  if (this.size > 64) {
+    this.wave.newAsteroids.push(
+      new Asteroids.asteroid(this.wave, this.size / 1.5, this.xLoc - (this.offset / 2), this.yLoc - (this.offset / 2) + Math.random() * this.offset),
+      new Asteroids.asteroid(this.wave, this.size / 1.5, this.xLoc + (this.offset / 2), this.yLoc - (this.offset / 2) + Math.random() * this.offset)
+    );
   }
 
+  MoneyPickup.newMoneyPickup(this.xLoc, this.yLoc, (this.wave.shipHealth + Math.random() * this.wave.shipHealth * 1.5), true);
+  Ships.generateExplosion(this);
+};
 
+Asteroids.asteroid.prototype.detectCollision = function(xLoc, yLoc) {
+  if (this.inPlay === 1 && distanceBetweenPoints(this.xLoc, this.yLoc, xLoc, yLoc) < this.offset) {
+    return true;
+  }
+  return false;
+};
+
+Asteroids.asteroid.prototype.damage = function (xLoc, yLoc, damage, noEffect) {
+  if (this.health > 0) {
+
+    var isCrit = Math.random() < getCritChance();
+		if (isCrit) {
+			damage *= getCritDamage();
+		}
+
+    if (!noEffect) {
+      Bullets.generateExplosion(xLoc, yLoc);
+      Sounds.enemyDamage.play();
+      this.sprite.texture = this.damageTexture;
+      this.lastDamaged = 0;
+      Ships.fragments.newFragment(xLoc, yLoc, this.wave.colors, 100 + Math.random() * 50);
+
+      var bumpSpeedX = this.xLoc - xLoc;
+      var bumpSpeedY = this.yLoc - yLoc;
+      var bumpMagMulti = ((damage / this.wave.shipHealth) * 50) / (magnitude(bumpSpeedX, bumpSpeedY) || 1);
+      this.xSpeed += bumpSpeedX * bumpMagMulti;
+      this.ySpeed += bumpSpeedY * bumpMagMulti;
+    }
+
+    this.health -= damage;
+
+    GameText.damage.newText(damage, this, isCrit);
+
+    if (this.wave) {
+      var percentOfShipDamaged = damage / this.wave.shipHealth;
+      stageSprite.screenShake += gameModel.maxScreenShake * percentOfShipDamaged;
+    }
+
+    if (this.health <= 0) {
+      this.destroy(this);
+    }
+  }
 };

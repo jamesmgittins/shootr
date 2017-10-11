@@ -23,7 +23,6 @@ var GameText = {
 		GameText.status.lootIcons = [];
 
 		if (GameText.damage.container) {
-			GameText.damage.texts.forEach(discardText);
 			GameText.damage.container.destroy(true);
 		}
 		GameText.damage.texts = [];
@@ -31,7 +30,6 @@ var GameText = {
 		GameText.damage.initialize();
 
 		if (GameText.credits.container) {
-			GameText.credits.texts.forEach(discardText);
 			GameText.credits.container.destroy(true);
 		}
 		GameText.credits.texts = [];
@@ -39,7 +37,6 @@ var GameText = {
 		GameText.credits.initialize();
 
 		if (GameText.bigText.container) {
-			GameText.bigText.texts.forEach(discardText);
 			GameText.bigText.container.destroy(true);
 		}
 
@@ -358,7 +355,7 @@ GameText.damage = {
 			}
 		});
 	},
-	newText: function(damage, ship) {
+	newText: function(damage, ship, isCrit) {
 
 		if (!gameModel.dmgNumbers)
 			return;
@@ -385,6 +382,13 @@ GameText.damage = {
 			}
 			text.damageValue = damage;
 			text.shipId = ship.id;
+		}
+		if (isCrit) {
+			text.tint = 0xFFFF00;
+			text.scale = {x:1.5, y:1.5};
+		} else {
+			text.tint = 0xFFFFFF;
+			text.scale = {x:1, y:1};
 		}
 		text.text = formatMoney(text.damageValue);
 		text.visible = true;

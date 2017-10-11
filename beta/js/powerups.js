@@ -80,20 +80,20 @@ var MoneyPickup = {
 
 						var distanceFromPlayer = distanceBetweenPoints(PlayerShip.playerShip.xLoc, PlayerShip.playerShip.yLoc, pickup.xLoc, pickup.yLoc);
 
-						if (distanceFromPlayer < Powerups.attractRange) {
+						if (distanceFromPlayer < Powerups.getAttractRange() && PlayerShip.playerShip.inPlay) {
 
-							if (distanceFromPlayer < 30) {
+							if (distanceFromPlayer < 35) {
 
 								Sounds.powerup.play(pickup.xLoc);
 
-								addCredits(pickup.moneyValue);
-								GameText.credits.newCreditText(pickup.xLoc,pickup.yLoc - 15,"+" + formatMoney(pickup.moneyValue));
+								addCredits(Talents.combatCredits(pickup.moneyValue));
+								GameText.credits.newCreditText(pickup.xLoc,pickup.yLoc - 15,"+" + formatMoney(Talents.combatCredits(pickup.moneyValue)));
 
 								this.spritePool.discardSprite(pickup);
 							} else {
 								var accelX = PlayerShip.playerShip.xLoc - pickup.xLoc;
 								var accelY = PlayerShip.playerShip.yLoc - pickup.yLoc;
-								var factor = (Powerups.acceleration * Powerups.attractRange / distanceFromPlayer) / magnitude(accelX, accelY);
+								var factor = (Powerups.acceleration * Powerups.attractRange * 2 / distanceFromPlayer) / magnitude(accelX, accelY);
 								pickup.xSpeed += accelX * factor * timeDiff;
 								pickup.speed += accelY * factor * timeDiff;
 
@@ -102,28 +102,25 @@ var MoneyPickup = {
 				          pickup.xSpeed *= speedFactor;
 				          pickup.speed *= speedFactor;
 				        }
-
 							}
-
 						}
 
+						pickup.tintNumber += pickup.tintMod * timeDiff;
+						pickup.tint = pickup.alternate ?
+							rgbToHex(Math.min(255,Math.max(pickup.tintNumber,150)),Math.min(255,Math.max(pickup.tintNumber,150)),255) :
+							rgbToHex(Math.min(255,Math.max(pickup.tintNumber,0)),255,Math.min(255,Math.max(pickup.tintNumber,0)));
 
-					pickup.tintNumber += pickup.tintMod * timeDiff;
-					pickup.tint = pickup.alternate ?
-						rgbToHex(Math.min(255,Math.max(pickup.tintNumber,150)),Math.min(255,Math.max(pickup.tintNumber,150)),255) :
-						rgbToHex(Math.min(255,Math.max(pickup.tintNumber,0)),255,Math.min(255,Math.max(pickup.tintNumber,0)));
+						pickup.lastTrail += timeDiff;
+						if (pickup.lastTrail > 0.5) {
+							pickup.lastTrail = 0;
+							Stars.powerupParts.newPowerupPart(pickup.position.x,pickup.position.y,pickup.tint);
+						}
 
-					pickup.lastTrail += timeDiff;
-					if (pickup.lastTrail > 0.5) {
-						pickup.lastTrail = 0;
-						Stars.powerupParts.newPowerupPart(pickup.position.x,pickup.position.y,pickup.tint);
-					}
+						if (pickup.tintNumber >= 200 && pickup.tintMod > 0)
+									pickup.tintMod *= -1;
 
-					if (pickup.tintNumber >= 200 && pickup.tintMod > 0)
-								pickup.tintMod *= -1;
-
-					if (pickup.tintNumber <= 0 && pickup.tintMod < 0)
-								pickup.tintMod *= -1;
+						if (pickup.tintNumber <= 0 && pickup.tintMod < 0)
+									pickup.tintMod *= -1;
 
 					} else {
 						this.spritePool.discardSprite(pickup);
@@ -157,6 +154,11 @@ var Powerups = {
 	lastPowerupSpawned : 0,
 	minFrequency: 15,
 	baseSeed : Date.now(),
+	getAttractRange : function() {
+		if (Buffs.isBuffActive("Magnetic"))
+			return Powerups.attractRange * 3;
+		return Powerups.attractRange;
+	},
 	inPlay:function(){
 		return Powerups.sprite[0].visible;
 	},
@@ -212,7 +214,7 @@ var Powerups = {
 
 		for (var i = 0; i < Powerups.maxPowerups; i++) {
 			if (!Powerups.sprite[i]) {
-				Powerups.sprite[i] = createSprite(Powerups.texture);
+				Powerups.sprite[i] = new PIXI.Sprite(Powerups.texture);
 				Powerups.sprite[i].visible = false;
 				Powerups.sprite[i].anchor = { x: 0.5, y: 0.5 };
 				Powerups.sprites.addChild(Powerups.sprite[i]);
@@ -240,24 +242,21 @@ var Powerups = {
 
 				var distanceFromPlayer = distanceBetweenPoints(PlayerShip.playerShip.xLoc, PlayerShip.playerShip.yLoc, Powerups.xLoc[i], Powerups.yLoc[i]);
 
-				if (distanceFromPlayer < Powerups.attractRange) {
+				if (distanceFromPlayer < Powerups.getAttractRange() && PlayerShip.playerShip.inPlay) {
 
 					if (distanceFromPlayer < 35) {
 
 						Sounds.powerup.play(Powerups.xLoc[i]);
+						Talents.crateCollected();
 
 						var number = Math.random();
 
 						if (number > 0.8) {
-								GameText.bigText.newBigText("Spread shot!");
+								Buffs.addSpreadShotBuff();
 								Powerups.sprite[i].visible = false;
-								PlayerShip.playerShip.powerupTime = 0;
-								PlayerShip.playerShip.spreadShot = 1;
 						} else if (number > 0.6 ){
-								GameText.bigText.newBigText("Cross shot!");
+								Buffs.addCrossShotBuff();
 								Powerups.sprite[i].visible = false;
-								PlayerShip.playerShip.powerupTime = 0;
-								PlayerShip.playerShip.crossShot = 1;
 						} else {
 							GameText.bigText.newBigText("Cargo Crate Collected!");
 							Powerups.sprite[i].visible = false;
@@ -277,7 +276,7 @@ var Powerups = {
 					} else {
 						var accelX = PlayerShip.playerShip.xLoc - Powerups.xLoc[i];
 						var accelY = PlayerShip.playerShip.yLoc - Powerups.yLoc[i];
-						var factor = (Powerups.acceleration * Powerups.attractRange / distanceFromPlayer) / magnitude(accelX, accelY);
+						var factor = (Powerups.acceleration * Powerups.attractRange * 2 / distanceFromPlayer) / magnitude(accelX, accelY);
 						Powerups.xSpeed[i] += accelX * factor * timeDiff;
 						Powerups.ySpeed[i] += accelY * factor * timeDiff;
 

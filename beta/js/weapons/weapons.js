@@ -121,25 +121,32 @@ Weapons.generateWeapon = function(level, seed, ultra, rarity) {
 
 Weapons.createWeaponLogic = function(weapon, container) {
   if (weapon.weaponType == Weapons.types.plasmaCannon)
-    return PlasmaCannon.create(weapon, container);
+    return new PlasmaCannon.weaponLogic(weapon, container);
 
   if (weapon.weaponType == Weapons.types.vulcanCannon)
-    return VulcanCannon.create(weapon, container);
+    return new VulcanCannon.weaponLogic(weapon, container);
 
   if (weapon.weaponType == Weapons.types.railGun)
-    return RailGun.create(weapon, container);
+    return new RailGun.weaponLogic(weapon, container);
 
   if (weapon.weaponType == Weapons.types.missileLauncher)
-    return MissileLauncher.create(weapon, container);
+    return new MissileLauncher.weaponLogic(weapon, container);
 
   if (weapon.weaponType == Weapons.types.bioGelGun)
-    return BioGelGun.create(weapon, container);
+    return new BioGelGun.weaponLogic(weapon, container);
 
   if (weapon.weaponType == Weapons.types.sonicWave)
-    return SonicWave.create(weapon, container);
+    return new SonicWave.weaponLogic(weapon, container);
 };
 
-
+Weapons.attackDrone = {
+  xLoc : 0,
+  yLoc : 0,
+  xSpeed : 0,
+  ySpeed : 0,
+  acceleration : 150,
+  maxSpeed : 70
+};
 
 Weapons.weaponLogic = {};
 
@@ -147,6 +154,47 @@ Weapons.weaponLogic = {};
 Weapons.update = function(timeDiff) {
 
   var shouldPlayerShoot = PlayerShip.playerShip.inPlay && PlayerShip.playerShip.rolling > 1 && (timeLeft > 0 || Boss.bossActive() || Enemies.waves.length > 0);
+  var fireRateModifier = Talents.fireRateModifier();
+
+  if (Talents.attackDrone()) {
+    if (!Weapons.attackDrone.sprite) {
+      Weapons.attackDrone.sprite = new PIXI.Sprite(glowTexture(PIXI.Texture.fromCanvas(Ships.shipArt(PlayerShip.SHIP_SIZE / 3, gameModel.p1.ship.seed + 1, Ships.enemyColors[gameModel.p1.ship.colorIndex]))));
+      // Weapons.attackDrone.sprite.scale = {x:0.4, y:0.4};
+      Weapons.attackDrone.sprite.anchor = {x:0.5, y: 0.5};
+      Weapons.attackDrone.sprite.tint = 0xEEEEEE;
+      Weapons.attackDrone.colors = PlayerShip.playerShip.colors;
+      Weapons.attackDroneContainer.addChild(Weapons.attackDrone.sprite);
+    }
+    var distanceFromPlayer = distanceBetweenPoints(Weapons.attackDrone.xLoc, Weapons.attackDrone.yLoc, PlayerShip.playerShip.xLoc, PlayerShip.playerShip.yLoc);
+    if (distanceFromPlayer > 100)  {
+      var accelX = PlayerShip.playerShip.xLoc - Weapons.attackDrone.xLoc;
+      var accelY = PlayerShip.playerShip.yLoc - Weapons.attackDrone.yLoc;
+      var factor = Weapons.attackDrone.acceleration / magnitude(accelX, accelY);
+
+      Weapons.attackDrone.xSpeed += accelX * factor * timeDiff;
+      Weapons.attackDrone.ySpeed += accelY * factor * timeDiff;
+
+      if (magnitude(Weapons.attackDrone.xSpeed, Weapons.attackDrone.ySpeed) > 100) {
+        var speedFactor = 100 / magnitude(Weapons.attackDrone.xSpeed, Weapons.attackDrone.ySpeed);
+        Weapons.attackDrone.xSpeed *= speedFactor;
+        Weapons.attackDrone.ySpeed *= speedFactor;
+      }
+
+      Weapons.attackDrone.trailX = Weapons.attackDrone.xLoc += Weapons.attackDrone.xSpeed * timeDiff;
+      Weapons.attackDrone.trailY = Weapons.attackDrone.yLoc += Weapons.attackDrone.ySpeed * timeDiff;
+    } else {
+      Weapons.attackDrone.xSpeed *= 0.95;
+      Weapons.attackDrone.ySpeed *= 0.95;
+      Weapons.attackDrone.trailX = Weapons.attackDrone.xLoc += Weapons.attackDrone.xSpeed * timeDiff;
+      Weapons.attackDrone.trailY = Weapons.attackDrone.yLoc += Weapons.attackDrone.ySpeed * timeDiff;
+    }
+
+    Weapons.attackDrone.sprite.position = {x : Weapons.attackDrone.xLoc * scalingFactor, y : Weapons.attackDrone.yLoc * scalingFactor};
+
+    if (Math.random() > 0.92 && Weapons.attackDrone.sprite.visible)
+      Stars.shipTrails.newPart(Weapons.attackDrone);
+
+  }
 
   if (gameModel.p1.frontWeapon && !Weapons.weaponLogic.frontWeapon)
     Weapons.weaponLogic.frontWeapon = Weapons.createWeaponLogic(gameModel.p1.frontWeapon, playerBulletContainer);
@@ -160,20 +208,23 @@ Weapons.update = function(timeDiff) {
 
   if (Weapons.weaponLogic.frontWeapon) {
     Weapons.weaponLogic.frontWeapon.update(timeDiff);
-    if (Weapons.weaponLogic.frontWeapon.readyToFire(shouldPlayerShoot, timeDiff)) {
+    if (Weapons.weaponLogic.frontWeapon.readyToFire(shouldPlayerShoot, timeDiff, fireRateModifier)) {
       Weapons.weaponLogic.frontWeapon.fireShot({x: PlayerShip.playerShip.xLoc, y: PlayerShip.playerShip.yLoc - 8, angle:0}, 1);
+      if (Talents.attackDrone()) {
+        Weapons.weaponLogic.frontWeapon.fireShot({x: Weapons.attackDrone.xLoc, y: Weapons.attackDrone.yLoc - 2, angle:0}, 0.5);
+      }
     }
   }
 
   if (Weapons.weaponLogic.turretWeapon) {
     Weapons.weaponLogic.turretWeapon.update(timeDiff);
-    if (Weapons.weaponLogic.turretWeapon.readyToFire(shouldPlayerShoot, timeDiff)) {
+    if (Weapons.weaponLogic.turretWeapon.readyToFire(shouldPlayerShoot, timeDiff, fireRateModifier)) {
       Weapons.weaponLogic.turretWeapon.fireShot({x: PlayerShip.playerShip.xLoc, y: PlayerShip.playerShip.yLoc, angle:Bullets.getTurretAngle()}, 1);
 
-      if (PlayerShip.playerShip.spreadShot) {
+      if (Buffs.isBuffActive(Buffs.buffNames.spreadShot)) {
         Weapons.weaponLogic.turretWeapon.fireShot({x: PlayerShip.playerShip.xLoc, y: PlayerShip.playerShip.yLoc, angle:Bullets.getTurretAngle() - 0.12}, 1);
         Weapons.weaponLogic.turretWeapon.fireShot({x: PlayerShip.playerShip.xLoc, y: PlayerShip.playerShip.yLoc, angle:Bullets.getTurretAngle() + 0.12}, 1);
-      } else if (PlayerShip.playerShip.crossShot) {
+      } else if (Buffs.isBuffActive(Buffs.buffNames.crossShot)) {
         Weapons.weaponLogic.turretWeapon.fireShot({x: PlayerShip.playerShip.xLoc, y: PlayerShip.playerShip.yLoc, angle:Bullets.getTurretAngle() + Math.PI}, 1);
         Weapons.weaponLogic.turretWeapon.fireShot({x: PlayerShip.playerShip.xLoc, y: PlayerShip.playerShip.yLoc, angle:Bullets.getTurretAngle() + Math.PI / 2}, 1);
         Weapons.weaponLogic.turretWeapon.fireShot({x: PlayerShip.playerShip.xLoc, y: PlayerShip.playerShip.yLoc, angle:Bullets.getTurretAngle() - Math.PI / 2}, 1);
@@ -184,7 +235,7 @@ Weapons.update = function(timeDiff) {
 
   if (Weapons.weaponLogic.rearWeapon) {
     Weapons.weaponLogic.rearWeapon.update(timeDiff);
-    if (Weapons.weaponLogic.rearWeapon.readyToFire(shouldPlayerShoot, timeDiff)) {
+    if (Weapons.weaponLogic.rearWeapon.readyToFire(shouldPlayerShoot, timeDiff, fireRateModifier)) {
       Weapons.weaponLogic.rearWeapon.fireShot({x: PlayerShip.playerShip.xLoc + 16, y: PlayerShip.playerShip.yLoc + 16, angle: (Math.PI / 8), rear:true}, 0.5);
       Weapons.weaponLogic.rearWeapon.fireShot({x: PlayerShip.playerShip.xLoc - 16, y: PlayerShip.playerShip.yLoc + 16, angle:(-Math.PI / 8), rear:true}, 0.5);
     }
@@ -197,6 +248,11 @@ Weapons.reset = function() {
 
   PlayerShip.playerShip.spreadShot = 0;
   PlayerShip.playerShip.crossShot = 0;
+
+  if (Weapons.attackDrone.sprite) {
+    Weapons.attackDrone.sprite.destroy();
+    Weapons.attackDrone.sprite = false;
+  }
 
   Bullets.enemyBullets.destroy();
   EMP.destroy();
@@ -214,5 +270,4 @@ Weapons.reset = function() {
 
   if (playerBulletContainer)
     playerBulletContainer.removeChildren(0);
-    // removeAllFromContainer(playerBulletContainer);
 };

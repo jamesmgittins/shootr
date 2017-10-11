@@ -24,7 +24,7 @@ Shipyard.generateShip = function(level, seed, ultra) {
     turretWeaponLevel:  Math.max(1,Math.round(level - 0.7 + Math.random() * 1.5)),
     rearWeaponLevel:    Math.max(1,Math.round(level - 0.7 + Math.random() * 1.5)),
     shieldLevel:        Math.max(1,Math.round(level - 0.7 + Math.random() * 1.5)),
-    speed : Math.min(1 + Math.random() * 0.5 + Math.min(0.5, level / 150), 1.6),
+    speed : Math.min(0.99 + Math.min(0.5, level / 150), 1.6),
     range : 12 + (level / 2) + (Math.random() * 0.1 * level),
 		colorIndex : prefix.index,
     name:(ultra? "Ultra " : "") + prefix.name + " " + Shipyard.suffixes[Math.floor(Math.random() * Shipyard.suffixes.length)],
@@ -118,7 +118,7 @@ Shipyard.initialize = function () {
     shipBacking.drawRect(bounds.x + 15, bounds.y + bounds.height / 9, bounds.width - 30, bounds.height / 2.5);
     Shipyard.menuContainer.addChild(shipBacking);
 
-    var sprite = createSprite(
+    var sprite = new PIXI.Sprite(
       glowTexture(
         PIXI.Texture.fromCanvas(Ships.shipArt(PlayerShip.SHIP_SIZE * 2, Shipyard.ships[i].seed, Ships.enemyColors[Shipyard.ships[i].colorIndex]))
       )
@@ -133,7 +133,7 @@ Shipyard.initialize = function () {
     var rearWeaponString = "Rear Weapon Level: " + Shipyard.levelReqText(ship.rearWeaponLevel, gameModel.p1.ship.rearWeaponLevel);
     var shieldString = "Shield Level: " + Shipyard.levelReqText(ship.shieldLevel, gameModel.p1.ship.shieldLevel);
     var fuelRangeString = "Fuel Range: " + ship.range.toFixed(2) + " light years   ( " + (ship.range > gameModel.p1.ship.range ? "+" : "") + (ship.range - gameModel.p1.ship.range).toFixed(2) +  " )";
-    var speedString = "Movement Speed: " + Math.round(ship.speed * 100) + "%   ( " + (ship.speed > gameModel.p1.ship.speed ? "+" : "") + Math.round((ship.speed - gameModel.p1.ship.speed) * 100) +  "% )";
+    var speedString = "Movement Speed: " + (Math.round(ship.speed * 1000)/10) + "%   ( " + (ship.speed > gameModel.p1.ship.speed ? "+" : "") + Math.round((ship.speed - gameModel.p1.ship.speed) * 100) +  "% )";
 
     var shipDetails = getText(frontWeaponString + "\n" + turretWeaponString + "\n" + rearWeaponString + "\n" + shieldString + "\n" + fuelRangeString + "\n" + speedString + "\n", fontSize, { });
     shipDetails.position = {x:shipBacking.getBounds().x + 5, y:shipBacking.getBounds().y + shipBacking.getBounds().height + 10};

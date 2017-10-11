@@ -244,7 +244,7 @@ UFOs.railWave = function() {
 	var seed = Date.now();
 	wave.texture = glowTexture(PIXI.Texture.fromCanvas(UFOs.getMirrorTexture(wave.size, seed, wave.colors)));
 	wave.damageTexture = glowTexture(PIXI.Texture.fromCanvas(UFOs.getMirrorTexture(wave.size, seed, wave.colors, true)));
-	wave.spritePool = new SpritePool(this.texture, frontEnemyContainer);
+	wave.spritePool = new SpritePool(wave.texture, frontEnemyContainer);
 	wave.bulletType = false;
 	wave.firingTime = UFOs.railFiringTime;
 	return wave;
@@ -257,7 +257,7 @@ UFOs.bulletWave = function() {
 	var seed = Date.now();
 	wave.texture = glowTexture(PIXI.Texture.fromCanvas(UFOs.getRotateTexture(wave.size, seed, wave.colors)));
 	wave.damageTexture = glowTexture(PIXI.Texture.fromCanvas(UFOs.getRotateTexture(wave.size, seed, wave.colors, true)));
-	wave.spritePool = new SpritePool(this.texture, frontEnemyContainer);
+	wave.spritePool = new SpritePool(wave.texture, frontEnemyContainer);
 	wave.bulletType = true;
 	wave.firingTime = UFOs.bulletFiringTime;
 	return wave;
@@ -270,16 +270,11 @@ UFOs.wave = function () {
 	this.shipFrequency = (3000 + (Math.random() * 1000));
 	this.lastShipSpawned = 0;
 
-	while (typeof this.wavePattern === 'undefined') {
-		if (EnemyShips.wavePatterns[EnemyShips.patternCounter].inUse) {
-			EnemyShips.patternCounter++;
-			if (EnemyShips.patternCounter >= EnemyShips.wavePatterns.length)
-				EnemyShips.patternCounter = 0;
-		} else {
-			this.wavePattern = EnemyShips.wavePatterns[EnemyShips.patternCounter];
-			this.wavePattern.inUse = true;
-		}
-	}
+	EnemyShips.patternCounter++;
+	if (EnemyShips.patternCounter >= EnemyShips.wavePatterns.length)
+		EnemyShips.patternCounter = 0;
+
+	this.wavePattern = EnemyShips.wavePatterns[EnemyShips.patternCounter];
 
 	this.shipsInWave = UFOs.minShipsPerWave + Math.round(Math.random() * (UFOs.maxShipsPerWave - UFOs.minShipsPerWave) * Enemies.difficultyFactor);
 	this.shipsSpawned = 0;
@@ -352,6 +347,11 @@ UFOs.enemyShip.prototype.detectCollision = function (xLoc, yLoc) {
 UFOs.enemyShip.prototype.damage = function(xLoc, yLoc, damage, noEffect) {
 	if (this.health > 0) {
 
+		var isCrit = Math.random() < getCritChance();
+		if (isCrit) {
+			damage *= getCritDamage();
+		}
+
 		if (!noEffect) {
 			Bullets.generateExplosion(xLoc, yLoc);
 			Sounds.enemyDamage.play(this.xLoc);
@@ -367,7 +367,7 @@ UFOs.enemyShip.prototype.damage = function(xLoc, yLoc, damage, noEffect) {
 
 		this.health -= damage;
 
-		GameText.damage.newText(damage, this);
+		GameText.damage.newText(damage, this, isCrit);
 
 		if (this.wave) {
 			var percentOfShipDamaged = damage / this.wave.shipHealth;
@@ -399,7 +399,7 @@ UFOs.enemyShip.prototype.destroy = function () {
 UFOs.enemyShip.prototype.update = function (timeDiff) {
 	if (this.inPlay) {
 
-		if (this.xLoc > 0 && this.xLoc < canvasWidth && this.yLoc > 0 && this.yLoc < canvasHeight)
+		if (this.xLoc + this.offset > 0 && this.xLoc - this.offset  < canvasWidth && this.yLoc + this.offset  > 0 && this.yLoc - this.offset  < canvasHeight)
 			Enemies.activeShips.push(this);
 
 		if (Math.sqrt(Math.pow(this.xLoc - this.xTar, 2) +
@@ -497,8 +497,6 @@ UFOs.wave.prototype.update = function (timeDiff) {
 		}
 	}
 	if (this.shipsExited + this.shipsDestroyed >= this.shipsInWave || (this.shipsExited + this.shipsDestroyed >= this.shipsSpawned && timeLeft < 0)) {
-		this.finished = true;
-		this.wavePattern.inUse = false;
 		this.destroy();
 	}
 };

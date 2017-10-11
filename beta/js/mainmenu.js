@@ -30,22 +30,22 @@ StationMenu = {
       StationMenu.hide();
       StarChart.show();
     }, description:"Scout nearby systems, plot a course and launch your ship"},
-    {title:"Pilot School",click:function(){
-      StationMenu.hide();
-      PilotSchool.show();
-    }, description:"Purchase permanent performance upgrades for your pilot"},
-    {title:"Shipyard", click:function(){
-      Shipyard.show();
-      StationMenu.hide();
-    }, description:"Purchase a new ship"},
-    {title:"Arms Dealer", click:function(){
-      ArmsDealer.show();
-      StationMenu.hide();
-    }, description:"Buy and sell weapons and shields"},
     {title:"Weapons Loadout", click:function(){
       Loadout.show();
       StationMenu.hide();
     }, description:"Change your equipped weapons and shield"},
+    {title:"Arms Dealer", click:function(){
+      ArmsDealer.show();
+      StationMenu.hide();
+    }, description:"Buy and sell weapons and shields"},
+    {title:"Shipyard", click:function(){
+      Shipyard.show();
+      StationMenu.hide();
+    }, description:"Purchase a new ship"},
+    {title:"Talents & Perks",click:function(){
+      StationMenu.hide();
+      PilotSchool.show();
+    }, description:"Purchase permanent performance upgrades for your pilot"},
     {title:"Settings", click:function(){
       SettingsMenu.show();
       SettingsMenu.onHide = StationMenu.show;
