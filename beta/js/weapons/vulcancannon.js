@@ -45,7 +45,7 @@ VulcanCannon.weaponLogic.prototype.individualBullet = function(speed, position, 
 	sprite.yLoc = position.y - (speed.y * 0.02);
 	sprite.xSpeed = speed.x;
 	sprite.ySpeed = speed.y;
-
+	sprite.enemiesDamaged = [];
 	sprite.rotation = Math.atan2(speed.x, speed.y);
 
 	sprite.lastEnemyDamaged = 0;
@@ -98,11 +98,11 @@ VulcanCannon.weaponLogic.prototype.update = function(timeDiff) {
 			} else {
 				for (var j = 0; j < Enemies.activeShips.length; j++) {
 					var enemyShip = Enemies.activeShips[j];
-					if (sprite.lastEnemyDamaged != enemyShip.id && enemyShip.detectCollision(sprite.xLoc, sprite.yLoc)) {
+					if (!sprite.enemiesDamaged.includes(enemyShip.id) && enemyShip.detectCollision(sprite.xLoc, sprite.yLoc)) {
 						Enemies.damageEnemy(enemyShip, sprite.xLoc, sprite.yLoc, sprite.bulletStrength);
 						if (this.weapon.passThrough) {
 							sprite.bulletStrength = sprite.bulletStrength * 0.6;
-							sprite.lastEnemyDamaged = enemyShip.id;
+							sprite.enemiesDamaged.push(enemyShip.id);
 						} else {
 							this.spritePool.discardSprite(sprite);
 						}

@@ -96,9 +96,10 @@ Weapons.getIconSvg =  function(item) {
 Weapons.generateWeapon = function(level, seed, ultra, rarity) {
 
   var weaponRarity = Weapons.rarity[0];
+  var randomNumber = Math.random() * Talents.rarityModifier();
 
   for (var i=0; i<Weapons.rarity.length; i++) {
-    if (ultra && Math.random() < Weapons.rarity[i].chance) {
+    if (ultra && randomNumber < Weapons.rarity[i].chance) {
       weaponRarity = Weapons.rarity[i];
     }
   }
@@ -140,12 +141,15 @@ Weapons.createWeaponLogic = function(weapon, container) {
 };
 
 Weapons.attackDrone = {
+  drone : true,
   xLoc : 0,
   yLoc : 0,
   xSpeed : 0,
   ySpeed : 0,
+  rotation: 0,
   acceleration : 150,
-  maxSpeed : 70
+  maxSpeed : 70,
+  lastTrail : 0,
 };
 
 Weapons.weaponLogic = {};
@@ -154,6 +158,7 @@ Weapons.weaponLogic = {};
 Weapons.update = function(timeDiff) {
 
   var shouldPlayerShoot = PlayerShip.playerShip.inPlay && PlayerShip.playerShip.rolling > 1 && (timeLeft > 0 || Boss.bossActive() || Enemies.waves.length > 0);
+  var shouldDroneShoot = PlayerShip.playerShip.inPlay && (timeLeft > 0 || Boss.bossActive() || Enemies.waves.length > 0);
   var fireRateModifier = Talents.fireRateModifier();
 
   if (Talents.attackDrone()) {
@@ -166,7 +171,7 @@ Weapons.update = function(timeDiff) {
       Weapons.attackDroneContainer.addChild(Weapons.attackDrone.sprite);
     }
     var distanceFromPlayer = distanceBetweenPoints(Weapons.attackDrone.xLoc, Weapons.attackDrone.yLoc, PlayerShip.playerShip.xLoc, PlayerShip.playerShip.yLoc);
-    if (distanceFromPlayer > 100)  {
+    if (distanceFromPlayer > 75)  {
       var accelX = PlayerShip.playerShip.xLoc - Weapons.attackDrone.xLoc;
       var accelY = PlayerShip.playerShip.yLoc - Weapons.attackDrone.yLoc;
       var factor = Weapons.attackDrone.acceleration / magnitude(accelX, accelY);
@@ -180,19 +185,28 @@ Weapons.update = function(timeDiff) {
         Weapons.attackDrone.ySpeed *= speedFactor;
       }
 
-      Weapons.attackDrone.trailX = Weapons.attackDrone.xLoc += Weapons.attackDrone.xSpeed * timeDiff;
-      Weapons.attackDrone.trailY = Weapons.attackDrone.yLoc += Weapons.attackDrone.ySpeed * timeDiff;
+      Weapons.attackDrone.xLoc += Weapons.attackDrone.xSpeed * timeDiff;
+      Weapons.attackDrone.yLoc += Weapons.attackDrone.ySpeed * timeDiff;
+      Weapons.attackDrone.sprite.tint = 0xDDDDDD;
     } else {
       Weapons.attackDrone.xSpeed *= 0.95;
       Weapons.attackDrone.ySpeed *= 0.95;
-      Weapons.attackDrone.trailX = Weapons.attackDrone.xLoc += Weapons.attackDrone.xSpeed * timeDiff;
-      Weapons.attackDrone.trailY = Weapons.attackDrone.yLoc += Weapons.attackDrone.ySpeed * timeDiff;
+      Weapons.attackDrone.xLoc += Weapons.attackDrone.xSpeed * timeDiff;
+      Weapons.attackDrone.yLoc += Weapons.attackDrone.ySpeed * timeDiff;
+      Weapons.attackDrone.sprite.tint = rgbToHex(221 - (75 - distanceFromPlayer),221 - (75 - distanceFromPlayer),221 - (75 - distanceFromPlayer));
     }
 
+    Ships.updateRotation(Weapons.attackDrone, timeDiff);
+    Weapons.attackDrone.trailX = Weapons.attackDrone.xLoc;
+    Weapons.attackDrone.trailY = Weapons.attackDrone.yLoc;
+    Weapons.attackDrone.sprite.rotation = Weapons.attackDrone.rotation;
     Weapons.attackDrone.sprite.position = {x : Weapons.attackDrone.xLoc * scalingFactor, y : Weapons.attackDrone.yLoc * scalingFactor};
-
-    if (Math.random() > 0.92 && Weapons.attackDrone.sprite.visible)
+    Weapons.attackDrone.lastTrail += timeDiff;
+    if (Weapons.attackDrone.lastTrail > 0.08) {
+      Weapons.attackDrone.lastTrail = 0;
       Stars.shipTrails.newPart(Weapons.attackDrone);
+    }
+
 
   }
 
@@ -208,8 +222,10 @@ Weapons.update = function(timeDiff) {
 
   if (Weapons.weaponLogic.frontWeapon) {
     Weapons.weaponLogic.frontWeapon.update(timeDiff);
-    if (Weapons.weaponLogic.frontWeapon.readyToFire(shouldPlayerShoot, timeDiff, fireRateModifier)) {
-      Weapons.weaponLogic.frontWeapon.fireShot({x: PlayerShip.playerShip.xLoc, y: PlayerShip.playerShip.yLoc - 8, angle:0}, 1);
+    if (Weapons.weaponLogic.frontWeapon.readyToFire(shouldDroneShoot, timeDiff, fireRateModifier)) {
+      if (Weapons.weaponLogic.frontWeapon.readyToFire(shouldPlayerShoot, timeDiff, fireRateModifier)) {
+        Weapons.weaponLogic.frontWeapon.fireShot({x: PlayerShip.playerShip.xLoc, y: PlayerShip.playerShip.yLoc - 8, angle:0}, 1);
+      }
       if (Talents.attackDrone()) {
         Weapons.weaponLogic.frontWeapon.fireShot({x: Weapons.attackDrone.xLoc, y: Weapons.attackDrone.yLoc - 2, angle:0}, 0.5);
       }

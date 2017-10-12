@@ -35,7 +35,7 @@ Buffs = {
 			var row = Math.floor(i / 4);
 			var col = i - row * 4;
       Buffs.currentBuffs[i].container.anchor = {x:0.5,y:0.5};
-			Buffs.currentBuffs[i].container.position = {x:(xPos + xPos * col) - Buffs.currentBuffs[i].container.width / 2,y:400 * scalingFactor - (row * scalingFactor * 54)};
+			Buffs.currentBuffs[i].container.position = {x:(xPos + xPos * col) - Buffs.currentBuffs[i].container.width / 2,y:380 * scalingFactor - (row * scalingFactor * 54)};
       Buffs.currentBuffs[i].timeText.text = Buffs.currentBuffs[i].time < 0 || Buffs.currentBuffs[i].permanent ? "" : Math.round(Buffs.currentBuffs[i].time);
       if (Buffs.currentBuffs[i].time < 0) {
         Buffs.currentBuffs[i].container.alpha -= 2 * timeDiff;

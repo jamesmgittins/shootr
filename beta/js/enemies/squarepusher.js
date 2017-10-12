@@ -121,6 +121,7 @@ Squarepusher.wave = function () {
 	this.colors = Ships.enemyColors[Math.floor(Math.random() * Ships.enemyColors.length)];
 
 	this.shipHealth = EnemyShips.shipHealth * 5;
+	this.spawnHealth = EnemyShips.shipHealth;
 	this.firing = false;
 	this.rotationDirection = Math.random() > 0.5 ? -1 : 1;
 
@@ -178,7 +179,7 @@ Squarepusher.enemyShip = function (wave, position) {
 		this.xSpeed = 0;
 		this.xLoc = position.x;
 		this.yLoc = position.y;
-		this.health = wave.shipHealth * Enemies.difficultyFactor / 5;
+		this.health = wave.spawnHealth * Enemies.difficultyFactor;
 		this.sprite.alpha = 0.5;
 	} else {
 		this.sprite = wave.spritePool.nextSprite();
@@ -220,7 +221,7 @@ Squarepusher.enemyShip.prototype.detectCollision = function (xLoc, yLoc) {
 Squarepusher.enemyShip.prototype.damage = function(xLoc, yLoc, inputDamage, noEffect) {
 	if (this.health > 0) {
 
-		var damage = Talents.enemyDamaged(inputDamage);
+		var damage = Talents.enemyDamaged(inputDamage, xLoc, yLoc);
 
 		var isCrit = Math.random() < getCritChance();
 		if (isCrit) {
@@ -385,7 +386,12 @@ Squarepusher.enemyShip.prototype.update = function (timeDiff) {
 		EnemyShips.checkForSplashDamage(this);
 		EnemyShips.checkForPlayerCollision(this, timeDiff);
 
-		if (this.health < this.wave.shipHealth)
-			this.sprite.tint = calculateTint(this.health / this.wave.shipHealth);
+		if (this.spawn) {
+			if (this.health < this.wave.spawnHealth)
+				this.sprite.tint = calculateTint(this.health / this.wave.spawnHealth);
+		} else {
+			if (this.health < this.wave.shipHealth)
+				this.sprite.tint = calculateTint(this.health / this.wave.shipHealth);
+		}
 	}
 };

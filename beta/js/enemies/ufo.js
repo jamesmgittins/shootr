@@ -347,7 +347,7 @@ UFOs.enemyShip.prototype.detectCollision = function (xLoc, yLoc) {
 UFOs.enemyShip.prototype.damage = function(xLoc, yLoc, inputDamage, noEffect) {
 	if (this.health > 0) {
 
-		var damage = Talents.enemyDamaged(inputDamage);
+		var damage = Talents.enemyDamaged(inputDamage, xLoc, yLoc);
 
 		var isCrit = Math.random() < getCritChance();
 		if (isCrit) {

@@ -215,7 +215,7 @@ EnemyShips.checkForSplashDamage = function (ship){
 EnemyShips.damageEnemyShip = function(xLoc, yLoc, inputDamage, noEffect) {
 	if (this.health > 0) {
 
-		var damage = Talents.enemyDamaged(inputDamage);
+		var damage = Talents.enemyDamaged(inputDamage, xLoc, yLoc);
 
 		var isCrit = Math.random() < getCritChance();
 		if (isCrit) {

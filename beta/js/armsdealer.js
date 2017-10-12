@@ -12,7 +12,8 @@ ArmsDealer = {
 	currentSelection: 0,
 	bButton: function() {},
 	gridWidth : 8,
-	showCurrentCredits : true
+	showCurrentCredits : true,
+	recoveredItems : []
 };
 
 
@@ -519,6 +520,23 @@ ArmsDealer.initialize = function() {
 
 	Math.seedrandom(seed);
 	ArmsDealer.buyOptions = [];
+
+	// check for recovered items
+	if(ArmsDealer.recoveredItems && ArmsDealer.recoveredItems.length > 0) {
+		ArmsDealer.recoveredItems.forEach(function(item){
+			var alreadyGotIt = false;
+			gameModel.p1.weapons.forEach(function(weapon){
+				if (weapon.id == item.id)
+					alreadyGotIt = true;
+			});
+			gameModel.p1.shields.forEach(function(shield){
+				if (shield.id == item.id)
+					alreadyGotIt = true;
+			});
+			if (!alreadyGotIt)
+				ArmsDealer.buyOptions.push(item);
+		});
+	}
 
 	var numOptions = Math.round(5 + Math.random() * 2);
 	for (var j = 0; j <numOptions; j++)

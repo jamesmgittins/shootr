@@ -25,7 +25,7 @@ Shipyard.generateShip = function(level, seed, ultra) {
     rearWeaponLevel:    Math.max(1,Math.round(level - 0.7 + Math.random() * 1.5)),
     shieldLevel:        Math.max(1,Math.round(level - 0.7 + Math.random() * 1.5)),
     speed : Math.min(0.99 + Math.min(0.5, level / 150), 1.6),
-    range : 12 + (level / 2) + (Math.random() * 0.1 * level),
+    range : 12 + (level / 5) + (Math.random() * 0.1 * level),
 		colorIndex : prefix.index,
     name:(ultra? "Ultra " : "") + prefix.name + " " + Shipyard.suffixes[Math.floor(Math.random() * Shipyard.suffixes.length)],
     dualEngines : Math.random() > 0.7

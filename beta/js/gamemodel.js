@@ -38,7 +38,11 @@ var Constants = {
 		background : 0x124215,
 		lightText : 0xB2DFDB,
 		darkText : 0x80D8FF
-	}
+	},
+	controlText : "Keyboard & Mouse\nW A S D to move ship and scroll in galaxy map\nMouse to aim turret, mousewheel to zoom galaxy map"
+	+ "\nLeft click to select a star system in the galaxy map\nQ & E to barrel roll to avoid enemy bullets\nP to pause during gameplay"
+	+ "\n\nGamepad Controls\nLeft Stick to move ship\nRight Stick to aim turret\nLeft & Right Shoulder buttons to barrel roll"
+	+ "\nStart / Options to pause during gameplay"
 };
 var gameModel = {
 	weaponIdCounter:1

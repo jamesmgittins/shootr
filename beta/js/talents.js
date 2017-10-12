@@ -16,19 +16,19 @@ Talents = {
           icon : "img/aura.svg"
         },
         {
-          name : "Dummy",
-          description : "This talent has not been written yet",
-          icon : "img/barbed-arrow.svg"
+          name : "Made of Money",
+          description : "5% chance to spawn credits when damaging an ememy",
+          icon : "img/gold-bar.svg"
         },
         {
-          name : "Dummy",
-          description : "This talent has not been written yet",
-          icon : "img/barbed-arrow.svg"
+          name : "Spoils Of War",
+          description : "Increases your chance to get super or above quality loot from crates by 20%",
+          icon : "img/skull-trophy.svg"
         },
         {
-          name : "Dummy",
-          description : "This talent has not been written yet",
-          icon : "img/barbed-arrow.svg"
+          name : "Master Negotiator",
+          description : "Any loot lost when you die will now be available\nfor purchase in the next Arms Dealer you visit",
+          icon : "img/emerald.svg"
         }
       ]
     },
@@ -37,27 +37,27 @@ Talents = {
       bgColor : Constants.itemColors.super,
       talents : [
         {
-          name: "Claw it Back",
+          name: "Claw It Back",
           description : "Destroying an enemy restores 2% of your shield",
           icon : "img/battery-positive.svg"
         },
         {
-          name : "Tables Turned",
+          name : "Turn The Tables",
           description : "Collecting a crate restores 50% of your shield",
           icon : "img/energise.svg"
         },
         {
           name : "Last Chance",
-          description : "Damage that would normally kill you has a 25% chance to restore 50% of your shield",
+          description : "Damage that would normally kill you\ninstead has a 25% chance to restore 50% of your shield",
           icon : "img/defibrilate.svg"
         },
         {
-          name : "First Cut is the Deepest",
-          description : "After taking damage gain 30% damage reduction for 5 seconds",
+          name : "First Cut Is The Deepest",
+          description : "After taking damage gain 30% additional damage reduction for 5 seconds",
           icon : "img/dripping-knife.svg"
         },
         {
-          name : "I am rubber you are glue",
+          name : "I Am Rubber You Are Glue",
           description : "Any damage taken is also inflicted upon the next enemy you hit",
           icon : "img/splash.svg"
         }
@@ -74,12 +74,12 @@ Talents = {
         },
         {
           name : "Frenzy",
-          description : "Increase rate of fire by 100% whenever your shield is below 30%",
+          description : "Increase rate of fire by 100% for 5 seconds after collecting a crate",
           icon : "img/implosion.svg"
         },
         {
           name : "Bullheaded",
-          description : "Increase the damage done to enemies when you ram them by 500%",
+          description : "Increase the damage done to enemies when you ram them by 700%",
           icon : "img/muscle-fat.svg"
         },
         {
@@ -88,7 +88,7 @@ Talents = {
           icon : "img/daggers.svg"
         },
         {
-          name : "Buds for Life",
+          name : "Buds For Life",
           description : "Summons a small attack drone that fires a copy of your front weapon at 50% damage",
           icon : "img/gear-heart.svg"
         }
@@ -127,16 +127,25 @@ Talents = {
     if (Talents.getGameModelTalents().greedTalent == "Untouchable") {
       Buffs.newBuff("Untouchable", 10, "img/aura.svg", Constants.itemColors.normal, true, true);
     }
+    if (Talents.getGameModelTalents().greedTalent == "Made of Money") {
+      Buffs.newBuff("Made of Money", 10, "img/gold-bar.svg", Constants.itemColors.normal, true, true);
+    }
+    if (Talents.getGameModelTalents().greedTalent == "Master Negotiator") {
+      Buffs.newBuff("Master Negotiator", 10, "img/emerald.svg", Constants.itemColors.hyper, true, true);
+    }
+    if (Talents.getGameModelTalents().greedTalent == "Spoils Of War") {
+      Buffs.newBuff("Spoils Of War", 10, "img/skull-trophy.svg", Constants.itemColors.hyper, true, true);
+    }
     if (Talents.getGameModelTalents().wrathTalent == "Bullheaded") {
       Buffs.newBuff("Bullheaded", 10, "img/muscle-fat.svg", Constants.itemColors.hyper, true, true);
     }
-    if (Talents.getGameModelTalents().wrathTalent == "Buds for Life") {
-      Buffs.newBuff("Buds for Life", 10, "img/gear-heart.svg", Constants.itemColors.hyper, true, true);
+    if (Talents.getGameModelTalents().wrathTalent == "Buds For Life") {
+      Buffs.newBuff("Buds For Life", 10, "img/gear-heart.svg", Constants.itemColors.hyper, true, true);
     }
   },
 
   attackDrone : function() {
-    return Talents.getGameModelTalents().wrathTalent == "Buds for Life";
+    return Talents.getGameModelTalents().wrathTalent == "Buds For Life";
   },
 
   combatCredits : function(credits) {
@@ -147,6 +156,14 @@ Talents = {
   },
 
 
+  rarityModifier : function() {
+    if (Talents.getGameModelTalents().greedTalent == "Spoils Of War") {
+      return 0.8;
+    }
+    return 1;
+  },
+
+
   passiveCredits : function(credits) {
     return credits * (1 + Talents.getGameModelTalents().greedPoints * 0.05);
   },
@@ -154,7 +171,7 @@ Talents = {
 
   ramDamage : function() {
     if (Buffs.isBuffActive("Bullheaded")) {
-      return 5;
+      return 7;
     }
     return 1;
   },
@@ -162,7 +179,7 @@ Talents = {
 
   passiveDmgReduction : function() {
     var additional = 0;
-    if (Buffs.isBuffActive("First Cut is the Deepest")) {
+    if (Buffs.isBuffActive("First Cut Is The Deepest")) {
       additional = 30;
     }
     return Talents.getGameModelTalents().pridePoints * 5 + additional;
@@ -194,8 +211,8 @@ Talents = {
 
 
   enemyDestroyed : function() {
-    if (Talents.getGameModelTalents().prideTalent == "Claw it Back"  && PlayerShip.playerShip.currShield < PlayerShip.playerShip.maxShield) {
-      Buffs.newBuff("Claw it Back", 1, "img/battery-positive.svg", Constants.itemColors.super, false, true);
+    if (Talents.getGameModelTalents().prideTalent == "Claw It Back"  && PlayerShip.playerShip.currShield < PlayerShip.playerShip.maxShield) {
+      Buffs.newBuff("Claw It Back", 1, "img/battery-positive.svg", Constants.itemColors.super, false, true);
       PlayerShip.restoreShieldPercent(0.02);
     }
     if (Talents.getGameModelTalents().wrathTalent == "Kill Streak") {
@@ -210,20 +227,26 @@ Talents = {
   },
 
 
-  enemyDamaged : function(amount) {
-    if (Buffs.isBuffActive("I am rubber you are glue")) {
-      Buffs.removeBuff("I am rubber you are glue");
+  enemyDamaged : function(amount, xLoc, yLoc) {
+    if (Buffs.isBuffActive("I Am Rubber You Are Glue")) {
+      Buffs.removeBuff("I Am Rubber You Are Glue");
       amount += Talents.dmgTaken;
       Talents.dmgTaken = 0;
+    }
+    if (Buffs.isBuffActive("Made of Money") && Math.random() < 0.05) {
+      MoneyPickup.newMoneyPickup(xLoc, yLoc, amount * 5);
     }
     return amount;
   },
 
 
   crateCollected : function() {
-    if (Talents.getGameModelTalents().prideTalent == "Tables Turned" && PlayerShip.playerShip.currShield < PlayerShip.playerShip.maxShield) {
-      Buffs.newBuff("Tables Turned", 1, "img/energise.svg", Constants.itemColors.super, false, false);
+    if (Talents.getGameModelTalents().prideTalent == "Turn The Tables" && PlayerShip.playerShip.currShield < PlayerShip.playerShip.maxShield) {
+      Buffs.newBuff("Turn The Tables", 1, "img/energise.svg", Constants.itemColors.super, false, false);
       PlayerShip.restoreShieldPercent(0.5);
+    }
+    if (Talents.getGameModelTalents().wrathTalent == "Frenzy") {
+      Buffs.newBuff("Frenzy", 5, "img/implosion.svg", Constants.itemColors.hyper, false);
     }
   },
 
@@ -234,9 +257,6 @@ Talents = {
     }
     if (Talents.getGameModelTalents().wrathTalent == "Retaliation") {
       Buffs.newBuff("Retaliation", 3, "img/spinning-sword.svg", Constants.itemColors.hyper, false);
-    }
-    if (Talents.getGameModelTalents().wrathTalent == "Frenzy" && PlayerShip.playerShip.currShield < PlayerShip.playerShip.maxShield * 0.3) {
-      Buffs.newBuff("Frenzy", 3, "img/implosion.svg", Constants.itemColors.hyper, true);
     }
     if (Talents.getGameModelTalents().wrathTalent == "Kill Streak") {
       Talents.killCounter = 0;
@@ -249,11 +269,11 @@ Talents = {
       }
     }
     if (Talents.getGameModelTalents().prideTalent == "First Cut is the Deepest") {
-      Buffs.newBuff("First Cut is the Deepest", 5, "img/dripping-knife.svg", Constants.itemColors.super, false, false);
+      Buffs.newBuff("First Cut Is The Deepest", 5, "img/dripping-knife.svg", Constants.itemColors.super, false, false);
     }
     if (Talents.getGameModelTalents().prideTalent == "I am rubber you are glue") {
       Talents.dmgTaken += amount;
-      Buffs.newBuff("I am rubber you are glue", 2, "img/splash.svg", Constants.itemColors.super, true, true);
+      Buffs.newBuff("I Am Rubber You Are Glue", 2, "img/splash.svg", Constants.itemColors.super, true, true);
     }
   },
 
@@ -261,9 +281,6 @@ Talents = {
   shieldRestored : function() {
     if (Talents.getGameModelTalents().greedTalent == "Untouchable" && PlayerShip.playerShip.currShield >= PlayerShip.playerShip.maxShield) {
       Buffs.newBuff("Untouchable", 10, "img/aura.svg", Constants.itemColors.normal, true);
-    }
-    if (Talents.getGameModelTalents().wrathTalent == "Frenzy" && PlayerShip.playerShip.currShield > PlayerShip.playerShip.maxShield * 0.3) {
-      Buffs.removeBuff("Frenzy");
     }
   }
 };

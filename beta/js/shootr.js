@@ -124,6 +124,7 @@ function changeState(state) {
 			GameText.levelComplete.hide();
 			Sounds.music.play();
 			Talents.startGame();
+			gameModel.p1.recoveredItems = [];
 		}
 
 		if (state == states.paused) {
@@ -181,6 +182,14 @@ function changeState(state) {
 			GameText.status.hide();
 
 			DeathMenu.show();
+
+			if (Talents.getGameModelTalents().greedTalent == "Master Negotiator") {
+				ArmsDealer.recoveredItems = [];
+				gameModel.lootCollected.forEach(function(item) {
+						ArmsDealer.recoveredItems.push(item);
+				});
+			}
+
 
 			resetGame();
 		}

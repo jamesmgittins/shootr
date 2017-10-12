@@ -17,9 +17,10 @@ Shields.getIconSvg =  function(item) {
 Shields.generateShield = function(level, seed, ultra, rarity) {
 
   var weaponRarity = Weapons.rarity[0];
+  var randomNumber = Math.random() * Talents.rarityModifier();
 
   for (var i=0; i<Weapons.rarity.length; i++) {
-    if (ultra && Math.random() < Weapons.rarity[i].chance) {
+    if (ultra && randomNumber < Weapons.rarity[i].chance) {
       weaponRarity = Weapons.rarity[i];
     }
   }

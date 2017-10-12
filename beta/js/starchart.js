@@ -10,11 +10,11 @@ StarChart = {
     return true;
   },
   launchButton :{title:"Launch Ship", click:function(){
+    StarChart.hide();
+    StationMenu.hide();
     gameModel.targetSystem = {x:StarChart.selectedStar.x,y:StarChart.selectedStar.y};
     changeLevel(StarChart.generateStar(StarChart.selectedStar.x, StarChart.selectedStar.y).level);
     changeState(states.running);
-    StarChart.hide();
-    StationMenu.hide();
 		cursorPosition = {x:-200,y:-200};
   }},
 	fastTravelButton :{title:"Fast Travel", click:function(){
@@ -893,12 +893,19 @@ StarChart.show = function() {
   StarChart.stopZoom = false;
   Sounds.mapMusic.reset();
   Sounds.mapMusic.play();
+  if (!gameModel.starChartTutorialSeen) {
+    Modal.show({
+      text:"This is the Galaxy Map\n\nHere you can select star systems to see information about them.\nIf they are within range of your ship you can use the launch\nbutton and try to make it there in one piece.\n\nYou can drag the map or use the WASD keys to scroll,\nmousewheel will zoom in/out.\n\nSee if you can find the nearest boss and take them down!"
+    });
+    gameModel.starChartTutorialSeen = true;
+  }
+
 };
 
 StarChart.hide = function() {
+  Sounds.mapMusic.fadeOut();
   setTimeout(function(){
     StarChart.menuContainer.visible = false;
-    Sounds.mapMusic.fadeOut();
     StarChart.Stars.getSpritePool().destroy();
     StarChart.Stars.spritePool = undefined;
 
@@ -918,7 +925,6 @@ StarChart.hide = function() {
       StarChart.asteroids.discardAll();
     }
   });
-
 };
 
 StarChart.calcFade = function (x,y,bounds) {

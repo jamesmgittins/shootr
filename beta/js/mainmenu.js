@@ -4,13 +4,17 @@ MainMenu = {
     {title:"Start",click:function(){
       StationMenu.show();
       MainMenu.hide();
-    }},
+    }, description:"Start or continue a game"},
     {title:"Settings", click:function(){
       SettingsMenu.show();
       SettingsMenu.onHide = MainMenu.show;
       MainMenu.hide();
-    }},
-    {title:"Exit", click:function(){}}],
+    }, description:"Display the settings menu"},
+    {title:"Controls", click:function(){
+      Modal.show({text:Constants.controlText});
+    }, description:"How to control the game"}
+    // ,{title:"Exit", click:function(){}}
+  ],
   currentSelection:0,
   bButton : function(){},
   buttonTint : Constants.uiColors.darkText,
@@ -26,7 +30,7 @@ StationMenu = {
   showCurrentCredits: true,
   menuTitle:"Station Menu",
   menuOptions:[
-    {title:"Star Chart",click:function(){
+    {title:"Galaxy Map",click:function(){
       StationMenu.hide();
       StarChart.show();
     }, description:"Scout nearby systems, plot a course and launch your ship"},
@@ -50,7 +54,10 @@ StationMenu = {
       SettingsMenu.show();
       SettingsMenu.onHide = StationMenu.show;
       StationMenu.hide();
-    }, description:"Configure the game"}
+    }, description:"Configure the game"},
+    {title:"Controls", click:function(){
+      Modal.show({text:Constants.controlText});
+    }, description:"How to control the game"}
   ],
   backButton : {title:"Main Menu", buttonDesc:buttonTypes.back, click:function(){
     StationMenu.hide();
@@ -138,7 +145,7 @@ SettingsMenu = {
     }, description:"Change the audio volume level"},
     {title:"Full Screen", click:function(){
       ShootrUI.toggleFullscreen();
-    }, description:"Switch to full screen. Due to browser security this option must be clicked"},
+    }, description:"Switch to full screen. Due to browser security this option must be clicked", hideWhenPaused : true},
     {title:"Music: OFF", click:function(){
       if (!gameModel.music) {
         gameModel.music = true;
@@ -185,7 +192,7 @@ SettingsMenu = {
       }
       save();
       location.reload(true);
-    }, description:"Toggle antialiasing. This will restart the game"},
+    }, description:"Toggle antialiasing. This will restart the game", hideWhenPaused : true},
     {title:"Detail: HIGH", click:function(){
       if (gameModel.detailLevel < 1) {
         gameModel.detailLevel = 1;
@@ -197,7 +204,7 @@ SettingsMenu = {
     }, description:"Toggle particle effect detail"},
     {title:"Delete Save Data", click:function(){
       resetSaveGame();
-    }, description:"Delete all save data. This will restart the game"},
+    }, description:"Delete all save data. This will restart the game", hideWhenPaused : true},
     {title:"Resolution Options", click:function(){
       ResolutionMenu.show();
       var settingsOnHide = SettingsMenu.onHide;
@@ -207,7 +214,10 @@ SettingsMenu = {
         SettingsMenu.onHide = settingsOnHide;
       };
       SettingsMenu.hide();
-    }, description:"Change internal rendering resolution"}
+    }, description:"Change internal rendering resolution", hideWhenPaused : true},
+    {title:"Controls", click:function(){
+      Modal.show({text:Constants.controlText});
+    }, description:"How to control the game"}
   ],
   backButton : {title:"Back", buttonDesc:buttonTypes.back, click:function(){
     SettingsMenu.hide();
@@ -261,6 +271,13 @@ SettingsMenu = {
       else
         SettingsMenu.controllerText.text = "Controller detected";
     }
+    SettingsMenu.menuOptions.forEach(function(option){
+        if (currentState === states.paused && option.hideWhenPaused)
+          option.text.visible = false;
+        else {
+          option.text.visible = true;
+        }
+    });
 
   }
 };
@@ -878,7 +895,7 @@ Modal = {
     this.dialogContainer.visible = false;
 
     this.okButton = {text:getText("Okay", 22 * scalingFactor, {}), value:"ok"};
-    this.okButton.text.position = {x:renderer.width * 0.4 - this.okButton.text.width / 2, y:renderer.height * 0.7 - this.okButton.text.height / 2};
+    this.okButton.text.position = {x:renderer.width * 0.4 - this.okButton.text.width / 2, y:renderer.height * 0.75 - this.okButton.text.height / 2};
     this.okButton.text.tint = MainMenu.buttonTint;
 
     this.okButton.click = function() {
@@ -893,7 +910,7 @@ Modal = {
     this.dialogContainer.addChild(this.okButton.text);
 
     this.cancelButton = {text:getText("Cancel", 22 * scalingFactor, {}), value:"cancel"};
-    this.cancelButton.text.position = {x:renderer.width * 0.6 - this.okButton.text.width / 2, y:renderer.height * 0.7 - this.okButton.text.height / 2};
+    this.cancelButton.text.position = {x:renderer.width * 0.6 - this.okButton.text.width / 2, y:renderer.height * 0.75 - this.okButton.text.height / 2};
     this.cancelButton.text.tint = MainMenu.buttonTint;
 
     this.cancelButton.click = function() {
@@ -917,7 +934,7 @@ Modal = {
     if (options) {
       if (options.text) {
         var textMessage = getText(options.text, 22 * scalingFactor, {});
-        textMessage.position = {x:renderer.width * 0.5 - textMessage.width / 2, y:renderer.height * 0.4 - textMessage.height / 2};
+        textMessage.position = {x:renderer.width * 0.5 - textMessage.width / 2, y:renderer.height * 0.47 - textMessage.height / 2};
         textMessage.tint = MainMenu.buttonTint;
         this.dialogContents.addChild(textMessage);
       }
@@ -928,13 +945,13 @@ Modal = {
         this.okButton.onOk = options.ok;
       }
       if (options.cancel) {
-        this.okButton.text.position = {x:renderer.width * 0.4 - this.okButton.text.width / 2, y:renderer.height * 0.7 - this.okButton.text.height / 2};
-        this.cancelButton.text.position = {x:renderer.width * 0.6 - this.okButton.text.width / 2, y:renderer.height * 0.7 - this.okButton.text.height / 2};
+        this.okButton.text.position = {x:renderer.width * 0.4 - this.okButton.text.width / 2, y:renderer.height * 0.75 - this.okButton.text.height / 2};
+        this.cancelButton.text.position = {x:renderer.width * 0.6 - this.okButton.text.width / 2, y:renderer.height * 0.75 - this.okButton.text.height / 2};
         this.cancelButton.text.visible = true;
         this.cancelButton.onCancel = options.cancel;
         this.select(this.cancelButton);
       } else {
-        this.okButton.text.position = {x:renderer.width * 0.5 - this.okButton.text.width / 2, y:renderer.height * 0.7 - this.okButton.text.height / 2};
+        this.okButton.text.position = {x:renderer.width * 0.5 - this.okButton.text.width / 2, y:renderer.height * 0.75 - this.okButton.text.height / 2};
         this.cancelButton.text.visible = false;
         this.select(this.okButton);
       }

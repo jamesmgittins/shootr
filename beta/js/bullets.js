@@ -212,22 +212,25 @@ Bullets.enemyBullets = {
 		bullet.xLoc = ship.xLoc;
 		bullet.yLoc = ship.yLoc + 16;
 
-		var travelTime = Math.min(
-				distanceBetweenPoints(
-					bullet.xLoc,
-					bullet.yLoc,
-					PlayerShip.playerShip.xLoc,
-					PlayerShip.playerShip.yLoc) / Bullets.enemyBullets.enemyShotSpeed,
-			0.8);
+		var distanceFromBulletToPlayer = distanceBetweenPoints(bullet.xLoc,	bullet.yLoc, PlayerShip.playerShip.xLoc, PlayerShip.playerShip.yLoc);
+		var travelTime = distanceFromBulletToPlayer / Bullets.enemyBullets.enemyShotSpeed;
 
-		travelTime = travelTime / 2 + (travelTime * Math.random());
+		var predictedPlayerMoveVector = {
+			x:PlayerShip.playerShip.xSpeed * travelTime,
+			y:PlayerShip.playerShip.ySpeed * travelTime
+		}
 
-		var xDiff = (PlayerShip.playerShip.xLoc + PlayerShip.playerShip.xSpeed * travelTime) - ship.xLoc;
-		var yDiff = ship.yLoc - (PlayerShip.playerShip.yLoc + PlayerShip.playerShip.ySpeed * travelTime);
-		var multi = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
+		var randomNumber = Math.random() * 0.8;
+		var vectorToAimAt = {
+			x: predictedPlayerMoveVector.x * randomNumber,
+			y: predictedPlayerMoveVector.y * randomNumber
+		}
 
-		bullet.xSpeed = xDiff / multi * Bullets.enemyBullets.enemyShotSpeed;
-		bullet.ySpeed = yDiff / multi * Bullets.enemyBullets.enemyShotSpeed;
+		var aimAngle = Math.atan2(bullet.xLoc - (PlayerShip.playerShip.xLoc + vectorToAimAt.x),  bullet.yLoc - (PlayerShip.playerShip.yLoc + vectorToAimAt.y));
+		var bulletSpeed = RotateVector2d(0, Bullets.enemyBullets.enemyShotSpeed, aimAngle);
+
+		bullet.xSpeed = bulletSpeed.x;
+		bullet.ySpeed = bulletSpeed.y;
 
 		if (rotation) {
 			var rotated = RotateVector2d(
@@ -355,7 +358,11 @@ Bullets.explosionBits = {
 
 
 Bullets.generateExplosion = function(x, y) {
-	for (var i = 0; i < Bullets.explosionBits.bitsPerExplosion * gameModel.detailLevel; i++) {
+	var bitsPerExplosion = Bullets.explosionBits.bitsPerExplosion * gameModel.detailLevel;
+	if (Bullets.explosionBits.getSpritePool().discardedSprites.length < 10) {
+		bitsPerExplosion *= 0.5;
+	}
+	for (var i = 0; i < bitsPerExplosion; i++) {
 		Bullets.explosionBits.newExplosionBit(x * scalingFactor, y * scalingFactor);
 	}
 	Bullets.blasts.newBlast(x, y);

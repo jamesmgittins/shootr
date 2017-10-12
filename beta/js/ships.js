@@ -267,6 +267,8 @@ Ships.updateRotation = function (ship, timeDiff) {
 
 	var tempX = -2 + Math.random() * 4;
 	var tempY = ship.enemyShip ? -20 : 20;
+	if (ship.drone)
+		tempy = 5;
 	var tempRotation = ship.enemyShip ? ship.rotation * -1 : ship.rotation;
 
 	ship.trailX = Math.cos(tempRotation) * tempX - Math.sin(tempRotation) * tempY + ship.xLoc;
