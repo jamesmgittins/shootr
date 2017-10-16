@@ -46,7 +46,8 @@ var Constants = {
 	+ "\nStart / Options to pause during gameplay"
 };
 var gameModel = {
-	weaponIdCounter:1
+	weaponIdCounter:1,
+	p1:{}
 };
 
 function maxLevelAllowed() {
