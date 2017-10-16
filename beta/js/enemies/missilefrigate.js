@@ -93,14 +93,14 @@ MissileFrigate.wave = function () {
 	this.shipFrequency = (1500 + (Math.random() * 500));
 	this.lastShipSpawned = 0;
 
-	this.shipsInWave = MissileFrigate.minShipsPerWave + Math.round(Math.random() * (MissileFrigate.maxShipsPerWave - MissileFrigate.minShipsPerWave) * Enemies.difficultyFactor);
+
+	this.shipsInWave = currentLevel > 3 ? MissileFrigate.minShipsPerWave + Math.round(Math.random() * (MissileFrigate.maxShipsPerWave - MissileFrigate.minShipsPerWave) * Enemies.difficultyFactor) : 1;
 	this.shipsSpawned = 0;
 	this.shipsDestroyed = 0;
 	this.size = MissileFrigate.size;
 	this.colors = Ships.enemyColors[Math.floor(Math.random() * Ships.enemyColors.length)];
 
 	this.shipHealth = EnemyShips.shipHealth * 4;
-	this.firing = false;
 	this.direction = Math.random() > 0.5 ? -1 : 1;
 	this.yLoc = canvasHeight * Math.random() * 0.2;
 
@@ -278,7 +278,7 @@ MissileFrigate.enemyShip.prototype.update = function (timeDiff) {
 		this.sprite.position.y = this.yLoc * scalingFactor;
 
 		this.lastShot += timeDiff;
-		if (this.lastShot > EnemyShips.waveBulletFrequency / 1000) {
+		if (this.lastShot > EnemyShips.waveBulletFrequency / 900) {
 			this.missilePosition++;
 			if (this.missilePosition > 1) {
 				this.missilePosition = -1;
