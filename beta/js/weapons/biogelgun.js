@@ -121,7 +121,7 @@ BioGelGun.weaponLogic.prototype.update = function(timeDiff) {
 						this.spritePool.discardSprite(sprite);
 					} else {
 						Enemies.damageEnemy(sprite.ship, sprite.ship.xLoc + sprite.xLoc, sprite.ship.yLoc + sprite.yLoc, sprite.bulletStrength * timeDiff * (1 / BioGelGun.damageOverTimeSec), true);
-						vector = RotateVector2d(sprite.xLoc, sprite.yLoc, sprite.ship.sprite.rotation - sprite.shipRotation);
+						vector = RotateVector2d(sprite.xLoc, sprite.yLoc, (sprite.ship.sprite ? sprite.ship.sprite.rotation : sprite.ship.rotation) - sprite.shipRotation);
 						sprite.position.x = (sprite.ship.xLoc + vector.x) * scalingFactor;
 						sprite.position.y = (sprite.ship.yLoc + vector.y) * scalingFactor;
 					}

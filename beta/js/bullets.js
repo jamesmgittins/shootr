@@ -167,7 +167,7 @@ Bullets.enemyMissiles = {
 		}
 	},
 	detectCollision : function(x,y) {
-		return distanceBetweenPoints(x,y,this.xLoc,this.yLoc) < 7;
+		return distanceBetweenPoints(x,y,this.xLoc,this.yLoc) < 10;
 	},
 	damage : function(xLoc, yLoc, inputDamage, noEffect) {
 
@@ -187,6 +187,7 @@ Bullets.enemyMissiles = {
 
 		if (this.damageValue <= 0) {
 			Bullets.enemyMissiles.spritePool.discardSprite(this);
+			this.inPlay = false;
 			MissileLauncher.generateExplosion(this.xLoc, this.yLoc);
 		}
 	},
@@ -210,6 +211,7 @@ Bullets.enemyMissiles = {
 		bullet.detectCollision = Bullets.enemyMissiles.detectCollision;
 		bullet.damageValue = Bullets.enemyBullets.enemyShotStrength;
 		bullet.tint = 0xFFAA00;
+		bullet.inPlay = true;
 
 		Sounds.playerMissile.play(x);
 		bullet.rotation = Math.atan2(bullet.xSpeed, bullet.ySpeed);
