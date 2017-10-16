@@ -97,7 +97,7 @@ Talents = {
   ],
 
   talentEquipped : function(talentName) {
-    if (Talents.getGameModelTalents().greedTalent == talentName || Talents.getGameModelTalents().prideTalent == talentName || Talents.getGameModelTalents().wrathTalent == talentName || gameModel.p1.ship.talent == talentName)
+    if (Talents.getGameModelTalents().greedTalent == talentName || Talents.getGameModelTalents().prideTalent == talentName || Talents.getGameModelTalents().wrathTalent == talentName || (gameModel.p1.ship && gameModel.p1.ship.talent == talentName))
       return true;
 
     return false;
