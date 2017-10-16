@@ -9,33 +9,35 @@ Weapons = {
   },
   rarity : [
     {
+      normal:true,
       factor:1,
       chance:1,
-      prefix: ""
+      prefix: "",
+      index : 0
     },
     {
       super:true,
       factor:1.5,
       chance:0.3,
-      prefix : "Super "
+      prefix : "Super ",
+      index : 1
     },
     {
       ultra:true,
       factor:2,
       chance:0.08,
-      prefix : "Ultra "
+      prefix : "Ultra ",
+      index : 2
     },
     {
       hyper:true,
       factor:3.5,
-      chance:0.03,
-      prefix : "Hyper "
+      chance:0.02,
+      prefix : "Hyper ",
+      index : 3
     }
   ]
 };
-
-
-
 
 
 Weapons.missileLauncher = function(level, seed, rarity) {
@@ -46,6 +48,7 @@ Weapons.missileLauncher = function(level, seed, rarity) {
 	var shotsPerSecond = 1 + Math.random();
 	var damagePerShot = dps / shotsPerSecond;
 	var missileLauncher = {
+    normal:rarity.normal,
     super:rarity.super,
 		ultra:rarity.ultra,
     hyper:rarity.hyper,
@@ -93,17 +96,25 @@ Weapons.getIconSvg =  function(item) {
       return "img/wifi.svg";
 };
 
-Weapons.generateWeapon = function(level, seed, ultra, rarity) {
+Weapons.generateWeapon = function(level, seed, rarity) {
+
+  if (!gameModel.dropsSinceLastGoodOne) gameModel.dropsSinceLastGoodOne = 0;
 
   var weaponRarity = Weapons.rarity[0];
-  var randomNumber = Math.random() * Talents.rarityModifier();
 
-  for (var i=0; i<Weapons.rarity.length; i++) {
-    if (ultra && randomNumber < Weapons.rarity[i].chance) {
-      weaponRarity = Weapons.rarity[i];
+  if (!rarity) {
+    gameModel.dropsSinceLastGoodOne++;
+
+    var randomNumber = Math.random() * Talents.rarityModifier() * Math.pow(0.95, gameModel.dropsSinceLastGoodOne);
+
+    for (var i=0; i<Weapons.rarity.length; i++) {
+      if (randomNumber < Weapons.rarity[i].chance) {
+        weaponRarity = Weapons.rarity[i];
+        if (i > 2) gameModel.dropsSinceLastGoodOne = 0;
+      }
     }
+    // console.log("generating random weapn, random number = " + randomNumber + " rarity = " + weaponRarity.prefix);
   }
-
   weaponRarity = rarity || weaponRarity;
 
   var weaponGenFunctions = [
@@ -117,6 +128,28 @@ Weapons.generateWeapon = function(level, seed, ultra, rarity) {
 
   return weaponGenFunctions[Math.floor(Math.random() * weaponGenFunctions.length)](level,seed,weaponRarity);
 };
+
+// used to test drop rates are behaving
+function testWeaponGeneration(number) {
+	var normal = 0;
+	var superRare = 0;
+	var ultra = 0;
+	var hyper = 0;
+	var seed = Date.now();
+	for (var i = 0; i < number; i++) {
+		var weapon = Weapons.generateWeapon(10, seed++);
+		if (weapon.hyper) {
+			hyper++;
+		} else if (weapon.ultra) {
+			ultra++;
+		} else if (weapon.super) {
+			superRare++;
+		} else {
+			normal++;
+		}
+	}
+	console.log(number + " weapons generated, normal: " + normal +", super: " + superRare + ", ultra: " +ultra + ", hyper: " + hyper);
+}
 
 
 

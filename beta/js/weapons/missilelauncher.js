@@ -81,8 +81,8 @@ MissileLauncher.weaponLogic = function(weapon, container) {
   weapon.lastShot = 0;
   this.weapon = weapon;
   this.rearAngleMod = MissileLauncher.rearAngleMod;
-  this.spritePool = new SpritePool(MissileLauncher.generateTexture(), container);
   this.missileTrails = new MissileLauncher.missileTrails(container);
+  this.spritePool = new SpritePool(MissileLauncher.generateTexture(), container);
 };
 
 MissileLauncher.weaponLogic.prototype.individualBullet = function(speed, position, damage, scale) {

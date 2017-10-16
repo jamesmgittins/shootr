@@ -32,13 +32,11 @@ PilotSchool.createTalentTree = function(talentTree) {
   container.addChild(background);
 
   var pointsInTree = 0;
-  var selectedTalent;
   var buyDescription;
   var clickFunction;
   switch(talentTree.name) {
     case "GREED":
       pointsInTree = Talents.getGameModelTalents().greedPoints;
-      selectedTalent = Talents.getGameModelTalents().greedTalent;
       if (pointsInTree >= 5) {
         buyDescription = "Invest a point in Greed to increase all credits earned by 5%\nCurrent bonus: " + (pointsInTree * 5) + "%";
       }else {
@@ -53,7 +51,6 @@ PilotSchool.createTalentTree = function(talentTree) {
       break;
     case "PRIDE":
       pointsInTree = Talents.getGameModelTalents().pridePoints;
-      selectedTalent = Talents.getGameModelTalents().prideTalent;
       if (pointsInTree >= 5) {
         buyDescription = "Invest a point in Pride to reduce damage from enemies by 5%\nCurrent bonus: " + (pointsInTree * 5) + "%";
       } else {
@@ -68,7 +65,6 @@ PilotSchool.createTalentTree = function(talentTree) {
       break;
     case "WRATH":
       pointsInTree = Talents.getGameModelTalents().wrathPoints;
-      selectedTalent = Talents.getGameModelTalents().wrathTalent;
       if (pointsInTree >= 5) {
         buyDescription = "Invest a point in Wrath to increase critical hit damage by 10%\nCurrent bonus: " + (pointsInTree * 10) + "%";
       } else {
@@ -91,7 +87,7 @@ PilotSchool.createTalentTree = function(talentTree) {
 
   for (var i = 0; i < talentTree.talents.length; i++) {
 
-    var selected = talentTree.talents[i].name == selectedTalent;
+    var selected = Talents.talentEquipped(talentTree.talents[i].name);
     var talentIcon = new PIXI.Container();
     talentIcon.unlocked = i + 1 <= pointsInTree;
     talentIcon.name = talentTree.talents[i].name;

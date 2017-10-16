@@ -119,10 +119,12 @@ ArmsDealer.createItemIcon = function(item, options) {
 
 	var svgToUse;
 
-	if (item.type == "weapon") {
+	if (item.type == Constants.itemTypes.weapon) {
 		svgToUse = Weapons.getIconSvg(item);
-	} else {
+	} else if (item.type == Constants.itemTypes.shield) {
 		svgToUse = Shields.getIconSvg(item);
+	} else {
+		svgToUse = "img/ship-emblem-no-shield.svg";
 	}
 
 	var pic = new PIXI.Sprite(PIXI.Texture.fromImage(svgToUse, undefined, undefined, 0.4));
@@ -161,8 +163,10 @@ ArmsDealer.createItemIcon = function(item, options) {
 	var comparison;
 	if (item.type == "weapon") {
 		comparison = ArmsDealer.weaponComparison(item, options.compareItem);
-	} else {
+	} else if (item.type == "shield"){
 		comparison = ArmsDealer.shieldComparison(item, options.compareItem);
+	} else {
+		comparison = Shipyard.comparison(item);
 	}
 	if (comparison.equipped) {
 
@@ -256,16 +260,19 @@ ArmsDealer.createItemLayout = function(item, buy, full, noIcon) {
 	var level = getText("", 16 * scalingFactor, {});
 
 	var comparison;
-	if (item.type == "weapon") {
+	if (item.type == Constants.itemTypes.weapon) {
 		comparison = ArmsDealer.weaponComparison(item);
 		details.text = (item.ultra || item.hyper ? item.ultraText + "\n" : "") + formatMoney(item.dps) + " DPS " + comparison.dps + "\n"  + (item.bullets > 1 ? item.bullets + "x " : "") + formatMoney(item.shotsPerSecond) + " Shots per second " + comparison.shotsPerSecond + "\n" + (item.accuracy * 100).toFixed(2) + "% Accuracy " + comparison.accuracy;
 		level.text = "Level " + item.level + (comparison.equipped ? " Weapon Slot [EQUIPPED]" : " Weapon Slot Required");
 		level.tint = level.defaultTint = item.level > Math.max(gameModel.p1.ship.frontWeaponLevel, gameModel.p1.ship.turretWeaponLevel, gameModel.p1.ship.rearWeaponLevel) ? MainMenu.unselectableTint : MainMenu.buttonTint;
-	} else {
+	} else if (item.type == Constants.itemTypes.shield) {
 		comparison = ArmsDealer.shieldComparison(item);
 		details.text = (item.ultra || item.hyper ? item.ultraText + "\n" : "") + formatMoney(item.capacity) + " Capacity " + comparison.capacity + "\n" + formatMoney(item.chargePerSecond) + " Recharge Rate" + comparison.chargePerSecond + "\n" + item.chargeDelay.toFixed(2) + " Second Recharge Delay " + comparison.chargeDelay;
 		level.text = "Level " + item.level + (comparison.equipped ? " Shield Slot [EQUIPPED]" : " Shield Slot Required");
 		level.tint = level.defaultTint = item.level > gameModel.p1.ship.shieldLevel ? MainMenu.unselectableTint : MainMenu.buttonTint;
+	} else if (item.type == Constants.itemTypes.ship) {
+		comparison = Shipyard.comparison(item);
+		level.text = "Level " + item.level;
 	}
 
 	if (full)
@@ -540,7 +547,7 @@ ArmsDealer.initialize = function() {
 
 	var numOptions = Math.round(5 + Math.random() * 2);
 	for (var j = 0; j <numOptions; j++)
-		ArmsDealer.buyOptions.push(Math.random() > 0.8 ? Shields.generateShield(level, seed++, false) : Weapons.generateWeapon(level, seed++, false));
+		ArmsDealer.buyOptions.push(Math.random() > 0.8 ? Shields.generateShield(level, seed++, Weapons.rarity[0]) : Weapons.generateWeapon(level, seed++, Weapons.rarity[0]));
 
 	ArmsDealer.buyButtons = [];
 	// ArmsDealer.gridWidth = 9

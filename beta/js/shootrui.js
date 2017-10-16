@@ -152,6 +152,7 @@ function mouseWheelHandler(e) {
 	e = window.event || e; // old IE support
 	var delta = (e.wheelDelta || -e.detail);
 	StarChart.mousewheel(delta);
+  Shipyard.mousewheel(delta);
 	e.stopPropagation();
 	e.preventDefault();
 	return false;

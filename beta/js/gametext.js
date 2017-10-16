@@ -742,7 +742,7 @@ GameText.levelComplete = {
 		container.addChild(cratesText);
 
 		if (Boss.isInTargetSystem()) {
-			var bossText = getText("Boss Defeated\nPerk Point Granted", 22 * scalingFactor, {
+			var bossText = getText("Boss Defeated\nTalent Point Granted", 22 * scalingFactor, {
 				fill: borderCol,
 				stroke: backgroundCol,
 				align: 'right'

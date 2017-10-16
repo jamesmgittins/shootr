@@ -65,6 +65,7 @@ Boss.randomLocation = function() {
   var currentLevel = Boss.currentLevel();
   var maxDistanceToPlot = Math.round(Constants.starDistancePerLevel * currentLevel);
   var acceptableStars = [];
+  var acceptableBlueprintStars = [];
   var star;
 
   for (var i = -maxDistanceToPlot; i <= maxDistanceToPlot; i++) {
@@ -72,12 +73,18 @@ Boss.randomLocation = function() {
       star = StarChart.generateStar(i,j);
       if (star.exists && calculateAdjustedStarLevel(star.level) === currentLevel)
         acceptableStars.push(star);
+      if (star.exists && calculateAdjustedStarLevel(star.level) === currentLevel - 1)
+        acceptableBlueprintStars.push(star);
     }
   }
   Math.seedrandom(new Date().getTime());
   var chosenStar = acceptableStars[Math.floor(Math.random() * acceptableStars.length)];
 
   gameModel.bossPosition = {x:chosenStar.x, y:chosenStar.y};
+
+  chosenStar = acceptableBlueprintStars[Math.floor(Math.random() * acceptableBlueprintStars.length)];
+  gameModel.shipBlueprintPosition = {x:chosenStar.x, y:chosenStar.y};
+
 };
 
 Boss.update = function(timeDiff) {

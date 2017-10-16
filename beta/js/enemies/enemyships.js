@@ -346,6 +346,7 @@ EnemyShips.enemyShip.prototype.update = function (timeDiff) {
 				}
 				if (this.lastBullet >= 0.2) {
 					Bullets.enemyBullets.newEnemyBullet(this);
+					// Bullets.enemyMissiles.newEnemyMissile(this);
 					this.lastBullet = 0;
 					this.bulletsLeft--;
 				}

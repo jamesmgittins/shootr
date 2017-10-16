@@ -139,6 +139,9 @@ Enemies = {
       this.enemySpawners.push(function(){return new EnemyShips.wave();});
       this.enemySpawners.push(function(){return new UFOs.bulletWave();});
 
+      if (gameModel.currentLevel > 1)
+        this.enemySpawners.push(function(){return new MissileFrigate.wave();});
+
       if (gameModel.currentLevel > 2)
         this.enemySpawners.push(function(){return new UFOs.railWave();});
 
@@ -176,7 +179,7 @@ Enemies = {
       }
       return this.getEnemySpawners()[Math.floor(Math.random() * this.getEnemySpawners().length)]();
     }
-
+    // return new MissileFrigate.wave();
     // return new EnemyShips.wave();
     // return new UFOs.bulletWave();
     // return new Squarepusher.wave();

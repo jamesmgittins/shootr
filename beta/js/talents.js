@@ -96,6 +96,13 @@ Talents = {
     }
   ],
 
+  talentEquipped : function(talentName) {
+    if (Talents.getGameModelTalents().greedTalent == talentName || Talents.getGameModelTalents().prideTalent == talentName || Talents.getGameModelTalents().wrathTalent == talentName || gameModel.p1.ship.talent == talentName)
+      return true;
+
+    return false;
+  },
+
 
   pointsAvailable : function() {
     var pointsSpent = Talents.getGameModelTalents().greedPoints + Talents.getGameModelTalents().pridePoints + Talents.getGameModelTalents().wrathPoints;
@@ -121,31 +128,31 @@ Talents = {
   startGame : function () {
     Talents.killCounter = 0;
     Talents.dmgTaken = 0;
-    if (Talents.getGameModelTalents().greedTalent == "Magnetic") {
+    if (Talents.talentEquipped("Magnetic")) {
       Buffs.newBuff("Magnetic", 10, "img/magnet.svg", Constants.itemColors.normal, true, true);
     }
-    if (Talents.getGameModelTalents().greedTalent == "Untouchable") {
+    if (Talents.talentEquipped("Untouchable")) {
       Buffs.newBuff("Untouchable", 10, "img/aura.svg", Constants.itemColors.normal, true, true);
     }
-    if (Talents.getGameModelTalents().greedTalent == "Made of Money") {
+    if (Talents.talentEquipped("Made of Money")) {
       Buffs.newBuff("Made of Money", 10, "img/gold-bar.svg", Constants.itemColors.normal, true, true);
     }
-    if (Talents.getGameModelTalents().greedTalent == "Master Negotiator") {
+    if (Talents.talentEquipped("Master Negotiator")) {
       Buffs.newBuff("Master Negotiator", 10, "img/emerald.svg", Constants.itemColors.hyper, true, true);
     }
-    if (Talents.getGameModelTalents().greedTalent == "Spoils Of War") {
+    if (Talents.talentEquipped("Spoils Of War")) {
       Buffs.newBuff("Spoils Of War", 10, "img/skull-trophy.svg", Constants.itemColors.hyper, true, true);
     }
-    if (Talents.getGameModelTalents().wrathTalent == "Bullheaded") {
+    if (Talents.talentEquipped("Bullheaded")) {
       Buffs.newBuff("Bullheaded", 10, "img/muscle-fat.svg", Constants.itemColors.hyper, true, true);
     }
-    if (Talents.getGameModelTalents().wrathTalent == "Buds For Life") {
+    if (Talents.talentEquipped("Buds For Life")) {
       Buffs.newBuff("Buds For Life", 10, "img/gear-heart.svg", Constants.itemColors.hyper, true, true);
     }
   },
 
   attackDrone : function() {
-    return Talents.getGameModelTalents().wrathTalent == "Buds For Life";
+    return Talents.talentEquipped("Buds For Life");
   },
 
   combatCredits : function(credits) {
@@ -157,7 +164,7 @@ Talents = {
 
 
   rarityModifier : function() {
-    if (Talents.getGameModelTalents().greedTalent == "Spoils Of War") {
+    if (Talents.talentEquipped("Spoils Of War")) {
       return 0.8;
     }
     return 1;
@@ -211,11 +218,11 @@ Talents = {
 
 
   enemyDestroyed : function() {
-    if (Talents.getGameModelTalents().prideTalent == "Claw It Back"  && PlayerShip.playerShip.currShield < PlayerShip.playerShip.maxShield) {
+    if (Talents.talentEquipped("Claw It Back")  && PlayerShip.playerShip.currShield < PlayerShip.playerShip.maxShield) {
       Buffs.newBuff("Claw It Back", 1, "img/battery-positive.svg", Constants.itemColors.super, false, true);
       PlayerShip.restoreShieldPercent(0.02);
     }
-    if (Talents.getGameModelTalents().wrathTalent == "Kill Streak") {
+    if (Talents.talentEquipped("Kill Streak")) {
       Talents.killCounter++;
       if (Talents.killCounter === 5) {
         Buffs.newBuff("Kill Streak", 5, "img/daggers.svg", Constants.itemColors.hyper, false, false);
@@ -241,37 +248,37 @@ Talents = {
 
 
   crateCollected : function() {
-    if (Talents.getGameModelTalents().prideTalent == "Turn The Tables" && PlayerShip.playerShip.currShield < PlayerShip.playerShip.maxShield) {
+    if (Talents.talentEquipped("Turn The Tables") && PlayerShip.playerShip.currShield < PlayerShip.playerShip.maxShield) {
       Buffs.newBuff("Turn The Tables", 1, "img/energise.svg", Constants.itemColors.super, false, false);
       PlayerShip.restoreShieldPercent(0.5);
     }
-    if (Talents.getGameModelTalents().wrathTalent == "Frenzy") {
+    if (Talents.talentEquipped("Frenzy")) {
       Buffs.newBuff("Frenzy", 5, "img/implosion.svg", Constants.itemColors.hyper, false);
     }
   },
 
 
   playerDamaged : function(amount) {
-    if (Talents.getGameModelTalents().greedTalent == "Untouchable" && PlayerShip.playerShip.currShield < PlayerShip.playerShip.maxShield) {
+    if (Talents.talentEquipped("Untouchable") && PlayerShip.playerShip.currShield < PlayerShip.playerShip.maxShield) {
       Buffs.removeBuff("Untouchable");
     }
-    if (Talents.getGameModelTalents().wrathTalent == "Retaliation") {
+    if (Talents.talentEquipped("Retaliation")) {
       Buffs.newBuff("Retaliation", 3, "img/spinning-sword.svg", Constants.itemColors.hyper, false);
     }
-    if (Talents.getGameModelTalents().wrathTalent == "Kill Streak") {
+    if (Talents.talentEquipped("Kill Streak")) {
       Talents.killCounter = 0;
       Buffs.removeBuff("Kill Streak");
     }
-    if (Talents.getGameModelTalents().prideTalent == "Last Chance" && PlayerShip.playerShip.currShield <= 0) {
+    if (Talents.talentEquipped("Last Chance") && PlayerShip.playerShip.currShield <= 0) {
       if (Math.random() < 0.25) {
         PlayerShip.restoreShieldPercent(0.5);
         Buffs.newBuff("Last Chance", 2, "img/defibrilate.svg", Constants.itemColors.super, false);
       }
     }
-    if (Talents.getGameModelTalents().prideTalent == "First Cut is the Deepest") {
+    if (Talents.talentEquipped("First Cut is the Deepest")) {
       Buffs.newBuff("First Cut Is The Deepest", 5, "img/dripping-knife.svg", Constants.itemColors.super, false, false);
     }
-    if (Talents.getGameModelTalents().prideTalent == "I am rubber you are glue") {
+    if (Talents.talentEquipped("I am rubber you are glue")) {
       Talents.dmgTaken += amount;
       Buffs.newBuff("I Am Rubber You Are Glue", 2, "img/splash.svg", Constants.itemColors.super, true, true);
     }
@@ -279,7 +286,7 @@ Talents = {
 
 
   shieldRestored : function() {
-    if (Talents.getGameModelTalents().greedTalent == "Untouchable" && PlayerShip.playerShip.currShield >= PlayerShip.playerShip.maxShield) {
+    if (Talents.talentEquipped("Untouchable") && PlayerShip.playerShip.currShield >= PlayerShip.playerShip.maxShield) {
       Buffs.newBuff("Untouchable", 10, "img/aura.svg", Constants.itemColors.normal, true);
     }
   }

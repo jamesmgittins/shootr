@@ -14,14 +14,22 @@ Shields.getIconSvg =  function(item) {
   return "img/shield.svg";
 };
 
-Shields.generateShield = function(level, seed, ultra, rarity) {
+Shields.generateShield = function(level, seed, rarity) {
+
+  if (!gameModel.dropsSinceLastGoodOne) gameModel.dropsSinceLastGoodOne = 0;
 
   var weaponRarity = Weapons.rarity[0];
-  var randomNumber = Math.random() * Talents.rarityModifier();
 
-  for (var i=0; i<Weapons.rarity.length; i++) {
-    if (ultra && randomNumber < Weapons.rarity[i].chance) {
-      weaponRarity = Weapons.rarity[i];
+  if (!rarity) {
+    gameModel.dropsSinceLastGoodOne++;
+
+    var randomNumber = Math.random() * Talents.rarityModifier() * Math.pow(0.95, gameModel.dropsSinceLastGoodOne);
+
+    for (var i=0; i<Weapons.rarity.length; i++) {
+      if (randomNumber < Weapons.rarity[i].chance) {
+        weaponRarity = Weapons.rarity[i];
+        if (i > 1) gameModel.dropsSinceLastGoodOne = 0;
+      }
     }
   }
 
@@ -34,9 +42,6 @@ Shields.generateShield = function(level, seed, ultra, rarity) {
   ];
 
   return shieldGenFunctions[Math.floor(Math.random() * shieldGenFunctions.length)](level, seed, weaponRarity);
-
-	return Shields.generateShieldItem(level, seed, weaponRarity);
-
 };
 
 

@@ -4,6 +4,10 @@ function magnitude(x,y) {
 	return Math.sqrt(x * x + y * y);
 }
 
+function isPointInsideRectangle(pointX, pointY, rectX, rectY, rectWidth, rectHeight) {
+	return pointX > rectX - rectWidth / 2 && pointX < rectX + rectWidth / 2 && pointY > rectY - rectHeight / 2 && pointY < rectY + rectHeight / 2;
+}
+
 function distanceBetweenPoints(x1, y1, x2, y2) {
     return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 }

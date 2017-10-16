@@ -147,6 +147,134 @@ Bullets.enemyRails = {
 };
 
 
+Bullets.enemyMissiles = {
+	acceleration : 350,
+	generateTexture : function() {
+    return PIXI.Texture.fromImage("img/missile.svg", undefined, undefined, 0.1);
+  },
+	getSpritePool:function() {
+		if (!this.spritePool) {
+			this.spritePool = new SpritePool(this.generateTexture(), bulletContainer);
+			this.missileTrails = new MissileLauncher.missileTrails(bulletContainer);
+		}
+		return this.spritePool;
+	},
+	destroy : function() {
+		if (this.spritePool) {
+			this.getSpritePool().destroy();
+			this.spritePool = undefined;
+			this.missileTrails.spritePool.destroy();
+		}
+	},
+	detectCollision : function(x,y) {
+		return distanceBetweenPoints(x,y,this.xLoc,this.yLoc) < 7;
+	},
+	damage : function(xLoc, yLoc, inputDamage, noEffect) {
+
+		if (!noEffect) {
+			Bullets.generateExplosion(xLoc, yLoc);
+			Sounds.enemyDamage.play(this.xLoc);
+		}
+
+		var damage = Talents.enemyDamaged(inputDamage, xLoc, yLoc);
+		var isCrit = Math.random() < getCritChance();
+		if (isCrit) {
+			damage *= getCritDamage();
+		}
+
+		this.damageValue -= damage;
+		GameText.damage.newText(damage, this, isCrit && !noEffect);
+
+		if (this.damageValue <= 0) {
+			Bullets.enemyMissiles.spritePool.discardSprite(this);
+			MissileLauncher.generateExplosion(this.xLoc, this.yLoc);
+		}
+	},
+	newEnemyMissile: function(x, y) {
+
+		if (x < 0 || x > canvasWidth || y < 0 || y > canvasHeight)
+			return;
+
+		var bullet = this.getSpritePool().nextSprite();
+
+		bullet.xLoc = x;
+		bullet.yLoc = y;
+
+		var aimAngle = Math.atan2(bullet.xLoc - PlayerShip.playerShip.xLoc,  bullet.yLoc - PlayerShip.playerShip.yLoc);
+		var bulletSpeed = RotateVector2d(0, 100, aimAngle);
+		bullet.scale = {x:1.5,y:1.5};
+		bullet.xSpeed = bulletSpeed.x;
+		bullet.ySpeed = bulletSpeed.y;
+		bullet.id = Enemies.currShipId++;
+		bullet.damage = Bullets.enemyMissiles.damage;
+		bullet.detectCollision = Bullets.enemyMissiles.detectCollision;
+		bullet.damageValue = Bullets.enemyBullets.enemyShotStrength;
+		bullet.tint = 0xFFAA00;
+
+		Sounds.playerMissile.play(x);
+		bullet.rotation = Math.atan2(bullet.xSpeed, bullet.ySpeed);
+		bullet.visible = true;
+		bullet.lastTrail = 0;
+		bullet.position.x = bullet.xLoc * scalingFactor;
+		bullet.position.y = bullet.yLoc * scalingFactor;
+	},
+	update : function(timeDiff) {
+		this.getSpritePool();
+		this.missileTrails.update(timeDiff);
+		for (var i = 0; i < this.spritePool.sprites.length; i++) {
+
+			var bullet = this.spritePool.sprites[i];
+
+			if (bullet.visible) {
+
+				bullet.xLoc += bullet.xSpeed * timeDiff;
+				bullet.yLoc -= bullet.ySpeed * timeDiff;
+
+				if (bullet.yLoc < 0 || bullet.yLoc > canvasHeight ||
+					bullet.xLoc < 0 || bullet.xLoc > canvasWidth) {
+					this.spritePool.discardSprite(bullet);
+				} else {
+					if (Ships.detectCollision(PlayerShip.playerShip, bullet.xLoc, bullet.yLoc)) {
+						this.spritePool.discardSprite(bullet);
+						Bullets.generateExplosion(bullet.xLoc, bullet.yLoc);
+						PlayerShip.damagePlayerShip(PlayerShip.playerShip, bullet.damageValue);
+					} else {
+
+						if (PlayerShip.playerShip.inPlay) {
+							var aimAngle = Math.atan2(bullet.xLoc - PlayerShip.playerShip.xLoc,  bullet.yLoc - PlayerShip.playerShip.yLoc);
+							var bulletSpeed = RotateVector2d(0, Bullets.enemyMissiles.acceleration, aimAngle);
+
+
+							bullet.xSpeed += bulletSpeed.x * timeDiff;
+							bullet.ySpeed += bulletSpeed.y * timeDiff;
+
+							if (magnitude(bullet.xSpeed, bullet.ySpeed) > Bullets.enemyBullets.enemyShotSpeed) {
+								var speedFactor = Bullets.enemyBullets.enemyShotSpeed / magnitude(bullet.xSpeed, bullet.ySpeed);
+								bullet.xSpeed *= speedFactor;
+								bullet.ySpeed *= speedFactor;
+							}
+							bullet.rotation = Math.atan2(bullet.xSpeed, bullet.ySpeed);
+						}
+
+						bullet.lastTrail += timeDiff * 1000;
+						if (bullet.lastTrail > MissileLauncher.trailFrequency / gameModel.detailLevel) {
+			        var posAdjust = RotateVector2d(0, 12 * scalingFactor, bullet.rotation);
+			        this.missileTrails.newPart(bullet.position.x + posAdjust.x, bullet.position.y + posAdjust.y);
+			        bullet.lastTrail = 0;
+			      }
+
+						bullet.position.x = bullet.xLoc * scalingFactor;
+						bullet.position.y = bullet.yLoc * scalingFactor;
+
+						Enemies.activeShips.push(bullet);
+					}
+				}
+
+			}
+		}
+	}
+};
+
 
 Bullets.enemyBullets = {
 	texture: function() {
@@ -194,6 +322,7 @@ Bullets.enemyBullets = {
 			Bullets.blasts.spritePool.destroy();
 			Bullets.blasts.spritePool = undefined;
 		}
+		Bullets.enemyMissiles.destroy();
 	},
 	enemyShotSpeed: 100,
 	enemyShotStrength: 1,
@@ -250,6 +379,7 @@ Bullets.enemyBullets = {
 	},
 	update : function(timeDiff) {
 		Bullets.enemyRails.update(timeDiff);
+		Bullets.enemyMissiles.update(timeDiff);
 		this.getSpritePool();
 		for (var i = 0; i < this.spritePool.sprites.length; i++) {
 

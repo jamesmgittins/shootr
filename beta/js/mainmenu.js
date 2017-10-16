@@ -614,6 +614,17 @@ MainMenu.checkButton = function(button) {
   return false;
 };
 
+MainMenu.checkMouseOverContainer = function(container, x, y) {
+  var bounds = container.getBounds();
+  var offsetX = x || 0;
+  var offsetY = y || 0;
+  if (container.visible && cursorPosition.x >= (bounds.x + offsetX) && cursorPosition.x - (bounds.x + offsetX) <= bounds.width  &&
+    cursorPosition.y >= (bounds.y + offsetY) && cursorPosition.y - (bounds.y + offsetY) <= bounds.height) {
+    return true;
+  }
+  return false;
+};
+
 MainMenu.controllerStatus = {up:false,down:false,left:false,right:false,a:false,b:false};
 
 MainMenu.updateGamepad = function() {

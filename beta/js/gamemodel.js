@@ -5,7 +5,7 @@ var Constants = {
 	difficultyLevelScaling : 1.4,
 	shieldLevelScaling : 1.39,
 	weaponLevelScaling : 1.38,
-	shipLevelPriceScaling : 1.44,
+	shipLevelPriceScaling : 1.41,
 	tradeRouteScaling: 1.44,
 	levelsPerBoss:5,
 	maxScreenShake:2.7,
@@ -31,7 +31,8 @@ var Constants = {
 	},
 	itemTypes : {
 		weapon:"weapon",
-		shield:"shield"
+		shield:"shield",
+		ship:"ship"
 	},
 	uiColors : {
 		// background : 0x1B5E20,
@@ -49,7 +50,7 @@ var gameModel = {
 };
 
 function maxLevelAllowed() {
-	return Boss.currentLevel();
+	return Boss.currentLevel() + 1;
 }
 
 function calculateShipLevel() {
@@ -164,14 +165,15 @@ function load() {
 			dmgNumbers : true,
 			antialiasing : false,
 			p1 : {
-				ship: Shipyard.generateShip(1, 45, false),
+				ship: Shipyard.generateShip(1, 45),
 				weapons: [PlasmaCannon.plasmaCannon(1,123,Weapons.rarity[1])],
 				shields: [Shields.generateShield(1, 234, false)],
 				credits: 500,
 				totalCredits: 0,
 				temporaryCredits : 0,
 				perkPoints:0,
-				upgrades : {speed:0,defence:0,damage:0,buying:0,trading:0,range:0}
+				upgrades : {speed:0,defence:0,damage:0,buying:0,trading:0,range:0},
+				shipBlueprints :[]
 			},
 			currentSystem: {x:0,y:0},
 			targetSystem: {x:0,y:0},
@@ -206,11 +208,11 @@ function addCredits (value, fromTrade) {
 }
 
 function getCritChance() {
-	return 0.05;
+	return gameModel.p1.ship.critChance || 0.05;
 }
 
 function getCritDamage() {
-	return 1.5 + Talents.passiveCritDamage();
+	return gameModel.p1.ship.critDamage + Talents.passiveCritDamage();
 }
 
 function getUpgradedRange() {

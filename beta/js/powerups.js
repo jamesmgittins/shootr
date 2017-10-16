@@ -194,10 +194,14 @@ var Powerups = {
 		var level = gameModel.currentLevel > 1 ?
 			Math.max(1, Math.round(gameModel.currentLevel + (Math.random() * maxLevelDifference * (1 - maxLevelDifference * 0.1)))) :
 			gameModel.currentLevel;
-		if (Math.random() > 0.75) {
-			return Shields.generateShield(level, this.baseSeed++, true);
+		if (Math.random() > 0.97) {
+			return Shipyard.generateBlueprint(level, this.baseSeed++);
 		} else {
-			return Weapons.generateWeapon(level, this.baseSeed++, true);
+			if (Math.random() > 0.75) {
+				return Shields.generateShield(level, this.baseSeed++);
+			} else {
+				return Weapons.generateWeapon(level, this.baseSeed++);
+			}
 		}
 	},
 	update : function(timeDiff) {

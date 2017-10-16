@@ -166,7 +166,7 @@ StarChart.generateStar = function(x, y) {
   var seed = (56788 - x) * (y === 0 ? 13370: y);
   Math.seedrandom(seed);
   var origin = x === 0 && y === 0;
-  var starExists = magnitude(x,y) < 4 ? origin || Math.random() > 0.3 : origin || Math.random() > 0.6;
+  var starExists = magnitude(x,y) < 5 ? origin || Math.random() > 0.3 : origin || Math.random() > 0.6;
 
   if (starExists) {
     var scale = 0.6 + Math.random() * 0.5 + (Math.random() > 0.9 ? Math.random() * 1.5 : 0);
@@ -677,11 +677,20 @@ StarChart.initializeStars = function() {
   if (gameModel.bossPosition) {
     StarChart.bossStar = StarChart.generateStar(gameModel.bossPosition.x, gameModel.bossPosition.y);
   }
+  if (gameModel.shipBlueprintPosition) {
+    StarChart.blueprintStar = StarChart.generateStar(gameModel.shipBlueprintPosition.x, gameModel.shipBlueprintPosition.y);
+  }
 
   if (StarChart.skullSprite) {
     StarChart.menuContainer.removeChild(StarChart.skullSprite);
     if (!StarChart.skullSprite._destroyed)
       StarChart.skullSprite.destroy(true);
+  }
+
+  if (StarChart.bluePrintSprite) {
+    StarChart.menuContainer.removeChild(StarChart.bluePrintSprite);
+    if (!StarChart.bluePrintSprite._destroyed)
+      StarChart.bluePrintSprite.destroy(true);
   }
 
 
@@ -690,6 +699,13 @@ StarChart.initializeStars = function() {
   StarChart.skullSprite.visible = false;
   StarChart.skullSprite.scaleMod = 0;
   StarChart.menuContainer.addChild(StarChart.skullSprite);
+
+  StarChart.bluePrintSprite = new PIXI.Sprite(PIXI.Texture.fromImage("img/ship-emblem-no-shield2.svg", undefined, undefined, 0.15));
+  StarChart.bluePrintSprite.anchor = {x:-0.5,y:-0.5};
+  StarChart.bluePrintSprite.tint = 0xFFFF00;
+  StarChart.bluePrintSprite.visible = false;
+  StarChart.bluePrintSprite.scaleMod = 0;
+  StarChart.menuContainer.addChild(StarChart.bluePrintSprite);
 
 	if (StarChart.shipSprite){
     StarChart.menuContainer.removeChild(StarChart.shipSprite);
@@ -965,6 +981,7 @@ StarChart.getStarInfoText = function() {
   var history = findInHistory(gameModel.currentSystem, StarChart.selectedStar);
 
   return (gameModel.bossPosition && gameModel.bossPosition.x == StarChart.selectedStar.x && gameModel.bossPosition.y == StarChart.selectedStar.y ? "WARNING dangerous enemy detected\n ": "") +
+    (gameModel.shipBlueprintPosition && gameModel.shipBlueprintPosition.x == StarChart.selectedStar.x && gameModel.shipBlueprintPosition.y == StarChart.selectedStar.y ? "Experimental ship blueprint available in this system\n ": "") +
     StarChart.selectedStar.name +
     "\n Level: " + displayLevel + (displayLevel > level + 3 ? " (Very Hard)" : (displayLevel > level + 1 ? " (Hard)" : " (Normal)")) +
 		(StarChart.selectedStarDistance() > 0 ? "\n Distance: " + StarChart.selectedStarDistance().toFixed(2)+ " light years" : "") +
@@ -1005,6 +1022,19 @@ StarChart.updatePointsOfInterest = function(timeDiff, centerPixels, starSpacing,
     StarChart.skullSprite.scaleMod += 2 * timeDiff;
     StarChart.skullSprite.alpha = Math.min(StarChart.calcFade(skullX,skullY,bounds), 0.7);
     StarChart.skullSprite.scale.x = StarChart.skullSprite.scale.y = (0.6 + 0.1 * Math.sin(StarChart.skullSprite.scaleMod)) * scalingFactor;
+  }
+
+  if (gameModel.shipBlueprintPosition && StarChart.blueprintStar) {
+    var blueprintX = centerPixels.x + ((StarChart.currentPosition.x + gameModel.shipBlueprintPosition.x + StarChart.blueprintStar.xWobble) * starSpacing);
+    var blueprintY = centerPixels.y + ((StarChart.currentPosition.y + gameModel.shipBlueprintPosition.y + StarChart.blueprintStar.yWobble) * starSpacing);
+    StarChart.bluePrintSprite.position.x = blueprintX + (10 + 20 * StarChart.zoom) * scalingFactor;
+    StarChart.bluePrintSprite.position.y = blueprintY;
+    StarChart.bluePrintSprite.rotation = 0;
+    StarChart.bluePrintSprite.anchor = {x:0.5,y:0.5};
+    StarChart.bluePrintSprite.visible = true;
+    StarChart.bluePrintSprite.scaleMod += 2 * timeDiff;
+    StarChart.bluePrintSprite.alpha = Math.min(StarChart.calcFade(blueprintX,blueprintY,bounds), 0.7);
+    StarChart.bluePrintSprite.scale.x = StarChart.bluePrintSprite.scale.y = (0.6 + 0.1 * Math.sin(StarChart.bluePrintSprite.scaleMod)) * scalingFactor;
   }
 
 

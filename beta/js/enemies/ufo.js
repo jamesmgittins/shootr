@@ -1,6 +1,6 @@
 var UFOs = {
-	minShipsPerWave : 1,
-	maxShipsPerWave : 3,
+	minShipsPerWave : 2,
+	maxShipsPerWave : 4,
 	waveBulletFrequency : 3000,
 	maxBulletsPerShot : 1,
 	SHIP_SIZE : 64,

@@ -333,7 +333,7 @@ Stars.shipTrails = {
 		return this.spritePool;
 	},
 	trailFrequency : 30,
-	newPart: function(ship) {
+	newPart: function(ship, xDirection) {
 
 		if (ship.trailX < 0 || ship.trailX > canvasWidth)
 			return;
@@ -359,8 +359,15 @@ Stars.shipTrails = {
 		part.alpha = 1;
 		part.position = position;
 
-		part.ySpeed = ((ship.enemyShip ? -0.7 : 1) * (280 + Math.random() * 100)) * scalingFactor;
-		part.xSpeed = (-10 + Math.random() * 20) * scalingFactor;
+		if (!xDirection) {
+			part.ySpeed = ((ship.enemyShip ? -0.7 : 1) * (280 + Math.random() * 100)) * scalingFactor;
+			part.xSpeed = (-10 + Math.random() * 20) * scalingFactor;
+		} else {
+			part.xSpeed = xDirection * (220 + Math.random() * 60) * scalingFactor;
+			part.ySpeed = (-10 + Math.random() * 20) * scalingFactor;
+		}
+
+
 	},
 	updateShip: function(ship, timeDiff) {
 		ship.lastTrail += timeDiff * 1000;
@@ -374,7 +381,6 @@ Stars.shipTrails = {
 			} else {
 				this.newPart(ship);
 			}
-
 		}
 	},
 	update: function(timeDiff) {

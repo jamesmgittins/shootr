@@ -94,10 +94,10 @@ function changeLevel(level) {
 
 	Stars.nebulaBackground.initTexture(StarChart.generateStar(gameModel.targetSystem.x, gameModel.targetSystem.y).seed);
 
-	EnemyShips.waveBulletFrequency = Math.max(1000 - gameModel.currentLevel, 500);
+	EnemyShips.waveBulletFrequency = Math.max(1000 - (gameModel.currentLevel * 5), 500);
 	EnemyShips.shipHealth = (13 * gameModel.currentLevel * levelDifficultyModifier) - 5 + gameModel.currentLevel;
 	EnemyShips.maxBulletsPerShot = Math.min(8, gameModel.currentLevel / 5 + 1);
-	Boss.health = EnemyShips.shipHealth * 70;
+	Boss.health = EnemyShips.shipHealth * 100;
 	Boss.initialized = false;
 
 	distance = StarChart.distanceBetweenStars(gameModel.currentSystem.x,gameModel.currentSystem.y, gameModel.targetSystem.x, gameModel.targetSystem.y);
@@ -145,6 +145,8 @@ function changeState(state) {
 					gameModel.p1.weapons.push(item);
 				if (item.type == Constants.itemTypes.shield)
 					gameModel.p1.shields.push(item);
+				if (item.type == Constants.itemTypes.ship)
+					gameModel.p1.shipBlueprints.push({level:item.level, seed:item.seed, rarity:item.rarity});
 			});
 
 			addToHistory(gameModel.currentSystem, gameModel.targetSystem);
@@ -183,7 +185,7 @@ function changeState(state) {
 
 			DeathMenu.show();
 
-			if (Talents.getGameModelTalents().greedTalent == "Master Negotiator") {
+			if (Talents.talentEquipped("Master Negotiator")) {
 				ArmsDealer.recoveredItems = [];
 				gameModel.lootCollected.forEach(function(item) {
 						ArmsDealer.recoveredItems.push(item);
@@ -282,8 +284,8 @@ function update() {
 			Buffs.update(timeDiff);
 			PlayerShip.updatePlayerShip(timeDiff);
 			Enemies.update(timeDiff);
-			Weapons.update(timeDiff);
 			Bullets.enemyBullets.update(timeDiff);
+			Weapons.update(timeDiff);
 			PlayerShip.controllerPointer.update();
 			Powerups.update(timeDiff);
 
