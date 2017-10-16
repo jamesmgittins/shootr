@@ -94,7 +94,7 @@ MissileFrigate.wave = function () {
 	this.lastShipSpawned = 0;
 
 
-	this.shipsInWave = currentLevel > 3 ? MissileFrigate.minShipsPerWave + Math.round(Math.random() * (MissileFrigate.maxShipsPerWave - MissileFrigate.minShipsPerWave) * Enemies.difficultyFactor) : 1;
+	this.shipsInWave = gameModel.currentLevel > 3 ? MissileFrigate.minShipsPerWave + Math.round(Math.random() * (MissileFrigate.maxShipsPerWave - MissileFrigate.minShipsPerWave) * Enemies.difficultyFactor) : 1;
 	this.shipsSpawned = 0;
 	this.shipsDestroyed = 0;
 	this.size = MissileFrigate.size;
