@@ -172,7 +172,7 @@ BioGelGun.weaponLogic.prototype.update = function(timeDiff) {
 							sprite.scale.x = sprite.scale.y = 1;
 							sprite.xLoc -= enemyShip.xLoc;
 							sprite.yLoc -= enemyShip.yLoc;
-							sprite.shipRotation = sprite.ship.sprite.rotation;
+							sprite.shipRotation = sprite.ship.sprite ? sprite.ship.sprite.rotation : sprite.ship.rotation;
 						}
 					}
 				}
