@@ -391,8 +391,9 @@ Ships.generateExplosion = function (ship, xDiff, yDiff, delay) {
 		var explosionSize = 75 + size * 150;
 		var i;
 
-		if (ship.enemyShip && ship.wave) {
+		if (ship.enemyShip && ship.wave && !ship.splashCreated) {
 			Bullets.splashDamage.createSplash(ship.xLoc + (xDiff || 0), ship.yLoc + (yDiff || 0), explosionSize, ship.wave.shipHealth, ship.wave.shipHealth * 2);
+			ship.splashCreated = true;
 		}
 
 		var numParts = (Ships.explosionBits.getSpritePool().discardedSprites.length > 10 ? 1 : 0.5) * (Ships.explosionBits.bitsPerExplosion + size * Ships.explosionBits.bitsPerExplosion) * gameModel.detailLevel;

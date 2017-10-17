@@ -65,7 +65,7 @@ function changeLevel(level) {
 
 	//gameModel.currentLevel = 1;
 
-	Bullets.enemyBullets.enemyShotStrength = 2 * gameModel.currentLevel * levelDifficultyModifier;
+	Bullets.enemyBullets.enemyShotStrength = (2 + gameModel.currentLevel * 0.05) * gameModel.currentLevel * levelDifficultyModifier;
 	Bullets.enemyBullets.enemyShotSpeed = Math.min(250 + (gameModel.currentLevel * 2), 400);
 	PlayerShip.playerShip.maxSpeed = getUpgradedSpeed();
 
@@ -319,10 +319,12 @@ var updateScreenShake =  function(timeDiff) {
 
 		stageSprite.position.x = ((canvas.width - canvas.height) / 2) + (Math.sin(stageSprite.screenShakeSins.x) * scalingFactor * stageSprite.screenShake);
 		stageSprite.position.y = Math.sin(stageSprite.screenShakeSins.y) * scalingFactor * stageSprite.screenShake;
+		// stageSprite.scale = {x:1 + (stageSprite.screenShake / 100),y:1 + (stageSprite.screenShake / 100)};
 		stageSprite.screenShake -= timeDiff * 30;
 	} else {
-		stageSprite.position.x = (canvas.width - canvas.height) / 2;
+		// stageSprite.position.x = (canvas.width - canvas.height) / 2;
 		stageSprite.position.y = 0;
+		stageSprite.scale = {x:1,y:1};
 	}
 };
 
@@ -433,7 +435,7 @@ function stageBackgroundCreate() {
   stageBackground.drawRect(0, 0, stageTexture.width, stageTexture.height);
 
 	stageBackground.tint = rgbToHex(10,10,10);
-// 	stageBackground.tint = calculateTintFromString("#E65100");
+	// stageBackground.tint = calculateTintFromString("#E65100");
 }
 
 function startGame() {

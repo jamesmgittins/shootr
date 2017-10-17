@@ -148,13 +148,16 @@ Enemies = {
       if (gameModel.currentLevel > 3)
         this.enemySpawners.push(function(){return new Squarepusher.wave();});
 
+      if (gameModel.currentLevel > 4)
+        this.enemySpawners.push(function(){return new LaserGunship.wave();});
+
     }
     return this.enemySpawners;
   },
 
 
   getEnemyWave:function() {
-
+    // setup some wave banks to improve performance
     if (Enemies.waveBank.length == 0) {
       Enemies.waveCount = 0;
       for (var i = 0; i < 10; i++) {
@@ -167,18 +170,30 @@ Enemies = {
         Enemies.asteroidBank.push(new Asteroids.wave());
       }
     }
-
+    // check for asteroids needed
     if ((startStar.asteroids && timeLeft / levelTime > 0.8) || (endStar.asteroids && timeLeft / levelTime < 0.30)) {
       if (Enemies.asteroidBank.length > Enemies.asteroidCount) {
         return Enemies.asteroidBank[Enemies.asteroidCount++];
       }
       return new Asteroids.wave();
     } else {
+      // make sure always some fighters active
+      var needFighters = true;
+      Enemies.activeWaves.forEach(function(wave){
+        if (wave.fighterWave)
+          needFighters = false;
+      });
+
+      if (needFighters) {
+        return new EnemyShips.wave();
+      }
+
       if (Enemies.waveBank.length > Enemies.waveCount) {
         return Enemies.waveBank[Enemies.waveCount++];
       }
       return this.getEnemySpawners()[Math.floor(Math.random() * this.getEnemySpawners().length)]();
     }
+    // return new LaserGunship.wave();
     // return new MissileFrigate.wave();
     // return new EnemyShips.wave();
     // return new UFOs.bulletWave();

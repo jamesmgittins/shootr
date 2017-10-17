@@ -228,7 +228,7 @@ GameText.status = {
 		GameText.status.container.addChild(GameText.status.lootContainer);
 
 		GameText.status.gameBorder = new PIXI.Graphics();
-		GameText.status.gameBorder.lineStyle(1, 0xFFFFFF);
+		GameText.status.gameBorder.lineStyle(Math.max(1,1 * gameModel.resolutionFactor), 0xFFFFFF);
 		GameText.status.gameBorder.drawRect(sideSpace, -5, renderer.height, renderer.height + 10);
 		GameText.status.gameBorder.tint = 0x005500;
 

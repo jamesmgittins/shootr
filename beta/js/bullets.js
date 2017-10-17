@@ -6,20 +6,10 @@ Bullets.splashDamage = {
 	currSplash : 0,
 	update: function(timeDiff) {
 
-		// if (!Bullets.splashDamage.trackingLines) {
-		// 	Bullets.splashDamage.trackingLines = new PIXI.Graphics();
-		// 	bulletContainer.addChild(Bullets.splashDamage.trackingLines);
-		// }
-		// bulletContainer.addChild(Bullets.splashDamage.trackingLines);
-		// Bullets.splashDamage.trackingLines.clear();
-		// Bullets.splashDamage.trackingLines.lineStyle(1, 0xFF0000);
-
 		for (var i = 0; i < Bullets.splashDamage.maxSplashes; i++) {
 			if (Bullets.splashDamage.splashes[i] && Bullets.splashDamage.splashes[i].active) {
 				Bullets.splashDamage.splashes[i].spread += timeDiff * Bullets.splashDamage.splashes[i].speed;
 				Bullets.splashDamage.splashes[i].damage -= timeDiff * Bullets.splashDamage.splashes[i].decay;
-
-				// Bullets.splashDamage.trackingLines.drawCircle(Bullets.splashDamage.splashes[i].xLoc * scalingFactor, Bullets.splashDamage.splashes[i].yLoc * scalingFactor, Bullets.splashDamage.splashes[i].spread * scalingFactor);
 
 				if (Bullets.splashDamage.splashes[i].damage <= 0) {
 					Bullets.splashDamage.splashes[i].active = 0;

@@ -171,6 +171,7 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
     }
 		if(PlayerShip.playerShip.lastDmg >= 60) {
 			PlayerShip.playerShip.sprite.texture = PlayerShip.playerShip.sprite.nonDamageTexture;
+			GameText.status.gameBorder.tint = 0x005500;
 		}
     PlayerShip.playerShip.container.position.x = PlayerShip.playerShip.xLoc * scalingFactor;
     PlayerShip.playerShip.container.position.y = PlayerShip.playerShip.yLoc * scalingFactor;
@@ -191,19 +192,22 @@ PlayerShip.updatePlayerShip = function (timeDiff) {
 
 
 
-PlayerShip.damagePlayerShip = function (playerShip, damage) {
+PlayerShip.damagePlayerShip = function (playerShip, damage, ignoreForRating) {
 	if (gameModel.p1.shield.recharge && Math.random() < 0.1) {
 		PlayerShip.restoreShield(damage * getDamageReduction());
 		Sounds.damage.play(PlayerShip.playerShip.xLoc);
 		GameText.bigText.newBigText("Shield absorbed " + formatMoney(damage) + " damage!");
 	} else {
-		playerShip.timesDamaged++;
+		if (!ignoreForRating)
+			playerShip.timesDamaged++;
+			
 		playerShip.currShield -= damage * getDamageReduction();
 		playerShip.lastDmg = 0;
 		Sounds.damage.play(PlayerShip.playerShip.xLoc);
 		stageSprite.screenShake = gameModel.maxScreenShake;
 		playerShip.sprite.texture=playerShip.sprite.damageTexture;
 		GameText.damage.newText((damage * getDamageReduction()), playerShip);
+		GameText.status.gameBorder.tint = 0xFF0000;
 		Talents.playerDamaged(damage * getDamageReduction());
 		if (playerShip.currShield <= 0 && playerShip.inPlay === 1) {
 			playerShip.container.visible=false;

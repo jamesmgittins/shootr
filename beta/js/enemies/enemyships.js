@@ -58,6 +58,8 @@ EnemyShips.wave = function () {
 		this.shipHealth = EnemyShips.shipHealth;
 	}
 
+	this.fighterWave = true;
+
 	this.lastShipSpawned = 0;
 
 	EnemyShips.patternCounter++;
