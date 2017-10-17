@@ -13,7 +13,7 @@ var MissileFrigate = {
 MissileFrigate.getMirrorTexture = function(size, seed, colors, white) {
 	size = Math.round(size * scalingFactor) % 2 === 0 ? Math.round(size * scalingFactor) : Math.round(size * scalingFactor) + 1;
 	Math.seedrandom(seed);
-	var shipLines = 25;
+	var shipLines = 35;
 	var shipCanvas = document.createElement('canvas');
 	shipCanvas.width = size;
 	shipCanvas.height = size * 2;

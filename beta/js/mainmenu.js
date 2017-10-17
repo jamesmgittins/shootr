@@ -71,6 +71,16 @@ StationMenu = {
     if (amountEarned > 0) {
       Modal.show({text:"You have earned " + formatMoney(amountEarned) + " Credits from your\ncleared trade routes while you were away"});
     }
+    if (Talents.pointsAvailable() > 0) {
+      StationMenu.menuOptions[4].text.text = StationMenu.menuOptions[4].title + " ( ! )";
+    } else {
+      StationMenu.menuOptions[4].text.text = StationMenu.menuOptions[4].title;
+    }
+    if (gameModel.currentSystem.x == gameModel.shipBlueprintPosition.x && gameModel.currentSystem.y == gameModel.shipBlueprintPosition.y) {
+      StationMenu.menuOptions[3].text.text = StationMenu.menuOptions[3].title + " ( ! )";
+    } else {
+      StationMenu.menuOptions[3].text.text = StationMenu.menuOptions[3].title;
+    }
   },
   bButton : function(){StationMenu.backButton.click();}
 };
@@ -98,11 +108,24 @@ DeathMenu = {
     DeathMenu.moneyLostText.anchor = {x:0.5,y:0.5};
     DeathMenu.moneyLostText.position = {x:0.5 * renderer.width, y:renderer.height / 5 - (MainMenu.fontSize * 3 * scalingFactor)};
     DeathMenu.menuContainer.addChild(DeathMenu.moneyLostText);
+
+    DeathMenu.tipText = getText("Tip:", fontSize, { align: 'center' });
+    DeathMenu.tipText.tint = MainMenu.titleTint;
+    DeathMenu.tipText.anchor = {x:0.5,y:0.5};
+    DeathMenu.tipText.position = {x:0.5 * renderer.width, y:renderer.height * 0.5};
+    DeathMenu.menuContainer.addChild(DeathMenu.tipText);
   },
   onShow:function(){
     DeathMenu.selectIndex(0);
     DeathMenu.moneyLostText.text = "You have lost " + formatMoney(gameModel.p1.temporaryCredits) + " credits\nand " + gameModel.lootCollected.length + " cargo crate" + (gameModel.lootCollected.length !== 1 ? "s" : "");
-  }
+
+    DeathMenu.tipText.text = "Tip:  " + DeathMenu.tips[Math.floor(Math.random() * DeathMenu.tips.length)];
+  },
+  tips : [
+    "Use the barrel roll to dodge through enemy projectiles\nTimed correctly it can even be used to dodge enemy rail guns",
+    "Asteroids are a good source of credits\nThe diamonds they are made of are very valuable",
+    "If higher levels are proving a challenge, make sure to spend\nsome credits on perk upgrades for offence and defence"
+  ]
 };
 
 PauseMenu = {
