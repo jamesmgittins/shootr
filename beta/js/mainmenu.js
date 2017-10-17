@@ -76,7 +76,7 @@ StationMenu = {
     } else {
       StationMenu.menuOptions[4].text.text = StationMenu.menuOptions[4].title;
     }
-    if (gameModel.currentSystem.x == gameModel.shipBlueprintPosition.x && gameModel.currentSystem.y == gameModel.shipBlueprintPosition.y) {
+    if (gameModel.shipBlueprintPosition && gameModel.currentSystem.x == gameModel.shipBlueprintPosition.x && gameModel.currentSystem.y == gameModel.shipBlueprintPosition.y) {
       StationMenu.menuOptions[3].text.text = StationMenu.menuOptions[3].title + " ( ! )";
     } else {
       StationMenu.menuOptions[3].text.text = StationMenu.menuOptions[3].title;

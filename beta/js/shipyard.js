@@ -50,8 +50,8 @@ Shipyard.generateShip = function(level, seed, rarity) {
   var critChance = 0.05;
   var critDamage = 1.5;
   if (!shipRarity.normal) {
-    critChance = 0.05 + Math.random() * 0.1 + shipRarity.index * 0.05;
-    critDamage = 1.5 + Math.random() * 0.5 + shipRarity.index * 0.15;
+    critChance = 0.05 + Math.random() * 0.1 + shipRarity.index * 0.03;
+    critDamage = 1.5 + Math.random() * 0.5 + shipRarity.index * 0.1;
   }
   var talent = false;
   if (shipRarity.hyper) {

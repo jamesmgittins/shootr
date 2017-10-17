@@ -24,14 +24,14 @@ Weapons = {
     },
     {
       ultra:true,
-      factor:2,
+      factor:1.7,
       chance:0.08,
       prefix : "Ultra ",
       index : 2
     },
     {
       hyper:true,
-      factor:3.5,
+      factor:2.1,
       chance:0.02,
       prefix : "Hyper ",
       index : 3
