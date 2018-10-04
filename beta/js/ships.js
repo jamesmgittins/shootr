@@ -382,6 +382,64 @@ Ships.explosionBits = {
 	}
 };
 
+Ships.explosionPuffs = {
+  bitsPerExplosion: 8,
+	getSpritePool : function() {
+		if (!this.spritePool) {
+      this.spritePool = new SpritePool((function() {
+        var size = 16 * scalingFactor;
+        var blast = document.createElement('canvas');
+        blast.width = size + 4;
+        blast.height = size + 4;
+        var blastCtx = blast.getContext('2d');
+        blastCtx.shadowBlur = 5;
+        blastCtx.shadowColor = "#CCCCCC";
+        var radgrad = blastCtx.createRadialGradient(size / 2 + 2, size / 2 + 2, 0, size / 2 + 2, size / 2 + 2, size / 2);
+        radgrad.addColorStop(0, 'rgba(0,0,0,0.1)');
+        // radgrad.addColorStop(0.5, 'rgba(100,100,100,0.01)');
+        radgrad.addColorStop(1, 'rgba(0,0,0,0)');
+        blastCtx.fillStyle = radgrad;
+        blastCtx.fillRect(0, 0, size + 4, size + 4);
+        return PIXI.Texture.fromCanvas(blast);
+      })(), shipTrailContainer);
+		}
+		return this.spritePool;
+	},
+	update:function(timeDiff){
+		if (this.spritePool) {
+			for (var i = 0; i < this.spritePool.sprites.length; i++) {
+				var sprite = this.spritePool.sprites[i];
+				if (sprite.visible) {
+          var alphaChange = Math.max(sprite.alpha * timeDiff, 0.05 * timeDiff);
+          sprite.alpha -= alphaChange;
+					if (sprite.alpha <= 0) {
+						sprite.visible = false;
+						this.spritePool.discardSprite(sprite);
+					} else {
+						sprite.position.x += sprite.xSpeed * timeDiff;
+						sprite.position.y += sprite.ySpeed * timeDiff;
+					}
+				}
+			}
+		}
+	},
+	newPuff: function (xLoc, yLoc, size) {
+
+		var sprite = this.getSpritePool().nextSprite();
+
+		sprite.visible = true;
+		sprite.alpha = 1;
+		sprite.position.x = xLoc * scalingFactor;
+		sprite.position.y = yLoc * scalingFactor;
+		sprite.scale.x =
+		sprite.scale.y = (0.1 + Math.random() * 2) * scalingFactor;
+
+		var speed = RotateVector2d(0, (Math.random() * size) * scalingFactor * 0.5, Math.random() * 2 * Math.PI);
+		sprite.xSpeed = speed.x;
+		sprite.ySpeed = speed.y;
+	}
+};
+
 
 
 Ships.generateExplosion = function (ship, xDiff, yDiff, delay) {
@@ -394,7 +452,11 @@ Ships.generateExplosion = function (ship, xDiff, yDiff, delay) {
 		if (ship.enemyShip && ship.wave && !ship.splashCreated) {
 			Bullets.splashDamage.createSplash(ship.xLoc + (xDiff || 0), ship.yLoc + (yDiff || 0), explosionSize, ship.wave.shipHealth, ship.wave.shipHealth * 2);
 			ship.splashCreated = true;
-		}
+    }
+
+    for (i = 0; i < Ships.explosionPuffs.bitsPerExplosion; i++) {
+      Ships.explosionPuffs.newPuff(ship.xLoc + (xDiff || 0), ship.yLoc + (yDiff || 0), explosionSize);
+    }
 
 		var numParts = (Ships.explosionBits.getSpritePool().discardedSprites.length > 10 ? 1 : 0.5) * (Ships.explosionBits.bitsPerExplosion + size * Ships.explosionBits.bitsPerExplosion) * gameModel.detailLevel;
 		for (i = 0; i < numParts; i++) {

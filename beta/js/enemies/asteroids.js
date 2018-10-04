@@ -131,6 +131,7 @@ Asteroids.wave = function() {
 
   this.texture = Asteroids.createTexture(this.seed, false, 20);
   this.spritePool = new SpritePool(this.texture, backgroundEnemyContainer);
+  this.spritePool.container.visible = false;
 
   this.ships = [];
   this.newAsteroids = [];

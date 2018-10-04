@@ -138,7 +138,7 @@ Bullets.enemyRails = {
 
 
 Bullets.enemyMissiles = {
-	acceleration : 350,
+	acceleration : 150,
 	generateTexture : function() {
     return PIXI.Texture.fromImage("img/missile.svg", undefined, undefined, 0.1);
   },
@@ -172,12 +172,12 @@ Bullets.enemyMissiles = {
 			damage *= getCritDamage();
 		}
 
-		this.damageValue -= damage;
+		this.damageValue -= damage * 2;
 		GameText.damage.newText(damage, this, isCrit && !noEffect);
 
 		if (this.damageValue <= 0) {
 			Bullets.enemyMissiles.spritePool.discardSprite(this);
-			this.inPlay = false;
+			this.inPlay = 0;
 			MissileLauncher.generateExplosion(this.xLoc, this.yLoc);
 		}
 	},
@@ -193,7 +193,7 @@ Bullets.enemyMissiles = {
 
 		var aimAngle = Math.atan2(bullet.xLoc - PlayerShip.playerShip.xLoc,  bullet.yLoc - PlayerShip.playerShip.yLoc);
 		var bulletSpeed = RotateVector2d(0, 100, aimAngle);
-		bullet.scale = {x:1.5,y:1.5};
+		bullet.scale = {x:0.5,y:0.5};
 		bullet.xSpeed = bulletSpeed.x;
 		bullet.ySpeed = bulletSpeed.y;
 		bullet.id = Enemies.currShipId++;
@@ -201,7 +201,7 @@ Bullets.enemyMissiles = {
 		bullet.detectCollision = Bullets.enemyMissiles.detectCollision;
 		bullet.damageValue = Bullets.enemyBullets.enemyShotStrength;
 		bullet.tint = 0xFFAA00;
-		bullet.inPlay = true;
+		bullet.inPlay = 1;
 
 		Sounds.playerMissile.play(x);
 		bullet.rotation = Math.atan2(bullet.xSpeed, bullet.ySpeed);
@@ -220,7 +220,11 @@ Bullets.enemyMissiles = {
 			if (bullet.visible) {
 
 				bullet.xLoc += bullet.xSpeed * timeDiff;
-				bullet.yLoc -= bullet.ySpeed * timeDiff;
+        bullet.yLoc -= bullet.ySpeed * timeDiff;
+        
+        if (bullet.scale.x < 1.2) {
+          bullet.scale.x = bullet.scale.y += 0.5 * timeDiff;
+        }
 
 				if (bullet.yLoc < 0 || bullet.yLoc > canvasHeight ||
 					bullet.xLoc < 0 || bullet.xLoc > canvasWidth) {

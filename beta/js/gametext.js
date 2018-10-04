@@ -80,9 +80,9 @@ GameText.shieldDisplay = {
 			GameText.shieldDisplay.shieldContainer.addChild(background);
 
 			GameText.shieldDisplay.shieldLevel = new PIXI.Graphics();
-			GameText.shieldDisplay.shieldLevel.beginFill(0xFFFFFF);
-			GameText.shieldDisplay.shieldLevel.drawRect(0, 0, maskSprite.width, maskSprite.height);
-			GameText.shieldDisplay.shieldLevel.tint = 0x0D47A1;
+			GameText.shieldDisplay.shieldLevel.beginFill(0x0D47A1);
+      GameText.shieldDisplay.shieldLevel.drawRect(0, 0, maskSprite.width, maskSprite.height);
+      GameText.shieldDisplay.shieldLevel.endFill();
 
 			GameText.shieldDisplay.shieldContainer.addChild(GameText.shieldDisplay.shieldLevel);
 
@@ -96,40 +96,46 @@ GameText.shieldDisplay = {
 
 	},
 	update:function(timeDiff) {
-		var percentage = PlayerShip.playerShip.currShield / PlayerShip.playerShip.maxShield;
+    if (currentState !== states.running)
+      return;
+
+    var percentage = PlayerShip.playerShip.currShield / PlayerShip.playerShip.maxShield;
+
+    var shieldColor = 0x0D47A1;
+
+    if (PlayerShip.playerShip.lastDmg >= PlayerShip.playerShip.shieldDelay) {
+      GameText.shieldDisplay.tintNumber += GameText.shieldDisplay.tintMod * timeDiff;
+      var colorFactor = Math.max(0,Math.min(1,GameText.shieldDisplay.tintNumber));
+      
+      if (GameText.shieldDisplay.tintNumber >= 1 && GameText.shieldDisplay.tintMod > 0)
+            GameText.shieldDisplay.tintMod *= -1;
+  
+      if (GameText.shieldDisplay.tintNumber <= 0 && GameText.shieldDisplay.tintMod < 0)
+            GameText.shieldDisplay.tintMod *= -1;
+  
+      shieldColor = rgbToHex(
+        GameText.shieldDisplay.startRgb.r + (GameText.shieldDisplay.endRgb.r - GameText.shieldDisplay.startRgb.r) * colorFactor,
+        GameText.shieldDisplay.startRgb.g + (GameText.shieldDisplay.endRgb.g - GameText.shieldDisplay.startRgb.g) * colorFactor,
+        GameText.shieldDisplay.startRgb.b + (GameText.shieldDisplay.endRgb.b - GameText.shieldDisplay.startRgb.b) * colorFactor
+      );
+    }
+    
 
 		// update shield display
-		if (GameText.shieldDisplay.percentage != percentage && GameText.shieldDisplay.shieldContainer.mask) {
-			GameText.shieldDisplay.shieldLevel.clear();
-			GameText.shieldDisplay.shieldLevel.beginFill(0xFFFFFF);
+		if (GameText.shieldDisplay.shieldContainer.mask) {
+      GameText.shieldDisplay.shieldLevel.clear();
+      GameText.shieldDisplay.shieldLevel.beginFill(shieldColor);
+      
 			var bounds = GameText.shieldDisplay.shieldContainer.mask;
 			GameText.shieldDisplay.shieldLevel.drawRect(
 				0,
 				bounds.height - (bounds.height * percentage),
 				bounds.width,
-				bounds.height);
-			GameText.shieldDisplay.shieldLevel.tint = 0x0D47A1;
-			GameText.shieldDisplay.percentage = percentage;
-		}
+        bounds.height);
 
-		if (PlayerShip.playerShip.lastDmg >= PlayerShip.playerShip.shieldDelay) {
-
-			GameText.shieldDisplay.tintNumber += GameText.shieldDisplay.tintMod * timeDiff;
-
-			var colorFactor = Math.max(0,Math.min(1,GameText.shieldDisplay.tintNumber));
-			GameText.shieldDisplay.shieldLevel.tint = rgbToHex(
-				GameText.shieldDisplay.startRgb.r + (GameText.shieldDisplay.endRgb.r - GameText.shieldDisplay.startRgb.r) * colorFactor,
-				GameText.shieldDisplay.startRgb.g + (GameText.shieldDisplay.endRgb.g - GameText.shieldDisplay.startRgb.g) * colorFactor,
-				GameText.shieldDisplay.startRgb.b + (GameText.shieldDisplay.endRgb.b - GameText.shieldDisplay.startRgb.b) * colorFactor
-			);
-
-
-			if (GameText.shieldDisplay.tintNumber >= 1 && GameText.shieldDisplay.tintMod > 0)
-						GameText.shieldDisplay.tintMod *= -1;
-
-			if (GameText.shieldDisplay.tintNumber <= 0 && GameText.shieldDisplay.tintMod < 0)
-						GameText.shieldDisplay.tintMod *= -1;
-		}
+      GameText.shieldDisplay.shieldLevel.endFill();
+      GameText.shieldDisplay.percentage = percentage;
+    }
 	}
 };
 

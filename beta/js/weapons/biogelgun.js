@@ -1,7 +1,8 @@
 BioGelGun = {
 
-	initialDamage: 0.01,
-	damageOverTimeSec : 3,
+	initialDamage: 0.1,
+  damageOverTimeSec : 3,
+  damageTickMs:200,
 	startSpeed : 500,
 	decelleration:300,
 	minSpeed : 190,
@@ -29,7 +30,8 @@ BioGelGun = {
 };
 
 BioGelGun.weaponLogic = function(weapon, container) {
-	weapon.lastShot = 0;
+  weapon.lastShot = 0;
+  weapon.lastDmgTick = 0;
 	this.weapon = weapon;
 	this.spritePool = new SpritePool(BioGelGun.generateTexture(), container);
 };
@@ -103,7 +105,14 @@ BioGelGun.weaponLogic.prototype.fireShot = function(position, damageModifier) {
 
 BioGelGun.weaponLogic.prototype.update = function(timeDiff) {
 	if (this.spritePool.destroyed)
-		return;
+    return;
+  
+  var isDamageTick = false;
+
+  if (this.weapon.lastDmgTick < updateTime - BioGelGun.damageTickMs) {
+    this.weapon.lastDmgTick = updateTime;
+    isDamageTick = true;
+  }
 
 	for (var i = 0; i < this.spritePool.sprites.length; i++) {
 		var sprite = this.spritePool.sprites[i];
@@ -120,7 +129,10 @@ BioGelGun.weaponLogic.prototype.update = function(timeDiff) {
 					if (sprite.scale.x < 0) {
 						this.spritePool.discardSprite(sprite);
 					} else {
-						Enemies.damageEnemy(sprite.ship, sprite.ship.xLoc + sprite.xLoc, sprite.ship.yLoc + sprite.yLoc, sprite.bulletStrength * timeDiff * (1 / BioGelGun.damageOverTimeSec), true);
+            
+            if (isDamageTick)
+              Enemies.damageEnemy(sprite.ship, sprite.ship.xLoc + sprite.xLoc, sprite.ship.yLoc + sprite.yLoc, sprite.bulletStrength * (BioGelGun.damageTickMs / 1000) * (1 / BioGelGun.damageOverTimeSec), true);
+              
 						vector = RotateVector2d(sprite.xLoc, sprite.yLoc, (sprite.ship.sprite ? sprite.ship.sprite.rotation : sprite.ship.rotation) - sprite.shipRotation);
 						sprite.position.x = (sprite.ship.xLoc + vector.x) * scalingFactor;
 						sprite.position.y = (sprite.ship.yLoc + vector.y) * scalingFactor;

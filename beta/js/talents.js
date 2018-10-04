@@ -233,6 +233,7 @@ Talents = {
     }
   },
 
+  madeOfMoneyLastSpawn : 0,
 
   enemyDamaged : function(amount, xLoc, yLoc) {
     if (Buffs.isBuffActive("I Am Rubber You Are Glue")) {
@@ -240,8 +241,9 @@ Talents = {
       amount += Talents.dmgTaken;
       Talents.dmgTaken = 0;
     }
-    if (Buffs.isBuffActive("Made of Money") && Math.random() < 0.05) {
+    if (Buffs.isBuffActive("Made of Money") && Talents.madeOfMoneyLastSpawn < updateTime - 500 && Math.random() < 0.05) {
       MoneyPickup.newMoneyPickup(xLoc, yLoc, amount * 5);
+      Talents.madeOfMoneyLastSpawn = updateTime;
     }
     return amount;
   },

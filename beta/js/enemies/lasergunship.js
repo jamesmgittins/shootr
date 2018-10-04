@@ -25,7 +25,7 @@ LaserGunship.getLaserTexture = function() {
 
 	// return glowTexture(PIXI.Texture.fromCanvas(blast));
 	return PIXI.Texture.fromCanvas(blast);
-}
+};
 
 LaserGunship.getMirrorTexture = function(size, seed, colors, white) {
 	size = Math.round(size * scalingFactor) % 2 === 0 ? Math.round(size * scalingFactor) : Math.round(size * scalingFactor) + 1;
@@ -130,12 +130,14 @@ LaserGunship.wave = function () {
 	this.texture = glowTexture(PIXI.Texture.fromCanvas(LaserGunship.getMirrorTexture(this.size, seed, this.colors)));
 	this.damageTexture = glowTexture(PIXI.Texture.fromCanvas(LaserGunship.getMirrorTexture(this.size, seed, this.colors, true)));
 	this.laserSpritePool = new SpritePool(LaserGunship.getLaserTexture(), backgroundEnemyContainer);
-	this.spritePool = new SpritePool(this.texture, backgroundEnemyContainer);
+	this.laserFlashSpritePool = new SpritePool(Ships.blasts.texture(), backgroundEnemyContainer);
+  this.spritePool = new SpritePool(this.texture, backgroundEnemyContainer);
 };
 
 LaserGunship.wave.prototype.destroy = function() {
 	this.spritePool.destroy();
 	this.laserSpritePool.destroy();
+	this.laserFlashSpritePool.destroy();
 	this.damageTexture.destroy(true);
 	this.texture.destroy(true);
 	this.finished = true;
@@ -186,7 +188,9 @@ LaserGunship.enemyShip = function (wave) {
 	this.sprite.position.y = this.yLoc * scalingFactor;
 	this.ySpeed = wave.maxSpeed;
 	this.laserSprite = wave.laserSpritePool.nextSprite();
-	this.laserSprite.visible = false;
+	this.laserFlash = wave.laserFlashSpritePool.nextSprite();
+	this.laserFlash.scale = {x:0.5 * scalingFactor, y:0.5 * scalingFactor};
+	this.laserFlash.visible = this.laserSprite.visible = false;
 	this.laserSprite.anchor = {x:0.5, y:0};
 	this.laserSprite.scale = {x:scalingFactor, y:24 * scalingFactor};
 
@@ -262,6 +266,7 @@ LaserGunship.enemyShip.prototype.destroy = function () {
 	setTimeout(function(){
 		shipToBlow.wave.spritePool.discardSprite(shipToBlow.sprite);
 		shipToBlow.wave.laserSpritePool.discardSprite(shipToBlow.laserSprite);
+		shipToBlow.wave.laserFlashSpritePool.discardSprite(shipToBlow.laserFlash);
 		shipToBlow.wave.shipsDestroyed++;
 		shipToBlow.inPlay = 0;
 		Talents.enemyDestroyed();
@@ -273,7 +278,7 @@ LaserGunship.enemyShip.prototype.destroy = function () {
 LaserGunship.enemyShip.prototype.update = function (timeDiff) {
 	if (this.inPlay) {
 
-		if (this.xLoc > 0 && this.xLoc < canvasWidth && this.yLoc > 0 && this.yLoc < canvasHeight)
+		if (this.xLoc > 0 && this.xLoc < canvasWidth && this.yLoc > -this.wave.size && this.yLoc < canvasHeight)
 			Enemies.activeShips.push(this);
 
 		this.xLoc += this.xSpeed * timeDiff;
@@ -297,12 +302,11 @@ LaserGunship.enemyShip.prototype.update = function (timeDiff) {
 
 		this.sprite.position.x = this.xLoc * scalingFactor;
 		this.sprite.position.y = this.yLoc * scalingFactor;
-		this.laserSprite.position.x = this.sprite.position.x;
-		this.laserSprite.position.y = this.sprite.position.y;
+		this.laserFlash.position.x = this.laserSprite.position.x = this.sprite.position.x;
+		this.laserFlash.position.y = this.laserSprite.position.y = (this.yLoc + 55) * scalingFactor;
 
 		if (this.laserSprite.visible) {
-			this.laserSprite.alpha = 0.5 + Math.random() * 0.5;
-
+			this.laserFlash.alpha = this.laserSprite.alpha = 0.5 + Math.random() * 0.5;
 
 			if (this.lastShot < this.firingTime / 2) {
 				this.laserSprite.scale.x += this.scalePerSec * timeDiff * scalingFactor;
@@ -317,14 +321,18 @@ LaserGunship.enemyShip.prototype.update = function (timeDiff) {
 			}
 		}
 
-		this.lastShot += timeDiff;
-		if (this.lastShot > this.firingTime && this.yLoc > 10) {
-			this.laserSprite.visible = !this.laserSprite.visible;
-			this.hasDamagedPlayerAlready = false;
-			if (this.laserSprite.visible)
-				this.laserSprite.scale.x = 0;
-			this.lastShot = 0;
+		if (this.yLoc > 0) {
+			this.lastShot += timeDiff;
+			if (this.lastShot > this.firingTime) {
+				this.laserFlash.visible = this.laserSprite.visible = !this.laserSprite.visible;
+				this.hasDamagedPlayerAlready = false;
+				if (this.laserSprite.visible)
+					this.laserSprite.scale.x = 0;
+				this.lastShot = 0;
+			}
 		}
+
+
 
 		this.lastDamaged += timeDiff;
 		if (this.lastDamaged > 0.06)

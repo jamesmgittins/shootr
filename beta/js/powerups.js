@@ -272,7 +272,7 @@ var Powerups = {
 							for (var j = 0; j < lootInCrate; j++ ) {
 								var item = Powerups.getRandomItem();
 								gameModel.lootCollected.push(item);
-								GameText.status.lootIcons.push(ArmsDealer.createItemIcon(item, {buy:false, cache:true}));
+								GameText.status.lootIcons.push(ArmsDealer.createItemIcon(item, {buy:false, cache:true, scale:0.8}));
 							}
 
 

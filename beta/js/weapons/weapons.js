@@ -24,15 +24,15 @@ Weapons = {
     },
     {
       ultra:true,
-      factor:1.7,
-      chance:0.08,
+      factor:1.8,
+      chance:0.04,
       prefix : "Ultra ",
       index : 2
     },
     {
       hyper:true,
-      factor:2.1,
-      chance:0.02,
+      factor:2.2,
+      chance:0.01,
       prefix : "Hyper ",
       index : 3
     }
@@ -66,9 +66,17 @@ Weapons.missileLauncher = function(level, seed, rarity) {
 	};
 
 	if (rarity.ultra || rarity.hyper) {
-		missileLauncher.lowHealthSeek = true;
-		missileLauncher.ultraText = "Missiles automatically lock on to the most damaged enemy ship";
-		missileLauncher.ultraName = "Widowmaker";
+
+    if (Math.random() > 0.5) {
+      missileLauncher.lowHealthSeek = true;
+      missileLauncher.ultraText = "Missiles automatically lock on to the most damaged enemy ship";
+      missileLauncher.ultraName = "Widowmaker";
+    } else {
+      missileLauncher.highHealthSeek = true;
+		  missileLauncher.ultraText = "Missiles automatically lock on to the most powerful enemy ship";
+		  missileLauncher.ultraName = "Goliath Buster";
+    }
+		
 	}
 
 	return missileLauncher;

@@ -10,6 +10,11 @@ Buffs = {
   },
 
   update : function(timeDiff) {
+
+    if (debug && Buffs.currentBuffs.length < 8) {
+      Buffs.randomBuff();
+    }
+
     var buffsToKeep = [];
     for (var i = 0; i < Buffs.currentBuffs.length; i++) {
       if (!Buffs.currentBuffs[i].permanent)
@@ -23,7 +28,8 @@ Buffs = {
     }
     Buffs.currentBuffs = buffsToKeep;
 
-    var sideSpace = (renderer.width - renderer.height) / 2;
+    var sideSpace = ((renderer.width - renderer.height) / 2);
+    var buffsPerRow = Math.floor(sideSpace / (Buffs.iconSize * scalingFactor)) - 1;
 
     for (i = 0; i < Buffs.currentBuffs.length; i++) {
       if (!Buffs.currentBuffs[i].container || Buffs.currentBuffs[i].container._destroyed) {
@@ -31,9 +37,9 @@ Buffs = {
         GameText.status.container.addChild(Buffs.currentBuffs[i].container);
       }
 
-      var xPos = sideSpace / 5;
-			var row = Math.floor(i / 4);
-			var col = i - row * 4;
+      var xPos = sideSpace / (buffsPerRow + 1);
+			var row = Math.floor(i / buffsPerRow);
+			var col = i - row * buffsPerRow;
       Buffs.currentBuffs[i].container.anchor = {x:0.5,y:0.5};
 			Buffs.currentBuffs[i].container.position = {x:(xPos + xPos * col) - Buffs.currentBuffs[i].container.width / 2,y:380 * scalingFactor - (row * scalingFactor * 54)};
       Buffs.currentBuffs[i].timeText.text = Buffs.currentBuffs[i].time < 0 || Buffs.currentBuffs[i].permanent ? "" : Math.round(Buffs.currentBuffs[i].time);
@@ -80,7 +86,7 @@ Buffs = {
   },
 
   randomBuff : function() {
-    var text = "";
+    var text = "Debug Buff ";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     for (var i = 0; i < 5; i++)
@@ -88,20 +94,22 @@ Buffs = {
     Buffs.newBuff(text, 10 + Math.random() * 20, "img/barbed-arrow.svg", Constants.itemColors.hyper);
   },
 
+  iconSize : 40,
+
   createContainer : function(buff) {
     buff.container = new PIXI.Container();
 
     var iconBg = new PIXI.Graphics();
     iconBg.beginFill(buff.bgColor);
     iconBg.lineStyle(2 * gameModel.resolutionFactor, 0xFFFFFF);
-    iconBg.drawRect(0, 0, renderer.width * 0.04, renderer.width * 0.04);
+    iconBg.drawRect(0, 0, Buffs.iconSize * scalingFactor, Buffs.iconSize * scalingFactor);
 
     buff.container.addChild(iconBg);
 
     var pic = new PIXI.Sprite(PIXI.Texture.fromImage(buff.icon, undefined, undefined, 0.2));
-    pic.scale.x = pic.scale.y = 0.3 * scalingFactor;
+    pic.scale.x = pic.scale.y = 0.25 * scalingFactor;
     pic.anchor = {x:0.5,y:0.5};
-    pic.position = {x:renderer.width * 0.02,y:renderer.width * 0.02};
+    pic.position = {x:Buffs.iconSize/2 * scalingFactor,y:Buffs.iconSize/2 * scalingFactor};
     pic.alpha = 0.7;
     buff.container.addChild(pic);
 

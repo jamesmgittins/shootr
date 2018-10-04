@@ -4,8 +4,6 @@ var canvasHeight = 640;
 
 var debug = false;
 
-var playerTwo = false;
-
 var loader;
 
 var levelTime = 118;
@@ -49,9 +47,6 @@ var playerOneSelectedLevel = -1;
 var playerOneSelectedUpgrade = -1;
 var playerOneAxes = [];
 var playerOneButtonsPressed = [];
-var playerTwoSelectedUpgrade = -1;
-var playerTwoAxes = [];
-var playerTwoButtonsPressed = [];
 var inSpace = true;
 
 var startStar;
@@ -62,8 +57,6 @@ function changeLevel(level) {
 	gameModel.currentLevel = Boss.isInTargetSystem() ? Math.max(Boss.currentLevel(), calculateAdjustedStarLevel(level)) : calculateAdjustedStarLevel(level);
 
 	var levelDifficultyModifier = Math.pow(Constants.difficultyLevelScaling, gameModel.currentLevel - 1);
-
-	//gameModel.currentLevel = 1;
 
 	Bullets.enemyBullets.enemyShotStrength = (2 + gameModel.currentLevel * 0.05) * gameModel.currentLevel * levelDifficultyModifier;
 	Bullets.enemyBullets.enemyShotSpeed = Math.min(250 + (gameModel.currentLevel * 2), 400);
@@ -233,6 +226,8 @@ var startTintPercentOnBackground = 1.50;
 
 var animationFrameId;
 
+var updateTime = 0;
+
 
 function update() {
 
@@ -242,7 +237,7 @@ function update() {
 			animationFrameId = requestAnimationFrame(update);
 
 		// get time difference since last frame
-		var updateTime = new Date().getTime();
+		updateTime = Date.now();
 		// var slowDownRatio = gameModel.maxScreenShake ? 1 - (stageSprite.screenShake / gameModel.maxScreenShake * 0.3) : 1;
 		var slowDownRatio = 1;
 		var timeDiff = slowDownRatio * (Math.min(100, Math.max(updateTime - lastUpdate, 0))) / 1000;
@@ -263,7 +258,8 @@ function update() {
 			Bullets.splashDamage.update(timeDiff);
 			Bullets.explosionBits.update(timeDiff);
 			Ships.blasts.update(timeDiff);
-			Ships.explosionBits.update(timeDiff);
+      Ships.explosionBits.update(timeDiff);
+      Ships.explosionPuffs.update(timeDiff);
 			Ships.fragments.update(timeDiff);
 		}
 
@@ -298,11 +294,11 @@ function update() {
 		}
 
 		GameText.update(timeDiff);
-		Stars.powerupParts.update(timeDiff);
+    Stars.powerupParts.update(timeDiff);
+    
+    renderer.render(stage, stageTexture);
+    renderer.render(gameContainer);
 
-
-		renderer.render(stage, stageTexture);
-		renderer.render(gameContainer);
 }
 
 var screenShakeXrate = 20;

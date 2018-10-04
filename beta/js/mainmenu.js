@@ -123,8 +123,9 @@ DeathMenu = {
   },
   tips : [
     "Use the barrel roll to dodge through enemy projectiles\nTimed correctly it can even be used to dodge enemy rail guns",
-    "Asteroids are a good source of credits\nThe diamonds they are made of are very valuable",
-    "If higher levels are proving a challenge, make sure to spend\nsome credits on perk upgrades for offence and defence"
+    "Asteroids are a good source of credits\nThey are made of valuable diamonds",
+    "If higher levels are proving a challenge, make sure to spend\nsome credits on perk upgrades for offence and defence",
+    "When enemies explode they cause splash damage to nearby enemy ships\nTry to set up a chain reaction"
   ]
 };
 

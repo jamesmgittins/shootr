@@ -2,7 +2,7 @@ MissileLauncher = {
 
   startVelocity: 160,
   maxVelocity: 250,
-  acceleration: 250,
+  acceleration: 275,
   rearAngleMod : 2.5,
   trailFrequency : 0.02,
 
@@ -97,6 +97,7 @@ MissileLauncher.weaponLogic.prototype.individualBullet = function(speed, positio
   sprite.position.x = position.x * scalingFactor;
   sprite.position.y = position.y * scalingFactor;
   sprite.lowHealthSeek = this.weapon.lowHealthSeek;
+  sprite.highHealthSeek = this.weapon.highHealthSeek;
 
   sprite.tint = this.weapon.ultra || this.weapon.hyper ? 0xffffff : 0xff9999;
 
@@ -143,18 +144,19 @@ MissileLauncher.weaponLogic.prototype.update = function(timeDiff) {
 				sprite.speed.x += accelX * factor * timeDiff;
 				sprite.speed.y += accelY * factor * timeDiff;
 
-				if (!sprite.lowHealthSeek) {
+				if (!sprite.lowHealthSeek && !sprite.highHealthSeek) {
 					var angleFromTarget = AngleVector2d(sprite.speed.x, sprite.speed.y, predictedTargetX - sprite.xLoc, predictedTargetY - sprite.yLoc);
 					if (angleFromTarget > 1)
 						sprite.target = false;
 				}
 			} else {
 				sprite.speed.y -= MissileLauncher.acceleration * timeDiff;
+        sprite.target = false;
 
 				// look for target
-				if (sprite.lowHealthSeek) {
+				if (sprite.lowHealthSeek || sprite.highHealthSeek) {
 					for (var enemyShipCount=0; enemyShipCount < Enemies.activeShips.length; enemyShipCount++) {
-						if (!sprite.target || sprite.target.health > Enemies.activeShips[enemyShipCount].health)
+						if (!sprite.target || (sprite.lowHealthSeek && sprite.target.health > Enemies.activeShips[enemyShipCount].health) || (sprite.highHealthSeek && sprite.target.health < Enemies.activeShips[enemyShipCount].health))
 							sprite.target = Enemies.activeShips[enemyShipCount];
 					}
 				} else {
@@ -163,7 +165,7 @@ MissileLauncher.weaponLogic.prototype.update = function(timeDiff) {
 						x: sprite.xLoc,
 						y: sprite.yLoc
 					};
-					sprite.target = false;
+					
 					var closestShip = false;
 					var shipDistance = 100;
 					for (var i = 0; i < 128; i++) {

@@ -77,7 +77,7 @@ Boss.randomLocation = function() {
         acceptableBlueprintStars.push(star);
     }
   }
-  Math.seedrandom(new Date().getTime());
+  Math.seedrandom(Date.now());
   var chosenStar = acceptableStars[Math.floor(Math.random() * acceptableStars.length)];
 
   gameModel.bossPosition = {x:chosenStar.x, y:chosenStar.y};

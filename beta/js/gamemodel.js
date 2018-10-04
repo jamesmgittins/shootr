@@ -5,7 +5,7 @@ var Constants = {
 	difficultyLevelScaling : 1.4,
 	shieldLevelScaling : 1.39,
 	weaponLevelScaling : 1.38,
-	shipLevelPriceScaling : 1.41,
+	shipLevelPriceScaling : 1.45,
 	tradeRouteScaling: 1.44,
 	levelsPerBoss:5,
 	maxScreenShake:2.7,
@@ -78,11 +78,12 @@ function calculateIncome() {
 }
 
 function calculateIncomeSinceLastCheck(time) {
-	if (gameModel.lastTradeUpdate < new Date().getTime() - time) {
-		var timeDifference = Math.min(86400, (new Date().getTime() - gameModel.lastTradeUpdate) / 1000); // cap time to 86400 = 24 Hours
+	var currTime = Date.now();
+	if (gameModel.lastTradeUpdate < currTime - time) {
+		var timeDifference = Math.min(7200, (currTime - gameModel.lastTradeUpdate) / 1000); // cap time to 86400 = 2 Hours
 		var amountEarned = timeDifference * calculateIncome();
 		addCredits(amountEarned, true);
-		gameModel.lastTradeUpdate = new Date().getTime();
+		gameModel.lastTradeUpdate = currTime;
 		return amountEarned;
 	}
 	return 0;
@@ -183,7 +184,7 @@ function load() {
 			bossesDefeated : 0,
 			weaponIdCounter: gameModel.weaponIdCounter,
 			resolutionFactor:1,
-			lastTradeUpdate: new Date().getTime()
+			lastTradeUpdate: Date.now()
 		};
 		gameModel.p1.turretWeapon = gameModel.p1.weapons[0];
 		gameModel.p1.shield = gameModel.p1.shields[0];

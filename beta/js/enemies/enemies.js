@@ -28,7 +28,7 @@ Enemies = {
     // test for end of the level
   	if (timeLeft < 0 && Enemies.waves.length === 0) {
   		Enemies.allDeadTimer += (timeDiff * 1000);
-  		if (Enemies.allDeadTimer > PlayerShip.allDeadTime && !Powerups.inPlay() && !MoneyPickup.inPlay()) {
+  		if (Enemies.allDeadTimer > PlayerShip.allDeadTime && ((!Powerups.inPlay() && !MoneyPickup.inPlay()) || Boss.bossActive())) {
   			if (Boss.bossActive()) {
   				Boss.update(timeDiff);
   			} else {
@@ -61,7 +61,9 @@ Enemies = {
     Enemies.lastWave += timeDiff * 1000;
     if (Enemies.activeWaves.length < Enemies.maxWaves && Enemies.lastWave >= Enemies.waveFrequency && timeLeft > 0) {
       Enemies.lastWave = Math.random() * -1000;
-      Enemies.activeWaves.push(Enemies.getEnemyWave());
+      var enemyWave = Enemies.getEnemyWave();
+      enemyWave.spritePool.container.visible = true;
+      Enemies.activeWaves.push(enemyWave);
     }
 
     // update each active wave
@@ -160,7 +162,7 @@ Enemies = {
     // setup some wave banks to improve performance
     if (Enemies.waveBank.length == 0) {
       Enemies.waveCount = 0;
-      for (var i = 0; i < 10; i++) {
+      for (var i = 0; i < 12; i++) {
         Enemies.waveBank.push(this.getEnemySpawners()[Math.floor(Math.random() * this.getEnemySpawners().length)]());
       }
     }
@@ -170,7 +172,7 @@ Enemies = {
         Enemies.asteroidBank.push(new Asteroids.wave());
       }
     }
-    // check for asteroids needed
+    //check for asteroids needed
     if ((startStar.asteroids && timeLeft / levelTime > 0.8) || (endStar.asteroids && timeLeft / levelTime < 0.30)) {
       if (Enemies.asteroidBank.length > Enemies.asteroidCount) {
         return Enemies.asteroidBank[Enemies.asteroidCount++];

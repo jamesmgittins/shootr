@@ -100,11 +100,12 @@ ArmsDealer.weaponComparison = function(item, compareTo) {
 
 ArmsDealer.createItemIcon = function(item, options) {
 
-	var itemContainer = new PIXI.Container();
+  var itemContainer = new PIXI.Container();
+  
 	var scale = scalingFactor;
 
 	if (options.scale)
-		scale = scalingFactor * options.scale;
+    scale = scalingFactor * options.scale;
 
 	var backgroundCol = item.hyper ? Constants.itemColors.hyper : item.ultra ? Constants.itemColors.ultra : item.super ? Constants.itemColors.super :Constants.itemColors.normal;
 	var borderCol = item.hyper ? Constants.itemBorders.hyper : item.ultra ? Constants.itemBorders.ultra : item.super ? Constants.itemBorders.super :Constants.itemBorders.normal;
@@ -116,24 +117,6 @@ ArmsDealer.createItemIcon = function(item, options) {
 	border.beginFill(borderCol);
 	border.drawRect(0, 0, 128 * scale, 24 * scale);
 	itemContainer.addChild(border);
-
-	var svgToUse;
-
-	if (item.type == Constants.itemTypes.weapon) {
-		svgToUse = Weapons.getIconSvg(item);
-	} else if (item.type == Constants.itemTypes.shield) {
-		svgToUse = Shields.getIconSvg(item);
-	} else {
-		svgToUse = "img/ship-emblem-no-shield.svg";
-	}
-
-	var pic = new PIXI.Sprite(PIXI.Texture.fromImage(svgToUse, undefined, undefined, 0.4));
-
-	pic.scale.x = pic.scale.y = 0.3 * scale;
-
-	pic.anchor = {x:0.5,y:0.5};
-	pic.position = {x:64 * scale,y:64 * scale};
-	itemContainer.addChild(pic);
 
 	var levelTooHigh = false;
 
@@ -215,15 +198,32 @@ ArmsDealer.createItemIcon = function(item, options) {
 		} else {
 			priceText.text = formatMoney(item.capacity) + " Capacity";
 		}
-	}
-
-
+  }
+  
 	itemContainer.addChild(priceText);
 
-	priceText.tint = priceText.defaultTint = levelText.tint = levelText.defaultTint = pic.tint = pic.defaultTint = border.tint = border.defaultTint = 0xAAAAAA;
+  priceText.tint = priceText.defaultTint = levelText.tint = levelText.defaultTint = border.tint = border.defaultTint = 0xAAAAAA;
+    
+  var svgToUse;
 
-	// if (options.cache)
-		// itemContainer.cacheAsBitmap = true;
+  if (item.type == Constants.itemTypes.weapon) {
+    svgToUse = Weapons.getIconSvg(item);
+  } else if (item.type == Constants.itemTypes.shield) {
+    svgToUse = Shields.getIconSvg(item);
+  } else {
+    svgToUse = "img/ship-emblem-no-shield.svg";
+  }
+
+  var pic = new PIXI.Sprite(PIXI.Texture.fromImage(svgToUse, undefined, undefined, 0.4));
+
+  pic.scale.x = pic.scale.y = 0.3 * scale;
+
+  pic.anchor = {x:0.5,y:0.5};
+  pic.position = {x:64 * scale,y:64 * scale};
+
+  pic.tint = pic.defaultTint = 0xAAAAAA;
+
+  itemContainer.addChild(pic);
 
 	return itemContainer;
 };

@@ -42,6 +42,9 @@ var createMusicBank = function(audiofiles, volume) {
     },
     fadeOut : function(time) {
       this.sounds[this.soundCount].fade(this.volume, 0, time || 1000);
+      setTimeout(function(){
+        this.reset();
+      },time || 1000);
     }
   };
 
@@ -61,8 +64,6 @@ var createHowlBank = function(audiofile, volume, maxFreq, randomness) {
     maxFreq : maxFreq || 100,
 
     play:function(x,y){
-
-      var updateTime = new Date().getTime();
 
       if (this.lastPlayed + this.maxFreq < updateTime) {
 

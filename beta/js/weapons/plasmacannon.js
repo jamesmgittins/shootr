@@ -200,7 +200,7 @@ PlasmaCannon.plasmaCannon = function(level,seed,rarity) {
 	};
 
 	if (rarity.ultra || rarity.hyper) {
-		if (Math.random() > 0.9 && bulletsPerShot == 1) {
+		if (Math.random() > 0.95 && bulletsPerShot == 1) {
 			plasmaCannon.ultraName = "Ketchup or Mustard";
 			plasmaCannon.name = "Ultra Hot Dog Blaster";
 			plasmaCannon.alternateTexture = "hotdog";
